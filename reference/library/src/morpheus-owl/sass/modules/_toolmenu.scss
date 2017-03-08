@@ -28,6 +28,7 @@ body.#{$namespace}toolMenu-collapsed{
 		}
 		ul{
 			li{
+				line-height: 0;
 				a{
 					min-height: 1.7em;
 					&:hover{
