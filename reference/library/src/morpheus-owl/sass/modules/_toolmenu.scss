@@ -197,6 +197,7 @@ nav#subSites{
 		padding: 0;
 		margin:  0;
 		li{
+			line-height: 0;
 			&.#{$namespace}collapseTools
 			{
 				display:flex;
