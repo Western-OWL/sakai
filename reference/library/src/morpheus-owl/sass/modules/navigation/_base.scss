@@ -619,7 +619,7 @@ body.is-logged-out{
 				display: block;
 				line-height: 1.429;
 			}
-			.#{$namespace}sitesNav__drop, .#{$namespace}sitesNav__dropdown{
+			.#{$namespace}sitesNav__drop, .#{$namespace}sitesNav__dropdown {
 				text-align: right;
 				margin-left: 0.2em;
 				position: absolute;
@@ -638,6 +638,11 @@ body.is-logged-out{
 					top: 40%;
 				}
 			}
+			.#{$namespace}sitesNav__favbtn {
+				@extend .sitesNav__dropdown;
+				@extend .fa-star;	
+			}
+
 			ul{
 				background: $sites-nav-menu-item-background;
 				display: none;
