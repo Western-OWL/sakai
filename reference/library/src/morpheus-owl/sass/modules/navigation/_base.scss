@@ -639,7 +639,13 @@ body.is-logged-out{
 				}
 			}
 			.#{$namespace}sitesNav__favbtn {
-				@extend .sitesNav__dropdown;
+				text-align: right;
+				margin-left: 0.2em;
+				position: absolute;
+				right: 8px;
+				top: 50%;
+				transform: translate(0%,-50%);
+				text-decoration: none;
 				@extend .fa-star;	
 			}
 
@@ -805,6 +811,8 @@ body.is-logged-out{
 		display: none;
 	}
 }
+
+
 
 .sitenav-dropdown-overlay{
 	height: 100%;
