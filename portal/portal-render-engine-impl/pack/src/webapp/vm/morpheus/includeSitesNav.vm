@@ -27,7 +27,7 @@
                         #if (${site.favourite} == true && ${userIsLoggedIn})
                             <a class="Mrphs-sitesNav__favbtn" href="javascript:void(0)" data-site-id="${site.siteId}" role="separator"></a>
                         #end
-                        #if (!${site.favourite} == true && ${userIsLoggedIn})
+                        #if (!${site.favourite} == false && ${userIsLoggedIn})
                             <a class="Mrphs-sitesNav__favbtn non-fav" href="javascript:void(0)" data-site-id="${site.siteId}" role="separator"></a>
                         #end
 
