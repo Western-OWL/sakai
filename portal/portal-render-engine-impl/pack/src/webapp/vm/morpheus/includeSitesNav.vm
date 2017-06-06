@@ -23,7 +23,15 @@
                             <span>#if ( ( ${tabDisplayLabel} == 2 ) && ( ${site.shortDescription} ) )${site.shortDescription}#else${site.siteTitle}#end</span>
                         </a>
                         <!--a class="Mrphs-sitesNav__dropdown" href="#" data-site-id="${site.siteId}" role="separator"></a-->
-                        <a class="Mrphs-sitesNav__favbtn" href="javascript:void(0)" data-site-id="${site.siteId}" role="separator"></a>
+
+                        #if (${site.favourite} == true && ${userIsLoggedIn})
+                            <a class="Mrphs-sitesNav__favbtn" href="javascript:void(0)" data-site-id="${site.siteId}" role="separator"></a>
+                        #end
+                        #if (!${site.favourite} == true && ${userIsLoggedIn})
+                            <a class="Mrphs-sitesNav__favbtn non-fav" href="javascript:void(0)" data-site-id="${site.siteId}" role="separator"></a>
+                        #end
+
+                        
                     </li>
 
                 #end ## END of IF (${site.isMyWorkspace})

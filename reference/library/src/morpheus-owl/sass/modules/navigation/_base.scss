@@ -646,7 +646,12 @@ body.is-logged-out{
 				top: 50%;
 				transform: translate(0%,-50%);
 				text-decoration: none;
-				@extend .fa-star;	
+				@extend .fa;
+				@extend .fa-star;
+
+				&.non-fav {
+					@extend .fa-star-o;
+				}	
 			}
 
 			ul{
