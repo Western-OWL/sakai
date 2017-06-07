@@ -642,7 +642,7 @@ body.is-logged-out{
 				text-align: right;
 				margin-left: 0.2em;
 				position: absolute;
-				right: 8px;
+				right: 6px;
 				top: 50%;
 				transform: translate(0%,-50%);
 				text-decoration: none;
@@ -650,13 +650,11 @@ body.is-logged-out{
 				&.fav {
 					@extend .fa-star;
 					@extend .fa;
-					@extend .fa-lg;
 				}
 
 				&.non-fav {
 					@extend .fa-star-o;
 					@extend .fa;
-					@extend .fa-lg;
 				}	
 			}
 

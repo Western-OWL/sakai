@@ -25,10 +25,10 @@
                         <!--a class="Mrphs-sitesNav__dropdown" href="#" data-site-id="${site.siteId}" role="separator"></a-->
 
                         #if (${site.favorite} == true && ${userIsLoggedIn})
-                            <a class="Mrphs-sitesNav__favbtn fa fav" href="javascript:void(0)" data-site-id="${site.siteId}" role="separator"></a>
+                            <a class="Mrphs-sitesNav__favbtn fav" href="javascript:void(0)" data-site-id="${site.siteId}" role="separator"></a>
                         #end
                         #if (${site.favorite} == false && ${userIsLoggedIn})
-                            <a class="Mrphs-sitesNav__favbtn fa non-fav" href="javascript:void(0)" data-site-id="${site.siteId}" role="separator"></a>
+                            <a class="Mrphs-sitesNav__favbtn non-fav" href="javascript:void(0)" data-site-id="${site.siteId}" role="separator"></a>
                         #end
 
                         
