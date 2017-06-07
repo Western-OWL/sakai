@@ -24,10 +24,10 @@
                         </a>
                         <!--a class="Mrphs-sitesNav__dropdown" href="#" data-site-id="${site.siteId}" role="separator"></a-->
 
-                        #if (${site.favourite} == true && ${userIsLoggedIn})
+                        #if (${site.favorite} == true && ${userIsLoggedIn})
                             <a class="Mrphs-sitesNav__favbtn" href="javascript:void(0)" data-site-id="${site.siteId}" role="separator"></a>
                         #end
-                        #if (!${site.favourite} == false && ${userIsLoggedIn})
+                        #if (${site.favorite} == false && ${userIsLoggedIn})
                             <a class="Mrphs-sitesNav__favbtn non-fav" href="javascript:void(0)" data-site-id="${site.siteId}" role="separator"></a>
                         #end
 
