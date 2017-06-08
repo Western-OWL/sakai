@@ -22,8 +22,9 @@
                         <a class="link-container" href="${site.siteUrl}" title="${site.fullTitle}" role="menuitem" aria-haspopup="true">
                             <span>#if ( ( ${tabDisplayLabel} == 2 ) && ( ${site.shortDescription} ) )${site.shortDescription}#else${site.siteTitle}#end</span>
                         </a>
-                        <!--a class="Mrphs-sitesNav__dropdown" href="#" data-site-id="${site.siteId}" role="separator"></a-->
+                        <a class="Mrphs-sitesNav__dropdown" href="#" data-site-id="${site.siteId}" role="separator"></a>
 
+                        <!-- Fav Section -->
                         #if (${site.favorite} == true && ${userIsLoggedIn})
                             <a class="Mrphs-sitesNav__favbtn fav" href="javascript:void(0)" data-site-id="${site.siteId}" role="separator"></a>
                         #end
