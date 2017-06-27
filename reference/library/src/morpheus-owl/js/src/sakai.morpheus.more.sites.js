@@ -310,6 +310,11 @@ $PBJQ(document).ready(function($){
     itemsBySiteId[$PBJQ(e).data('site-id')] = $PBJQ(e).parent();
   });
 
+  // Add the fav toggle to the top-nav buttons
+  $PBJQ(".Mrphs-sitesNav__favbtn").each(function(i, e) {
+    $PBJQ(e).click(topNavFavorite)
+  })
+
   var button_states = {
     favorite: {
       markup: '<i class="site-favorite-icon site-favorite"></i>'
@@ -390,6 +395,17 @@ $PBJQ(document).ready(function($){
     return $PBJQ('.site-favorite-btn', favoritesPane).has('.site-favorite').map(function () {
       return $PBJQ(this).data('site-id');
     }).toArray();
+  }
+
+  /**
+   * @func topNavFavorite
+   * @desc Toggles favouriting from the top navigation
+   * @param {*} event  - jQuery Event for item clicked
+   */
+  var topNavFavorite = function(event) {
+    var favs = listFavorites();
+    console.log(favs);
+    console.log(event);
   }
 
   var loadFromServer = function () {
