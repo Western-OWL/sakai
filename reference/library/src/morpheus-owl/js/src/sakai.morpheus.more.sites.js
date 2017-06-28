@@ -401,8 +401,8 @@ $PBJQ(document).ready(function($){
    */
   var topNavFavorite = function(event) {
     var favs = listFavorites();
-    console.log(favs);
-    console.log(event);
+    console.warn(favs);
+    console.warn(event);
   }
 
   // Add the fav toggle to the top-nav buttons
