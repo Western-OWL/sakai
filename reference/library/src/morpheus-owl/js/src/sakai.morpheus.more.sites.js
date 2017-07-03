@@ -407,7 +407,7 @@ $PBJQ(document).ready(function($){
 
   // Add the fav toggle to the top-nav buttons
   $PBJQ(".Mrphs-sitesNav__favbtn").each(function(i, e) {
-    $PBJQ(e).click(topNavFavorite)
+    return $PBJQ(e).click(topNavFavorite)
   })
 
   var loadFromServer = function () {
