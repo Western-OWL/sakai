@@ -402,12 +402,7 @@ $PBJQ(document).ready(function($){
    * @param {Function} onError  - Error function to be called on AJAX failure 
    */
   var syncFavoritesToServer = function(favs, onError) {
-
-    if (!favoritesLoaded) {
-      console.log("Can't update favorites as they haven't been loaded yet.");
-      return;
-    }
-    
+  
     if (!onError) {
       onError = function (err) {
         console.warn("error")
@@ -436,11 +431,16 @@ $PBJQ(document).ready(function($){
    * @param {*} event  - jQuery Event for item clicked
    */
   var topNavFavorite = function(event) {
-    var newFavId = event.target.attributes["data-site-id"];
+    var newFavId = $PBJQ(event.target).data("site-id")
 
     getUserFavorites(function(list){
-        var favs = list;
-        var ind = favs.indexOf(newFavId)
+        var favs = list; 
+        var ind = favs.indexOf(newFavId); 
+
+        console.log(favs);
+        console.log(newFavId);
+        consoel.log(ind);
+        
         if(ind == -1) {
           // Add Fav  
           favs.push(newFavId)
