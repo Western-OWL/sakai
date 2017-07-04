@@ -398,9 +398,10 @@ $PBJQ(document).ready(function($){
   /**
    * @func syncFavoritesToServer
    * @desc Reusable method to sync fav changes to the server
-   * @param {Array} favs  - List of SiteIds to be used as favourites 
+   * @param {Array} favs  - List of SiteIds to be used as favourites
+   * @param {Function} onError  - Error function to be called on AJAX failure 
    */
-  var syncFavoritesToServer = function(favs) {
+  var syncFavoritesToServer = function(favs, onError) {
     if (!onError) {
       onError = function () {};
     }
