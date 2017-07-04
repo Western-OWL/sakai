@@ -439,7 +439,7 @@ $PBJQ(document).ready(function($){
 
         console.log(favs);
         console.log(newFavId);
-        consoel.log(ind);
+        console.log(ind);
         
         if(ind == -1) {
           // Add Fav  
