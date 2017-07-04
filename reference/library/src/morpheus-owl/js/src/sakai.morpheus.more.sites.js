@@ -394,6 +394,31 @@ $PBJQ(document).ready(function($){
     }).toArray();
   }
 
+
+  /**
+   * @func syncFavoritesToServer
+   * @desc Reusable method to sync fav changes to the server
+   * @param {Array} favs  - List of SiteIds to be used as favourites 
+   */
+  var syncFavoritesToServer = function(favs) {
+    if (!onError) {
+      onError = function () {};
+    }
+
+    $PBJQ.ajax({
+      url: '/portal/favorites/update',
+      method: 'POST',
+      data: {
+        favorites: favs.join(';')
+      },
+      error: onError
+    });
+
+    // Notify user and update the list
+    favoritesList = favs;
+    showRefreshNotification();
+  }
+
   /**
    * @func topNavFavorite
    * @desc Toggles favouriting from the top navigation
@@ -403,11 +428,20 @@ $PBJQ(document).ready(function($){
     var newFavId = event.target.attributes["data-site-id"];
 
     getUserFavorites(function(list){
-      var favs = list;
-      console.warn(favs);
-      console.warn(newFavId);
+        var favs = list;
+        var ind = favs.indexOf(newFavId)
+        if(ind == -1) {
+          // Add Fav  
+          favs.push(newFavId)
+        } else {
+          // Remove Fav
+          favs.splice(ind,1)
+        }
+        syncFavoritesToServer(favs)
     });
   }
+
+
 
   // Add the fav toggle to the top-nav buttons
   $PBJQ(".Mrphs-sitesNav__favbtn").each(function(i, e) {
