@@ -402,9 +402,19 @@ $PBJQ(document).ready(function($){
    * @param {Function} onError  - Error function to be called on AJAX failure 
    */
   var syncFavoritesToServer = function(favs, onError) {
-    if (!onError) {
-      onError = function () {};
+
+    if (!favoritesLoaded) {
+      console.log("Can't update favorites as they haven't been loaded yet.");
+      return;
     }
+    
+    if (!onError) {
+      onError = function (err) {
+        console.warn("error")
+        console.warn(err);
+      };
+    }
+    console.warn(favs);
 
     $PBJQ.ajax({
       url: '/portal/favorites/update',
