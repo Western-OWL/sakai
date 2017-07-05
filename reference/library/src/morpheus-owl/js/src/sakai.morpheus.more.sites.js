@@ -404,10 +404,7 @@ $PBJQ(document).ready(function($){
   var syncFavoritesToServer = function(favs, onError) {
   
     if (!onError) {
-      onError = function (err) {
-        console.warn("error")
-        console.warn(err);
-      };
+      onError = function (err) { };
     }
     console.warn(favs);
 
@@ -436,10 +433,6 @@ $PBJQ(document).ready(function($){
     getUserFavorites(function(list){
         var favs = list; 
         var ind = favs.indexOf(newFavId); 
-
-        console.log(favs);
-        console.log(newFavId);
-        console.log(ind);
         
         if(ind == -1) {
           // Add Fav  
