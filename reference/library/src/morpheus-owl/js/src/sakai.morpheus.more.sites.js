@@ -433,7 +433,7 @@ $PBJQ(document).ready(function($){
         var favs = list; 
         var ind = favs.indexOf(newFavId); 
         
-        if(ind == -1) {
+        if(ind === -1) {
           // Add Fav  
           favs.push(newFavId)
         } else {
