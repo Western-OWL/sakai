@@ -418,7 +418,7 @@ $PBJQ(document).ready(function($){
 
     // Notify user and update the list
     favoritesList = favs;
-    showRefreshNotification();
+    // showRefreshNotification();
   }
 
   /**
@@ -434,12 +434,15 @@ $PBJQ(document).ready(function($){
         var ind = favs.indexOf(newFavId); 
         
         if(ind === -1) {
-          // Add Fav  
+          // Add Fav
           favs.push(newFavId)
         } else {
           // Remove Fav
           favs.splice(ind,1)
         }
+        $PBJQ(event.target).toggleClass("non-fav");
+        $PBJQ(event.target).toggleClass("fav");  
+
         syncFavoritesToServer(favs)
     });
   }
