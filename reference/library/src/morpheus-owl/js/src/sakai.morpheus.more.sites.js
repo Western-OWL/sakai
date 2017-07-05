@@ -406,7 +406,6 @@ $PBJQ(document).ready(function($){
     if (!onError) {
       onError = function (err) { };
     }
-    console.warn(favs);
 
     $PBJQ.ajax({
       url: '/portal/favorites/update',
