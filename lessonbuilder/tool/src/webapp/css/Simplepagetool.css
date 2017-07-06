@@ -198,7 +198,7 @@ div.action span .nextbutton, .Mrphs-siteHierarchy span .nextbutton{
 
 }
 .act .deleteButton {
-    float: none
+    float: right
 }
 .controlsPanel .act .deleteButton:hover, .act .deleteButton:hover {
     background: none !important;
