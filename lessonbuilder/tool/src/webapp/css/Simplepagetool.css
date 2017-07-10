@@ -204,15 +204,16 @@ div.action span .nextbutton, .Mrphs-siteHierarchy span .nextbutton{
     background: linear-gradient(#d9534f, #EC4440);
     border: 1px solid #942B28;
     color: #fff;
+    cursor: pointer;
 }
 
 .act .deleteButton {
     float: right
 }
-.controlsPanel .act .deleteButton:hover, .act .deleteButton:hover {
+/*.controlsPanel .act .deleteButton:hover, .act .deleteButton:hover {
     background: none !important;
     cursor: pointer;
-}
+}*/
 .inset-text {
 	margin-top: 1em;
 	border-style: solid;
