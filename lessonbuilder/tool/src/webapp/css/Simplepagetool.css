@@ -190,13 +190,22 @@ div.action span .nextbutton, .Mrphs-siteHierarchy span .nextbutton{
     margin:1em 0;
 }
 .controlsPanel .act .deleteButton, .act .deleteButton {
-    background: none !important;
+    /*background: none !important;
     border: none !important;
     box-shadow: none !important;
-    color: #c00 !important;    
+    color: #c00 !important;*/
     text-shadow:none !important;
-
+    background: linear-gradient(#d9534f, #EC4440);
+    border: 1px solid #d43f3a;
+    color: #fff;
 }
+
+.controlsPanel .act .deleteButton:hover, .act .deleteButton:hover {
+    background: linear-gradient(#d9534f, #EC4440);
+    border: 1px solid #942B28;
+    color: #fff;
+}
+
 .act .deleteButton {
     float: right
 }
