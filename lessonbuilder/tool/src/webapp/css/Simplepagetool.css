@@ -189,6 +189,24 @@ div.action span .nextbutton, .Mrphs-siteHierarchy span .nextbutton{
 .controlsPanel .act {
     margin:1em 0;
 }
+/*.controlsPanel .act .deleteButton, .act .deleteButton {
+    text-shadow:none !important;
+    background: linear-gradient(#d9534f, #EC4440);
+    border: 1px solid #d43f3a;
+    color: #fff;
+}
+
+.controlsPanel .act .deleteButton:hover, .act .deleteButton:hover {
+    background: #EC4440;
+    border: 1px solid #943B38;
+    color: #fff;
+    cursor: pointer;
+}
+
+.act .deleteButton {
+    float: right
+}*/
+
 .controlsPanel .act .deleteButton, .act .deleteButton {
     background: none !important;
     border: none !important;
@@ -204,6 +222,7 @@ div.action span .nextbutton, .Mrphs-siteHierarchy span .nextbutton{
     background: none !important;
     cursor: pointer;
 }
+
 .inset-text {
 	margin-top: 1em;
 	border-style: solid;
