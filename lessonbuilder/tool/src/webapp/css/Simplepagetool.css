@@ -204,7 +204,7 @@ div.action span .nextbutton, .Mrphs-siteHierarchy span .nextbutton{
 }
 
 .act .deleteButton {
-    float: right
+    float: none
 }
 
 .inset-text {
