@@ -25,15 +25,15 @@
                         <a class="Mrphs-sitesNav__dropdown" href="#" data-site-id="${site.siteId}" role="separator"></a>
 
                         <!-- Fav Section -->
-                        #if (${site.favorite} == true && ${userIsLoggedIn})
+                        #if (${site.favorite} == true && ${userIsLoggedIn} && ${site.siteId != "!gateway"})
                             <a class="Mrphs-sitesNav__favbtn fav" href="javascript:void(0)" data-site-id="${site.siteId}" role="separator" title="Remove Favorite"></a>
                         #end
-                        #if (${site.favorite} == false && ${userIsLoggedIn})
+                        #if (${site.favorite} == false && ${userIsLoggedIn} && ${site.siteId != "!gateway"})
                             <a class="Mrphs-sitesNav__favbtn non-fav" href="javascript:void(0)" data-site-id="${site.siteId}" role="separator" title="Add Favorite"></a>
                         #end
 
                         
-                    </li>
+                   </li>
 
                 #end ## END of IF (${site.isMyWorkspace})
 
