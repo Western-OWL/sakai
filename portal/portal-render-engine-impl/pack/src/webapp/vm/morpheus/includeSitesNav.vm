@@ -32,7 +32,7 @@
                             <a class="Mrphs-sitesNav__favbtn non-fav" href="javascript:void(0)" data-site-id="${site.siteId}" role="separator" title="Add Favorite"></a>
                         #end
                         #if (${userIsLoggedIn} && ${site.siteId} == "!gateway")
-                            <i class="fa fa-fw fa-info"></i>
+                            <i class="Mrphs-sitesNav__gateway"></i>
                         #end
 
                         

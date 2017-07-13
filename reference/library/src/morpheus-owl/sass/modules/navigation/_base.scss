@@ -659,6 +659,18 @@ body.is-logged-out{
 					@extend .fa;
 				}	
 			}
+			.#{$namespace}sitesNav__gateway {
+				text-align: right;
+				margin-left: 0.2em;
+				position: absolute;
+				left: 6px;
+				top: 50%;
+				transform: translate(0%,-50%);
+				text-decoration: none;
+
+				@extend .fa-globe;
+				@extend .fa;
+			}
 
 			ul{
 				background: $sites-nav-menu-item-background;
