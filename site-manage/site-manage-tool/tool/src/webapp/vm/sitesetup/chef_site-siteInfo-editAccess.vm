@@ -289,7 +289,7 @@
 
 				## joinable site settings - join notification
 				#if( $joinNotificationEnabled || $joinNotifyEnabledLocalDisabledGlobal )
-					<p class="checkbox indnt4">
+					<p class="checkbox indnt4 margin-fix">
 						<input name="chkJoinNotification" id="chkJoinNotification" type="checkbox"
 							#if( $joinNotification ) checked="checked" #end
 							#if( !$joinNotificationEnabled || $joinNotifyEnabledLocalDisabledGlobal ) disabled #end 
@@ -320,7 +320,7 @@
 				
 				## SAK-24423 - joinable site settings - limit by account types
 				#if( $joinLimitAccountTypesEnabled || $joinLimitEnabledLocalDisabledGlobal )
-					<p id="joinLimitByAccountType" class="checkbox indnt4">
+					<p id="joinLimitByAccountType" class="checkbox indnt4 margin-fix">
 						<input name="chkJoinLimitByAccountType" id="chkJoinLimitByAccountType" type="checkbox" 
 							onclick="this.checked ? document.getElementById( 'joinerAccountTypes' ).style.display='block' 
 							: document.getElementById('joinerAccountTypes').style.display='none'; utils.resizeFrame(); validatePage();"
@@ -342,7 +342,7 @@
 						#foreach( $category in $joinableAccountTypeCategories )
 							#if( !$category )
 								#foreach( $accType in $joinableAccountTypes )
-									<p class="checkbox">
+									<p class="checkbox margin-fix">
 										<input type="checkbox" name="chkJoin-$accType.type" id="chkJoin-$accType.type" onchange="validatePage();"
 											#foreach( $accountType in $joinLimitedAccountTypes )
 												#if( $accountType == $accType.type )
