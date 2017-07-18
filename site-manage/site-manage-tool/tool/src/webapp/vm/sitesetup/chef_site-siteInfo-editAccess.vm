@@ -365,7 +365,7 @@
 								#foreach( $accType in $joinableAccountTypes )
 									#if( $accType.category == $category )
 										#set( $checkboxName = "$accType.category$accType.type" )
-										<p class="checkbox">
+										<p class="checkbox margin-fix">
 											<input type="checkbox" name="chkJoin-$accType.type" id="chkJoin-$checkboxName" onclick="doCategoryCheck( this ); validatePage();"
 												#foreach( $accountType in $joinLimitedAccountTypes )
 													#if( $accountType == $accType.type )
