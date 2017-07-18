@@ -305,7 +305,7 @@
 				
 				## SAK-24423 - joinable site settings - exclude from public list
 				#if( $joinExcludeFromPublicListEnabled || $joinExcludeEnabledLocalDisabledGlobal )
-					<p class="checkbox indnt4">
+					<p class="checkbox indnt4 margin-fix">
 						<input name="chkJoinExcludeFromPublicList" id="chkJoinExcludeFromPublicList" type="checkbox"
 							#if( $joinExcludeFromPublicList ) checked="checked" #end
 							#if( !$joinExcludeFromPublicListEnabled || $joinExcludeEnabledLocalDisabledGlobal ) disabled #end />
