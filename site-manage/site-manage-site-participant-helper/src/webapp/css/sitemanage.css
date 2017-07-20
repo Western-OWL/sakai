@@ -2,7 +2,6 @@ table tr th.wicket_orderDown span {
     background: transparent;
     text-align: left;
     margin-right: .2em;
-    /*vertical-align: middle;*/
     background-position: right;
     background-repeat:no-repeat;
     background-image: url(/library/image/sakai/sortdescending.gif);
@@ -14,7 +13,6 @@ table tr th.wicket_orderUp span {
     background: transparent;
     text-align: left;
     margin-right: .2em;
-    /*vertical-align: middle;*/
     background-position: right;
     background-repeat:no-repeat;
     background-image: url(/library/image/sakai/sortascending.gif);
@@ -26,7 +24,6 @@ table tr th.wicket_orderNone span {
     background: transparent;
     text-align: left;
     margin-right: .2em;
-    /*vertical-align: middle;*/
     background-position: right;
     background-repeat:no-repeat;
     background-image: url(/library/image/sakai/checkoff.gif);
