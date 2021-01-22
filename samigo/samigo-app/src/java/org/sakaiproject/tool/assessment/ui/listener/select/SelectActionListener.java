@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.faces.context.FacesContext;
 import javax.faces.event.AbortProcessingException;
@@ -41,6 +42,8 @@ import org.apache.commons.lang.math.NumberUtils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+// Note: Later version of Sakai user elasticsearch StringUtils
+import org.apache.commons.lang.StringUtils;
 import org.sakaiproject.tool.assessment.api.SamigoApiFactory;
 import org.sakaiproject.tool.assessment.data.dao.grading.AssessmentGradingData;
 import org.sakaiproject.tool.assessment.data.dao.grading.StudentGradingSummaryData;
@@ -150,10 +153,10 @@ public class SelectActionListener
     }
     
     // filter out the one that the given user do not have right to access
-    ArrayList takeableList = getTakeableList(publishedAssessmentList,  h, updatedAssessmentNeedResubmitList, updatedAssessmentList);
+    List<PublishedAssessmentFacade> takeableList = getTakeableList(publishedAssessmentList,  h, updatedAssessmentNeedResubmitList, updatedAssessmentList);
     
     // 1c. prepare delivery bean
-    ArrayList takeablePublishedList = new ArrayList();
+    ArrayList<DeliveryBeanie> takeablePublishedList = new ArrayList<>();
     for (int i = 0; i < takeableList.size(); i++) {
       // note that this object is PublishedAssessmentFacade(assessmentBaseId,
       // title, releaseTo, startDate, dueDate, retractDate,lateHandling,
@@ -204,7 +207,7 @@ public class SelectActionListener
     ArrayList recentSubmittedList = 
     	publishedAssessmentService.getBasicInfoOfLastOrHighestOrAverageSubmittedAssessmentsByScoringOption( AgentFacade.getAgentString(), AgentFacade.getCurrentSiteId(),"2".equals(select.getDisplayAllAssessments()));
    
-    HashMap publishedAssessmentHash = getPublishedAssessmentHash(publishedAssessmentList);
+    HashMap<Long, PublishedAssessmentFacade> publishedAssessmentHash = getPublishedAssessmentHash(publishedAssessmentList);
     ArrayList submittedAssessmentGradingList = new ArrayList();
     //log.info("recentSubmittedList size="+recentSubmittedList.size());
     boolean hasHighest = false;
@@ -434,18 +437,27 @@ public class SelectActionListener
     	Collections.reverse(submittedAssessmentGradingList);
     }
 
+    // If secure delivery modules are installed, then insert their html fragments      
+    select.setSecureDeliveryHTMLFragments( "" );
+    SecureDeliveryServiceAPI secureDelivery = SamigoApiFactory.getInstance().getSecureDeliveryServiceAPI();
+
+    if ( secureDelivery.isSecureDeliveryAvaliable() ) {
+        HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().          getExternalContext().getRequest();
+        select.setSecureDeliveryHTMLFragments( secureDelivery.getInitialHTMLFragments(request, new    ResourceLoader().getLocale() ) );
+
+        for (DeliveryBeanie db : takeablePublishedList) {
+            // We have to refetch the published assessment because the hash above doesn't have the    metadata
+            PublishedAssessmentFacade paf = publishedAssessmentService.getPublishedAssessment(db.     getAssessmentId());
+            final String moduleId = paf.getAssessmentMetaDataByLabel( SecureDeliveryServiceAPI.       MODULE_KEY );
+
+            db.setAlternativeDeliveryUrl( secureDelivery.getAlternativeDeliveryUrl(moduleId, new      Long(db.getAssessmentId()), AgentFacade.getAgentString()) );
+        }
+    }
+
     // set the managed beanlist properties that we need
     select.setTakeableAssessments(takeablePublishedList);
     select.setReviewableAssessments(submittedAssessmentGradingList);
 
-    // If secure delivery modules are installed, then insert their html fragments      
-    select.setSecureDeliveryHTMLFragments( "" );
-    SecureDeliveryServiceAPI secureDelivery = SamigoApiFactory.getInstance().getSecureDeliveryServiceAPI();
-    if ( secureDelivery.isSecureDeliveryAvaliable() ) {
-    	
-    	HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
-    	select.setSecureDeliveryHTMLFragments( secureDelivery.getInitialHTMLFragments(request, new ResourceLoader().getLocale() ) );
-    }
   }
 
   /**
@@ -567,8 +579,8 @@ public class SelectActionListener
   // agent is authorizaed and filter out the one that does not meet the
   // takeable criteria.
   // SAK-1464: we also want to filter out assessment released To Anonymous Users
-  private ArrayList getTakeableList(ArrayList assessmentList, HashMap h, List updatedAssessmentNeedResubmitList, List updatedAssessmentList) {
-    ArrayList takeableList = new ArrayList();
+  private List<PublishedAssessmentFacade> getTakeableList(List assessmentList, HashMap <Long,Integer> h,  List updatedAssessmentNeedResubmitList, List updatedAssessmentList) {
+    List<PublishedAssessmentFacade> takeableList = new ArrayList<>();
     GradingService gradingService = new GradingService();
     HashMap numberRetakeHash = gradingService.getNumberRetakeHash(AgentFacade.getAgentString());
     HashMap actualNumberRetake = gradingService.getActualNumberRetakeHash(AgentFacade.getAgentString());
@@ -845,10 +857,10 @@ public class SelectActionListener
     return timeElapsedInString;
   }
 
-  public HashMap getPublishedAssessmentHash(ArrayList publishedAssessmentList){
-    HashMap h = new HashMap();
+  public HashMap getPublishedAssessmentHash(List publishedAssessmentList){
+    HashMap<Long, PublishedAssessmentFacade> h = new HashMap<>();
     for (int i=0; i<publishedAssessmentList.size();i++){
-      PublishedAssessmentFacade p = (PublishedAssessmentFacade)publishedAssessmentList.get(i);
+      PublishedAssessmentFacade p = (PublishedAssessmentFacade) publishedAssessmentList.get(i);
       h.put(p.getPublishedAssessmentId(), p);
     }
     return h;

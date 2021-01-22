@@ -100,6 +100,7 @@ public class AgentResults
   private int submissionCount=0;
   private Double scoreSummation=new Double("0");
   private Double averageScore= new Double("0");
+  private String alternativeInstructorReviewUrl;
   
   public AgentResults() {
   }
@@ -539,4 +540,13 @@ public class AgentResults
     public void setAgentDisplayId(String agentDisplayId) {
         this.agentDisplayId = agentDisplayId;
     }
+    
+    public void setAlternativeInstructorReviewUrl(String url) {
+    	this.alternativeInstructorReviewUrl = url;
+    }
+
+    public String getAlternativeInstructorReviewUrl() {
+    	return alternativeInstructorReviewUrl;
+    }
+
 }

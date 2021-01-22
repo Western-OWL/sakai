@@ -134,6 +134,31 @@
             <groupId>org.sakaiproject.jsf</groupId>
             <artifactId>jsf-app</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <!-- Note: this moves into master pom in future versions of Sakai -bbailla2 -->
+            <version>4.5.5</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <!-- This is likely already included in future versions of sakai -bbailla2 -->
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.10</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcore</artifactId>
+            <!-- Note: this moves into master pom in future versions of Sakai -bbailla2 -->
+            <version>4.4.10</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <!-- This is likely already included in future versions of sakai -bbailla2 -->
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
         <!-- Unit test dependencies -->
         <dependency>
         	<groupId>org.springframework</groupId>

@@ -76,6 +76,7 @@ private static Logger log = LoggerFactory.getLogger(DeliveryBeanie.class);
   private int timeLimit_hour;
   private int timeLimit_minute;
   private String finalScore;
+  private String alternativeDeliveryUrl;
   private boolean isAssessmentBeanie=false;
 
   // display * and notes for multiple submissions 
@@ -502,6 +503,16 @@ private static Logger log = LoggerFactory.getLogger(DeliveryBeanie.class);
 	public void setFinalScore(String finalScore) {
 		this.finalScore = finalScore;
 	}
+	
+	public String getAlternativeDeliveryUrl() {
+		return alternativeDeliveryUrl;
+	}
+
+	public void setAlternativeDeliveryUrl(String url) {
+		this.alternativeDeliveryUrl = url;
+		
+	}
+
 	public boolean getIsAssessmentBeanie() {
 		return isAssessmentBeanie;
 	}
@@ -509,4 +520,5 @@ private static Logger log = LoggerFactory.getLogger(DeliveryBeanie.class);
 	public void setIsAssessmentBeanie(boolean isAssessmentBeanie) {
 		this.isAssessmentBeanie = isAssessmentBeanie;
 	}
+
 }
