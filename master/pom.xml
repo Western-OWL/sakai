@@ -131,6 +131,8 @@
     <!-- Sakai modules that are versioned separately -->
     <!-- lessonbuilder tool pom depends on msgcntr ver prop. Need to add a profile to the LB tool pom to mark change between 10.x master and earlier versions -->
     <sakai.msgcntr.version>${sakai.version}</sakai.msgcntr.version> 
+    <sakai.httpclient.version>4.5.5</sakai.httpclient.version>
+    <sakai.httpcore.version>4.4.10</sakai.httpcore.version>
     <!-- Set the source encoding to avoid maven warnings -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <sakai.jdk.version>1.8</sakai.jdk.version>
@@ -546,7 +548,7 @@
       <dependency>
         <groupId>commons-codec</groupId>
         <artifactId>commons-codec</artifactId>
-        <version>1.8</version>
+        <version>1.10</version>
         <scope>provided</scope>
       </dependency>
       <dependency>
@@ -1670,6 +1672,16 @@
           <groupId>org.mariadb.jdbc</groupId>
           <artifactId>mariadb-java-client</artifactId>
           <version>1.3.6</version>
+      </dependency>
+      <dependency>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpclient</artifactId>
+          <version>${sakai.httpclient.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpcore</artifactId>
+          <version>${sakai.httpcore.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
