@@ -442,15 +442,15 @@ public class SelectActionListener
     SecureDeliveryServiceAPI secureDelivery = SamigoApiFactory.getInstance().getSecureDeliveryServiceAPI();
 
     if ( secureDelivery.isSecureDeliveryAvaliable() ) {
-        HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().          getExternalContext().getRequest();
-        select.setSecureDeliveryHTMLFragments( secureDelivery.getInitialHTMLFragments(request, new    ResourceLoader().getLocale() ) );
+        HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
+        select.setSecureDeliveryHTMLFragments( secureDelivery.getInitialHTMLFragments(request, new ResourceLoader().getLocale() ) );
 
         for (DeliveryBeanie db : takeablePublishedList) {
-            // We have to refetch the published assessment because the hash above doesn't have the    metadata
-            PublishedAssessmentFacade paf = publishedAssessmentService.getPublishedAssessment(db.     getAssessmentId());
-            final String moduleId = paf.getAssessmentMetaDataByLabel( SecureDeliveryServiceAPI.       MODULE_KEY );
+            // We have to refetch the published assessment because the hash above doesn't have the metadata
+            PublishedAssessmentFacade paf = publishedAssessmentService.getPublishedAssessment(db.getAssessmentId());
+            final String moduleId = paf.getAssessmentMetaDataByLabel( SecureDeliveryServiceAPI.MODULE_KEY );
 
-            db.setAlternativeDeliveryUrl( secureDelivery.getAlternativeDeliveryUrl(moduleId, new      Long(db.getAssessmentId()), AgentFacade.getAgentString()) );
+            db.setAlternativeDeliveryUrl( secureDelivery.getAlternativeDeliveryUrl(moduleId, new Long(db.getAssessmentId()), AgentFacade.getAgentString()).orElse("") );
         }
     }
 

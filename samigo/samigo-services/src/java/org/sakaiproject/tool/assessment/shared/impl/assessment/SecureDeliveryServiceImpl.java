@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -162,15 +163,12 @@ public class SecureDeliveryServiceImpl implements SecureDeliveryServiceAPI {
 	 * @return The title decoration for the given module and locale. Returns empty string if moduleId is NONE_ID,
 	 *         null, not available or disabled.
 	 */
-	public String getTitleDecoration(String moduleId, Locale locale) {
+	public String getTitleDecoration(String moduleId, final Locale locale) {
 		
-		SecureDeliveryModuleIfc module = secureDeliveryModules.get( moduleId );
-		
-		if ( moduleId == null || NONE_ID.equals( moduleId ) || module == null || !module.isEnabled() )
-			return "";
+		Optional<SecureDeliveryModuleIfc> module = getModuleIfEnabled(moduleId);
 	
 		try {
-			return module.getTitleDecoration( locale );
+			return module.map(m -> m.getTitleDecoration( locale )).orElse("");
 		}
 		catch ( Exception e ) {
 			
@@ -355,11 +353,11 @@ public class SecureDeliveryServiceImpl implements SecureDeliveryServiceAPI {
 	 * Sakai could then be iframed in this newly-locked down browser.
 	 */
 	@Override
-	public String getAlternativeDeliveryUrl(String moduleId, Long assessmentId, String uid) {
+	public Optional<String> getAlternativeDeliveryUrl(String moduleId, Long assessmentId, String uid) {
 		SecureDeliveryModuleIfc module = secureDeliveryModules.get( moduleId );
 
 		if ( moduleId == null || assessmentId == null || uid == null || NONE_ID.equals( moduleId ) || module == null ) {
-			return "";
+			return Optional.empty();
 		}
 		
 		return module.getAlternativeDeliveryUrl(assessmentId, uid);
@@ -370,11 +368,11 @@ public class SecureDeliveryServiceImpl implements SecureDeliveryServiceAPI {
 	 * This alternative URL could take the user to a commercial service.
 	 */
 	@Override
-	public String getInstructorReviewUrl(String moduleId, Long assessmentId, String studentId) {
+	public Optional<String> getInstructorReviewUrl(String moduleId, Long assessmentId, String studentId) {
 		SecureDeliveryModuleIfc module = secureDeliveryModules.get( moduleId );
 
 		if ( moduleId == null || assessmentId == null || studentId == null || NONE_ID.equals( moduleId ) || module == null ) {
-			return "";
+			return Optional.empty();
 		}
 		
 		return module.getInstructorReviewUrl(assessmentId, studentId);
@@ -425,5 +423,20 @@ public class SecureDeliveryServiceImpl implements SecureDeliveryServiceAPI {
 		 */
 	}
 	
-	
+	@Override
+	public Optional<String> getSecureDeliveryServiceNameForModule(String moduleId, final Locale locale)
+	{
+		Optional<SecureDeliveryModuleIfc> module = getModuleIfEnabled(moduleId);
+		return module.map(m -> m.getModuleName(locale));
+	}
+
+	private Optional<SecureDeliveryModuleIfc> getModuleIfEnabled(String moduleId)
+	{
+		SecureDeliveryModuleIfc module = secureDeliveryModules.get(moduleId);
+		if (moduleId == null || NONE_ID.equals( moduleId ) || module == null || !module.isEnabled())
+		{
+			return Optional.empty();
+		}
+		return Optional.of(module);
+	}
 }
