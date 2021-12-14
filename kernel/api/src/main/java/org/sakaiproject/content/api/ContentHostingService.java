@@ -27,7 +27,6 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.Stack;
 import java.util.TreeSet;
@@ -261,6 +260,13 @@ public interface ContentHostingService extends EntityProducer
 	public static final String DOCX_MIMETYPE
 		= "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 	public static final String ODT_MIMETYPE = "application/vnd.oasis.opendocument.text";
+
+    // These are used by the built in getHtmlForRef converter. NOT the fileconversionservice. Used
+    // as a key in the returned content map to indicate the status of the conversiont.
+    public static final String CONVERSION_TOO_BIG = "CONVERSION_TOO_BIG";
+    public static final String CONVERSION_OK = "CONVERSION_OK";
+    public static final String CONVERSION_FAILED = "CONVERSION_FAILED";
+    public static final String CONVERSION_NOT_SUPPORTED = "CONVERSION_NOT_SUPPORTED";
 
 	/**
     * For a given id, return its UUID (creating it if it does not already exist)
@@ -2119,5 +2125,5 @@ public interface ContentHostingService extends EntityProducer
 
 	public String expandMacros(String url);
 
-	public Optional<String> getHtmlForRef(String ref);
+	public Map<String,String> getHtmlForRef(String ref);
 }
