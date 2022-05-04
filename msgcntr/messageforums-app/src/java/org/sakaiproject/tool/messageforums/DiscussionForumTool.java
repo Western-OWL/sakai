@@ -9200,5 +9200,10 @@ public class DiscussionForumTool {
 	public String getCDNQuery() {
 		return PortalUtils.getCDNQuery();
 	}
+
+	public List<DiscussionForumBean> getSelectedForumAsList() {
+		DiscussionForumBean forum = getSelectedForum();
+		return forum == null ? Collections.emptyList() : Collections.singletonList(forum);
+	}
 }
 
