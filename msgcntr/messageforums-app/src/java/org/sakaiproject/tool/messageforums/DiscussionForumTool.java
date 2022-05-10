@@ -2269,6 +2269,12 @@ public class DiscussionForumTool {
 	  }
     return selectedMessage;
   }
+
+  public List<DiscussionMessageBean> getSelectedMessageAsList()
+  {
+	  DiscussionMessageBean msg = getSelectedMessage();
+	  return msg == null ? Collections.emptyList() : Collections.singletonList(msg);
+  }
   
   public List getPFSelectedThread() 
   {
@@ -2594,6 +2600,7 @@ public class DiscussionForumTool {
     }
 
     selectedMessage = new DiscussionMessageBean(message, messageManager);
+	selectedMessage.setRead(true);
     DiscussionTopic topic=forumManager.getTopicById(Long.valueOf(topicId));
     setSelectedForumForCurrentTopic(topic);
     selectedTopic = new DiscussionTopicBean(topic, selectedForum.getForum(),
@@ -4056,6 +4063,7 @@ public class DiscussionForumTool {
 	    }
 
 	    selectedMessage = new DiscussionMessageBean(message, messageManager);
+		selectedMessage.setRead(true);
 	    
 	    return processDfMsgReplyMsg();
   }
@@ -4141,6 +4149,7 @@ public class DiscussionForumTool {
 		  }
 
 		  selectedMessage = new DiscussionMessageBean(message, messageManager);
+		  selectedMessage.setRead(true);  // it will be marked as read later in processDfMsgGrd()
 
 	  }else{
 		  selectedMessage = null;

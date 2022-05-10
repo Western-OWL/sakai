@@ -5,6 +5,7 @@
                  org.sakaiproject.tool.cover.ToolManager" %>
 <%@ taglib uri="http://java.sun.com/jsf/html" prefix="h" %>
 <%@ taglib uri="http://java.sun.com/jsf/core" prefix="f" %>
+<%@ taglib uri="http://myfaces.apache.org/tomahawk" prefix="t"%>
 <%@ taglib uri="http://sakaiproject.org/jsf2/sakai" prefix="sakai" %>
 <%@ taglib uri="http://sakaiproject.org/jsf/messageforums" prefix="mf" %>
 <jsp:useBean id="msgs" class="org.sakaiproject.util.ResourceLoader" scope="session">
@@ -126,32 +127,8 @@
                 <h:outputText   value="#{ForumTool.selectedTopic.topic.title}" />
             </h4>
             <h:messages globalOnly="true" infoClass="success" errorClass="alertMessage" rendered="#{! empty facesContext.maximumSeverity}"/>
-            <h:panelGroup rendered="#{ForumTool.selectedMessage != null}">
-                <f:verbatim>
-                <div class="singleMessage">
-                </f:verbatim>
-                    <h:outputText value="#{ForumTool.selectedMessage.message.title} " styleClass="title"/>
-                    <h:outputText value="#{ForumTool.selectedMessage.anonAwareAuthor}" styleClass="#{ForumTool.selectedMessage.useAnonymousId ? 'anonymousAuthor' : ''}" />
-                    <h:outputText value=" #{msgs.cdfm_me}" rendered="#{ForumTool.selectedMessage.currentUserAndAnonymous}" />
-                    <h:outputText value=" #{msgs.cdfm_openb} " />
-                    <h:outputText value="#{ForumTool.selectedMessage.message.created}">
-                        <f:convertDateTime pattern="#{msgs.date_format}" timeZone="#{ForumTool.userTimeZone}" locale="#{ForumTool.userLocale}"/>
-                    </h:outputText>
-                    <h:outputText value=" #{msgs.cdfm_closeb}" />
-                    <%-- Attachments --%>
-                    <h:dataTable value="#{ForumTool.selectedMessage.attachList}"    var="eachAttach" rendered="#{!empty ForumTool.selectedMessage.attachList}">
-                        <h:column rendered="#{!empty ForumTool.selectedMessage.message.attachments}">
-                            <sakai:contentTypeMap fileType="#{eachAttach.attachment.attachmentType}" mapType="image" var="imagePath" pathPrefix="/library/image/"/>
-                            <h:graphicImage id="exampleFileIcon" value="#{imagePath}" />
-                            <h:outputLink value="#{eachAttach.url}" target="_new_window">
-                                <h:outputText value="#{eachAttach.attachment.attachmentName}" />
-                            </h:outputLink>
-                        </h:column>
-                    </h:dataTable>
-                    <h:outputText escape="false" value="#{ForumTool.selectedMessage.message.body}"  style="display:block;margin-top:2em" styleClass="textPanel"/>
-                <f:verbatim>
-                </div>
-                </f:verbatim>
+            <h:panelGroup layout="block" rendered="#{ForumTool.selectedMessage != null}" styleClass="hideActionButtons suppressAuthorLinkDisplay">
+				<%@ include file="/jsp/discussionForum/includes/singletonMessageList.jspf"%>
             </h:panelGroup>
 
             <h:panelGroup styleClass="instruction" rendered="#{ForumTool.allowedToGradeItem}">

@@ -25,6 +25,13 @@
 				var menuLinkSpan = menuLink.closest('span');
 				menuLinkSpan.addClass('current');
 				menuLinkSpan.html(menuLink.text());
+
+				$('#openLinkBlock').hide();
+                jQuery('.replyMsgToggle').click(function(e) {
+                    $('#replytomessage').toggle();
+                    $('.replyMsgToggleParent').toggle();
+                    resizeFrame('grow');
+                });
 				});
 		</script>
 		<%@ include file="/jsp/discussionForum/menu/forumsMenu.jsp" %>
@@ -50,41 +57,21 @@
 				</tr>	
 			</table>
 
-		<%--********************* Reply To *********************--%>	     	
-		<div class="singleMessageReply"> 
-				<h:outputText value="#{msgs.cdfm_reply_message_pref}" styleClass="title highlight"/> <h:outputText value="#{ForumTool.selectedMessage.message.title}" styleClass="title"/>
-				<h:outputText value="#{ForumTool.selectedMessage.anonAwareAuthor}" styleClass="textPanelFooter #{ForumTool.selectedMessage.useAnonymousId ? 'anonymousAuthor' : ''}" />
-				<h:outputText value=" #{msgs.cdfm_me}" styleClass="textPanelFooter" rendered="#{ForumTool.selectedMessage.currentUserAndAnonymous}" />
-				<h:outputText value=" #{msgs.cdfm_openb}" styleClass="textPanelFooter"/>
-				<h:outputText value="#{ForumTool.selectedMessage.message.created}" styleClass="textPanelFooter">
-					<f:convertDateTime pattern="#{msgs.date_format}" timeZone="#{ForumTool.userTimeZone}" locale="#{ForumTool.userLocale}"/>  
-				</h:outputText>
-				<h:outputText value=" #{msgs.cdfm_closeb}" styleClass="textPanelFooter"/>
-				<p id="openLinkBlock" class="toggleParent openLinkBlock">
-					<a href="#" id="showMessage" class="toggle show">
-						<h:graphicImage url="/images/collapse.gif" alt=""/>
-						<h:outputText value=" #{msgs.cdfm_read_full_rep_tomessage}" />
-					</a>
-				</p>
-				<p id="hideLinkBlock" class="toggleParent hideLinkBlock display-none">
-					<a href="#" id="hideMessage" class="toggle show">
-						<h:graphicImage url="/images/expand.gif" alt="" />
-						<h:outputText value=" #{msgs.cdfm_hide_full_rep_tomessage}"/>
-					</a>
-				</p>
-				<div id="fullTopicDescription" class="fullTopicDescription">
-					<mf:htmlShowArea value="#{ForumTool.selectedMessage.message.body}" hideBorder="true" />
-					<h:dataTable value="#{ForumTool.selectedMessage.message.attachments}" var="eachAttach"  rendered="#{!empty ForumTool.selectedMessage.message.attachments}" columnClasses="attach,bogus" styleClass="attachList" border="0">
-						<h:column rendered="#{!empty ForumTool.selectedMessage.message.attachments}">
-							<sakai:contentTypeMap fileType="#{eachAttach.attachmentType}" mapType="image" var="imagePath" pathPrefix="/library/image/"/>
-							<h:graphicImage id="exampleFileIcon" value="#{imagePath}" alt="" />
-						</h:column>
-						<h:column>
-							<h:outputText value="#{eachAttach.attachmentName}"/>
-						</h:column>
-					</h:dataTable>
-				</div>
-			</div>
+		<%--********************* Reply To *********************--%>
+		<p id="openLinkBlock" class="replyMsgToggleParent">
+			<a href="#" id="showMessage" class="replyMsgToggle">
+				<h:graphicImage url="/images/collapse.gif" alt=""/>
+				<h:outputText value=" #{msgs.cdfm_read_full_rep_tomessage}" />
+			</a>
+		</p>
+		<p id="hideLinkBlock" class="replyMsgToggleParent">
+			<a href="#" id="hideMessage" class="replyMsgToggle">
+				<h:graphicImage url="/images/expand.gif" alt="" />
+				<h:outputText value=" #{msgs.cdfm_hide_full_rep_tomessage}"/>
+			</a>
+		</p>
+		<div id="replytomessage" class="hideActionButtons"><%@ include file="/jsp/discussionForum/includes/singletonMessageList.jspf"%></div>
+
 		<t:htmlTag value="p" rendered="#{ForumTool.anonymousEnabled && ForumTool.selectedTopic.topic.postAnonymous}">
 			<h:outputText value="#{ForumTool.selectedTopic.topic.revealIDsToRoles ? msgs.cdfm_revealIDsToRoles_blurb : msgs.cdfm_anonymous_blurb}" />
 		</t:htmlTag>

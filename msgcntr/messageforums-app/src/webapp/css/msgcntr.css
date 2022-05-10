@@ -689,3 +689,17 @@ div.msgcntr-profile-qtip {
 .openDateSpan {
 	display: block;
 }
+
+.singleMessage.suppressLinkTitleDisplay a.title,
+.suppressAuthorLinkDisplay .singleMessage .msgAuthorStatsLink {
+	text-decoration: none;
+	color: #212121;
+	pointer-events: none;
+	cursor: default;
+}
+
+.hideActionButtons .singleMessage .itemToolBar,
+.hideActionButtons .singleMessage .otherActions
+{
+	display: none;
+}

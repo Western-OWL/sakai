@@ -1,5 +1,6 @@
-// <%@ taglib uri="http://java.sun.com/jsf/html" prefix="h" %>
+<%@ taglib uri="http://java.sun.com/jsf/html" prefix="h" %>
 <%@ taglib uri="http://java.sun.com/jsf/core" prefix="f" %>
+<%@ taglib uri="http://myfaces.apache.org/tomahawk" prefix="t"%>
 <%@ taglib uri="http://sakaiproject.org/jsf2/sakai" prefix="sakai" %>
 <%@ taglib uri="http://sakaiproject.org/jsf/messageforums" prefix="mf" %>
 <jsp:useBean id="msgs" class="org.sakaiproject.util.ResourceLoader" scope="session">
@@ -242,67 +243,9 @@
 					</h:panelGroup>
 				</h:panelGroup>
 			</h:panelGroup>
-			<h:panelGroup layout="block" styleClass="singleMessage">
-				<%--title, metadata and navigation --%>
-				<h:panelGrid columns="1"  style="width: 100%;" border="0">
-					<h:outputText rendered="#{ForumTool.selectedMessage.message.deleted && !ForumTool.needToPostFirst}"  value="#{msgs.cdfm_msg_deleted_label}" styleClass="instruction"/>
-					<h:outputText value="#{msgs.cdfm_postFirst_warning}" rendered="#{ForumTool.needToPostFirst}" styleClass="messageAlert"/>
-					<h:panelGroup rendered="#{!ForumTool.selectedMessage.message.deleted}" style="display:block">
-						<h:panelGroup styleClass="authorImage" rendered="#{ForumTool.showProfileInfo && !ForumTool.selectedMessage.useAnonymousId}">
-							<h:outputLink value="#{ForumTool.serverUrl}/direct/profile/#{ForumTool.selectedMessage.message.authorId}/formatted" styleClass="authorProfile" rendered="#{ForumTool.showProfileLink}">
-								<h:graphicImage value="#{ForumTool.serverUrl}/direct/profile/#{ForumTool.selectedMessage.message.authorId}/image/thumb" alt="#{ForumTool.selectedMessage.message.author}" />
-							</h:outputLink>
-							<h:graphicImage value="#{ForumTool.serverUrl}/direct/profile/#{ForumTool.selectedMessage.message.authorId}/image/thumb" alt="#{ForumTool.selectedMessage.message.author}" rendered="#{!ForumTool.showProfileLink}"/>
-						</h:panelGroup>
-						<h:outputText rendered="#{ ForumTool.selectedMessage.msgDenied}" value="#{msgs.cdfm_msg_denied_label}" styleClass="messageDenied"/>
-						<h:outputText 	rendered="#{ForumTool.allowedToApproveMsg && ForumTool.allowedToDenyMsg}" value="#{msgs.cdfm_msg_pending_label}" styleClass="messagePending"/>
-						<h:outputText value="#{ForumTool.selectedMessage.message.title}"  styleClass="title" />
-						<h:outputText value="<br />" escape="false" />
-						<h:outputText value="#{ForumTool.selectedMessage.anonAwareAuthor}" styleClass="textPanelFooter #{ForumTool.selectedMessage.useAnonymousId ? 'anonymousAuthor' : ''}" rendered="#{!ForumTool.instructor || ForumTool.selectedMessage.useAnonymousId}"/>
-						<h:outputText value=" #{msgs.cdfm_me}" styleClass="textPanelFooter" rendered="#{ForumTool.selectedMessage.currentUserAndAnonymous}" />
-						<h:commandLink action="#{mfStatisticsBean.processActionStatisticsUser}" immediate="true" title=" #{ForumTool.selectedMessage.anonAwareAuthor }" styleClass="textPanelFooter #{ForumTool.selectedMessage.useAnonymousId ? 'anonymousAuthor' : ''}" rendered="#{ForumTool.instructor && !ForumTool.selectedMessage.useAnonymousId}">
-                        	<f:param value="#{ForumTool.selectedMessage.authorEid}" name="siteUserId"/>
-                        	<h:outputText value="#{ForumTool.selectedMessage.anonAwareAuthor}"/>
-                        </h:commandLink>
-						<h:outputText value=" #{msgs.cdfm_openb} "  styleClass="textPanelFooter" />
-						<h:outputText value="#{ForumTool.selectedMessage.message.created}"  styleClass="textPanelFooter" >
-							<f:convertDateTime pattern="#{msgs.date_format}" timeZone="#{ForumTool.userTimeZone}" locale="#{ForumTool.userLocale}"/>  
-						</h:outputText>
-						<h:outputText value=" #{msgs.cdfm_closeb}"  styleClass="textPanelFooter" />
-					</h:panelGroup>
 
-				</h:panelGrid>
-
-				<%-- Rank --%>
-				<h:panelGroup rendered="#{ForumTool.selectedMessage.authorRank != null}">
-				<h:panelGroup layout="block" styleClass="forumsRank">
-					<h:outputText escape="false" rendered="#{not empty ForumTool.selectedMessage.authorRank.rankImage.attachmentId}" value="<img src=\"#{ForumTool.selectedMessage.authorRank.rankImage.attachmentUrl}\" class=\"rankImage\" alt=\"Rank Image\" height=\"35\" width=\"35\" />" />
-					<h:panelGroup layout="block" styleClass="forumsRankNameContainer">
-						<h:outputText value="#{ForumTool.selectedMessage.authorRank.title}" styleClass="forumsRankName"/>
-						<h:outputText value="#{msgs.num_of_posts} #{ForumTool.selectedMessage.authorPostCount}" styleClass="forumsRankName" rendered="#{ForumTool.selectedMessage.authorRank.type == 2}"/>
-					</h:panelGroup>
-				</h:panelGroup>
-				</h:panelGroup>
-				<%-- End Rank --%>
-
-				<h:panelGroup layout="block" styleClass="textPanel">
-					<h:outputText escape="false" value="#{ForumTool.selectedMessage.message.body}" id="messageBody" 
-							rendered="#{!ForumTool.selectedMessage.message.deleted}" />
-				</h:panelGroup>
-				<h:dataTable value="#{ForumTool.selectedMessage.attachList}" var="eachAttach"  cellpadding="3" cellspacing="0" columnClasses="attach,bogus" style="font-size:.9em;width:auto;margin-left:1em" border="0">
-					<h:column rendered="#{!empty ForumTool.selectedMessage.message.attachments}">
-						  <sakai:contentTypeMap fileType="#{eachAttach.attachment.attachmentType}" mapType="image" var="imagePath" pathPrefix="/library/image/"/>
-  						<h:graphicImage id="exampleFileIcon" value="#{imagePath}" />
-						<%-- <h:outputLink value="#{eachAttach.attachmentUrl}" target="_blank">
-							<h:outputText value="#{eachAttach.attachmentName}"/>
-						</h:outputLink>--%>
-						<h:outputText value=" "/>
-						<h:outputLink value="#{eachAttach.url}" target="_blank">
-							<h:outputText value="#{eachAttach.attachment.attachmentName}"/>
-						</h:outputLink>
-					</h:column>
-				</h:dataTable>
-			</h:panelGroup>
+			<h:outputText value="#{msgs.cdfm_postFirst_warning}" rendered="#{ForumTool.needToPostFirst}" styleClass="messageAlert"/>
+			<t:div rendered="!#{ForumTool.needToPostFirst}"><%@ include file="/jsp/discussionForum/includes/singletonMessageList.jspf"%></t:div>
 		
 			<h:panelGroup rendered="#{ForumTool.deleteMsg && ForumTool.errorSynch}">
 				<h:outputText styleClass="alertMessage" 

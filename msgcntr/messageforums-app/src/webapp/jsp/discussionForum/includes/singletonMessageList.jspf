@@ -1,0 +1,5 @@
+<t:dataList id="singletonMessageList" value="#{ForumTool.selectedMessageAsList}" rendered="#{!empty ForumTool.selectedMessageAsList}" var="message">
+	<t:div styleClass="singleMessage suppressLinkTitleDisplay">
+		<%@ include file="/jsp/discussionForum/includes/singleMessage.jspf"%>
+	</t:div>
+</t:dataList>
