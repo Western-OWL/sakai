@@ -245,7 +245,7 @@
 			</h:panelGroup>
 
 			<h:outputText value="#{msgs.cdfm_postFirst_warning}" rendered="#{ForumTool.needToPostFirst}" styleClass="messageAlert"/>
-			<t:div rendered="!#{ForumTool.needToPostFirst}"><%@ include file="/jsp/discussionForum/includes/singletonMessageList.jspf"%></t:div>
+			<t:div rendered="#{!ForumTool.needToPostFirst}"><%@ include file="/jsp/discussionForum/includes/singletonMessageList.jspf"%></t:div>
 		
 			<h:panelGroup rendered="#{ForumTool.deleteMsg && ForumTool.errorSynch}">
 				<h:outputText styleClass="alertMessage" 
