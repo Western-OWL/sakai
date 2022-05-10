@@ -89,26 +89,8 @@
 				</h:panelGroup>
 			</h:panelGroup>
 			
-			<h:panelGroup layout="block" styleClass="row view-message-nav">
-				<h:panelGroup layout="block" styleClass="col-md-offset-6 col-md-6 view-message-nav">
-					<h:panelGroup styleClass="button formButtonDisabled" rendered="#{!ForumTool.selectedThreadHead.hasPreThread}">
-						<h:outputText value="#{msgs.cdfm_previous_thread}"  />
-					</h:panelGroup>
-					<h:commandLink styleClass="button" action="#{ForumTool.processActionDisplayThread}" value="#{msgs.cdfm_previous_thread}"  rendered="#{ForumTool.selectedThreadHead.hasPreThread}">
-						<f:param value="#{ForumTool.selectedThreadHead.preThreadId}" name="messageId"/>
-						<f:param value="#{ForumTool.selectedTopic.topic.id}" name="topicId"/>
-						<f:param value="#{ForumTool.selectedForum.forum.id}" name="forumId"/>
-					</h:commandLink>
-					<h:panelGroup styleClass="button formButtonDisabled" rendered="#{!ForumTool.selectedThreadHead.hasNextThread}">
-						<h:outputText value="#{msgs.cdfm_next_thread}"  />
-					</h:panelGroup>
-					<h:commandLink styleClass="button" action="#{ForumTool.processActionDisplayThread}" value="#{msgs.cdfm_next_thread}" rendered="#{ForumTool.selectedThreadHead.hasNextThread}">
-						<f:param value="#{ForumTool.selectedThreadHead.nextThreadId}" name="messageId"/>
-						<f:param value="#{ForumTool.selectedTopic.topic.id}" name="topicId"/>
-						<f:param value="#{ForumTool.selectedForum.forum.id}" name="forumId"/>
-					</h:commandLink>
-				</h:panelGroup>
-			</h:panelGroup>
+			<%@ include file="/jsp/discussionForum/includes/threadPrevNext.jspf"%>
+
 			<%-- topic short description and long description --%>
 			<h:panelGroup layout="block" styleClass="topicBloc topicBlocLone">
 				<h:panelGroup layout="block" styleClass="textPanel">
@@ -279,26 +261,7 @@
 				</h:panelGroup>
 			</h:panelGroup>
 			<h:panelGroup><br /></h:panelGroup>
-			<h:panelGroup layout="block" styleClass="row view-message-nav">
-				<h:panelGroup layout="block" styleClass="col-md-offset-6 col-md-6">
-					<h:panelGroup rendered="#{!ForumTool.selectedThreadHead.hasPreThread}" >
-						<h:outputText value="#{msgs.cdfm_previous_thread}"  styleClass="button formButtonDisabled" />
-					</h:panelGroup>
-					<h:commandLink styleClass="button" action="#{ForumTool.processActionDisplayThread}" value="#{msgs.cdfm_previous_thread}"  rendered="#{ForumTool.selectedThreadHead.hasPreThread}">
-						<f:param value="#{ForumTool.selectedThreadHead.preThreadId}" name="messageId"/>
-						<f:param value="#{ForumTool.selectedTopic.topic.id}" name="topicId"/>
-						<f:param value="#{ForumTool.selectedForum.forum.id}" name="forumId"/>
-					</h:commandLink>
-					<h:panelGroup rendered="#{!ForumTool.selectedThreadHead.hasNextThread}" styleClass="button formButtonDisabled" >
-						<h:outputText   value="#{msgs.cdfm_next_thread}"  />
-					</h:panelGroup>
-					<h:commandLink styleClass="button" action="#{ForumTool.processActionDisplayThread}" value="#{msgs.cdfm_next_thread}" rendered="#{ForumTool.selectedThreadHead.hasNextThread}">
-						<f:param value="#{ForumTool.selectedThreadHead.nextThreadId}" name="messageId"/>
-						<f:param value="#{ForumTool.selectedTopic.topic.id}" name="topicId"/>
-						<f:param value="#{ForumTool.selectedForum.forum.id}" name="forumId"/>
-					</h:commandLink>
-				</h:panelGroup>
-			 </h:panelGroup>
+			<%@ include file="/jsp/discussionForum/includes/threadPrevNext.jspf"%>
 		</h:form>
 	</sakai:view>
 </f:view>

@@ -32,11 +32,6 @@
 
 				setupMessageNav('messagePending');
 				setupMessageNav('messageNew');
-				if ($('div.hierItemBlock').size() >= 1){
-					$('.itemNav').clone().addClass('specialLink').appendTo('form')
-					$("<br/><br/>").appendTo('form');
-				}
-
 			});
 		</script>
 		<%@ include file="/jsp/discussionForum/menu/forumsMenu.jsp" %>
@@ -100,24 +95,7 @@
 
 				 </h:panelGroup>
 
-				 <h:panelGroup styleClass="itemNav">
-				 	<h:panelGroup styleClass="button formButtonDisabled" rendered="#{!ForumTool.selectedThreadHead.hasPreThread}" >
-						<h:outputText  value="#{msgs.cdfm_previous_thread}"/>
-					</h:panelGroup>
-					 <h:commandLink styleClass="button" action="#{ForumTool.processActionDisplayThread}" value="#{msgs.cdfm_previous_thread}"  rendered="#{ForumTool.selectedThreadHead.hasPreThread}">
-						 <f:param value="#{ForumTool.selectedThreadHead.preThreadId}" name="messageId"/>
-						 <f:param value="#{ForumTool.selectedTopic.topic.id}" name="topicId"/>
-						 <f:param value="#{ForumTool.selectedForum.forum.id}" name="forumId"/>
-					 </h:commandLink>
-					 <h:panelGroup styleClass="button formButtonDisabled" rendered="#{!ForumTool.selectedThreadHead.hasNextThread}">
-					 	<h:outputText value="#{msgs.cdfm_next_thread}"/>
-					 </h:panelGroup>
-					 <h:commandLink styleClass="button" action="#{ForumTool.processActionDisplayThread}" value="#{msgs.cdfm_next_thread}" rendered="#{ForumTool.selectedThreadHead.hasNextThread}">
-						<f:param value="#{ForumTool.selectedThreadHead.nextThreadId}" name="messageId"/>
-						<f:param value="#{ForumTool.selectedTopic.topic.id}" name="topicId"/>
-						<f:param value="#{ForumTool.selectedForum.forum.id}" name="forumId"/>
-					 </h:commandLink>
-				 </h:panelGroup>
+				 <%@ include file="/jsp/discussionForum/includes/threadPrevNext.jspf"%>
 			</h:panelGrid>
 
 		<h:panelGroup rendered="#{!ForumTool.threadMoved}">
@@ -172,6 +150,8 @@
 			</h:column>
 		</mf:hierDataTable>
 		</div>
+
+		<%@ include file="/jsp/discussionForum/includes/threadPrevNext.jspf"%>
 				
 		<h:inputHidden id="mainOrForumOrTopic" value="dfViewThread" />
 		<%--//designNote:  need a message if no messages (as in when there are no unread ones)  --%>
