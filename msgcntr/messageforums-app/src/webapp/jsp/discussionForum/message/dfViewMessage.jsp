@@ -201,30 +201,7 @@
 			</h:panelGroup>
 
 			<%--navigation cell --%>
-			<h:panelGroup layout="block" styleClass="row view-message-nav">
-				<h:panelGroup layout="block" styleClass="col-md-offset-6 col-md-6">
-					<h:commandLink styleClass="button"
-						action="#{ForumTool.processDisplayPreviousMsg}"
-						rendered="#{ForumTool.selectedMessage != null && ForumTool.selectedMessage.hasPre}"
-						title=" #{msgs.cdfm_prev_msg}">
-						<h:outputText value="#{msgs.cdfm_prev_msg}" />
-					</h:commandLink>
-					<h:panelGroup styleClass="button formButtonDisabled"
-						rendered="#{!ForumTool.selectedMessage.hasPre}">
-						<h:outputText value="#{msgs.cdfm_prev_msg}" />
-					</h:panelGroup>
-					<h:commandLink styleClass="button"
-						action="#{ForumTool.processDfDisplayNextMsg}"
-						rendered="#{ForumTool.selectedMessage != null && ForumTool.selectedMessage.hasNext}"
-						title=" #{msgs.cdfm_next_msg}">
-						<h:outputText value="#{msgs.cdfm_next_msg}" />
-					</h:commandLink>
-					<h:panelGroup styleClass="button formButtonDisabled"
-						rendered="#{!ForumTool.selectedMessage.hasNext}">
-						<h:outputText value="#{msgs.cdfm_next_msg}" />
-					</h:panelGroup>
-				</h:panelGroup>
-			</h:panelGroup>
+			<%@ include file="/jsp/discussionForum/includes/dfViewMessage/msgPrevNext.jspf"%>
 
 			<h:outputText value="#{msgs.cdfm_postFirst_warning}" rendered="#{ForumTool.needToPostFirst}" styleClass="messageAlert"/>
 			<t:div rendered="#{!ForumTool.needToPostFirst}"><%@ include file="/jsp/discussionForum/includes/singletonMessageList.jspf"%></t:div>
@@ -241,25 +218,8 @@
 				<h:commandButton id="post" action="#{ForumTool.processDfMsgDeleteConfirmYes}" value="#{msgs.cdfm_button_bar_delete}" accesskey="x" styleClass="active blockMeOnClick" rendered="#{ForumTool.selectedMessage.userCanDelete}" />
                 <h:outputText styleClass="sak-banner-info" style="display:none" value="#{msgs.cdfm_processing_submit_message}" />
 			</p>
-	
-			<h:panelGroup layout="block" styleClass="row view-message-nav">
-				<h:panelGroup layout="block" styleClass="col-md-offset-6 col-md-6">
-					<h:commandLink styleClass="button" action="#{ForumTool.processDisplayPreviousMsg}" rendered="#{ForumTool.selectedMessage != null && ForumTool.selectedMessage.hasPre}" 
-							title=" #{msgs.cdfm_prev_msg}">
-						<h:outputText value="#{msgs.cdfm_prev_msg}" />
-					</h:commandLink>
-					<h:panelGroup rendered="#{!ForumTool.selectedMessage.hasPre}" styleClass="button formButtonDisabled">
-						<h:outputText value="#{msgs.cdfm_prev_msg}"  />
-					</h:panelGroup>
-					<h:commandLink styleClass="button" action="#{ForumTool.processDfDisplayNextMsg}" rendered="#{ForumTool.selectedMessage != null && ForumTool.selectedMessage.hasNext}" 
-							title=" #{msgs.cdfm_next_msg}">
-						<h:outputText value="#{msgs.cdfm_next_msg}" />
-					</h:commandLink>
-					<h:panelGroup rendered="#{!ForumTool.selectedMessage.hasNext}"  styleClass="button formButtonDisabled">
-						<h:outputText value="#{msgs.cdfm_next_msg}" />
-					</h:panelGroup>
-				</h:panelGroup>
-			</h:panelGroup>
+
+			<%@ include file="/jsp/discussionForum/includes/dfViewMessage/msgPrevNext.jspf"%>
 			<h:panelGroup><br /></h:panelGroup>
 			<%@ include file="/jsp/discussionForum/includes/threadPrevNext.jspf"%>
 		</h:form>
