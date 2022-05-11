@@ -1,5 +1,6 @@
 <%@ taglib uri="http://java.sun.com/jsf/html" prefix="h" %>
 <%@ taglib uri="http://java.sun.com/jsf/core" prefix="f" %>
+<%@ taglib uri="http://myfaces.apache.org/tomahawk" prefix="t"%>
 <%@ taglib uri="http://sakaiproject.org/jsf2/sakai" prefix="sakai" %>
 <%@ taglib uri="http://sakaiproject.org/jsf/messageforums" prefix="mf" %>
 <jsp:useBean id="msgs" class="org.sakaiproject.util.ResourceLoader" scope="session">
@@ -147,29 +148,10 @@
 				 </h:commandLink>
 			 </h:panelGroup>
 			<h:panelGrid columns="2" width="100%" styleClass="specialLink">
-			    <h:panelGroup>
-					<f:verbatim><div class="specialLink"><h1></f:verbatim>
-			      <h:commandLink action="#{ForumTool.processActionHome}" title=" #{msgs.cdfm_message_forums}" rendered="#{ForumTool.messagesandForums}">
-						<h:outputText value="#{msgs.cdfm_message_forums}"/>
-					</h:commandLink>
-			      <h:commandLink action="#{ForumTool.processActionHome}" title=" #{msgs.cdfm_discussion_forums}" rendered="#{ForumTool.forumsTool}" >
-							<h:outputText value="#{msgs.cdfm_discussion_forums}"/>
-						</h:commandLink>
-      			  <h:outputText value=" " /><h:outputText value=" / " /><h:outputText value=" " />
-					  <h:commandLink action="#{ForumTool.processActionDisplayForum}" title="#{ForumTool.selectedForum.forum.title}" rendered="#{ForumTool.showForumLinksInNav}">
-						<h:outputText value="#{ForumTool.selectedForum.forum.title}"/>
-						  <f:param value="#{ForumTool.selectedForum.forum.id}" name="forumId"/>
-					  </h:commandLink>
-					  <h:outputText value="#{ForumTool.selectedForum.forum.title}" rendered="#{!ForumTool.showForumLinksInNav}"/>
-					  <h:outputText value=" " /><h:outputText value=" / " /><h:outputText value=" " />
-					  <h:outputText value="#{ForumTool.selectedTopic.topic.title}" />
-						<%--//designNote: up arrow should go here - get decent image and put title into link. --%>
-						<h:commandLink action="#{ForumTool.processActionDisplayForum}"  title="#{msgs.cdfm_up_level_title}" rendered="#{ForumTool.showForumLinksInNav}" style="margin-left:.3em">
-							<h:graphicImage url="/images/silk/arrow_turn_up.gif" style="vertical-align:top;padding:0;margin-top:-2px" alt="" />	
-							<f:param value="#{ForumTool.selectedForum.forum.id}" name="forumId"/>
-						</h:commandLink>
-					  <f:verbatim></h1></div></f:verbatim>
+			    <h:panelGroup styleClass="suppressTopicCrumbLink hideThreadCrumb">
+						<%@ include file="/jsp/discussionForum/includes/crumbs/standard.jspf" %>
 				 </h:panelGroup>
+
 			</h:panelGrid>
 
 		<h:panelGroup id="forumActions" layout="block">

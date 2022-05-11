@@ -1,5 +1,6 @@
 <%@ taglib uri="http://java.sun.com/jsf/html" prefix="h" %>
 <%@ taglib uri="http://java.sun.com/jsf/core" prefix="f" %>
+<%@ taglib uri="http://myfaces.apache.org/tomahawk" prefix="t"%>
 <%@ taglib uri="http://sakaiproject.org/jsf2/sakai" prefix="sakai" %>
 <%@ taglib uri="http://sakaiproject.org/jsf/messageforums" prefix="mf" %>
 <jsp:useBean id="msgs" class="org.sakaiproject.util.ResourceLoader" scope="session">
@@ -67,20 +68,8 @@
 	    	</div>
 
 		<div class="row">
-			<div class="col-md-9 col-xs-12">
-					<f:verbatim><div class="breadCrumb specialLink"><h3></f:verbatim>
-			      <h:commandLink action="#{ForumTool.processActionHome}" value="#{msgs.cdfm_message_forums}" title=" #{msgs.cdfm_message_forums}"
-			      		rendered="#{ForumTool.messagesandForums}" />
-			      <h:commandLink action="#{ForumTool.processActionHome}" value="#{msgs.cdfm_discussion_forums}" title=" #{msgs.cdfm_discussion_forums}"
-			      		rendered="#{ForumTool.forumsTool}" />
-      			  <h:outputText value=" " /><h:outputText value=" / " /><h:outputText value=" " />
-					  <h:commandLink action="#{ForumTool.processActionDisplayForum}" title=" #{ForumTool.selectedForum.forum.title}">
-						  <f:param value="#{ForumTool.selectedForum.forum.id}" name="forumId"/>
-						  <h:outputText value="#{ForumTool.selectedForum.forum.title}" />
-					  </h:commandLink>
-				  <h:outputText value=" " /><h:outputText value=" / " /><h:outputText value=" " />
-				  	  <h:outputText value="#{ForumTool.selectedTopic.topic.title}" />
-					  <f:verbatim></h3></div></f:verbatim>
+			<div class="col-md-9 col-xs-12 suppressTopicCrumbLink hideThreadCrumb">
+				<%@ include file="/jsp/discussionForum/includes/crumbs/standard.jspf" %>
 			</div>
 			<div class="pull-right">
 				   <h:outputText  styleClass="button formButtonDisabled"  value="#{msgs.cdfm_previous_topic}"  rendered="#{!ForumTool.selectedTopic.hasPreviousTopic}" />

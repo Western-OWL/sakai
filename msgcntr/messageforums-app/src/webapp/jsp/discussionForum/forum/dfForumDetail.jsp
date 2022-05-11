@@ -1,5 +1,6 @@
 <%@ taglib uri="http://java.sun.com/jsf/html" prefix="h" %>
 <%@ taglib uri="http://java.sun.com/jsf/core" prefix="f" %>
+<%@ taglib uri="http://myfaces.apache.org/tomahawk" prefix="t"%>
 <%@ taglib uri="http://sakaiproject.org/jsf2/sakai" prefix="sakai" %>
 <%@ taglib uri="http://sakaiproject.org/jsf/messageforums" prefix="mf" %>
 <jsp:useBean id="msgs" class="org.sakaiproject.util.ResourceLoader" scope="session">
@@ -29,16 +30,9 @@
 		<%@ include file="/jsp/discussionForum/menu/forumsMenu.jsp" %>
 			<h:outputText styleClass="showMoreText"  style="display:none" value="#{msgs.cdfm_show_more_full_description}"  />
 
-
-		<h3 class="specialLink" style="margin-bottom:1em">
-          		<%-- Display the proper home page link: either Messages & Forums OR Forums --%>
-			      <h:commandLink action="#{ForumTool.processActionHome}" value="#{msgs.cdfm_message_forums}" title=" #{msgs.cdfm_message_forums}"
-			      		rendered="#{ForumTool.messagesandForums}" />
-			      <h:commandLink action="#{ForumTool.processActionHome}" value="#{msgs.cdfm_discussion_forums}" title=" #{msgs.cdfm_discussion_forums}"
-			      		rendered="#{ForumTool.forumsTool}" />
-			      <h:outputText value=" " /><h:outputText value=" / " /><h:outputText value=" " />
-			      <h:outputText value="#{ForumTool.selectedForum.forum.title}" />
-		</h3>
+		<t:div styleClass="suppressForumCrumbLink hideTopicCrumb hideThreadCrumb">
+			<%@ include file="/jsp/discussionForum/includes/crumbs/standard.jspf" %>
+		</t:div>
 
 		<h:dataTable id="forums" value="#{ForumTool.selectedForumAsList}" rendered="#{!empty ForumTool.selectedForumAsList}" role="presentation" width="100%" var="forum" cellpadding="0" cellspacing="0" styleClass="specialLink" border="0">
 			<%@ include file="/jsp/discussionForum/includes/singleForum.jspf"%>

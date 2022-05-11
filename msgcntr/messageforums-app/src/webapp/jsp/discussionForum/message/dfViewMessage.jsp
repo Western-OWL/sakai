@@ -56,38 +56,7 @@
             <%@ include file="/jsp/discussionForum/menu/forumsMenu.jsp" %>
 
 			<%--breadcrumb and thread nav grid--%>
-			<h:panelGroup layout="block" styleClass="navPanel row">
-				<h:panelGroup layout="block" styleClass="col-md-12">
-					<h3>
-						<h:commandLink action="#{ForumTool.processActionHome}" value="#{msgs.cdfm_message_forums}" title=" #{msgs.cdfm_message_forums}"
-							rendered="#{ForumTool.messagesandForums}" />
-						<h:commandLink action="#{ForumTool.processActionHome}" value="#{msgs.cdfm_discussion_forums}" title=" #{msgs.cdfm_discussion_forums}"
-							rendered="#{ForumTool.forumsTool}" />
-						<h:outputText value=" " /><h:outputText value=" / " /><h:outputText value=" " />
-						<h:commandLink action="#{ForumTool.processActionDisplayForum}" 
-								title=" #{ForumTool.selectedForum.forum.title}" rendered="#{ForumTool.showForumLinksInNav}" >
-							<f:param value="#{ForumTool.selectedForum.forum.id}" name="forumId"/>
-							<h:outputText value="#{ForumTool.selectedForum.forum.title}"/>
-						</h:commandLink>
-						<h:outputText value="#{ForumTool.selectedForum.forum.title}" rendered="#{!ForumTool.showForumLinksInNav}"/>
-						<h:outputText value=" " /><h:outputText value=" / " /><h:outputText value=" " />
-						<h:commandLink action="#{ForumTool.processActionDisplayTopic}"  
-								title=" #{ForumTool.selectedTopic.topic.title}">
-								<f:param value="#{ForumTool.selectedForum.forum.id}" name="forumId"/>
-								<f:param value="#{ForumTool.selectedTopic.topic.id}" name="topicId"/>
-								<h:outputText value="#{ForumTool.selectedTopic.topic.title}"/>
-						</h:commandLink>
-						<h:outputText value=" " /><h:outputText value=" / " /><h:outputText value=" " />
-						<h:commandLink action="#{ForumTool.processActionDisplayThread}"  
-								title=" #{ForumTool.selectedThreadHead.message.title}">
-							<f:param value="#{ForumTool.selectedForum.forum.id}" name="forumId"/>
-							<f:param value="#{ForumTool.selectedTopic.topic.id}" name="topicId"/>
-							<f:param value="#{ForumTool.selectedThreadHead.message.id}" name="messageId"/>
-							<h:outputText value="#{ForumTool.selectedThreadHead.message.title}"/>
-						</h:commandLink>
-					</h3>
-				</h:panelGroup>
-			</h:panelGroup>
+			<%@ include file="/jsp/discussionForum/includes/crumbs/standard.jspf" %>
 			
 			<%@ include file="/jsp/discussionForum/includes/threadPrevNext.jspf"%>
 

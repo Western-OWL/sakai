@@ -691,7 +691,13 @@ div.msgcntr-profile-qtip {
 }
 
 .singleMessage.suppressLinkTitleDisplay a.title,
-.suppressAuthorLinkDisplay .singleMessage .msgAuthorStatsLink {
+.suppressAuthorLinkDisplay .singleMessage .msgAuthorStatsLink,
+.standardCrumbs .suppressForumCrumbLinkDisplay,
+.suppressThreadCrumbLink .threadCrumb a,
+.suppressTopicCrumbLink .topicCrumb a,
+.suppressForumCrumbLinkDisplay,
+.suppressForumCrumbLink .forumCrumb a
+{
 	text-decoration: none;
 	color: #212121;
 	pointer-events: none;
@@ -699,7 +705,9 @@ div.msgcntr-profile-qtip {
 }
 
 .hideActionButtons .singleMessage .itemToolBar,
-.hideActionButtons .singleMessage .otherActions
+.hideActionButtons .singleMessage .otherActions,
+.hideThreadCrumb .threadCrumb,
+.hideTopicCrumb .topicCrumb
 {
 	display: none;
 }
