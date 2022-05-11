@@ -34,9 +34,9 @@
 			<%@ include file="/jsp/discussionForum/includes/crumbs/standard.jspf" %>
 		</t:div>
 
-		<h:dataTable id="forums" value="#{ForumTool.selectedForumAsList}" rendered="#{!empty ForumTool.selectedForumAsList}" role="presentation" width="100%" var="forum" cellpadding="0" cellspacing="0" styleClass="specialLink" border="0">
+		<t:dataList value="#{ForumTool.selectedForumAsList}" rendered="#{!empty ForumTool.selectedForumAsList}" var="forum">
 			<%@ include file="/jsp/discussionForum/includes/singleForum.jspf"%>
-		</h:dataTable>
+		</t:dataList>
 
 		<h:inputHidden id="mainOrForumOrTopic" value="dfForumDetail" />
 		<%
