@@ -165,14 +165,7 @@
 	<mf:htmlShowArea value="#{message.message.body}" hideBorder="true" rendered="#{!message.deleted}" />
 	<%-- attach list --%>
 	<h:panelGroup rendered="#{!empty message.attachList && !message.deleted}">
-		<h:dataTable value="#{message.attachList}" var="eachAttach" styleClass="attachListJSF" rendered="#{!empty message.attachList}" style="font-size:.9em;width:auto;margin-left:1em">
-			<h:column rendered="#{!empty message.message.attachments}">
-				  <sakai:contentTypeMap fileType="#{eachAttach.attachment.attachmentType}" mapType="image" var="imagePath" pathPrefix="/library/image/"/>
-  					<h:graphicImage id="exampleFileIcon" value="#{imagePath}" />
-				<h:outputLink value="#{eachAttach.url}" target="_blank">
-					<h:outputText value=" " />
-					<h:outputText value="#{eachAttach.attachment.attachmentName}" />
-				</h:outputLink>
-			</h:column>
-		</h:dataTable>
+		<t:dataList value="#{message.attachListAsSingletonList}" var="attachList">
+			<%@ include file="/jsp/discussionForum/includes/attachments.jspf"%>
+		</t:dataList>
 	</h:panelGroup>

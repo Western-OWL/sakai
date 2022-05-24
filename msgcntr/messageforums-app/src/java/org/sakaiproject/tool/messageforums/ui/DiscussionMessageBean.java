@@ -21,6 +21,7 @@
 package org.sakaiproject.tool.messageforums.ui;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -316,6 +317,11 @@ public class DiscussionMessageBean
 		  }
 	  }
 	  return decoAttachList;
+  }
+
+  public List<List<DecoratedAttachment>> getAttachListAsSingletonList()
+  {
+	  return Collections.singletonList(getAttachList());
   }
 
   public int getChildUnread(){
