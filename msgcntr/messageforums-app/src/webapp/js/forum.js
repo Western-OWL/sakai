@@ -874,6 +874,28 @@ $(document).ready(function(){
 
 });
 
+// general panel show/hide functionality with a11y support
+$(document).ready(function ()
+{
+	$(".forumsCollapseTrigger").each(function(index)
+	{
+		// find the panel
+		const $panel = $(this).siblings(".forumsCollapseTarget").first();
+		// write aria-controls and attach click event handler (should also support keyboard)
+		$(this).attr("aria-controls", $panel[0].id).click(function(event)
+		{
+			// toggle the panel visibility
+			$panel.toggle();
+			// toggle the aria-expanded attribute on the link
+			const toggleExpanded = this.getAttribute("aria-expanded") === "false" ? "true" : "false";
+			this.setAttribute("aria-expanded", toggleExpanded);
+			resizeFrame('grow'); // still needed for Lessons iframe?
+			return false; // stop link navigation
+		});
+
+	});
+});
+
 var MFR_RBC = MFR_RBC || {};
 
 MFR_RBC.saveRubric = function() {

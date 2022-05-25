@@ -25,13 +25,6 @@
 				var menuLinkSpan = menuLink.closest('span');
 				menuLinkSpan.addClass('current');
 				menuLinkSpan.html(menuLink.text());
-
-				$('#openLinkBlock').hide();
-                jQuery('.replyMsgToggle').click(function(e) {
-                    $('#replytomessage').toggle();
-                    $('.replyMsgToggleParent').toggle();
-                    resizeFrame('grow');
-                });
 				});
 		</script>
 		<%@ include file="/jsp/discussionForum/menu/forumsMenu.jsp" %>
@@ -58,19 +51,8 @@
 			</table>
 
 		<%--********************* Reply To *********************--%>
-		<p id="openLinkBlock" class="replyMsgToggleParent">
-			<a href="#" id="showMessage" class="replyMsgToggle">
-				<h:graphicImage url="/images/collapse.gif" alt=""/>
-				<h:outputText value=" #{msgs.cdfm_read_full_rep_tomessage}" />
-			</a>
-		</p>
-		<p id="hideLinkBlock" class="replyMsgToggleParent">
-			<a href="#" id="hideMessage" class="replyMsgToggle">
-				<h:graphicImage url="/images/expand.gif" alt="" />
-				<h:outputText value=" #{msgs.cdfm_hide_full_rep_tomessage}"/>
-			</a>
-		</p>
-		<div id="replytomessage" class="hideActionButtons"><%@ include file="/jsp/discussionForum/includes/singletonMessageList.jspf"%></div>
+		<a href="#" class="forumsCollapseTrigger" aria-expanded="false"><h:outputText value=" #{msgs.cdfm_read_full_rep_tomessage}" /></a>
+		<div id="replytomessage" class="hideActionButtons collapse forumsCollapseTarget"><%@ include file="/jsp/discussionForum/includes/singletonMessageList.jspf"%></div>
 
 		<t:htmlTag value="p" rendered="#{ForumTool.anonymousEnabled && ForumTool.selectedTopic.topic.postAnonymous}">
 			<h:outputText value="#{ForumTool.selectedTopic.topic.revealIDsToRoles ? msgs.cdfm_revealIDsToRoles_blurb : msgs.cdfm_anonymous_blurb}" />
