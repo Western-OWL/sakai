@@ -1,33 +1,92 @@
 /*PART 1 - FORUM AND TOPIC LISTINGS*/
+.forums {
+	width: 100%;
+	max-width: 100%;
+}
 .forumHeader{
 	/*panel holding all forum metadata in forum list view*/
+	display: flex;
 	width: 100%;
-    background: #F8F8F3;
-    border: 1px solid #D9C9A7;
-    margin-bottom: 0;
-    margin-top: 1em;
+	background: #eee;
+	border: 1px solid #ddd;
+	margin-bottom: 0;
+	margin-top: 10px;
+	padding: 10px;
 }
-.forumHeader td{
-	/*inner container forum metadata in forum list view*/
-	padding: .25em .5em;
-	vertical-align: text-top;
+.forumTitle {
+	display: flex;
+	flex-direction: column;
 }
-.forumHeader td .title{
-	/*forum title in forum list view*/
-	font-weight: bold;
-	font-size: 1.3em;
+.forumTitle h2 {
+	display: flex;
+	align-items: center;
+	margin: 0;
+	padding: 8px 0; /* to match the button height */
+	font-size: 18px;
 }
-.forumHeader .actionLinks,.topicBloc .actionLinks{
-	/*a spacer between title + metadata and the links*/
-	padding-left: 1em;
+.forumTitle sakai-rubric-student-preview-button {
+	margin-left: 4px;
+}
+.forumHeader .actionLinks,
+.topicBloc .actionLinks {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	width: max-content;
+	margin: 0 0 0 auto;
+	padding: 0;
+	list-style: none;
+}
+.forumHeader .actionLinks > li,
+.topicBloc .actionLinks > li {
+	margin-left: 10px;
+}
+.forumActions, 
+.topicActions {
+	display: flex;
+	align-items: flex-start;
+	justify-content: flex-end;
+	flex-wrap: wrap;
+	width: max-content;
+	margin-left: auto;
+}
+.forums .forumActions button, 
+.forums .topicActions button, 
+.forums .forumActions .button, 
+.forums .topicActions .button {
+	margin-left: 4px;
+	margin-right: 0;
+}
+.forumsTopics.table {
+	margin-bottom: 0;
+	table-layout: fixed;
+}
+.forumsTopics.table > tbody > tr > td {
+	/* overrides Bootstrap's default padding */
+	padding: 10px;
+}
+.forumsTopics .messagesCountColumn, 
+.forumsTopics .unreadCountColumn, 
+.forumsTopics .actionsColumn {
+	width: 15%;
+	text-align: center;
+	vertical-align: middle;
+}
+.topicTitle h3 {
+	display: flex;
+	align-items: center;
+	margin: 0;
+	padding: 8px 0; /* to match the button height */
+	font-size: 16px;
+	font-weight: normal;
 }
 .topicBloc a.show,.topicBloc a.hide,.forumHeader a.show,.forumHeader a.hide,.singleMessage a.show,.singleMessage a.hide, .singleMessageReply a.show,.singleMessageReply a.hide{
 	/*show and hide descr links in various places*/
-/*	color: #f55 !important;*/
-	font-size: 95%;
+	display: flex !important;
+	align-items: center;
+	margin: 0;
+	font-size: 1em;
 	text-decoration: none !important;
-	margin: .4em 0;
-	vertical-align: middle;
 }
 .topicBloc a.show img,.topicBloc a.hide img,.forumHeader a.show img,.forumHeader a.hide img, .singleMessage a.show img,.singleMessage a.hide img,  .singleMessageReply a.show img,.singleMessageReply a.hide img{
 	/*image associated with show and hide descr links in various places*/
@@ -46,10 +105,17 @@
 }
 .topicBloc{
 	/*inner container topic metadata in forum list view, or single topic view*/
-	border-left: 2px solid #fc6;
-	width: 80%;
+	border-top: 0 none;
+	border-bottom: 1px solid #e5e5e5;
+	border-left: 1px solid #e5e5e5;
+	border-right: 1px solid #e5e5e5;
 	padding: 0 .5em;
 	margin: 0;
+}
+.topicBloc.topicTitle {
+	margin: 0;
+	padding: 0;
+	border: 0 none;
 }
 .topicBloc td{
 	padding-left: .5em;
@@ -62,18 +128,14 @@
 .topicBlocLone td {
 	padding: 0;
 }
-.singleMessage .title, .singleMessageReply .title, .topicBloc .title,.pendingApproval .title{
+.singleMessage .title, .singleMessageReply .title, .pendingApproval .title{
 	/*	title for all the above cases*/
 	font-weight: bold;
-	font-size: 1.2em;
 }
-.forumHeader .shortDescription,.topicBloc .shortDescription{
+.forumHeader .shortDescription, .topicTitle .shortDescription, .topicBloc .shortDescription{
 	/*	short description whenever one occurs - do not use padding */
 	display: block;
-	margin: .5em 0;
-    font-size:.85em;
-    -ms-word-break: break-word;
-     word-break: break-word;
+	margin: 0;
 }
 .messageNew{
 	color: #000;
@@ -94,8 +156,6 @@
 	padding: 1px 2px;
 	/*	display:none; - uncomment to hide the message associated with parents of new messages*/
 }
-
-
 .childrenNewZero {
     color: #555555;
     font-size: 85%;
@@ -710,4 +770,25 @@ div.msgcntr-profile-qtip {
 .hideTopicCrumb .topicCrumb
 {
 	display: none;
+}
+.badge-draft, 
+.badge-locked, 
+.badge-moderated, 
+.badge-new {
+	margin: 0 0 0 4px;
+	padding: 4px;
+	border-radius: 4px;
+	background-color: #f8deae;
+	color: #555;
+	font-size: 12px;
+	font-weight: bold;
+}
+.badge-locked {
+	background-color: #fbced0; 
+}
+.badge-moderated {
+	background-color: #f5dfb0;
+}
+.badge-new {
+	background-color: #eaea21;
 }

@@ -1,79 +1,42 @@
+<%@ taglib uri="http://myfaces.apache.org/tomahawk" prefix="t"%>
 <h:column>
-        <h:panelGroup layout="block" rendered="#{! forum.nonePermission}">
-		<h:panelGrid columns="1" styleClass="forumHeader"  border="0">
-  	    <h:panelGroup>
+	<h:panelGroup layout="block" rendered="#{! forum.nonePermission}">
+		<h:panelGroup layout="block" styleClass="forumHeader">
+			<h:panelGroup layout="block" styleClass="forumTitle">
 				<%-- link to forum and decorations --%>
-				<h:outputText styleClass="highlight title draftForum" id="draft" value="#{msgs.cdfm_draft}" rendered="#{forum.forum.draft == 'true'}"/>
-				<h:outputText id="draft_space" value=" -  " rendered="#{forum.forum.draft == 'true'}" styleClass="title"/>
-				<%-- availability marker --%>
-				<h:graphicImage url="/images/silk/date_delete.png" title="#{msgs.forum_restricted_message}" alt="#{msgs.forum_restricted_message}" rendered="#{forum.availability == 'false'}" style="margin-right:.5em"/>
-				<%-- locked marker --%>
-				<h:graphicImage url="/images/silk/lock.png" alt="#{msgs.cdfm_forum_locked}" rendered="#{forum.locked == 'true'}" style="margin-right:.5em"/>
-				<%-- Rubrics marker --%>
-				<h:panelGroup rendered="#{forum.hasRubric == 'true'}">
-					<sakai-rubric-student-preview-button
-						display="icon"
-						token="<h:outputText value="#{ForumTool.rbcsToken}" />"
-						tool-id="sakai.gradebookng"
-						entity-id="<h:outputText value="#{forum.gradeAssign}" />">
-					</sakai-rubric-student-preview-button>
-				</h:panelGroup>
-				<h:commandLink action="#{ForumTool.processActionDisplayForum}" title=" #{forum.forum.title}" rendered="#{ForumTool.showForumLinksInNav}"  styleClass="title">
-			        <f:param value="#{forum.forum.id}" name="forumId"/>
-			        <h:outputText value="#{forum.forum.title}"/>
-		        </h:commandLink>
-				<h:outputText value="#{forum.forum.title}" rendered="#{!ForumTool.showForumLinksInNav}"  styleClass="title" />
-				<%-- links to act on this forum --%>
-
-				<h:outputText id="forum_moderated" value=" #{msgs.cdfm_forum_moderated_flag}" styleClass="textPanelFooter" rendered="#{forum.moderated == 'true'}" />
-				<h:outputText value=" "  styleClass="actionLinks"/>
-			  <h:commandLink action="#{ForumTool.processActionNewTopic}" value="#{msgs.cdfm_new_topic}" rendered="#{forum.newTopic}" title="#{msgs.cdfm_new_topic}">
-		      <f:param value="#{forum.forum.id}" name="forumId"/>
-	      </h:commandLink>
-		  	<h:outputText  value=" | " rendered="#{forum.changeSettings}"/><%-- gsilver: hiding the pipe when user does not have the ability to change the settings --%>
-	   	  <h:commandLink action="#{ForumTool.processActionForumSettings}"  value="#{msgs.cdfm_forum_settings}" rendered="#{forum.changeSettings}" title="#{msgs.cdfm_forum_settings}">
-		      <f:param value="#{forum.forum.id}" name="forumId"/>
-	      </h:commandLink>
-				<h:outputText  value=" | " rendered="#{ForumTool.newForum || ForumTool.instructor || forum.changeSettings}" />
-
-					<%-- link to display other options on this forum --%>
-					<f:verbatim><a href="#" class="moreMenuLink"></f:verbatim>
-						<h:outputText  styleClass="moreMenuLinkSpan" value="#{msgs.cdfm__moremenulink}" rendered="#{ForumTool.newForum || ForumTool.instructor || forum.changeSettings}" />
-					<f:verbatim></a></f:verbatim>
-
-				<%-- list of options, revealed when link above is used, model new added options on existing ones--%>
-				<f:verbatim><ul style="display:none" class="moreMenu"></f:verbatim>
-
-					<f:verbatim><li></f:verbatim>
-						<h:commandLink id="duplicate" action="#{ForumTool.processActionDuplicateForumMainConfirm}" value="#{msgs.cdfm_duplicate_forum}" rendered="#{ForumTool.newForum}" >
-							<f:param value="#{forum.forum.id}" name="forumId"/>
-						</h:commandLink>
-					<f:verbatim></li></f:verbatim>
-
-				<f:verbatim><li></f:verbatim>
-					<h:commandLink action="#{mfStatisticsBean.processActionStatisticsByTopic}" immediate="true" rendered="#{ForumTool.instructor}">
-  					<f:param value="" name="topicId"/>
-  					<f:param value="#{forum.forum.id}" name="forumId"/>
-  					<h:outputText value="#{msgs.cdfm_button_bar_grade}" />
-					</h:commandLink>
-				<f:verbatim></li></f:verbatim>
-
-				<f:verbatim><li></f:verbatim>
-					<h:commandLink id="delete" action="#{ForumTool.processActionDeleteForumMainConfirm}" value="#{msgs.cdfm_button_bar_delete_forum}" rendered="#{forum.changeSettings}">
+				<h2>
+					<h:commandLink action="#{ForumTool.processActionDisplayForum}" title=" #{forum.forum.title}" rendered="#{ForumTool.showForumLinksInNav}"  styleClass="title">
 						<f:param value="#{forum.forum.id}" name="forumId"/>
+						<h:outputText value="#{forum.forum.title}"/>
 					</h:commandLink>
-				<f:verbatim></li></f:verbatim>
-			<f:verbatim></ul></f:verbatim>
+					<h:outputText value="#{forum.forum.title}" rendered="#{!ForumTool.showForumLinksInNav}"  styleClass="title" />
 
+					<%-- draft marker --%>
+					<h:outputText id="draft" styleClass="badge-draft" value="#{msgs.cdfm_draft}" rendered="#{forum.forum.draft == 'true'}" />
+					<%-- availability marker --%>
+					<h:graphicImage url="/images/silk/date_delete.png" title="#{msgs.forum_restricted_message}" alt="#{msgs.forum_restricted_message}" rendered="#{forum.availability == 'false'}" />
+					<%-- locked marker --%>
+					<h:outputText styleClass="badge-locked" value="#{msgs.cdfm_forum_locked_flag}" rendered="#{forum.locked == 'true'}" />
+					<%-- moderated marker --%>
+					<h:outputText id="forum_moderated" styleClass="badge-moderated" value="#{msgs.cdfm_forum_moderated_flag}" rendered="#{forum.moderated == 'true'}" />
+					<%-- Rubrics marker --%>
+					<h:panelGroup rendered="#{forum.hasRubric == 'true'}">
+						<sakai-rubric-student-preview-button
+							display="icon"
+							token="<h:outputText value="#{ForumTool.rbcsToken}" />"
+							tool-id="sakai.gradebookng"
+							entity-id="<h:outputText value="#{forum.gradeAssign}" />">
+						</sakai-rubric-student-preview-button>
+					</h:panelGroup>
+				</h2>
+				<%-- the forum details --%>
+				<h:outputText value="#{forum.forum.shortDescription}" styleClass="shortDescription" rendered="#{forum.forum.shortDescription != null && forum.forum.shortDescription != ''}" />
 
-<%-- the forum details --%>
-				<h:outputText value="#{forum.forum.shortDescription}" styleClass="shortDescription"/>
-	  			<f:subview id="longDesc" rendered="#{!empty forum.attachList || (forum.forum.extendedDescription != '' &&  forum.forum.extendedDescription != null && forum.forum.extendedDescription != '<br/>')}">
-
+				<f:subview id="longDesc" rendered="#{!empty forum.attachList || (forum.forum.extendedDescription != '' &&  forum.forum.extendedDescription != null && forum.forum.extendedDescription != '<br/>')}">
 				<h:panelGroup>
 					<h:panelGroup layout="block" id="openLinkBlock" styleClass="toggleParent openLinkBlock #{ForumTool.alwaysShowFullDesc ? 'display-none' : ''}">
 						<a href="#" id="showMessage" class="toggle show">
-							<h:graphicImage url="/images/expand.gif" alt=""/>
+							<h:graphicImage url="/images/collapse.gif" alt=""/>
 							<h:outputText value=" #{msgs.cdfm_read_full_description}" />
 							<h:outputText value=" #{msgs.cdfm_and}" rendered="#{!empty forum.attachList}"/>
 							<h:outputText value=" #{msgs.cdfm_attach}" rendered="#{!empty forum.attachList}"/>
@@ -81,14 +44,13 @@
 					</h:panelGroup>
 					<h:panelGroup layout="block" id="hideLinkBlock" styleClass="toggleParent hideLinkBlock #{ForumTool.alwaysShowFullDesc  ? '' : 'display-none'}">
 						<a href="#" id="hideMessage" class="toggle show">
-							<h:graphicImage url="/images/collapse.gif" alt="" />
+							<h:graphicImage url="/images/expand.gif" alt="" />
 							<h:outputText value=" #{msgs.cdfm_hide_full_description}"/>
 							<h:outputText value=" #{msgs.cdfm_and}" rendered="#{!empty forum.attachList}" />
 							<h:outputText value=" #{msgs.cdfm_attach}" rendered="#{!empty forum.attachList}"/>
 						</a>
 					</h:panelGroup>
 				</h:panelGroup>
-
 					<h:panelGroup layout="block" id="fullTopicDescription" styleClass="textPanel fullTopicDescription #{ForumTool.alwaysShowFullDesc ? 'display-block' : ''}">
 						<h:outputText escape="false" value="#{forum.forum.extendedDescription}" />
 						<%-- attachs --%>
@@ -104,7 +66,6 @@
 							</h:column>
 						</h:dataTable>
 					</h:panelGroup>
-				<f:verbatim></div></f:verbatim>
 				</f:subview>
 				<f:subview id="dates" rendered="#{ForumTool.showAvailabilityDates == 'true' && forum.availabilityRestricted == 'true'}">
 					<h:outputLink id="forum_extended_show2" value="javascript:void(0)" title="#{msgs.cdfm_read_dates}"  styleClass="show" style="#{'display:block'}"
@@ -123,176 +84,181 @@
 							<h:outputText value="#{msgs.openDate}: #{forum.formattedOpenDate}" />
 							<h:outputText value="#{msgs.closeDate}: #{forum.formattedCloseDate}" />
 						</h:panelGrid>
-					<f:verbatim></div></f:verbatim>
+					</div>
 				</f:subview>
-	  </h:panelGroup>
-  </h:panelGrid>
-	  <%-- the topic list  --%>
-		<%--//designNote: display a message if there is no topics for this forum , give a prompt to create a topic--%>
-		<h:panelGrid columns="1" cellpadding="3" rendered="#{empty forum.topics}" style="margin:0 1em 2em 1em;">
-			<h:panelGroup styleClass="instruction">
-				<h:outputText escape="false" value="#{msgs.cdfm_forum_inf_no_topic_here} " />
-				<h:commandLink action="#{ForumTool.processActionNewTopic}" value="#{msgs.cdfm_forum_inf_no_topic_create}" rendered="#{forum.newTopic}" title="#{msgs.cdfm_new_topic}">
-		      <f:param value="#{forum.forum.id}" name="forumId"/>
-	      </h:commandLink>
-
 			</h:panelGroup>
-		</h:panelGrid>
-
-		<h:dataTable id="topics" rendered="#{!empty forum.topics}" value="#{forum.topics}" var="topic"  width="100%"   cellspacing="0" cellpadding="0" border="0">
-		   <h:column>
-                        <h:panelGroup layout="block" rendered="#{! topic.nonePermission}">
-					<h:panelGrid columns="1" width="100%" styleClass="specialLink topicBloc" cellpadding="0" cellspacing="0">
-		      	<h:panelGroup>
-
-							<h:graphicImage url="/images/folder.gif" alt="Topic Folder" rendered="#{topic.unreadNoMessages == 0 }" styleClass="topicIcon" style="margin-right:.5em"/>
-							<h:graphicImage url="/images/folder_unread.gif" alt="Topic Folder" rendered="#{topic.unreadNoMessages > 0 }" styleClass="topicIcon" style="margin-right:.5em"/>
-							<h:outputText styleClass="highlight title draftTopic" id="draft" value="#{msgs.cdfm_draft}" rendered="#{topic.topic.draft == 'true'}"/>
-							<h:outputText id="draft_space" value="  - " rendered="#{topic.topic.draft == 'true'}" styleClass="title"/>
-							<h:graphicImage url="/images/silk/date_delete.png" title="#{msgs.topic_restricted_message}" alt="#{msgs.topic_restricted_message}" rendered="#{topic.availability == 'false'}" style="margin-right:.5em"/>
-							<h:graphicImage url="/images/silk/lock.png" alt="#{msgs.cdfm_forum_locked}" rendered="#{forum.locked == 'true' || topic.locked == 'true'}" style="margin-right:.5em"/>
-							<%-- Rubrics marker --%>
-							<h:panelGroup rendered="#{topic.hasRubric == 'true'}">
-								<sakai-rubric-student-preview-button
-									display="icon"
-									token="<h:outputText value="#{ForumTool.rbcsToken}" />"
-									tool-id="sakai.gradebookng"
-									entity-id="<h:outputText value="#{topic.gradeAssign}" />">
-								</sakai-rubric-student-preview-button>
-							</h:panelGroup>
-							<h:commandLink action="#{ForumTool.processActionDisplayTopic}" id="topic_title" title=" #{topic.topic.title}" styleClass="title">
-								<f:param value="#{topic.topic.id}" name="topicId"/>
+			<%-- links to act on this forum --%>
+<%--keeping for now in case we can't get the Bootstrap dropdown menus working with unique ids:
+			<t:htmlTag value="ul" styleClass="actionLinks" rendered="#{forum.newTopic || forum.changeSettings || ForumTool.instructor}">
+				<t:htmlTag value="li" rendered="#{forum.newTopic}">
+					<h:commandLink action="#{ForumTool.processActionNewTopic}" value="#{msgs.cdfm_new_topic}" rendered="#{forum.newTopic}" title="#{msgs.cdfm_new_topic}">
+						<f:param value="#{forum.forum.id}" name="forumId"/>
+					</h:commandLink>
+				</t:htmlTag>
+				<t:htmlTag value="li" rendered="#{forum.changeSettings}">
+					<h:commandLink action="#{ForumTool.processActionForumSettings}" value="#{msgs.cdfm_forum_settings}" rendered="#{forum.changeSettings}" title="#{msgs.cdfm_forum_settings}">
+						<f:param value="#{forum.forum.id}" name="forumId"/>
+					</h:commandLink>
+				</t:htmlTag>
+				<t:htmlTag value="li" rendered="#{ForumTool.newForum}">
+					<h:commandLink id="duplicate" action="#{ForumTool.processActionDuplicateForumMainConfirm}" value="#{msgs.cdfm_duplicate_forum}" rendered="#{ForumTool.newForum}" >
+						<f:param value="#{forum.forum.id}" name="forumId"/>
+					</h:commandLink>
+				</t:htmlTag>
+				<t:htmlTag value="li" rendered="#{ForumTool.instructor}">
+					<h:commandLink action="#{mfStatisticsBean.processActionStatisticsByTopic}" immediate="true" rendered="#{ForumTool.instructor}">
+						<f:param value="" name="topicId"/>
+						<f:param value="#{forum.forum.id}" name="forumId"/>
+						<h:outputText value="#{msgs.cdfm_button_bar_grade}" />
+					</h:commandLink>
+				</t:htmlTag>
+				<t:htmlTag value="li" rendered="#{forum.changeSettings}">
+					<h:commandLink id="delete" action="#{ForumTool.processActionDeleteForumMainConfirm}" value="#{msgs.cdfm_button_bar_delete_forum}" rendered="#{forum.changeSettings}">
+						<f:param value="#{forum.forum.id}" name="forumId"/>
+					</h:commandLink>
+				</t:htmlTag>
+			</t:htmlTag>
+--%>
+			<h:panelGroup layout="block" styleClass="forumActions" rendered="#{forum.newTopic || forum.changeSettings || ForumTool.instructor}">
+				<h:commandLink styleClass="button" action="#{ForumTool.processActionNewTopic}" value="#{msgs.cdfm_new_topic}" rendered="#{forum.newTopic}" title="#{msgs.cdfm_new_topic}">
+					<f:param value="#{forum.forum.id}" name="forumId"/>
+				</h:commandLink>
+				
+				<div class="dropdown">
+					<button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+						<h:outputText value="#{msgs.cdfm_forum_options}" />
+						<span class="caret"></span>
+					</button>
+					<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu1">
+						<t:htmlTag value="li" rendered="#{forum.changeSettings}">
+							<h:commandLink action="#{ForumTool.processActionForumSettings}" value="#{msgs.cdfm_forum_settings}" rendered="#{forum.changeSettings}" title="#{msgs.cdfm_forum_settings}">
 								<f:param value="#{forum.forum.id}" name="forumId"/>
-								<h:outputText value="#{topic.topic.title}"/>
 							</h:commandLink>
-
-               <%-- // display  singular ('unread message') if unread message is  1 --%>
-               <h:outputText styleClass="childrenNew" id="topic_msg_count55" value="  #{topic.unreadNoMessages} #{msgs.cdfm_lowercase_unread_msg}"
-                             rendered="#{topic.isRead && topic.unreadNoMessages >= 1}"/>
-
-               <%-- // display  plural ('unread messages') with different style sheet if unread message is 0 --%>
-               <h:outputText styleClass="childrenNewZero" id="topic_msg_count57" value="   #{topic.unreadNoMessages} #{msgs.cdfm_lowercase_unread_msg}"
-                             rendered="#{topic.isRead && topic.unreadNoMessages == 0}"/>
-
-               <%-- // display singular ('message') if total message is 1--%>
-               <h:outputText styleClass="textPanelFooter" id="topic_msg_count58" value="#{msgs.cdfm_of} #{topic.totalNoMessages} #{msgs.cdfm_lowercase_msg}"
-                             rendered="#{topic.isRead && topic.totalNoMessages == 1}"/>
-
-               <%-- // display singular ('message') if total message is 0 or more than 1--%>
-               <h:outputText styleClass="textPanelFooter" id="topic_msg_count59" value="#{msgs.cdfm_of} #{topic.totalNoMessages} #{msgs.cdfm_lowercase_msgs}"
-                             rendered="#{topic.isRead && (topic.totalNoMessages > 1 || topic.totalNoMessages == 0)}"/>
-
-               <h:outputText id="topic_moderated" value=" #{msgs.cdfm_forum_moderated_flag}" styleClass="textPanelFooter" rendered="#{topic.moderated == 'true' && topic.isRead}" />
-
-							<%--//desNote: links to act on this topic --%>
-							<h:outputText value=" "  styleClass="actionLinks"/>
-    	         <h:commandLink action="#{ForumTool.processActionTopicSettings}" id="topic_setting" value="#{msgs.cdfm_topic_settings}" rendered="#{topic.changeSettings}"
-    	                        title=" #{msgs.cdfm_topic_settings}">
-					     <f:param value="#{topic.topic.id}" name="topicId"/>
-				       <f:param value="#{forum.forum.id}" name="forumId"/>
-				     </h:commandLink>
-							<h:outputText  value=" | " rendered="#{forum.newTopic || ForumTool.instructor || topic.changeSettings}"/>
-
-							<%-- link to display other options on this topic --%>
-							<f:verbatim><a href="#" class="moreMenuLink"></f:verbatim>
-								<h:outputText  styleClass="moreMenuLinkSpan" value="#{msgs.cdfm__moremenulink}" rendered="#{forum.newTopic || ForumTool.instructor || topic.changeSettings}" />
-							<f:verbatim></a></f:verbatim>
-
-							<%-- list of options, revealed when link above is used, model new added options on existing ones--%>
-							<f:verbatim><ul style="display:none" class="moreMenu"></f:verbatim>
-								<f:verbatim><li></f:verbatim>
-
-									<h:commandLink action="#{ForumTool.processActionDuplicateTopicMainConfirm}" id="duplicate_confirm" value="#{msgs.cdfm_duplicate_topic}" rendered="#{forum.newTopic}"
-									title=" #{msgs.cdfm_duplicate_topic}">
-											<f:param value="#{topic.topic.id}" name="topicId"/>
-											<f:param value="#{forum.forum.id}" name="forumId"/>
-									</h:commandLink>
-								<f:verbatim></li></f:verbatim>
-								<f:verbatim><li></f:verbatim>
+						</t:htmlTag>
+						<t:htmlTag value="li" rendered="#{ForumTool.newForum}">
+							<h:commandLink id="duplicate" action="#{ForumTool.processActionDuplicateForumMainConfirm}" value="#{msgs.cdfm_duplicate_forum}" rendered="#{ForumTool.newForum}" >
+								<f:param value="#{forum.forum.id}" name="forumId"/>
+							</h:commandLink>
+						</t:htmlTag>
+						<t:htmlTag value="li" rendered="#{ForumTool.instructor}">
 							<h:commandLink action="#{mfStatisticsBean.processActionStatisticsByTopic}" immediate="true" rendered="#{ForumTool.instructor}">
-			  				    <f:param value="#{topic.topic.id}" name="topicId"/>
-			  				    <f:param value="#{forum.forum.id}" name="forumId"/>
-			  				    <h:outputText value="#{msgs.cdfm_button_bar_grade}" />
-				          	</h:commandLink>
-								<f:verbatim></li></f:verbatim>
-
-								<f:verbatim><li></f:verbatim>
-							<h:commandLink action="#{ForumTool.processActionDeleteTopicMainConfirm}" id="delete_confirm" value="#{msgs.cdfm_button_bar_delete_topic}" accesskey="d" rendered="#{topic.changeSettings}"
-							title="#{msgs.cdfm_button_bar_delete_topic}">
-									<f:param value="#{topic.topic.id}" name="topicId"/>
-									<f:param value="#{forum.forum.id}" name="forumId"/>
+								<f:param value="" name="topicId"/>
+								<f:param value="#{forum.forum.id}" name="forumId"/>
+								<h:outputText value="#{msgs.cdfm_button_bar_grade}" />
 							</h:commandLink>
-								<f:verbatim></li></f:verbatim>
-						<f:verbatim></ul></f:verbatim>
-							<%--the topic details --%>
-							<h:outputText id="topic_desc" value="#{topic.topic.shortDescription}" styleClass="shortDescription" />
-							<f:subview id="longDescTopic" rendered="#{!empty topic.attachList || (topic.topic.extendedDescription != '' &&  topic.topic.extendedDescription != null && topic.topic.extendedDescription != '<br/>')}">
+						</t:htmlTag>
+						<t:htmlTag value="li" rendered="#{forum.changeSettings}">
+							<h:commandLink id="delete" action="#{ForumTool.processActionDeleteForumMainConfirm}" value="#{msgs.cdfm_button_bar_delete_forum}" rendered="#{forum.changeSettings}">
+								<f:param value="#{forum.forum.id}" name="forumId"/>
+							</h:commandLink>
+						</t:htmlTag>
+					</ul>
+				</div>
+			</h:panelGroup>
+		</h:panelGroup> <%--end of Forum Heading--%>
 
-							<h:panelGroup>
-								<h:panelGroup layout="block" id="openLinkBlock" styleClass="toggleParent openLinkBlock #{ForumTool.alwaysShowFullDesc ? 'display-none' : ''}">
-									<a href="#" id="showMessage" class="toggle show">
-										<h:graphicImage url="/images/expand.gif" alt=""/>
-										<h:outputText value=" #{msgs.cdfm_read_full_description}" />
-										<h:outputText value=" #{msgs.cdfm_and}" rendered="#{!empty topic.attachList}"/>
-										<h:outputText value=" #{msgs.cdfm_attach}" rendered="#{!empty topic.attachList}"/>
-									</a>
-								</h:panelGroup>
-								<h:panelGroup layout="block" id="hideLinkBlock" styleClass="toggleParent hideLinkBlock #{ForumTool.alwaysShowFullDesc ? '' : 'display-none'}">
-									<a href="#" id="hideMessage" class="toggle show">
-										<h:graphicImage url="/images/collapse.gif" alt="" />
-										<h:outputText value=" #{msgs.cdfm_hide_full_description}"/>
-										<h:outputText value=" #{msgs.cdfm_and}" rendered="#{!empty topic.attachList}" />
-										<h:outputText value=" #{msgs.cdfm_attach}" rendered="#{!empty topic.attachList}"/>
-									</a>
-								</h:panelGroup>
+		<%-- the topic list  --%>
+		<%--//designNote: display a message if there is no topics for this forum , give a prompt to create a topic--%>
+		<h:dataTable id="noTopics" styleClass="forumsTopics table table-bordered table-hover" rendered="#{empty forum.topics}" value="#{forum.topics}" var="topic">
+			<h:panelGroup styleClass="sak-banner-info" rendered="#{empty forum.topics}">
+				<h:outputText escape="false" value="#{msgs.cdfm_forum_inf_no_topic_here} " />
+				<h:commandLink styleClass="button" action="#{ForumTool.processActionNewTopic}" value="#{msgs.cdfm_forum_inf_no_topic_create}" rendered="#{forum.newTopic}" title="#{msgs.cdfm_new_topic}">
+					<f:param value="#{forum.forum.id}" name="forumId"/>
+				</h:commandLink>
+			</h:panelGroup>
+		</h:dataTable>
+
+		<h:dataTable id="topics" styleClass="forumsTopics table table-bordered table-hover" columnClasses="topicsColumn,messagesCountColumn,unreadCountColumn,actionsColumn" rendered="#{!empty forum.topics}" value="#{forum.topics}" var="topic">
+			<h:column>
+				<h:panelGroup layout="block" rendered="#{! topic.nonePermission}" styleClass="topicTitle topicBloc">
+					<h3>
+						<h:commandLink action="#{ForumTool.processActionDisplayTopic}" id="topic_title" title=" #{topic.topic.title}" styleClass="title">
+							<f:param value="#{topic.topic.id}" name="topicId"/>
+							<f:param value="#{forum.forum.id}" name="forumId"/>
+							<h:outputText value="#{topic.topic.title}"/>
+						</h:commandLink>
+						<h:outputText id="draft" styleClass="badge-draft" value="#{msgs.cdfm_draft}" rendered="#{topic.topic.draft == 'true'}" />
+						<h:graphicImage url="/images/silk/date_delete.png" title="#{msgs.topic_restricted_message}" alt="#{msgs.topic_restricted_message}" rendered="#{topic.availability == 'false'}" />
+						<h:outputText styleClass="badge-locked" value="#{msgs.cdfm_forum_locked_flag}" rendered="#{forum.locked == 'true' || topic.locked == 'true'}" />
+						<h:outputText id="topic_moderated" styleClass="badge-moderated" value="#{msgs.cdfm_forum_moderated_flag}" rendered="#{topic.moderated == 'true' && topic.isRead}" />
+						<%-- Rubrics marker --%>
+						<h:panelGroup rendered="#{topic.hasRubric == 'true'}">
+							<sakai-rubric-student-preview-button
+								display="icon"
+								token="<h:outputText value="#{ForumTool.rbcsToken}" />"
+								tool-id="sakai.gradebookng"
+								entity-id="<h:outputText value="#{topic.gradeAssign}" />">
+							</sakai-rubric-student-preview-button>
+						</h:panelGroup>
+					</h3>
+
+					<%--the topic details --%>
+					<h:outputText id="topic_desc" value="#{topic.topic.shortDescription}" styleClass="shortDescription" />
+
+					<f:subview id="longDescTopic" rendered="#{!empty topic.attachList || (topic.topic.extendedDescription != '' &&  topic.topic.extendedDescription != null && topic.topic.extendedDescription != '<br/>')}">
+						<h:panelGroup>
+							<h:panelGroup layout="block" id="openLinkBlock" styleClass="toggleParent openLinkBlock #{ForumTool.alwaysShowFullDesc ? 'display-none' : ''}">
+								<a href="#" id="showMessage" class="toggle show">
+									<h:graphicImage url="/images/collapse.gif" alt=""/>
+									<h:outputText value=" #{msgs.cdfm_read_full_description}" />
+									<h:outputText value=" #{msgs.cdfm_and}" rendered="#{!empty topic.attachList}"/>
+									<h:outputText value=" #{msgs.cdfm_attach}" rendered="#{!empty topic.attachList}"/>
+								</a>
 							</h:panelGroup>
-
-							<h:panelGroup layout="block" id="fullTopicDescription" styleClass="textPanel fullTopicDescription #{ForumTool.alwaysShowFullDesc ? 'display-block' : ''}">
-								<h:outputText escape="false" value="#{topic.topic.extendedDescription}" />
-								<%-- attachs --%>
-								<%--//desNote:attach list --%>
-								<h:dataTable  styleClass="attachListTable" value="#{topic.attachList}" var="eachAttach" rendered="#{!empty topic.attachList}" cellpadding="3" cellspacing="0" columnClasses="attach,bogus" border="0">
-									<h:column>
-										<h:graphicImage url="/images/attachment.gif" alt=""/>
-										<h:outputText value=" " />
-											<h:outputLink value="#{eachAttach.url}" target="_blank">
-												<h:outputText value="#{eachAttach.attachment.attachmentName}" />
-											</h:outputLink>
-										</h:column>
-								</h:dataTable>
+							<h:panelGroup layout="block" id="hideLinkBlock" styleClass="toggleParent hideLinkBlock #{ForumTool.alwaysShowFullDesc ? '' : 'display-none'}">
+								<a href="#" id="hideMessage" class="toggle show">
+									<h:graphicImage url="/images/expand.gif" alt="" />
+									<h:outputText value=" #{msgs.cdfm_hide_full_description}"/>
+									<h:outputText value=" #{msgs.cdfm_and}" rendered="#{!empty topic.attachList}" />
+									<h:outputText value=" #{msgs.cdfm_attach}" rendered="#{!empty topic.attachList}"/>
+								</a>
 							</h:panelGroup>
+						</h:panelGroup>
 
-							<f:subview id="hideLongDescTopic" rendered="#{!ForumTool.alwaysShowFullDesc}">
-								<f:verbatim><div class="toggle" style="display:none;"></f:verbatim>
-							</f:subview>
-							<f:subview id="showLongDescTopic" rendered="#{ForumTool.alwaysShowFullDesc}">
-								<f:verbatim><div class="toggle"></f:verbatim>
-							</f:subview>
-					<mf:htmlShowArea  id="topic_fullDescription" hideBorder="true"	 value="#{topic.topic.extendedDescription}" />
+						<h:panelGroup layout="block" id="fullTopicDescription" styleClass="textPanel fullTopicDescription #{ForumTool.alwaysShowFullDesc ? 'display-block' : ''}">
+							<h:outputText escape="false" value="#{topic.topic.extendedDescription}" />
+							<%-- attachs --%>
+							<%--//desNote:attach list --%>
+							<h:dataTable  styleClass="attachListTable" value="#{topic.attachList}" var="eachAttach" rendered="#{!empty topic.attachList}" cellpadding="3" cellspacing="0" columnClasses="attach,bogus" border="0">
+								<h:column>
+									<h:graphicImage url="/images/attachment.gif" alt=""/>
+									<h:outputText value=" " />
+										<h:outputLink value="#{eachAttach.url}" target="_blank">
+											<h:outputText value="#{eachAttach.attachment.attachmentName}" />
+										</h:outputLink>
+									</h:column>
+							</h:dataTable>
+						</h:panelGroup>
+
+						<f:subview id="hideLongDescTopic" rendered="#{!ForumTool.alwaysShowFullDesc}">
+							<div class="toggle" style="display:none;">
+						</f:subview>
+						<f:subview id="showLongDescTopic" rendered="#{ForumTool.alwaysShowFullDesc}">
+							<f:verbatim><div class="toggle"></f:verbatim>
+						</f:subview>
+
+						<mf:htmlShowArea id="topic_fullDescription" hideBorder="true" value="#{topic.topic.extendedDescription}" />
 								<%--//desNote:attach list --%>
-								<h:dataTable  styleClass="attachListTable" value="#{topic.attachList}" var="eachAttach" rendered="#{!empty topic.attachList}" cellpadding="3" cellspacing="0" columnClasses="attach,bogus" style="font-size:.9em;width:auto;margin-left:1em" border="0">
-					  <h:column>
-										<h:graphicImage url="/images/attachment.gif" alt=""/>
-<%--						<h:outputLink value="#{eachAttach.attachmentUrl}" target="_blank">
-							<h:outputText value="#{eachAttach.attachmentName}" />
-						</h:outputLink>--%>
-										<h:outputText value=" " />
-						<h:outputLink value="#{eachAttach.url}" target="_blank">
-							<h:outputText value="#{eachAttach.attachment.attachmentName}" />
-						</h:outputLink>
+							<h:dataTable  styleClass="attachListTable" value="#{topic.attachList}" var="eachAttach" rendered="#{!empty topic.attachList}" cellpadding="3" cellspacing="0" columnClasses="attach,bogus" style="font-size:.9em;width:auto;margin-left:1em" border="0">
+								<h:column>
+									<h:graphicImage url="/images/attachment.gif" alt=""/>
+									<h:outputLink value="#{eachAttach.url}" target="_blank">
+										<h:outputText value="#{eachAttach.attachment.attachmentName}" />
+									</h:outputLink>
+								</h:column>
+							</h:dataTable>
+			<%-- gsilver: need a render attribute on the dataTable here to avoid putting an empty table in response -- since this looks like a stub that was never worked out to display the messages inside this construct - commenting the whole thing out.
+				<h:dataTable styleClass="indnt2" id="messages" value="#{topics.messages}" var="message">
+					<h:column>
+						<h:outputText id="message_title" value="#{message.message.title}"/>
+						<f:verbatim><br /></f:verbatim>
+						<h:outputText id="message_desc" value="#{message.message.shortDescription}" />
 					</h:column>
-			  </h:dataTable>
-			  <%-- gsilver: need a render attribute on the dataTable here to avoid putting an empty table in response -- since this looks like a stub that was never worked out to display the messages inside this construct - commenting the whole thing out.
-			 <h:dataTable styleClass="indnt2" id="messages" value="#{topics.messages}" var="message">
-			  <h:column>
-					<h:outputText id="message_title" value="#{message.message.title}"/>
-					<f:verbatim><br /></f:verbatim>
-					<h:outputText id="message_desc" value="#{message.message.shortDescription}" />
-			  </h:column>
-			</h:dataTable>
+				</h:dataTable>
 			--%>
-    <f:verbatim></div></f:verbatim>
-    </f:subview>
+						</div>
+					</f:subview>
+
 			<f:subview id="topic_dates" rendered="#{ForumTool.showAvailabilityDates == 'true' && topic.availabilityRestricted == 'true'}">
 				<h:outputLink id="forum_extended_show2" value="javascript:void(0)" title="#{msgs.cdfm_read_dates}"  styleClass="show" style="#{'display:block'}"
 						onclick="toggleDates($(this).next('.hide'), $('div.toggle2:first', $(this).parents('tr:first')), $(this));">
@@ -310,13 +276,98 @@
 						<h:outputText value="#{msgs.openDate}: #{topic.formattedOpenDate}" />
 						<h:outputText value="#{msgs.closeDate}: #{topic.formattedCloseDate}" />
 					</h:panelGrid>
-				<f:verbatim></div></f:verbatim>
+				</div>
 			</f:subview>
-						</h:panelGroup>
+				</h:panelGroup>
+			 </h:column>
+			<h:column>
+				<%-- // display singular ('message') if total message is 1--%>
+				<h:outputText id="topic_msg_count58" value="#{topic.totalNoMessages} #{msgs.cdfm_lowercase_msg}"
+					rendered="#{topic.isRead && topic.totalNoMessages == 1}"/>
 
-					</h:panelGrid>
-            </h:panelGroup>
-	 </h:column>
-      </h:dataTable>
-        </h:panelGroup>
-	  </h:column>
+				<%-- // display singular ('message') if total message is 0 or more than 1--%>
+				<h:outputText id="topic_msg_count59" value="#{topic.totalNoMessages} #{msgs.cdfm_lowercase_msgs}"
+					rendered="#{topic.isRead && (topic.totalNoMessages > 1 || topic.totalNoMessages == 0)}"/>
+			</h:column>
+			<h:column>
+				<%-- // display  singular ('unread message') if unread message is  1 --%>
+				<h:outputText styleClass="badge-new" id="topic_msg_count55" value="  #{topic.unreadNoMessages} #{msgs.cdfm_lowercase_unread_msg}"
+					rendered="#{topic.isRead && topic.unreadNoMessages >= 1}"/>
+
+				<%-- // display  plural ('unread messages') with different style sheet if unread message is 0 --%>
+				<h:outputText styleClass="" id="topic_msg_count57" value="   #{topic.unreadNoMessages} #{msgs.cdfm_lowercase_unread_msg}"
+					rendered="#{topic.isRead && topic.unreadNoMessages == 0}"/>
+			</h:column>
+			<h:column rendered="#{forum.newTopic || ForumTool.instructor || topic.changeSettings}">
+				<%--//desNote: links to act on this topic --%>
+				<h:panelGroup layout="block" styleClass="topicActions" rendered="#{forum.newTopic || forum.changeSettings || ForumTool.instructor}">
+					<div class="dropdown">
+						<button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+							<h:outputText value="#{msgs.cdfm_topic_options}" />
+							<span class="caret"></span>
+						</button>
+						<ul class="dropdown-menu dropdown-menu-right">
+							<t:htmlTag value="li" rendered="#{forum.changeSettings}">
+								<h:commandLink action="#{ForumTool.processActionTopicSettings}" id="topic_setting" value="#{msgs.cdfm_topic_settings}" rendered="#{topic.changeSettings}" title=" #{msgs.cdfm_topic_settings}">
+									<f:param value="#{topic.topic.id}" name="topicId"/>
+									<f:param value="#{forum.forum.id}" name="forumId"/>
+								</h:commandLink>
+							</t:htmlTag>
+							<t:htmlTag value="li" rendered="#{ForumTool.newForum}">
+								<h:commandLink action="#{ForumTool.processActionDuplicateTopicMainConfirm}" id="duplicate_confirm" value="#{msgs.cdfm_duplicate_topic}" rendered="#{forum.newTopic}"
+									title=" #{msgs.cdfm_duplicate_topic}">
+									<f:param value="#{topic.topic.id}" name="topicId"/>
+									<f:param value="#{forum.forum.id}" name="forumId"/>
+								</h:commandLink>
+							</t:htmlTag>
+							<t:htmlTag value="li" rendered="#{ForumTool.instructor}">
+								<h:commandLink action="#{mfStatisticsBean.processActionStatisticsByTopic}" immediate="true" rendered="#{ForumTool.instructor}">
+									<f:param value="#{topic.topic.id}" name="topicId"/>
+									<f:param value="#{forum.forum.id}" name="forumId"/>
+									<h:outputText value="#{msgs.cdfm_button_bar_grade}" />
+								</h:commandLink>
+							</t:htmlTag>
+							<t:htmlTag value="li" rendered="#{forum.changeSettings}">
+								<h:commandLink action="#{ForumTool.processActionDeleteTopicMainConfirm}" id="delete_confirm" value="#{msgs.cdfm_button_bar_delete_topic}" accesskey="d" rendered="#{topic.changeSettings}"
+									title="#{msgs.cdfm_button_bar_delete_topic}">
+									<f:param value="#{topic.topic.id}" name="topicId"/>
+									<f:param value="#{forum.forum.id}" name="forumId"/>
+								</h:commandLink>
+							</t:htmlTag>
+						</ul>
+					</div>
+				</h:panelGroup>
+<%-- replaced with dropdown above, but we'll keep this here for now
+				<a href="#" class="moreMenuLink">
+					<h:outputText styleClass="moreMenuLinkSpan" value="#{msgs.cdfm__moremenulink}" rendered="#{forum.newTopic || ForumTool.instructor || topic.changeSettings}" />
+				</a>
+
+				<%-- list of options, revealed when link above is used, model new added options on existing ones
+				<ul style="display:none" class="moreMenu">
+					<li>
+						<h:commandLink action="#{ForumTool.processActionDuplicateTopicMainConfirm}" id="duplicate_confirm" value="#{msgs.cdfm_duplicate_topic}" rendered="#{forum.newTopic}"
+							title=" #{msgs.cdfm_duplicate_topic}">
+							<f:param value="#{topic.topic.id}" name="topicId"/>
+							<f:param value="#{forum.forum.id}" name="forumId"/>
+						</h:commandLink>
+					</li>
+					<li>
+						<h:commandLink action="#{mfStatisticsBean.processActionStatisticsByTopic}" immediate="true" rendered="#{ForumTool.instructor}">
+							<f:param value="#{topic.topic.id}" name="topicId"/>
+							<f:param value="#{forum.forum.id}" name="forumId"/>
+							<h:outputText value="#{msgs.cdfm_button_bar_grade}" />
+						</h:commandLink>
+					</li>
+					<li>
+						<h:commandLink action="#{ForumTool.processActionDeleteTopicMainConfirm}" id="delete_confirm" value="#{msgs.cdfm_button_bar_delete_topic}" accesskey="d" rendered="#{topic.changeSettings}"
+							title="#{msgs.cdfm_button_bar_delete_topic}">
+							<f:param value="#{topic.topic.id}" name="topicId"/>
+							<f:param value="#{forum.forum.id}" name="forumId"/>
+						</h:commandLink>
+					</li>
+				</ul>
+--%>
+			</h:column>
+		</h:dataTable>
+	</h:panelGroup>
+</h:column>

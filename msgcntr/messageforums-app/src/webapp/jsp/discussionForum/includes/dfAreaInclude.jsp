@@ -1,12 +1,10 @@
 <!--jsp/discussionForum/area/dfAreaInclude.jsp-->
 <script src="/webcomponents/rubrics/sakai-rubrics-utils.js<h:outputText value="#{ForumTool.CDNQuery}" />"></script>
 <script type="module" src="/webcomponents/rubrics/rubric-association-requirements.js<h:outputText value="#{ForumTool.CDNQuery}" />"></script>
-<h:panelGrid columns="1" cellpadding="3" rendered="#{empty ForumTool.forums}">
-	<h:panelGroup>
-		<h:outputText styleClass="instruction noForumsMessage"  value="#{msgs.cdfm_forum_noforums} "  />
-		<h:commandLink  id="create_forum" title="#{msgs.cdfm_new_forum}" value="#{msgs.cdfm_forum_inf_no_forum_create}" action="#{ForumTool.processActionNewForum}" rendered="#{ForumTool.newForum}" />
-	</h:panelGroup>
-</h:panelGrid>
+<h:panelGroup layout="block" styleClass="noForums" rendered="#{empty ForumTool.forums}">
+	<p class="noForumsMessage"><h:outputText value="#{msgs.cdfm_forum_noforums} " /></p>
+	<h:commandLink  id="create_forum" styleClass="button" title="#{msgs.cdfm_new_forum}" value="#{msgs.cdfm_forum_inf_no_forum_create}" action="#{ForumTool.processActionNewForum}" rendered="#{ForumTool.newForum}" />
+</h:panelGroup>
 <h:outputText styleClass="accessUserCheck" style="display:none" rendered="#{ForumTool.newForum}" value="x"/>
 <script>
 $(document).ready(function() {
@@ -46,7 +44,8 @@ $(document).ready(function() {
 </script>
 <h:outputText escape="false" value="<script>$(document).ready(function() {setupLongDesc()});</script>"  rendered="#{!ForumTool.showShortDescription}"/>
 
-			<h:outputText styleClass="showMoreText"  style="display:none" value="#{msgs.cdfm_show_more_full_description}"  />
+<%-- OWL TODO: What does this More line do? --%>
+<h:outputText styleClass="showMoreText"  style="display:none" value="#{msgs.cdfm_show_more_full_description}"  />
 
 	<p class="instruction noForumsAccess"  style="display:none;">
 			<h:outputText styleClass="instruction"  value="#{msgs.cdfm_forum_inf_no_forum_access}"  />
@@ -80,6 +79,6 @@ $(document).ready(function() {
 </f:verbatim>
 </f:subview>
 
-<h:dataTable id="forums" value="#{ForumTool.forums}" rendered="#{!empty ForumTool.forums}" role="presentation" width="100%" var="forum" cellpadding="0" cellspacing="0" styleClass="specialLink" border="0">
+<h:dataTable id="forums" styleClass="forums" value="#{ForumTool.forums}" rendered="#{!empty ForumTool.forums}" role="presentation" var="forum">
 <%@ include file="singleForum.jspf"%>
 </h:dataTable>

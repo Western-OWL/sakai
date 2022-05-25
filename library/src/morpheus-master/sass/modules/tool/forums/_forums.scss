@@ -258,7 +258,7 @@
 
 	.openLinkBlock, .hideLinkBlock {
 		padding: 0;
-		margin: 0.5em 0;
+		margin: 0;
 		&.display-none {
 			display: none;
 		}
@@ -266,6 +266,7 @@
 
 	.fullTopicDescription {
 		display: none;
+		margin: $standard-spacing 13px; // 13px = disclosure triangle width
 		&.display-block {
 			display: block;
 		}

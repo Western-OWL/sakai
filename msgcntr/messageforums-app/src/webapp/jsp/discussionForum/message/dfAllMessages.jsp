@@ -193,7 +193,6 @@
 					  <h:outputText id="topic_moderated" value="  #{msgs.cdfm_topic_moderated_flag}"  styleClass="textPanelFooter" rendered="#{ForumTool.selectedTopic.topic.moderated == 'true'}" />
 					  <h:outputText value="#{msgs.cdfm_closeb}" styleClass="textPanelFooter"/>
 					  --%>
-					  <h:outputText value=" "  styleClass="actionLinks"/>
 
 					<h:outputText value="#{ForumTool.selectedTopic.topic.shortDescription}" rendered="#{!empty ForumTool.selectedTopic.topic.shortDescription}" styleClass="shortDescription" />
 					
