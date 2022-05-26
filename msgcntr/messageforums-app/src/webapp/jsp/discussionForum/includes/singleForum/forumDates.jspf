@@ -1,0 +1,6 @@
+<f:subview id="dates" rendered="#{ForumTool.showAvailabilityDates == 'true' && forum.availabilityRestricted == 'true'}">
+	<h:panelGrid columns="1" rendered="#{forum.availabilityRestricted == 'true'}">
+		<h:outputText value="#{msgs.openDate}: #{forum.formattedOpenDate}" />
+		<h:outputText value="#{msgs.closeDate}: #{forum.formattedCloseDate}" />
+	</h:panelGrid>
+</f:subview>

@@ -881,8 +881,8 @@ $(document).ready(function ()
 	{
 		// find the panel
 		const $panel = $(this).siblings(".forumsCollapseTarget").first();
-		// write aria-controls and attach click event handler (should also support keyboard)
-		$(this).attr("aria-controls", $panel[0].id).click(function(event)
+		// write aria-expanded, aria-controls, and attach click event handler (should also support keyboard)
+		$(this).attr("aria-expanded", "false").attr("aria-controls", $panel[0].id).click(function(event)
 		{
 			// toggle the panel visibility
 			$panel.toggle();
