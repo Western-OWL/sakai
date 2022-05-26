@@ -2,6 +2,7 @@
                  javax.faces.el.*, org.sakaiproject.tool.messageforums.*"%>
 <%@ taglib uri="http://java.sun.com/jsf/html" prefix="h" %>
 <%@ taglib uri="http://java.sun.com/jsf/core" prefix="f" %>
+<%@ taglib uri="http://myfaces.apache.org/tomahawk" prefix="t"%>
 <%@ taglib uri="http://sakaiproject.org/jsf2/sakai" prefix="sakai" %>
 <%@ taglib uri="http://sakaiproject.org/jsf/messageforums" prefix="mf" %>
 <jsp:useBean id="msgs" class="org.sakaiproject.util.ResourceLoader" scope="session">
@@ -51,57 +52,13 @@ if (thisId == null)
 		<%--//designNote: this just feels weird - presenting somehting that sort of looks like the form used to create the forum (with an editable permissions block!) to comfirm deletion --%>
 		<h:outputText id="alert-delete" styleClass="sak-banner-warn" value="#{msgs.cdfm_delete_forum}" rendered="#{ForumTool.selectedForum.markForDeletion}" style="display:block" />	
         <h:outputText styleClass="sak-banner-warn" value="#{msgs.cdfm_duplicate_forum_confirm}" rendered="#{ForumTool.selectedForum.markForDuplication}" style="display:block" />
-		<table class="forumHeader">
-			  <tr>
-					<td><h:messages styleClass="sak-banner-warn" id="errorMessages" rendered="#{! empty facesContext.maximumSeverity}" />
-				<h:graphicImage url="/images/silk/lock.png" alt="#{msgs.cdfm_forum_locked}" rendered="#{ForumTool.selectedForum.locked=='true'}"  style="margin-right:.3em"/>
-				<h:graphicImage url="/images/silk/lock_open.png" alt="#{msgs.cdfm_forum_locked}" rendered="#{ForumTool.selectedForum.locked=='false'}"  style="margin-right:.3em"/>
-				<span class="title">
-                    <h:outputText value="#{ForumTool.selectedForum.forum.title}" rendered="#{!ForumTool.selectedForum.markForDuplication}"/>
-				    <h:inputText size="50" value="#{ForumTool.selectedForum.forum.title}" id="forum_title" rendered="#{ForumTool.selectedForum.markForDuplication}">
-                        <f:validateLength minimum="1" maximum="255" />
-                    </h:inputText>
-				</span>
-				<h:outputText   value="#{msgs.cdfm_openb}"/>
-					<h:outputText   value="#{msgs.cdfm_moderated}"  rendered="#{ForumTool.selectedForum.moderated=='true'}" />
-					<h:outputText   value="#{msgs.cdfm_notmoderated}"  rendered="#{ForumTool.selectedForum.moderated=='false'}" />
-				<h:outputText   value="#{msgs.cdfm_closeb}"/>
-			<p class="textPanel">
-				    <h:outputText id="forum_shortDescription"  value="#{ForumTool.selectedForum.forum.shortDescription}"/>
-			</p>
+		<h:messages styleClass="sak-banner-warn" id="errorMessages" rendered="#{! empty facesContext.maximumSeverity}" />
+		<t:dataList id="forumHeader" value="#{ForumTool.selectedForumAsList}" rendered="#{!empty ForumTool.selectedForumAsList}" var="forum">
+			<t:div styleClass="singleForumHeader suppressLinkTitleDisplay">
+				<%@ include file="/jsp/discussionForum/includes/singleForum/forumHeader.jspf"%>
+			</t:div>
+		</t:dataList>
 
-			<h:panelGroup>
-				<h:panelGroup layout="block" id="openLinkBlock" styleClass="toggleParent openLinkBlock display-none">
-					<a href="#" id="showMessage" class="toggle show">
-						<h:graphicImage url="/images/expand.gif" alt=""/>
-						<h:outputText value=" #{msgs.cdfm_read_full_description}" />
-					</a>
-				</h:panelGroup>
-				<h:panelGroup layout="block" id="hideLinkBlock" styleClass="toggleParent hideLinkBlock">
-					<a href="#" id="hideMessage" class="toggle show">
-						<h:graphicImage url="/images/collapse.gif" alt="" />
-						<h:outputText value=" #{msgs.cdfm_hide_full_description}"/>
-					</a>
-				</h:panelGroup>
-			</h:panelGroup>
-
-			<h:panelGroup layout="block" id="fullTopicDescription" styleClass="textPanel fullTopicDescription">
-				<h:outputText escape="false" value="#{ForumTool.selectedForum.forum.extendedDescription}" />
-
-				<h:dataTable value="#{ForumTool.selectedForum.attachList}" var="eachAttach" rendered="#{!empty ForumTool.selectedForum.attachList}" styleClass="table table-hover table-striped table-bordered" columnClasses="bogus">
-					<h:column>
-						<sakai:contentTypeMap fileType="#{eachAttach.attachment.attachmentType}" mapType="image" var="imagePath" pathPrefix="/library/image/"/>
-						<h:graphicImage id="exampleFileIcon" value="#{imagePath}" alt="" />
-						<h:outputLink value="#{eachAttach.url}" target="_new_window">
-							<h:outputText value="#{eachAttach.attachment.attachmentName}"  style="text-decoration:underline;"/>
-						</h:outputLink>
-					</h:column>
-				</h:dataTable>
-			</h:panelGroup>
-		</div>	
-		</td>
-		</tr>
-		</table>
        <div class="act">
           <h:commandButton id ="revise" rendered="#{!ForumTool.selectedForum.markForDeletion && !ForumTool.selectedForum.markForDuplication}" 
                            immediate="true"  action="#{ForumTool.processActionReviseForumSettings}" 
