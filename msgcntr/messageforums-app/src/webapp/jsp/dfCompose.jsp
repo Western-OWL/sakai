@@ -1,5 +1,6 @@
 <%@ taglib uri="http://java.sun.com/jsf/html" prefix="h" %>
 <%@ taglib uri="http://java.sun.com/jsf/core" prefix="f" %>
+<%@ taglib uri="http://myfaces.apache.org/tomahawk" prefix="t"%>
 <%@ taglib uri="http://sakaiproject.org/jsf2/sakai" prefix="sakai" %>
 <%@ taglib uri="http://sakaiproject.org/jsf/messageforums" prefix="mf" %>
 <jsp:useBean id="msgs" class="org.sakaiproject.util.ResourceLoader" scope="session">
@@ -27,36 +28,7 @@
       </script>
       <%@ include file="/jsp/discussionForum/menu/forumsMenu.jsp" %>
       <h3><h:outputText value="#{msgs.cdfm_tool_bar_message}" /></h3>
-			<table class="topicBloc topicBlocLone specialLink">
-				<tr>
-					<td>
-						<h:outputText value="#{ForumTool.selectedForum.forum.title} /  #{ForumTool.selectedTopic.topic.title}"  styleClass="title"/> 
-						<h:panelGroup styleClass="textPanel" layout="block" rendered="#{!empty ForumTool.selectedTopic.topic.shortDescription != '' && ForumTool.selectedTopic.topic.shortDescription != null && ForumTool.selectedTopic.topic.shortDescription != '<br/>'}">
-							<h:outputText value="#{ForumTool.selectedTopic.topic.shortDescription}" />
-						</h:panelGroup>
-						<h:panelGroup rendered="#{!empty ForumTool.selectedTopic.topic.extendedDescription != '' && ForumTool.selectedTopic.topic.extendedDescription != null && ForumTool.selectedTopic.topic.extendedDescription != '<br/>'}">
-							<p id="openLinkBlock" class="toggleParent openLinkBlock display-none">
-								<a href="#" id="showMessage" class="toggle show">
-									<h:graphicImage url="/images/collapse.gif" alt=""/>
-									<h:outputText value=" #{msgs.cdfm_read_full_description}" />
-								</a>
-							</p>
-							<p id="hideLinkBlock" class="toggleParent hideLinkBlock">
-								<a href="#" id="hideMessage" class="toggle show">
-									<h:graphicImage url="/images/expand.gif" alt="" />
-									<h:outputText value=" #{msgs.cdfm_hide_full_description}"/>
-								</a>
-							</p>
-							<%-- //designNote: am assuming that the thinking is that once the user is here 
-								there is no longer need for the long description context (or as much), so do not put it in
-								the response by default - same goes for attachment list if any --%>
-							<div id="fullTopicDescription" class="textPanel">
-								<h:outputText escape="false" value="#{ForumTool.selectedTopic.topic.extendedDescription}" />
-							</div>
-						</h:panelGroup>
-					</td>
-				</tr>
-			</table>
+	  <%@ include file="/jsp/discussionForum/includes/topicHeader/singletonTopicHeaderList.jspf"%>
 			<div>
 				<h:outputText value="#{ForumTool.selectedTopic.topic.revealIDsToRoles ? msgs.cdfm_revealIDsToRoles_blurb :  msgs.cdfm_anonymous_blurb}" rendered="#{ForumTool.anonymousEnabled && ForumTool.selectedTopic.topic.postAnonymous}"/>
 			</div>

@@ -1564,6 +1564,11 @@ public class DiscussionForumTool {
   	}
   	return selectedTopic;
   }
+
+  public List<DiscussionTopicBean> getSelectedTopicAsList()
+  {
+	  return Collections.singletonList(getSelectedTopic());
+  }
   
   /**
    * @return Returns the selected Area

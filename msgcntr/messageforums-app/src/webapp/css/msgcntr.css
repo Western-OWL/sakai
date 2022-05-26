@@ -751,6 +751,7 @@ div.msgcntr-profile-qtip {
 }
 
 .singleMessage.suppressLinkTitleDisplay a.title,
+.singleTopicHeader.suppressLinkTitleDisplay a.title,
 .suppressAuthorLinkDisplay .singleMessage .msgAuthorStatsLink,
 .standardCrumbs .suppressForumCrumbLinkDisplay,
 .suppressThreadCrumbLink .threadCrumb a,

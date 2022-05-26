@@ -166,75 +166,7 @@
 				<h:graphicImage url="/../../library/image/silk/printer.png" alt="#{msgs.print_friendly}" title="#{msgs.print_friendly}" />
 			</h:outputLink>
  		</h:panelGroup>
-
-			<h:panelGrid columns="1" width="100%"  styleClass="topicBloc topicBlocLone specialLink"  cellspacing="0" cellpadding="0">
-				<h:panelGroup>
-					<h:outputText styleClass="highlight title" id="draft" value="#{msgs.cdfm_draft}" rendered="#{ForumTool.selectedTopic.topic.draft == 'true'}"/>
-					<h:outputText id="draft_space" value="  - " rendered="#{ForumTool.selectedTopic.topic.draft == 'true'}" styleClass="title"/>
-					<h:graphicImage url="/images/silk/date_delete.png" title="#{msgs.topic_restricted_message}" alt="#{msgs.topic_restricted_message}" rendered="#{ForumTool.selectedTopic.topic.availability == 'false'}" style="margin-right:.5em"/>
-					<h:graphicImage url="/images/silk/lock.png" alt="#{msgs.cdfm_forum_locked}" rendered="#{ForumTool.selectedForum.forum.locked == 'true' || ForumTool.selectedTopic.topic.locked == 'true'}" style="margin-right:.5em"/>
-					<%-- Rubrics marker --%>
-					<h:panelGroup rendered="#{ForumTool.selectedTopic.hasRubric == 'true'}" >
-					  <sakai-rubric-student-preview-button
-						  token="<h:outputText value="#{ForumTool.rbcsToken}" />"
-						  display="icon"
-						  tool-id="sakai.gradebookng"
-						  entity-id="<h:outputText value="#{ForumTool.selectedTopic.gradeAssign}" />">
-					  </sakai-rubric-student-preview-button>
-					</h:panelGroup>
-					<h:outputText value="#{ForumTool.selectedTopic.topic.title}" styleClass="title"/>
-
-			         <h:outputText id="topic_moderated" value=" #{msgs.cdfm_forum_moderated_flag}" styleClass="childrenNewZero" rendered="#{ForumTool.selectedTopic.moderated == 'true' }" />
-					
-					  <%--//designNote: for paralellism to other views, need to add read/unread count here as well as Moderated attribute--%>  
-					  <%-- 
-					  <h:outputText value=" #{msgs.cdfm_openb}" styleClass="textPanelFooter"/> 
-					  <h:outputText value="123 messages - 5 unread" styleClass="textPanelFooter todo" />
-					  <h:outputText id="topic_moderated" value="  #{msgs.cdfm_topic_moderated_flag}"  styleClass="textPanelFooter" rendered="#{ForumTool.selectedTopic.topic.moderated == 'true'}" />
-					  <h:outputText value="#{msgs.cdfm_closeb}" styleClass="textPanelFooter"/>
-					  --%>
-
-					<h:outputText value="#{ForumTool.selectedTopic.topic.shortDescription}" rendered="#{!empty ForumTool.selectedTopic.topic.shortDescription}" styleClass="shortDescription" />
-					
-					<h:panelGroup rendered="#{!empty ForumTool.selectedTopic.attachList || ForumTool.selectedTopic.topic.extendedDescription != '' && ForumTool.selectedTopic.topic.extendedDescription != null && ForumTool.selectedTopic.topic.extendedDescription != '<br/>'}">
-						<p id="openLinkBlock" class="toggleParent openLinkBlock">
-							<a href="#" id="showMessage" class="toggle show">
-								<h:graphicImage url="/images/collapse.gif" alt=""/>
-								<h:outputText value=" #{msgs.cdfm_read_full_description}" />
-								<h:outputText value=" #{msgs.cdfm_and}" rendered="#{!empty ForumTool.selectedTopic.attachList}"/>
-								<h:outputText value=" #{msgs.cdfm_attach}" rendered="#{!empty ForumTool.selectedTopic.attachList}"/>
-							</a>
-						</p>
-						<p id="hideLinkBlock" class="toggleParent hideLinkBlock display-none">
-							<a href="#" id="hideMessage" class="toggle show">
-								<h:graphicImage url="/images/expand.gif" alt="" />
-								<h:outputText value=" #{msgs.cdfm_hide_full_description}"/>
-								<h:outputText value=" #{msgs.cdfm_and}" rendered="#{!empty ForumTool.selectedTopic.attachList}" />
-								<h:outputText value=" #{msgs.cdfm_attach}" rendered="#{!empty ForumTool.selectedTopic.attachList}"/>
-							</a>
-						</p>
-					</h:panelGroup>
-
-					<f:verbatim><div id="fullTopicDescription" class="textPanel fullTopicDescription"></f:verbatim>
-						<div>
-							<h:outputText escape="false" value="#{ForumTool.selectedTopic.topic.extendedDescription}" />
-						</div>
-						<div class="table-responsive">
-						<h:dataTable styleClass="table table-hover table-striped table-bordered" value="#{ForumTool.selectedTopic.attachList}" var="eachAttach" rendered="#{!empty ForumTool.selectedTopic.attachList}" cellpadding="3" cellspacing="0" columnClasses="attach,bogus">
-					  <h:column>
-						<sakai:contentTypeMap fileType="#{eachAttach.attachment.attachmentType}" mapType="image" var="imagePath" pathPrefix="/library/image/"/>									
-						<h:graphicImage id="exampleFileIcon" value="#{imagePath}" alt=""  />						
-						</h:column>
-						<h:column>
-						<h:outputLink value="#{eachAttach.url}" target="_blank">
-							<h:outputText value="#{eachAttach.attachment.attachmentName}" />
-						</h:outputLink>				  
-					</h:column>
-			  </h:dataTable>
-			</div>
-					<f:verbatim></div></f:verbatim>
-				</h:panelGroup>
-			</h:panelGrid>	
+			<%@ include file="/jsp/discussionForum/includes/topicHeader/singletonTopicHeaderList.jspf"%>	
 				<%--<%@ include file="dfViewSearchBar.jsp"%> --%>
 				
 				<h:panelGroup rendered="#{ForumTool.selectedTopic.isMovePostings}" >
