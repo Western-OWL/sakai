@@ -23,6 +23,7 @@ package org.sakaiproject.tool.messageforums.ui;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -1144,6 +1145,11 @@ public class DiscussionTopicBean
 			}
 		}
 		return decoAttachList;
+	}
+
+	public List<List<DecoratedAttachment>> getAttachListAsSingletonList()
+	{
+		return Collections.singletonList(getAttachList());
 	}
 
 	public boolean isSorted()

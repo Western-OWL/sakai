@@ -1,0 +1,20 @@
+<h3>
+	<h:commandLink action="#{ForumTool.processActionDisplayTopic}" id="topic_title" title=" #{topic.topic.title}" styleClass="title">
+		<f:param value="#{topic.topic.id}" name="topicId"/>
+		<f:param value="#{forum.forum.id}" name="forumId"/>
+		<h:outputText value="#{topic.topic.title}"/>
+	</h:commandLink>
+	<h:outputText id="draft" styleClass="badge-draft" value="#{msgs.cdfm_draft}" rendered="#{topic.topic.draft == 'true'}" />
+	<h:graphicImage url="/images/silk/date_delete.png" title="#{msgs.topic_restricted_message}" alt="#{msgs.topic_restricted_message}" rendered="#{topic.availability == 'false'}" />
+	<h:outputText styleClass="badge-locked" value="#{msgs.cdfm_forum_locked_flag}" rendered="#{forum.locked == 'true' || topic.locked == 'true'}" />
+	<h:outputText id="topic_moderated" styleClass="badge-moderated" value="#{msgs.cdfm_forum_moderated_flag}" rendered="#{topic.moderated == 'true' && topic.isRead}" />
+	<%-- Rubrics marker --%>
+	<h:panelGroup rendered="#{topic.hasRubric == 'true'}">
+		<sakai-rubric-student-preview-button
+			display="icon"
+			token="<h:outputText value="#{ForumTool.rbcsToken}" />"
+			tool-id="sakai.gradebookng"
+			entity-id="<h:outputText value="#{topic.gradeAssign}" />">
+		</sakai-rubric-student-preview-button>
+	</h:panelGroup>
+</h3>
