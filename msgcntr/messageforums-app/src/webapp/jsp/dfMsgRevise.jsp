@@ -1,6 +1,8 @@
 <%@ taglib uri="http://java.sun.com/jsf/html" prefix="h" %>
 <%@ taglib uri="http://java.sun.com/jsf/core" prefix="f" %>
+<%@ taglib uri="http://myfaces.apache.org/tomahawk" prefix="t"%>
 <%@ taglib uri="http://sakaiproject.org/jsf2/sakai" prefix="sakai" %>
+<%@ taglib uri="http://sakaiproject.org/jsf/messageforums" prefix="mf" %>
 <jsp:useBean id="msgs" class="org.sakaiproject.util.ResourceLoader" scope="session">
    <jsp:setProperty name="msgs" property="baseName" value="org.sakaiproject.api.app.messagecenter.bundle.Messages"/>
 </jsp:useBean>
@@ -31,20 +33,7 @@
         <%@ include file="/jsp/discussionForum/menu/forumsMenu.jsp" %>
      <h3><h:outputText value="#{msgs.cdfm_revise_forum_msg}" /></h3>
 
-			<table class="topicBloc topicBlocLone">
-				<tr>
-					<td>
-						<span class ="title">
-							<h:outputText value="#{ForumTool.selectedForum.forum.title}-#{ForumTool.selectedTopic.topic.title}" />
-						</span>
-					<h:panelGroup layout="block" rendered="#{!empty ForumTool.selectedTopic.topic.shortDescription}">
-						<p class="textPanel">
-							<h:outputText value="#{ForumTool.selectedTopic.topic.shortDescription}"/>
-						</p>
-					</h:panelGroup>
-					</td>
-				</tr>
-			</table>	
+	<%@ include file="/jsp/discussionForum/includes/topicHeader/singletonTopicHeaderList.jspf"%>
 
 	<p class="instruction">		
               <h:outputText value="#{msgs.cdfm_required}"/>
