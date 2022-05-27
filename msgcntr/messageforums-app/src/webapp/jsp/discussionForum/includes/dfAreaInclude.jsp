@@ -8,7 +8,7 @@
 <h:outputText styleClass="accessUserCheck" style="display:none" rendered="#{ForumTool.newForum}" value="x"/>
 <script>
 $(document).ready(function() {
-	var topicLen = $('.topicBloc').length;
+	var topicLen = $('.topicTitle').length;
 	var forumLen = $('.forumHeader').length;
 	var draftForumLen = $('.draftForum').length
 	var draftTopicLen = $('.draftTopic').length
@@ -45,38 +45,25 @@ $(document).ready(function() {
 <h:outputText escape="false" value="<script>$(document).ready(function() {setupLongDesc()});</script>"  rendered="#{!ForumTool.showShortDescription}"/>
 
 <%-- OWL TODO: What does this More line do? --%>
-<h:outputText styleClass="showMoreText"  style="display:none" value="#{msgs.cdfm_show_more_full_description}"  />
+<h:outputText styleClass="showMoreText" style="display:none" value="#{msgs.cdfm_show_more_full_description}" />
 
-	<p class="instruction noForumsAccess"  style="display:none;">
-			<h:outputText styleClass="instruction"  value="#{msgs.cdfm_forum_inf_no_forum_access}"  />
-	</p>
-<f:subview id="maintainMessages" rendered="#{ForumTool.newForum}">
-<f:verbatim>
-	<p class="instruction defForums highlightPanel"  style="display:none;">
-</f:verbatim>
-<h:outputText value="#{msgs.cdfm_forum_inf_init_guide}" escape="false" />
-<f:verbatim>
-	</p>
-</f:verbatim>
-<f:verbatim>
-	<p class="instruction noTopics  highlightPanel" style="display:none">
-</f:verbatim>
-<h:outputText styleClass="highlight" style="font-weight:bold" value="#{msgs.cdfm_forum_inf_note} " />
-<h:outputText escape="false" value="#{msgs.cdfm_forum_inf_no_topics}" styleClass="noTopicsatAll" style="display:none"/>
-<f:verbatim>
-<span class="noTopicsDraft" style="display:none"><h:outputText value="#{msgs.cdfm_forum_inf_all_topics_draft}" /></span>
-	</p>
-</f:verbatim>
-<f:verbatim>
-	<p class="instruction noForumsDraft  highlightPanel" style="display:none"><h:outputText styleClass="highlight" style="font-weight:bold" value="#{msgs.cdfm_forum_inf_note} " />
-</f:verbatim>
-<!--
-<h:outputText escape="false" value="#{msgs.cdfm_forum_inf_no_forums}"/>
--->
-<f:verbatim>
-<span class="noForumsDraft" style="display:none"><h:outputText value="#{msgs.cdfm_forum_inf_all_forums_draft}" /></span>
+<p class="instruction noForumsAccess"  style="display:none;">
+	<h:outputText styleClass="instruction"  value="#{msgs.cdfm_forum_inf_no_forum_access}" />
 </p>
-</f:verbatim>
+<f:subview id="maintainMessages" rendered="#{ForumTool.newForum}">
+	<p class="instruction defForums highlightPanel"  style="display:none;">
+		<h:outputText value="#{msgs.cdfm_forum_inf_init_guide}" escape="false" />
+	</p>
+	<p class="instruction noTopics  highlightPanel" style="display:none">
+		<h:outputText styleClass="highlight" style="font-weight:bold" value="#{msgs.cdfm_forum_inf_note} " />
+		<h:outputText escape="false" value="#{msgs.cdfm_forum_inf_no_topics}" styleClass="noTopicsatAll" style="display:none"/>
+		<span class="noTopicsDraft" style="display:none"><h:outputText value="#{msgs.cdfm_forum_inf_all_topics_draft}" /></span>
+	</p>
+	<p class="instruction noForumsDraft  highlightPanel" style="display:none">
+		<h:outputText styleClass="highlight" style="font-weight:bold" value="#{msgs.cdfm_forum_inf_note} " />
+		<h:outputText escape="false" value="#{msgs.cdfm_forum_inf_no_forums}"/>
+		<span class="noForumsDraft" style="display:none"><h:outputText value="#{msgs.cdfm_forum_inf_all_forums_draft}" /></span>
+	</p>
 </f:subview>
 
 <h:dataTable id="forums" styleClass="forums" value="#{ForumTool.forums}" rendered="#{!empty ForumTool.forums}" role="presentation" var="forum">

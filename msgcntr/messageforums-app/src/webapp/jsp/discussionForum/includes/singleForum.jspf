@@ -42,7 +42,7 @@
 				</h:commandLink>
 				
 				<div class="dropdown">
-					<button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+					<button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 						<h:outputText value="#{msgs.cdfm_forum_options}" />
 						<span class="caret"></span>
 					</button>
@@ -75,15 +75,15 @@
 		</h:panelGroup> <%--end of Forum Heading--%>
 
 		<%-- the topic list  --%>
-		<%--//designNote: display a message if there is no topics for this forum , give a prompt to create a topic--%>
-		<h:dataTable id="noTopics" styleClass="forumsTopics table table-bordered table-hover" rendered="#{empty forum.topics}" value="#{forum.topics}" var="topic">
-			<h:panelGroup styleClass="sak-banner-info" rendered="#{empty forum.topics}">
+		<%--//designNote: display a message if there is no topics for this forum , give a prompt to create a topic; in a table to match the datatable when topis are populated--%>
+		<h:panelGrid columns="1" styleClass="forumsTopics table table-bordered table-hover" rendered="#{empty forum.topics}" role="presentation">
+			<h:panelGroup layout="block" styleClass="sak-banner-info">
 				<h:outputText escape="false" value="#{msgs.cdfm_forum_inf_no_topic_here} " />
 				<h:commandLink styleClass="button" action="#{ForumTool.processActionNewTopic}" value="#{msgs.cdfm_forum_inf_no_topic_create}" rendered="#{forum.newTopic}" title="#{msgs.cdfm_new_topic}">
 					<f:param value="#{forum.forum.id}" name="forumId"/>
 				</h:commandLink>
 			</h:panelGroup>
-		</h:dataTable>
+		</h:panelGrid>
 
 		<h:dataTable id="topics" styleClass="forumsTopics table table-bordered table-hover" columnClasses="topicsColumn,messagesCountColumn,unreadCountColumn,actionsColumn" rendered="#{!empty forum.topics}" value="#{forum.topics}" var="topic">
 			<h:column>
@@ -111,7 +111,7 @@
 				<%--//desNote: links to act on this topic --%>
 				<h:panelGroup layout="block" styleClass="topicActions" rendered="#{forum.newTopic || forum.changeSettings || ForumTool.instructor}">
 					<div class="dropdown">
-						<button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+						<button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 							<h:outputText value="#{msgs.cdfm_topic_options}" />
 							<span class="caret"></span>
 						</button>

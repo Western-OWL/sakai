@@ -8,7 +8,7 @@
 	<%-- draft marker --%>
 	<h:outputText id="draft" styleClass="badge-draft" value="#{msgs.cdfm_draft}" rendered="#{forum.forum.draft == 'true'}" />
 	<%-- availability marker --%>
-	<h:graphicImage url="/images/silk/date_delete.png" title="#{msgs.forum_restricted_message}" alt="#{msgs.forum_restricted_message}" rendered="#{forum.availability == 'false'}" />
+	<h:outputText styleClass="badge-unavailable" value="#{msgs.cdfm_forum_unavailable_flag}" rendered="#{forum.availability == 'false' || empty forum.topics}" />
 	<%-- locked marker --%>
 	<h:outputText styleClass="badge-locked" value="#{msgs.cdfm_forum_locked_flag}" rendered="#{forum.locked == 'true'}" />
 	<%-- moderated marker --%>

@@ -1,4 +1,4 @@
-<h:panelGroup layout="block" rendered="#{! topic.nonePermission}" styleClass="topicTitle topicBloc">
+<h:panelGroup layout="block" rendered="#{! topic.nonePermission}" styleClass="topicTitle">
 	<%@ include file="topicTitle.jspf"%>
 
 	<%--the topic details --%>
@@ -9,7 +9,7 @@
 	<h:outputLink value="#" styleClass="forumsCollapseTrigger"
 				  rendered="#{(!ForumTool.alwaysShowFullDesc && (!empty topic.attachList || (topic.topic.extendedDescription != '' &&  topic.topic.extendedDescription != null && topic.topic.extendedDescription != '<br/>')))
 				  || (ForumTool.showAvailabilityDates == 'true' && topic.availabilityRestricted == 'true')}">
-		<h:outputText value="#{msgs.cdfm__moremenulink}" />
+		<h:outputText value="#{msgs.cdfm_details}" />
 	</h:outputLink>
 	<t:div id="togglePanel" styleClass="collapse forumsCollapseTarget">
 	<f:subview id="desc2" rendered="#{!ForumTool.alwaysShowFullDesc}"><%@ include file="topicDesc.jspf"%></f:subview>

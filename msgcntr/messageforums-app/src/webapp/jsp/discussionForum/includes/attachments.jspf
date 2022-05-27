@@ -1,11 +1,8 @@
-<h:dataTable value="#{attachList}" var="eachAttach" styleClass="attachListJSF" rendered="#{!empty attachList}" style="font-size:.9em;width:auto;margin-left:1em">
-	<h:column>
-		  <sakai:contentTypeMap fileType="#{eachAttach.attachment.attachmentType}" mapType="image" var="imagePath" pathPrefix="/library/image/"/>
-			<h:graphicImage id="exampleFileIcon" value="#{imagePath}" />
-		<h:outputLink value="#{eachAttach.url}" target="_blank" rel="noreferrer">
-			<h:outputText value=" " />
-			<h:outputText value="#{eachAttach.attachment.attachmentName}" />
-		</h:outputLink>
-	</h:column>
-</h:dataTable>
-
+<t:dataList layout="unorderedList" value="#{attachList}" var="eachAttach" styleClass="attachListJSF" rendered="#{!empty attachList}">
+	<sakai:contentTypeMap fileType="#{eachAttach.attachment.attachmentType}" mapType="image" var="imagePath" pathPrefix="/library/image/"/>
+	<h:graphicImage id="exampleFileIcon" value="#{imagePath}" alt="" />
+	<h:outputLink value="#{eachAttach.url}" target="_blank" rel="noreferrer">
+		<h:outputText value=" " />
+		<h:outputText value="#{eachAttach.attachment.attachmentName}" />
+	</h:outputLink>
+</t:dataList>

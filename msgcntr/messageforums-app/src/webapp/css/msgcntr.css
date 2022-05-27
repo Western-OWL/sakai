@@ -2,6 +2,7 @@
 .forums {
 	width: 100%;
 	max-width: 100%;
+	margin-bottom: 10px;
 }
 .forumHeader{
 	/*panel holding all forum metadata in forum list view*/
@@ -9,13 +10,13 @@
 	width: 100%;
 	background: #eee;
 	border: 1px solid #ddd;
-	margin-bottom: 0;
-	margin-top: 10px;
+	margin: 0;
 	padding: 10px;
 }
 .forumTitle {
 	display: flex;
 	flex-direction: column;
+	align-items: flex-start;
 }
 .forumTitle h2 {
 	display: flex;
@@ -26,6 +27,27 @@
 }
 .forumTitle sakai-rubric-student-preview-button {
 	margin-left: 4px;
+}
+.forumsCollapseTrigger[href] {
+	display: inline-block;
+	text-decoration: none;
+}
+.forumsCollapseTrigger:before {
+	content: "\f0da";
+	display: inline-block;
+	width: 1em;
+	font-family: FontAwesome;
+	text-align: center;
+}
+.forumsCollapseTrigger[aria-expanded="true"]:before {
+	content: "\f0d7";
+}
+.shortDescription + .forumsCollapseTrigger {
+	margin-top: 8px; /* to match title's spacing when both short description and details are set */
+}
+.forumsCollapseTarget {
+	overflow: hidden;
+	padding-left: 1em; /* to match the width of the trigger arrow above */
 }
 .forumHeader .actionLinks,
 .topicBloc .actionLinks {
@@ -58,7 +80,7 @@
 	margin-right: 0;
 }
 .forumsTopics.table {
-	margin-bottom: 0;
+	margin-bottom: 10px;
 	table-layout: fixed;
 }
 .forumsTopics.table > tbody > tr > td {
@@ -71,6 +93,9 @@
 	width: 15%;
 	text-align: center;
 	vertical-align: middle;
+}
+.forumsTopics .sak-banner-info {
+	margin: 0;
 }
 .topicTitle h3 {
 	display: flex;
@@ -436,6 +461,14 @@ td div.title{
 .attachPanel td.attach{
 	width: 1em;
 }
+.attachListJSF {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.attachListJSF > li {
+	line-height: 2;
+}
 .permissionTable {
 	width: 675px;	
 }
@@ -776,7 +809,8 @@ div.msgcntr-profile-qtip {
 .badge-draft, 
 .badge-locked, 
 .badge-moderated, 
-.badge-new {
+.badge-new,
+.badge-unavailable {
 	margin: 0 0 0 4px;
 	padding: 4px;
 	border-radius: 4px;

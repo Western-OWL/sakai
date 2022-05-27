@@ -885,7 +885,7 @@ $(document).ready(function ()
 		$(this).attr("aria-expanded", "false").attr("aria-controls", $panel[0].id).click(function(event)
 		{
 			// toggle the panel visibility
-			$panel.toggle();
+			$panel.toggle("blind", 200);
 			// toggle the aria-expanded attribute on the link
 			const toggleExpanded = this.getAttribute("aria-expanded") === "false" ? "true" : "false";
 			this.setAttribute("aria-expanded", toggleExpanded);
