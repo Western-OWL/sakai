@@ -121,11 +121,7 @@
 
             <span class="close-button fa fa-times" onClick="SPNR.disableControlsAndSpin(this, null);closeDialogBoxIfExists();" aria-label="<h:outputText value="#{msgs.close_window}" />"></span>
             <h3><h:outputText value="#{msgs.cdfm_grade_msg}" /></h3>
-            <h4>
-                <h:outputText value="#{ForumTool.selectedForum.forum.title}" />
-                <h:outputText value=" #{msgs.cdfm_dash} " rendered="#{!empty ForumTool.selectedTopic}"/>
-                <h:outputText   value="#{ForumTool.selectedTopic.topic.title}" />
-            </h4>
+            <%@ include file="/jsp/discussionForum/includes/topicHeader/singletonTopicHeaderList.jspf"%>
             <h:messages globalOnly="true" infoClass="success" errorClass="alertMessage" rendered="#{! empty facesContext.maximumSeverity}"/>
             <h:panelGroup layout="block" rendered="#{ForumTool.selectedMessage != null}" styleClass="hideActionButtons suppressAuthorLinkDisplay">
 				<%@ include file="/jsp/discussionForum/includes/singletonMessageList.jspf"%>

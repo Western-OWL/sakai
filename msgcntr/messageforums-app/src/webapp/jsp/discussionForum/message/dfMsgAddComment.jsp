@@ -15,11 +15,7 @@
 		<h:form id="dfMsgAddComment">
 
 			<h3><h:outputText value="#{msgs.cdfm_add_comment}" /></h3>
-			<h4>
-				<h:outputText value="#{ForumTool.selectedForum.forum.title}" />
-				<h:outputText value=" #{msgs.cdfm_dash} " /> 
-				<h:outputText	value="#{ForumTool.selectedTopic.topic.title}" />
-			</h4>
+			<%@ include file="/jsp/discussionForum/includes/topicHeader/singletonTopicHeaderList.jspf"%>
 			
 			<h:messages globalOnly="true" infoClass="success" errorClass="alertMessage" rendered="#{! empty facesContext.maximumSeverity}" />
 
