@@ -6,12 +6,9 @@
   	if (thisId == null) 
   	{
     	thisId = "Main" + org.sakaiproject.tool.cover.ToolManager.getCurrentPlacement().getId();
- 		 }
- 	
+	}
 %>
 <script>
-
-
 	var iframeId = '<%= org.sakaiproject.util.Web.escapeJavascript(thisId)%>';
 	
 	function resize(){
@@ -25,7 +22,7 @@
 </script>
 
 <h:outputText escape="false" value="<a id=\"#{message.message.id}\" name=\"#{message.message.id}\"></a>" />
-	<f:verbatim><div class="hierItemBlock" ></f:verbatim>
+<div class="hierItemBlock" >
 	<%@ include file="/jsp/discussionForum/includes/singleMessage.jspf"%>
 	<%-- close the div with class of hierItemBlock --%>
 <h:outputText escape="false" value="</div>"  rendered="#{!message.deleted}"/>

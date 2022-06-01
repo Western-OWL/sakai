@@ -4,10 +4,7 @@ var dialogutil = dialogutil || {};
 
 	dialogutil.openDialog = function(divId, frameId, yPos) {
 		var vHeight = 300;
-		
-		
 
-		$('body').css('padding-bottom','300px')
 		$("#" + divId).dialog({
 			resizable: false,
 			autoOpen:false,
@@ -96,6 +93,5 @@ var dialogutil = dialogutil || {};
 	dialogutil.replaceBodyOnLoad = function (newOnLoad, contextObject) {
 		$("body", contextObject.document).prop("onload", newOnLoad);
 	}
-
 
 })(jQuery, dialogutil);

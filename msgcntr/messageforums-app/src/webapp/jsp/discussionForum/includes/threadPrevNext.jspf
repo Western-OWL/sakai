@@ -1,20 +1,18 @@
-<h:panelGroup layout="block" styleClass="row view-message-nav">
-	<h:panelGroup layout="block" styleClass="col-md-offset-6 col-md-6">
-		<h:panelGroup styleClass="button formButtonDisabled" rendered="#{!ForumTool.selectedThreadHead.hasPreThread}">
-			<h:outputText value="#{msgs.cdfm_previous_thread}"  />
-		</h:panelGroup>
-		<h:commandLink styleClass="button" action="#{ForumTool.processActionDisplayThread}" value="#{msgs.cdfm_previous_thread}"  rendered="#{ForumTool.selectedThreadHead.hasPreThread}">
-			<f:param value="#{ForumTool.selectedThreadHead.preThreadId}" name="messageId"/>
-			<f:param value="#{ForumTool.selectedTopic.topic.id}" name="topicId"/>
-			<f:param value="#{ForumTool.selectedForum.forum.id}" name="forumId"/>
-		</h:commandLink>
-		<h:panelGroup styleClass="button formButtonDisabled" rendered="#{!ForumTool.selectedThreadHead.hasNextThread}">
-			<h:outputText value="#{msgs.cdfm_next_thread}"  />
-		</h:panelGroup>
-		<h:commandLink styleClass="button" action="#{ForumTool.processActionDisplayThread}" value="#{msgs.cdfm_next_thread}" rendered="#{ForumTool.selectedThreadHead.hasNextThread}">
-			<f:param value="#{ForumTool.selectedThreadHead.nextThreadId}" name="messageId"/>
-			<f:param value="#{ForumTool.selectedTopic.topic.id}" name="topicId"/>
-			<f:param value="#{ForumTool.selectedForum.forum.id}" name="forumId"/>
-		</h:commandLink>
+<h:panelGroup layout="block" styleClass="view-message-nav">
+	<h:panelGroup styleClass="button formButtonDisabled" rendered="#{!ForumTool.selectedThreadHead.hasPreThread}">
+		<h:outputText value="#{msgs.cdfm_previous_thread}"  />
 	</h:panelGroup>
+	<h:commandLink styleClass="button" action="#{ForumTool.processActionDisplayThread}" value="#{msgs.cdfm_previous_thread}" rendered="#{ForumTool.selectedThreadHead.hasPreThread}">
+		<f:param value="#{ForumTool.selectedThreadHead.preThreadId}" name="messageId"/>
+		<f:param value="#{ForumTool.selectedTopic.topic.id}" name="topicId"/>
+		<f:param value="#{ForumTool.selectedForum.forum.id}" name="forumId"/>
+	</h:commandLink>
+	<h:panelGroup styleClass="button formButtonDisabled" rendered="#{!ForumTool.selectedThreadHead.hasNextThread}">
+		<h:outputText value="#{msgs.cdfm_next_thread}" />
+	</h:panelGroup>
+	<h:commandLink styleClass="button" action="#{ForumTool.processActionDisplayThread}" value="#{msgs.cdfm_next_thread}" rendered="#{ForumTool.selectedThreadHead.hasNextThread}">
+		<f:param value="#{ForumTool.selectedThreadHead.nextThreadId}" name="messageId"/>
+		<f:param value="#{ForumTool.selectedTopic.topic.id}" name="topicId"/>
+		<f:param value="#{ForumTool.selectedForum.forum.id}" name="forumId"/>
+	</h:commandLink>
 </h:panelGroup>

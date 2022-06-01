@@ -46,7 +46,7 @@
 	margin-top: 8px; /* to match title's spacing when both short description and details are set */
 }
 .forumsCollapseTarget {
-	overflow: hidden;
+	overflow: hidden; /* avoid jitted: https://stackoverflow.com/questions/21347898/jquery-slidedown-animation-jitter */
 	padding-left: 1em; /* to match the width of the trigger arrow above */
 }
 .forumHeader .actionLinks,
@@ -162,15 +162,7 @@
 	display: block;
 	margin: 0;
 }
-.messageNew{
-	color: #000;
-	font: .84em/1em verdana, arial,sans-serif;
-	background: #fe9;
-	outline:1px solid #fff; 
-	padding: 1px 2px;
-	margin-right: 5px;
-	/*	display:none; - uncomment to hide the "new" message */
-}
+
 .childrenNewNumber{
 	margin-left: 5px;
 }
@@ -189,29 +181,13 @@
 }
 
 #messNavHolder{
-	float:none;
-	display:block;
-	line-height: 2em;
-	height:100%;
-	overflow:hidden;
-	padding:2px 0;
-	margin:.3em 0;
-	clear:both;
-	}
-.jumpToNew{
-	padding:2px;
+	display:inline-block;
 }
-.jumpToNew a {
-	border:1px solid #ccc;
-	padding:3px;
-	padding-left:18px;
-	background: #eee url(../images/silk/arrow_down.png) center left no-repeat;
+.sakai-table-buttonContainer.threadOptions {
+	margin-bottom: 10px;
 }
-.markAllAsRead {
-	border:1px solid #ccc;
-	padding:3px;
-	padding-left:30px;
-	background: #eee url(../images/markAsRead.gif)  5px center no-repeat;
+.sakai-table-buttonContainer.threadOptions > .button:last-of-type {
+	margin-right: 0;
 }
 
 .topicIcon{
@@ -234,43 +210,17 @@
 	padding: 1px 2px;
 	margin-right: 5px;
 }
-
-.Mrphs-sakai-forums #msgForum a.button.markAsReadIcon{
-	cursor: pointer;
-	padding-left: 25px;
-	position:relative;
-}
-
-.Mrphs-sakai-forums #msgForum a.button.markAsReadIcon::before{
-	content: "";
-	position:absolute;
-	background: url('../images/silk/email.png') 0 center no-repeat;
-	width: 20px;
-	height: 16px;
-	top: 50%;
-	left: 5px;
-	transform: translateY(-50%);
-}
-
-.Mrphs-sakai-forums #msgForum a.markAsReadIcon:hover::before{
-	background-image: url('../images/silk/email_open.png');
-}
-.messagesFlat,.messagesThreaded{
-	margin: 10px 0;
+.table.messagesFlat,.table.messagesThreaded{
 	table-layout: fixed;
 	width: 100%;
-}
-.messagesFlat  tbody tr div,.messagesThreaded tbody tr div{
-	border: none
+	margin-bottom: 0;
 }
 .messagesFlat tbody tr td div.hierItemBlock,.messagesThreaded tbody tr td div.hierItemBlock{
 	padding: 0 10px;
 	border-left: 2px solid #cd5 !important;
-	margin: 10px;
 }
-.messagesThreaded tbody tr td{
-	padding-top: 0;
-	padding-bottom: 0;
+.messagesThreaded > tbody > tr > td.bogus, .messagesFlat > tbody > tr > td.bogus {
+	padding: 10px 0;
 }
 .messagesThreaded tbody tr td div.hierItemBlock .textPanel{
 	clear: both;
@@ -293,18 +243,9 @@
 	margin: 0;
 	border: none !important;
 }
-.messagesFlat tbody .title,.messagesThreaded tbody .title{
-	font-weight: bold;
-	font-size: 1.1em;
-}	
-
-.allMessages .messageTitle .firstChild{
-	/*first post in a thread in topic listing (no body)*/
+.hierItemBlock .attachListJSF {
+	margin-bottom: 10px;
 }
-.allMessages .hierItemBlock .messageTitle .firstChild{
-	/*first post in a thread in topic listing ( + body) */
-}
-
 .allMessages td.attach{
 	vertical-align:middle;
 }
@@ -315,6 +256,41 @@
 	/*listing of a message pending aproval*/
 	border-left: 2px solid #ccc;
 	margin: 0;
+}
+.messageMetadata {
+	display: flex;
+	justify-content: space-between;
+}
+.messageAuthor, .messageAuthor a[href] {
+	color: #555;
+	font-weight: bold;
+	text-decoration: none;
+}
+.messageDate {
+	margin-left: 4px;
+	font-size: 12px;
+}
+.messageReadByCount {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	width: max-content;
+}
+.messageReadByCount .readByCount {
+	font-weight: bold;
+}
+.itemToolBar {
+	display: flex;
+	justify-content: flex-end;
+}
+.itemToolBar a.button {
+	margin-top: 10px;
+}
+.itemToolBar.itemToolBar a:last-of-type {
+	margin-right: 0;
+}
+.itemToolBar.itemToolBar .replyButton.button {
+	margin-right: auto;
 }
 /*PART 3 - SINGLE MESSAGE DISPLAY*/
 .singleMessage{
@@ -469,6 +445,9 @@ td div.title{
 .attachListJSF > li {
 	line-height: 2;
 }
+.attachListJSF img {
+	margin-right: 4px;
+}
 .permissionTable {
 	width: 675px;	
 }
@@ -532,7 +511,7 @@ table.discTria:hover{
 	background: transparent;
 }
 .inactive{
-	color: #aaa;
+	color: #707070;
 }
 .printBlock{
 	/*top  most parent of any printable block - used in print previews/pretty prints*/
@@ -571,10 +550,6 @@ table.discTria:hover{
 	background: #000;
 	padding: 3px;
 	margin-right: 5px;
-}
-
-.messageMetadata{
-	padding:1px 0;
 }
 
 a .textPanelFooter{
@@ -810,7 +785,8 @@ div.msgcntr-profile-qtip {
 .badge-locked, 
 .badge-moderated, 
 .badge-new,
-.badge-unavailable {
+.badge-unavailable,
+.messageNew {
 	margin: 0 0 0 4px;
 	padding: 4px;
 	border-radius: 4px;
@@ -825,6 +801,34 @@ div.msgcntr-profile-qtip {
 .badge-moderated {
 	background-color: #f5dfb0;
 }
-.badge-new {
+.badge-new, .messageNew {
 	background-color: #eaea21;
+}
+.forumsNavBar {
+	display:flex;
+	justify-content: space-between;
+	align-items: center;
+	flex-wrap: wrap;
+}
+.standardCrumbs {
+	display: flex;
+	flex-wrap: wrap;
+	margin: 10px 0;
+	padding: 0;
+	list-style: none;
+}
+.standardCrumbs > li + li::before {
+	content: "\f105";
+	padding: 0 10px;
+	font-family: FontAwesome;
+}
+.view-message-nav {
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+	flex-wrap: wrap;
+	margin-left: auto;
+}
+.view-message-nav > a, .view-message-nav > span {
+	margin: 10px 0 10px 4px;
 }

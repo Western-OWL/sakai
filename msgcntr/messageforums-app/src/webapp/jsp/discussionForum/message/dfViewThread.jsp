@@ -67,33 +67,38 @@
 		// element into which the value gets insert and retrieved from
 		<span class="highlight"  id="maxthreaddepth" class="skip"><h:outputText value="#{msgs.cdfm_maxthreaddepth}" /></span>
 //--%>
+	<div class="forumsNavBar">
+		<h:panelGroup layout="block" styleClass="suppressThreadCrumbLink">
+			<%@ include file="/jsp/discussionForum/includes/crumbs/standard.jspf" %>
+		</h:panelGroup>
+		<%@ include file="/jsp/discussionForum/includes/threadPrevNext.jspf"%>
+	</div>
 
-			<h:panelGrid columns="2" width="100%" styleClass="specialLink">
-			    <h:panelGroup styleClass="suppressThreadCrumbLink">
-					<%@ include file="/jsp/discussionForum/includes/crumbs/standard.jspf" %>
-				 </h:panelGroup>
+	<div id="dialogDiv" title="Grade Messages" style="display:none">
+		<iframe id="dialogFrame" name="dialogFrame" width="100%" height="100%" frameborder="0"></iframe>
+	</div>
+	<h:messages styleClass="sak-banner-error" id="errorMessages" rendered="#{! empty facesContext.maximumSeverity}" />
 
-				 <%@ include file="/jsp/discussionForum/includes/threadPrevNext.jspf"%>
-			</h:panelGrid>
+	<div id="gradesSavedDiv" class="sak-banner-success" style="display:none">
+		<h:outputText value="#{msgs.cdfm_grade_successful}"/>
+	</div>
 
-		<h:panelGroup rendered="#{!ForumTool.threadMoved}">
+	<div class="sakai-table-toolBar">
+		<div class="sakai-table-filterContainer">
+			<%@ include file="dfViewSearchBarThread.jsp"%>
+		</div>
+		<h:panelGroup layout="block" styleClass="sakai-table-buttonContainer threadOptions" rendered="#{!ForumTool.threadMoved}">
 			<h:commandLink styleClass="button" value="#{msgs.cdfm_reply_thread}" id="replyThread" rendered="#{ForumTool.selectedTopic.isNewResponseToResponse && ForumTool.selectedThreadHead.msgApproved && !ForumTool.selectedTopic.locked && !ForumTool.selectedForum.locked == 'true'}"
-				action="#{ForumTool.processDfMsgReplyThread}" immediate="true"/>&nbsp;
-			<h:commandLink styleClass="button" value=" #{msgs.cdfm_mark_all_as_read}" id="markAllRead" action="#{ForumTool.processActionMarkAllThreadAsRead}" rendered="#{ForumTool.selectedTopic.isMarkAsRead and not ForumTool.selectedTopic.topic.autoMarkThreadsRead}"/>&nbsp;
+				action="#{ForumTool.processDfMsgReplyThread}" immediate="true"/>
+			<div id="messNavHolder"></div>
+			<h:commandLink styleClass="button" value=" #{msgs.cdfm_mark_all_as_read}" id="markAllRead" action="#{ForumTool.processActionMarkAllThreadAsRead}" rendered="#{ForumTool.selectedTopic.isMarkAsRead and not ForumTool.selectedTopic.topic.autoMarkThreadsRead}"/>
 			<h:outputLink styleClass="button" id="print" value="javascript:printFriendly('#{ForumTool.printFriendlyUrlThread}');">
-				<h:graphicImage url="/../../library/image/silk/printer.png" alt="#{msgs.print_friendly}" title="#{msgs.print_friendly}" />
+				<h:outputText value="#{msgs.cdfm_print}" />
 			</h:outputLink>
 		</h:panelGroup>
+	</div>
 
-	  	<f:verbatim>
-			<div id="dialogDiv" title="Grade Messages" style="display:none">
-	    		<iframe id="dialogFrame" name="dialogFrame" width="100%" height="100%" frameborder="0"></iframe>
-	    	</div>
-		</f:verbatim>
-		
-				 <%@ include file="dfViewSearchBarThread.jsp"%>
-		
-		<h:outputText value="#{msgs.cdfm_postFirst_warning}" rendered="#{ForumTool.needToPostFirst}" styleClass="messageAlert"/>
+		<h:outputText value="#{msgs.cdfm_postFirst_warning}" rendered="#{ForumTool.needToPostFirst}" styleClass="sak-banner-info"/>
         <%-- a moved message --%>
         <h:panelGroup rendered="#{ForumTool.threadMoved}" >
           <f:verbatim><span></f:verbatim>
@@ -107,30 +112,26 @@
             <h:outputText styleClass="threadMovedMsg"  value=" #{msgs.anotherTopic}" />
           <f:verbatim></span></f:verbatim>
         </h:panelGroup>
-		<div id="messNavHolder" style="clear:both;"></div>
+
 		<%--rjlowe: Expanded View to show the message bodies, but not threaded --%>
-		<div>
+
 		<h:dataTable id="expandedMessages" value="#{ForumTool.selectedThread}" var="message" rendered="#{!ForumTool.threaded}"
-   	 		styleClass="table table-hover table-striped table-bordered messagesFlat specialLink" cellpadding="0" cellspacing="0" width="100%" columnClasses="bogus">
+			styleClass="table table-hover table-striped table-bordered messagesFlat" columnClasses="bogus">
 			<h:column>
-			
 				<%@ include file="dfViewThreadBodyInclude.jsp" %>
 			</h:column>
 		</h:dataTable>
-		</div>
-		
+
 		<%--rjlowe: Expanded View to show the message bodies, threaded --%>
-		<div>
 		<mf:hierDataTable id="expandedThreadedMessages" value="#{ForumTool.selectedThread}" var="message" rendered="#{ForumTool.threaded}"
-   	 		noarrows="true" styleClass="table table-hover table-striped table-bordered messagesThreaded specialLink" border="0" cellpadding="0" cellspacing="0" width="100%" columnClasses="bogus">
+				noarrows="true" styleClass="table table-hover table-striped table-bordered messagesThreaded" border="0" cellpadding="0" cellspacing="0" width="100%" columnClasses="bogus">
 			<h:column id="_msg_subject">
 				<%@ include file="dfViewThreadBodyInclude.jsp" %>
 			</h:column>
 		</mf:hierDataTable>
-		</div>
 
 		<%@ include file="/jsp/discussionForum/includes/threadPrevNext.jspf"%>
-				
+
 		<h:inputHidden id="mainOrForumOrTopic" value="dfViewThread" />
 		<%--//designNote:  need a message if no messages (as in when there are no unread ones)  --%>
 
@@ -146,11 +147,8 @@
   			mySetMainFrameHeight('<%= org.sakaiproject.util.Web.escapeJavascript(thisId)%>');
   		}
 	</script> 
-	
+
 	</h:form>
 	<h:outputText value="#{msgs.cdfm_insufficient_privileges_view_topic}" rendered="#{ForumTool.selectedTopic.topic.draft && ForumTool.selectedTopic.topic.createdBy != ForumTool.userId}" />
-	
-				 
-	
 </sakai:view>
 </f:view>

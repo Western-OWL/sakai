@@ -336,7 +336,7 @@ public class HierDataTableRender extends HtmlBasicRenderer
 				}
 
 				if (column.getId().endsWith("_msg_subject")) {
-					writer.writeAttribute("style", "padding-left: " + dmb.getDepth() + "em;", "style");
+					writer.writeAttribute("style", "padding-left: " + dmb.getDepth()*10 + "px;", "style");
 				}
 
 				// Render the contents of this cell by iterating over the kids of our kids

@@ -91,10 +91,6 @@
 				}
 			}
 		}
-
-		.view-message-nav{
-			text-align:right;
-		}
 	}
 
 	table.specialLink{
@@ -237,22 +233,6 @@
 		
 		& #forum_grading{
 			margin-top: 2em;
-		}
-	}
-
-	.messagesThreaded{
-		.md{
-			display: inline-block;
-			font-size: 1em;
-			padding: 0.3em 0.2em 0.1em 0;
-			a{
-				color: $text-color;
-				text-decoration: none;
-				border-bottom: 1px dotted darken( $tool-background-color, 15% );
-				&:hover{
-					border-bottom: 1px dotted darken( $tool-background-color, 10% );
-				}
-			}
 		}
 	}
 

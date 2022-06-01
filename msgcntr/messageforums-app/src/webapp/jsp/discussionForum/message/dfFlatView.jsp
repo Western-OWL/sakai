@@ -84,7 +84,7 @@
 	<span class="skip" id="nextNewItemTitleHolder"><h:outputText value="#{msgs.cdfm_gotonewtitle}" /></span>
 	<span class="skip" id="lastNewItemTitleHolder"><h:outputText value="#{msgs.cdfm_lastnewtitle}" /></span>
 
-		<div id="messNavHolder" style="clear:both;">
+		<div id="messNavHolder">
 				<h:commandLink action="#{ForumTool.processActionMarkAllAsRead}" rendered="#{ForumTool.selectedTopic.isMarkAsRead}" styleClass="button"> 
 					<h:outputText value=" #{msgs.cdfm_mark_all_as_read}" />
 				</h:commandLink>
