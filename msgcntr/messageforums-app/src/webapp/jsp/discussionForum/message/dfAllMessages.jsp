@@ -133,20 +133,7 @@
         </f:subview>
 
  		<h:messages styleClass="alertMessage" id="errorMessages" rendered="#{! empty facesContext.maximumSeverity}" />
- 			<h:panelGroup styleClass="itemNav">
-			   <h:outputText styleClass="button formButtonDisabled" value="#{msgs.cdfm_previous_topic}"  rendered="#{!ForumTool.selectedTopic.hasPreviousTopic}" />
-				 <h:commandLink styleClass="button" action="#{ForumTool.processActionDisplayPreviousTopic}" value="#{msgs.cdfm_previous_topic}"  rendered="#{ForumTool.selectedTopic.hasPreviousTopic}" 
-				                title=" #{msgs.cdfm_previous_topic}">
-					 <f:param value="#{ForumTool.selectedTopic.previousTopicId}" name="previousTopicId"/>
-					 <f:param value="#{ForumTool.selectedForum.forum.id}" name="forumId"/>
-				 </h:commandLink>
-				 <h:outputText  styleClass="button formButtonDisabled" value="#{msgs.cdfm_next_topic}" rendered="#{!ForumTool.selectedTopic.hasNextTopic}" />
-				 <h:commandLink styleClass="button" action="#{ForumTool.processActionDisplayNextTopic}" value="#{msgs.cdfm_next_topic}" rendered="#{ForumTool.selectedTopic.hasNextTopic}" 
-				                title=" #{msgs.cdfm_next_topic}">
-					<f:param value="#{ForumTool.selectedTopic.nextTopicId}" name="nextTopicId"/>
-					<f:param value="#{ForumTool.selectedForum.forum.id}" name="forumId"/>
-				 </h:commandLink>
-			 </h:panelGroup>
+ 			<%@ include file="/jsp/discussionForum/includes/topicPrevNext.jspf" %>
 			<h:panelGrid columns="2" width="100%" styleClass="specialLink">
 			    <h:panelGroup styleClass="suppressTopicCrumbLink hideThreadCrumb">
 						<%@ include file="/jsp/discussionForum/includes/crumbs/standard.jspf" %>
@@ -154,18 +141,8 @@
 
 			</h:panelGrid>
 
-		<h:panelGroup id="forumActions" layout="block">
-			<h:commandLink styleClass="button" value="#{msgs.cdfm_container_title_thread}" action="#{ForumTool.processAddMessage}" id="df_componse_message_dfAllMessages" 
-				rendered="#{ForumTool.selectedTopic.isNewResponse && !ForumTool.selectedTopic.locked && !ForumTool.selectedForum.locked == 'true'}"/>&nbsp;
-			<h:commandLink styleClass="button" value="#{msgs.cdfm_flat_view}" action="#{ForumTool.processActionDisplayFlatView}"/>&nbsp;
-			<h:commandLink styleClass="button" action="#{ForumTool.processActionTopicSettings}" id="topic_setting" rendered="#{ForumTool.selectedTopic.changeSettings}">&nbsp;
-				<f:param value="#{ForumTool.selectedTopic.topic.id}" name="topicId"/>
-				<h:outputText value="#{msgs.cdfm_topic_settings}"/>
-			</h:commandLink>&nbsp;
-			<h:outputLink styleClass="button" id="print" value="javascript:printFriendly('#{ForumTool.printFriendlyUrl}');">
-				<h:graphicImage url="/../../library/image/silk/printer.png" alt="#{msgs.print_friendly}" title="#{msgs.print_friendly}" />
-			</h:outputLink>
- 		</h:panelGroup>
+			<%@ include file="/jsp/discussionForum/includes/topicViewActions.jspf" %>
+
 			<%@ include file="/jsp/discussionForum/includes/topicHeader/singletonTopicHeaderList.jspf"%>	
 				<%--<%@ include file="dfViewSearchBar.jsp"%> --%>
 				
@@ -351,20 +328,7 @@
 
 <f:verbatim><br/><br/></f:verbatim>
 <h:panelGrid columns="1" width="100%" styleClass="specialLink">
-	 <h:panelGroup styleClass="itemNav">
-	   <h:outputText styleClass="button formButtonDisabled"  value="#{msgs.cdfm_previous_topic}"  rendered="#{!ForumTool.selectedTopic.hasPreviousTopic}" />
-		 <h:commandLink styleClass="button" action="#{ForumTool.processActionDisplayPreviousTopic}" value="#{msgs.cdfm_previous_topic}"  rendered="#{ForumTool.selectedTopic.hasPreviousTopic}" 
-		                title=" #{msgs.cdfm_previous_topic}">
-			 <f:param value="#{ForumTool.selectedTopic.previousTopicId}" name="previousTopicId"/>
-			 <f:param value="#{ForumTool.selectedForum.forum.id}" name="forumId"/>
-		 </h:commandLink>	
-		 <h:outputText  styleClass="button formButtonDisabled" value="#{msgs.cdfm_next_topic}" rendered="#{!ForumTool.selectedTopic.hasNextTopic}" />
-		 <h:commandLink  styleClass="button" action="#{ForumTool.processActionDisplayNextTopic}" value="#{msgs.cdfm_next_topic}" rendered="#{ForumTool.selectedTopic.hasNextTopic}" 
-		                title=" #{msgs.cdfm_next_topic}">
-			<f:param value="#{ForumTool.selectedTopic.nextTopicId}" name="nextTopicId"/>
-			<f:param value="#{ForumTool.selectedForum.forum.id}" name="forumId"/>
-		 </h:commandLink>
-	 </h:panelGroup>
+	 <%@ include file="/jsp/discussionForum/includes/topicPrevNext.jspf" %>
 </h:panelGrid>
 		
 <input type="hidden" id="selectedTopicid" name="selectedTopicid" class="selectedTopicid" value="0" />
