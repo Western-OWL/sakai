@@ -1,1 +1,1 @@
-<%@ include file="/jsp/discussionForum/includes/dfMsgReply.jspf"%>
+<%@ include file="/jsp/discussionForum/includes/composeAndReply/composeAndReply.jspf"%>
