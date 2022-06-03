@@ -829,6 +829,6 @@ div.msgcntr-profile-qtip {
 	flex-wrap: wrap;
 	margin-left: auto;
 }
-.view-message-nav > a, .view-message-nav > span {
+.view-message-nav > a[href].button, .view-message-nav > span {
 	margin: 10px 0 10px 4px;
 }
