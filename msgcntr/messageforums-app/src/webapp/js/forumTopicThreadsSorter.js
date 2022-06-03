@@ -341,7 +341,7 @@ jQuery.fn.threadsSorter = function() {
 		
 		
 		/* 
-		 * The sakai expand/collapse will reload the tables which wipe out the sorted rows when expending/collapsing.
+		 * The sakai expand/collapse will reload the tables which wipe out the sorted rows when expanding/collapsing.
 		 * We added handler for expand/collapse when clicking on first column header  -- the expand/collapse icon 
 		 * to overwrite the out of box behavior, so that the table still remains sorted and sorting direction indicator
 		 * still shows up while it's expanding/collapsing.

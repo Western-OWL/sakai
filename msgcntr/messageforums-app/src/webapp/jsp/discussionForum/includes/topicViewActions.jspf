@@ -1,20 +1,26 @@
-<h:panelGroup id="forumsActions" layout="block">
-	<h:commandLink styleClass="button" value="#{msgs.cdfm_container_title_thread}" id="df_compose_message_dfAllMessages"
-		rendered="#{ForumTool.selectedTopic.isNewResponse && !ForumTool.selectedTopic.locked && !ForumTool.selectedForum.locked == 'true'}" action="#{ForumTool.processAddMessage}" immediate="true"/>&nbsp;
-	<h:commandLink styleClass="button" value="#{msgs.cdfm_thread_view}"  id="threadView" action="#{ForumTool.processActionDisplayThreadedView}" immediate="true"
-				   rendered="#{view.viewId == '/jsp/discussionForum/message/dfFlatView.jsp'}"/>
-	<h:commandLink styleClass="button" value="#{msgs.cdfm_flat_view}" action="#{ForumTool.processActionDisplayFlatView}"
-				   rendered="#{view.viewId == '/jsp/discussionForum/message/dfAllMessages.jsp'}"/>&nbsp;
-	<h:commandLink styleClass="button" action="#{ForumTool.processActionTopicSettings}" id="topic_setting" value="#{msgs.cdfm_topic_settings}"
-		rendered="#{ForumTool.selectedTopic.changeSettings}">
-		<f:param value="#{ForumTool.selectedTopic.topic.id}" name="topicId"/>
-	</h:commandLink>&nbsp;
-	<h:commandLink styleClass="button" action="#{ForumTool.processActionDeleteTopicConfirm}" id="delete_confirm"
-		value="#{msgs.cdfm_button_bar_delete_topic}" accesskey="d"
-		rendered="#{view.viewId == '/jsp/discussionForum/message/dfFlatView.jsp' && !ForumTool.selectedTopic.markForDeletion && ForumTool.displayTopicDeleteOption}">
-		<f:param value="#{ForumTool.selectedTopic.topic.id}" name="topicId"/>
-	</h:commandLink>&nbsp;
-	<h:outputLink styleClass="button" id="print" value="javascript:printFriendly('#{ForumTool.printFriendlyUrl}');">
-		<h:graphicImage url="/../../library/image/silk/printer.png" alt="#{msgs.print_friendly}" title="#{msgs.print_friendly}" />
-	</h:outputLink>
+<h:panelGroup id="forumsActions" layout="block" styleClass="sakai-table-toolBar">
+	<div class="sakai-table-filterContainer">
+		<div class="sakai-table-viewFilter">
+			<h:commandLink styleClass="button startNewConversation" value="#{msgs.cdfm_container_title_thread}" id="df_compose_message_dfAllMessages"
+				rendered="#{ForumTool.selectedTopic.isNewResponse && !ForumTool.selectedTopic.locked && !ForumTool.selectedForum.locked == 'true'}" action="#{ForumTool.processAddMessage}" immediate="true"/>
+		</div>
+	</div>
+	<h:panelGroup layout="block" styleClass="sakai-table-buttonContainer threadOptions" rendered="#{!ForumTool.threadMoved}">
+		<h:commandLink styleClass="button" value="#{msgs.cdfm_thread_view}"  id="threadView" action="#{ForumTool.processActionDisplayThreadedView}" immediate="true"
+			rendered="#{view.viewId == '/jsp/discussionForum/message/dfFlatView.jsp'}"/>
+		<h:commandLink styleClass="button" value="#{msgs.cdfm_flat_view}" action="#{ForumTool.processActionDisplayFlatView}"
+			rendered="#{view.viewId == '/jsp/discussionForum/message/dfAllMessages.jsp'}"/>
+		<h:commandLink styleClass="button" action="#{ForumTool.processActionTopicSettings}" id="topic_setting" value="#{msgs.cdfm_topic_settings}"
+			rendered="#{ForumTool.selectedTopic.changeSettings}">
+			<f:param value="#{ForumTool.selectedTopic.topic.id}" name="topicId"/>
+		</h:commandLink>
+		<h:commandLink styleClass="button" action="#{ForumTool.processActionDeleteTopicConfirm}" id="delete_confirm"
+			value="#{msgs.cdfm_button_bar_delete_topic}" accesskey="d"
+			rendered="#{view.viewId == '/jsp/discussionForum/message/dfFlatView.jsp' && !ForumTool.selectedTopic.markForDeletion && ForumTool.displayTopicDeleteOption}">
+			<f:param value="#{ForumTool.selectedTopic.topic.id}" name="topicId"/>
+		</h:commandLink>
+		<h:outputLink styleClass="button" id="print" value="javascript:printFriendly('#{ForumTool.printFriendlyUrl}');">
+			<h:outputText value="#{msgs.cdfm_print}" />
+		</h:outputLink>
+	</h:panelGroup>
 </h:panelGroup>

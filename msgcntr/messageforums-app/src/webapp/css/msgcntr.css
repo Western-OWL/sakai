@@ -194,22 +194,6 @@
 /*	display:none; 	comment to hide blue or orange speech balloons by topics in Forum list view */
 }
 /* PART 2 - TOPIC/THREAD VIEWS*/
-.messagePending{
-	background: #bf9;
-	font: .84em/1em verdana, arial,sans-serif;
-	color: #000;
-	outline:1px solid #fff; 
-	padding: 1px 2px;
-	margin-right: 5px;
-}
-.messageDenied{
-	color: #000;
-	font: .84em/1em verdana, arial,sans-serif;
-	background: #f9a;
-	outline:1px solid #fff; 	
-	padding: 1px 2px;
-	margin-right: 5px;
-}
 .table.messagesFlat,.table.messagesThreaded{
 	table-layout: fixed;
 	width: 100%;
@@ -248,6 +232,10 @@
 }
 .allMessages td.attach{
 	vertical-align:middle;
+}
+.allMessages td.messagesCountColumn,
+.allMessages td.unreadCountColumn {
+	text-align: center;
 }
 .allMessages .anonymousAuthor{
 	font-size:1.2em;
@@ -291,6 +279,12 @@
 }
 .itemToolBar.itemToolBar .replyButton.button {
 	margin-right: auto;
+}
+.forumsTableFooter {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
 }
 /*PART 3 - SINGLE MESSAGE DISPLAY*/
 .singleMessage{
@@ -786,11 +780,16 @@ div.msgcntr-profile-qtip {
 .badge-moderated, 
 .badge-new,
 .badge-unavailable,
-.messageNew {
+.messageNew,
+.messagePending,
+.messageDenied {
+	display: inline-block;
+	height: 1.6em;
 	margin: 0 0 0 4px;
 	padding: 4px;
 	border-radius: 4px;
 	background-color: #f8deae;
+	line-height: 1;
 	color: #555;
 	font-size: 12px;
 	font-weight: bold;
@@ -803,6 +802,13 @@ div.msgcntr-profile-qtip {
 }
 .badge-new, .messageNew {
 	background-color: #eaea21;
+}
+.messagePending{
+	background-color: #bf9;
+}
+.messageDenied{
+	background-color: #f9a;
+	color: #444;
 }
 .forumsNavBar {
 	display:flex;
