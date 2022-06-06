@@ -37,6 +37,7 @@
  			$('#msgForum\\:messagesInHierDataTable').threadsSorter();
 			//add handles to list for thread operat
 			instrumentThreads('msgForum\\:messagesInHierDataTable');
+			enableDisableMoveThreadLink();
 
 			var menuLink = $('#forumsMainMenuLink');
 			var menuLinkSpan = menuLink.closest('span');
@@ -48,13 +49,15 @@
         function disableMoveLink() {
             var linkid = "msgForum:df_move_message_commandLink";
             var movelink = document.getElementById(linkid);
-        	movelink.style.color="grey";
+            movelink.classList.add("disabled");
+            movelink.classList.add("disabledMoveLink");
         }
 
         function enableMoveLink() {
             var linkid = "msgForum:df_move_message_commandLink";
             var movelink = document.getElementById(linkid);
-        	movelink.style.color="";
+            movelink.classList.remove("disabled");
+            movelink.classList.remove("disabledMoveLink");
         }
  
         // this is  called from messageforums-app/src/java/org/sakaiproject/tool/messageforums/jsf/HierDataTableRender.java. 

@@ -775,6 +775,12 @@ div.msgcntr-profile-qtip {
 {
 	display: none;
 }
+
+.disabledMoveLink
+{
+	pointer-events: none;
+}
+
 .badge-draft, 
 .badge-locked, 
 .badge-moderated, 
