@@ -123,11 +123,11 @@
 			<mf:hierDataTable styleClass="table-hover allMessages" id="messagesInHierDataTable" rendered="#{!empty ForumTool.messages}"  value="#{ForumTool.messages}" var="message" expanded="#{ForumTool.expanded}"
 					columnClasses="attach, attach,messageTitle,messagesCountColumn,unreadCountColumn,attach,bogus,bogus">
 				<h:column id="_checkbox">
+				</h:column>
+				<h:column id="_toggle">
 					<f:facet name="header">
 						<h:graphicImage value="/images/expand-collapse.gif" alt="#{msgs.expandAll}" title="#{msgs.expandAll}" />
 					</f:facet>
-				</h:column>
-				<h:column id="_toggle">
 				</h:column>
 				<h:column id="_msg_subject">
 					<f:facet name="header">

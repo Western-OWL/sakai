@@ -311,7 +311,7 @@ jQuery.fn.threadsSorter = function() {
 		 * except first column
 		 */
 		
-		$(this).find("th:gt(0)").click(function(e){
+		$(this).find("th:gt(1)").click(function(e){
 		
 			//IE supports srcElement, not currentTarget
 			if(!e.currentTarget)
@@ -351,7 +351,7 @@ jQuery.fn.threadsSorter = function() {
 		var imageCollapseUrl = "../../images/collapse.gif";
 		var imageExpandUrl = "../../images/expand.gif";
 	
-		var expandCollapseCol = $this[0].tHead.rows[0].cells[0];
+		var expandCollapseCol = $this[0].tHead.rows[0].cells[1];
 		
 		//replaceWith added in jQuery 1.2, not in 1.1.4
 		//$(expandCollapseCol).find("a").replaceWith("<img src=" + imageCollapseUrl + " alt='Expand All/Collapse All' title='Expand All/Collapse All'/>");
@@ -359,14 +359,14 @@ jQuery.fn.threadsSorter = function() {
 		$(expandCollapseCol).css("cursor", "pointer");
 		var flip = 1;   //indicates click times for expand all/collapse all
 
-		$(this).find("th:eq(0)").click(function(e){
+		$(this).find("th:eq(1)").click(function(e){
 			flip++;
 			var imageObj = $(e.target).is("img")?$(e.target):$(e.target).find("img");
 			
 			var toggleThreadSorter = function (el, show) {
 				$(el.tBodies[0].rows).not(".hierItemBlock").toggle(show); 
-				imageObj.attr({'src': show ? imageExpandCollapseUrl : imageCollapseExpandUrl});
-				$("tr.hierItemBlock td:first-child img").attr({'src': show ? imageCollapseUrl : imageExpandUrl})
+				imageObj.attr({'src': show ? imageCollapseExpandUrl : imageExpandCollapseUrl });
+				$("tr.hierItemBlock td:nth-child(2) img").attr({'src': show ? imageExpandUrl : imageCollapseUrl});
 			};
 			toggleThreadSorter($this[0], flip %2 === 0);
 
