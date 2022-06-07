@@ -79,8 +79,9 @@ public class ShowAreaRender extends Renderer
         }
         else
         {
-          writer
-            .write("<div class=\"textPanel bordered\">");
+		  writer.write("<div id=\"");
+		  writer.write(id);
+          writer.write("\" class=\"textPanel bordered\">");
 //		  .write("<table border=\"1\" id=\"message_table\" cellpadding=\"7\" style=\"border-collapse: collapse; table-layout:fixed\" width=\"90%\"><tr width=\"95%\"><td width=\"100%\" STYLE=\"word-wrap: break-word\">");
               writer.write(value);
           writer.write("</div>");
