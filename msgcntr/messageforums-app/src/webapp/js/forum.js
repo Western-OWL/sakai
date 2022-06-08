@@ -482,13 +482,13 @@ function fckeditor_word_count(editorInstance) {
 
 function msgcntr_word_count(forumHtml) {
     if (document.getElementById('counttotal')) {
-        document.getElementById('counttotal').innerHTML = "<span class='highlight'>(" + getWordCount(forumHtml) + ")</span>";
+        document.getElementById('counttotal').innerHTML = getWordCount(forumHtml);
     }
 }
 
  function fckeditor_word_count_fromMessage(msgStr, countSpan){
  	if (document.getElementById(countSpan)) {
- 	    document.getElementById(countSpan).innerHTML = "<span class='highlight'>(" + getWordCount(msgStr) + ")</span>";
+ 	    document.getElementById(countSpan).innerHTML = getWordCount(msgStr);
  	}
  }
  

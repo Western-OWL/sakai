@@ -289,10 +289,9 @@
 /*PART 3 - SINGLE MESSAGE DISPLAY*/
 .singleMessage{
 	/*title + metadata block of a single message display*/
+	padding: 10px;
 	border-left: 2px solid #69d;
-	background:#f9f9f9;
-	margin-top: 1em;
-	padding:.3em  .5em;
+	background: #f9f9f9;
 }
 .singleMessage .textPanel {
 	/* so non-breaking wide message content doesn't stretch the page */
@@ -302,35 +301,7 @@
 	/*title + metadata block of a single message display*/
 	border:1px solid #ccc;
 	background:#ffe;
-	margin-top: 1em;
-	padding:.3em  .5em;
-}
-table.messageActions {
-	/*single message action links top container*/
-	background: #eee;
-}
-table.messageActions td{
-	/*single message action links inner container*/
-	padding: 6px;
-	vertical-align: middle;
-	background: #eee;
-}
-.messageActions a{
-	/*single message action links*/
-	text-decoration: none !important;
-	border: 1px solid #ccc !important;
-	background: #fff;
-	padding: 2px 5px;
-	vertical-align: middle;
-	margin: 0 .3em .3em 0;
-	display: inline-block;
-}
-.messageActions a span{
-	white-space: nowrap;
-}
-.messageActions a:hover{
-	border: 1px solid #555  !important;
-	text-decoration: none !important;
+	padding: 10px;
 }
 #permalinkHolder{
 	border:1px solid #ccc;
@@ -353,12 +324,14 @@ table.messageActions td{
 	width: 100%;
 	height: 200px;
 }
-.messageActions td.otherOtherActions {
-	/*rightmost column of single message action links - not used*/
-	text-align: right;
+.viewMessageDetailsContainer {
+	display: flex;
+	align-items: flex-end;
+	justify-content: space-between;
+	flex-wrap: wrap;
 }
-.messageActions a img{
-	vertical-align: middle;
+#counttotal {
+	margin-left: 4px;
 }
 /*PART $ MESSAGE TYPES */
 .messageAlert{

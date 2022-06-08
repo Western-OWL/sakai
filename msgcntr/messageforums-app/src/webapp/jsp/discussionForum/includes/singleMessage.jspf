@@ -22,9 +22,9 @@
 							<f:param value="#{ForumTool.selectedTopic.topic.baseForum.id}" name="forumId" />
 						</h:commandLink>
 						<h:outputText styleClass="messageNew" value="#{msgs.cdfm_newflag}" rendered="#{!message.read}"/>
-						<%--pending  message flag --%>
+						<%--pending message flag --%>
 						<h:outputText value="#{msgs.cdfm_msg_pending_label}" rendered="#{message.msgPending}" styleClass="messagePending"/>
-						<%--denied  message flag --%>
+						<%--denied message flag --%>
 						<h:outputText value="#{msgs.cdfm_msg_denied_label}" rendered="#{message.msgDenied}" styleClass="messageDenied" />
 					</div>
 
@@ -72,9 +72,9 @@
 		</t:dataList>
 	</h:panelGroup>
 
-	<%-- reply and other message actions panel --%>
+	<%-- reply and other message actions panel for most pages in the tool (except the single message view (dfViewMessage)--%>
 	<%-- If message actually deleted, don't display links --%>
-	<h:panelGroup layout="block" rendered="#{!message.deleted}" styleClass="itemToolBar">
+	<h:panelGroup layout="block" rendered="#{!message.deleted && view.viewId != '/jsp/discussionForum/message/dfViewMessage.jsp'}" styleClass="itemToolBar">
 		<%-- mark as read link --%>
 		<h:outputLink value="javascript:void(0);"
 			title="#{msgs.cdfm_mark_as_read}"
@@ -108,7 +108,7 @@
 		</h:panelGroup>
 		<%-- Moderate other action --%>
 		<h:panelGroup rendered="#{ForumTool.selectedTopic.isModeratedAndHasPerm}">
-			<h:commandLink action="#{ForumTool.processActionDisplayMessage}" immediate="true" title=" #{msgs.cdfm_moderate}" value="#{msgs.cdfm_moderate}"  styleClass="button">
+			<h:commandLink action="#{ForumTool.processActionDisplayMessage}" immediate="true" title=" #{msgs.cdfm_moderate}" value="#{msgs.cdfm_moderate}" styleClass="button">
 				<f:param value="#{message.message.id}" name="messageId" />
 				<f:param value="#{ForumTool.selectedTopic.topic.id}" name="topicId" />
 				<f:param value="#{ForumTool.selectedTopic.topic.baseForum.id}" name="forumId" />
@@ -138,4 +138,56 @@
 				<f:param value="dfViewThread" name="fromPage" />
 			</h:commandLink>
 		</h:panelGroup>
+	</h:panelGroup>
+
+	<%-- reply and other message actions panel for the single message view only (dfViewMessage) because different buttons and actions are available than on other pages --%>
+	<h:panelGroup layout="block" rendered="#{!ForumTool.deleteMsg && !ForumTool.selectedMessage.message.deleted && view.viewId == '/jsp/discussionForum/message/dfViewMessage.jsp'}" styleClass="itemToolBar">
+		<%-- Reply to this message--%>
+		<h:commandLink styleClass="button" title="#{msgs.cdfm_button_bar_reply_to_msg}" action="#{ForumTool.processDfMsgReplyMsg}" 
+				rendered="#{ForumTool.selectedTopic.isNewResponseToResponse && ForumTool.selectedMessage.msgApproved && !ForumTool.selectedTopic.locked && !ForumTool.selectedForum.locked == 'true'}">
+			<h:outputText value=" #{msgs.cdfm_button_bar_reply_to_msg}" />
+		</h:commandLink>
+		<%-- Reply to the initial message--%>
+		<h:commandLink styleClass="button replyButton" title="#{msgs.cdfm_button_bar_reply_to_thread}" action="#{ForumTool.processDfMsgReplyThread}" 
+				rendered="#{ForumTool.selectedTopic.isNewResponseToResponse && ForumTool.selectedThreadHead.msgApproved && !ForumTool.selectedTopic.locked && !ForumTool.selectedForum.locked == 'true'}">
+			<h:outputText value=" #{msgs.cdfm_button_bar_reply_to_thread}" />
+		</h:commandLink>
+		<%-- Grade this message--%>
+		<h:commandLink styleClass="button" title="#{msgs.cdfm_button_bar_grade}" action="#{ForumTool.processDfMsgGrd}" 
+				rendered="#{ForumTool.selectedTopic.isPostToGradebook && ForumTool.gradebookExist}">
+			<h:outputText value=" #{msgs.cdfm_button_bar_grade}" />
+		</h:commandLink>
+		<%-- Edit this message--%>
+		<h:commandLink styleClass="button" title="#{msgs.cdfm_button_bar_revise}" action="#{ForumTool.processDfMsgRvs}" 
+				rendered="#{ForumTool.selectedMessage.revise}">
+			<h:outputText value=" #{msgs.cdfm_button_bar_revise}" />
+		</h:commandLink>
+		<%-- Email --%>
+		<h:outputLink styleClass="button" id="createEmail2" value="mailto:#{ForumTool.selectedMessage.authorEmail}" rendered="#{ForumTool.selectedMessage.userCanEmail && ForumTool.selectedMessage.authorEmail != '' && ForumTool.selectedMessage.authorEmail != null}">
+			<f:param value="Feedback on #{ForumTool.selectedMessage.message.title}" name="subject" />
+			<h:outputText value=" #{msgs.cdfm_button_bar_email}"/>
+		</h:outputLink>
+		<%-- Copy Link - permalink -- permalink is broken
+		<h:outputLink id="permalink1" value="#{ForumTool.messageURL}" styleClass="button permaLink" title="#{msgs.cdfm_button_bar_permalink_message}">
+			<h:outputText value=" #{msgs.cdfm_button_bar_permalink}"/>
+		</h:outputLink> --%>
+		<%-- Approve this message--%>
+		<h:commandLink styleClass="button" title="#{msgs.cdfm_button_bar_approve}" action="#{ForumTool.processDfMsgApprove}" 
+				rendered="#{ForumTool.allowedToApproveMsg}">
+			<h:outputText value=" #{msgs.cdfm_button_bar_approve}" />
+		</h:commandLink>
+		<%-- Deny this message--%>
+		<h:commandLink styleClass="button" title="#{msgs.cdfm_button_bar_deny}" action="#{ForumTool.processDfMsgDeny}" 
+				rendered="#{ForumTool.allowedToDenyMsg}">
+			<h:outputText value=" #{msgs.cdfm_button_bar_deny}" />
+		</h:commandLink>
+		<%-- Add a comment to this message--%>
+		<h:commandLink styleClass="button" title="#{msgs.cdfm_button_bar_add_comment}" action="#{ForumTool.processDfMsgAddComment}" 
+				rendered="#{ForumTool.allowedToApproveMsg && ForumTool.selectedMessage.msgDenied}">
+			<h:outputText value=" #{msgs.cdfm_button_bar_add_comment}" />
+		</h:commandLink>
+		<%-- Delete this message--%>
+		<h:commandLink styleClass="button" title="#{msgs.cdfm_button_bar_delete_msg}" action="#{ForumTool.processDfMsgDeleteConfirm}" rendered="#{ForumTool.selectedMessage.userCanDelete}" >
+			<h:outputText value=" #{msgs.cdfm_button_bar_delete_msg}" />
+		</h:commandLink>
 	</h:panelGroup>
