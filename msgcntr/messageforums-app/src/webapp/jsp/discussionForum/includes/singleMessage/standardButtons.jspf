@@ -1,0 +1,63 @@
+<%-- mark as read link --%>
+<h:outputLink value="javascript:void(0);"
+	title="#{msgs.cdfm_mark_as_read}"
+	rendered="#{!message.read and ForumTool.selectedTopic.isMarkAsRead}"
+	styleClass="markAsReadIcon button"
+	onclick="doAjax(#{message.message.id}, #{ForumTool.selectedTopic.topic.id}, this);">
+	<h:outputText value="#{msgs.cdfm_mark_as_read}"/>
+</h:outputLink>
+<%-- Reply link --%>
+<h:panelGroup rendered="#{ForumTool.selectedTopic.isNewResponseToResponse && message.msgApproved && !ForumTool.selectedTopic.locked && !ForumTool.selectedForum.locked == 'true'}">
+	<h:commandLink action="#{ForumTool.processDfMsgReplyMsgFromEntire}" title="#{msgs.cdfm_reply}" styleClass="button replyButton">
+		<h:outputText value=" #{msgs.cdfm_reply}" />
+		<f:param value="#{message.message.id}" name="messageId" />
+		<f:param value="#{ForumTool.selectedTopic.topic.id}" name="topicId" />
+		<f:param value="#{ForumTool.selectedForum.forum.id}" name="forumId" />
+	</h:commandLink>
+</h:panelGroup>
+<%-- link to grade --%>
+<h:panelGroup rendered="#{ForumTool.selectedTopic.isPostToGradebook && ForumTool.gradebookExist}">
+	<h:outputLink value="/tool/#{ForumTool.currentToolId}/discussionForum/message/dfMsgGrade" target="dialogFrame" styleClass="button"
+		onclick="dialogLinkClick(this);">
+		<f:param value="#{ForumTool.selectedForum.forum.id}" name="forumId"/>
+		<f:param value="#{ForumTool.selectedTopic.topic.id}" name="topicId"/>
+		<f:param value="#{message.message.id}" name="messageId"/>
+		<f:param value="dialogDiv" name="dialogDivId"/>
+		<f:param value="dialogFrame" name="frameId"/>
+		<f:param value="gradesSavedDiv" name="gradesSavedDiv"/>
+		<f:param value="#{message.message.createdBy}" name="userId"/>
+		<h:outputText value=" #{msgs.cdfm_button_bar_grade}" />
+	</h:outputLink>
+</h:panelGroup>
+<%-- Moderate other action --%>
+<h:panelGroup rendered="#{ForumTool.selectedTopic.isModeratedAndHasPerm}">
+	<h:commandLink action="#{ForumTool.processActionDisplayMessage}" immediate="true" title=" #{msgs.cdfm_moderate}" value="#{msgs.cdfm_moderate}" styleClass="button">
+		<f:param value="#{message.message.id}" name="messageId" />
+		<f:param value="#{ForumTool.selectedTopic.topic.id}" name="topicId" />
+		<f:param value="#{ForumTool.selectedTopic.topic.baseForum.id}" name="forumId" />
+	</h:commandLink>
+</h:panelGroup>
+<%-- Revise other action --%>
+<h:panelGroup rendered="#{message.revise}">
+	<h:commandLink action="#{ForumTool.processDfMsgRvsFromThread}" value="#{msgs.cdfm_button_bar_revise}" styleClass="button">
+		<f:param value="#{message.message.id}" name="messageId" />
+		<f:param value="#{ForumTool.selectedTopic.topic.id}" name="topicId" />
+		<f:param value="#{ForumTool.selectedTopic.topic.baseForum.id}" name="forumId" />
+	</h:commandLink>
+</h:panelGroup>
+<%-- Email --%>
+<h:panelGroup>
+	<h:outputLink id="createEmail1" value="mailto:#{message.authorEmail}" rendered="#{message.userCanEmail}" styleClass="button">
+		<f:param value="Feedback on #{message.message.title}" name="subject" />
+		<h:outputText value="#{msgs.cdfm_button_bar_email}"/>
+	</h:outputLink>
+</h:panelGroup>
+<%-- Delete other action --%>
+<h:panelGroup rendered="#{message.userCanDelete}" >
+	<h:commandLink action="#{ForumTool.processDfMsgDeleteConfirm}" value="#{msgs.cdfm_button_bar_delete}" styleClass="button">
+		<f:param value="#{message.message.id}" name="messageId" />
+		<f:param value="#{ForumTool.selectedTopic.topic.id}" name="topicId" />
+		<f:param value="#{ForumTool.selectedTopic.topic.baseForum.id}" name="forumId" />
+		<f:param value="dfViewThread" name="fromPage" />
+	</h:commandLink>
+</h:panelGroup>
