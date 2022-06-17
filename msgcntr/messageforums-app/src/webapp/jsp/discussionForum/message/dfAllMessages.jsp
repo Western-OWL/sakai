@@ -44,6 +44,8 @@
 			menuLinkSpan.addClass('current');
 			menuLinkSpan.html(menuLink.text());
 
+			setupMessageNav('messageNew');
+			setupMessageNav('messagePending');
  		});
 
         function disableMoveLink() {

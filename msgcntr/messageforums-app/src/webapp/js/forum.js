@@ -347,8 +347,8 @@ function setupMessageNav(messageType){
                     e.preventDefault();
                     var targetPosPrep=$(this).attr('href').replace('#','');
                     var targetPos = $("a[name='" + targetPosPrep + "']").position();
-                    window.parent.scrollTo(0, targetPos.top);        
-                })
+                    window.parent.scrollTo(0, targetPos.top);
+                });
             }
             else {
                 $(this).prop("title", last);
@@ -356,7 +356,8 @@ function setupMessageNav(messageType){
         });
     }
     if ($(".messageNew").size() < 1 && $(".messagePending").size() < 1) {
-        $('#messNavHolder').remove()
+        $('#messNavHolder').remove();
+        $('.markAllAsRead').remove();
     }
 }
 
