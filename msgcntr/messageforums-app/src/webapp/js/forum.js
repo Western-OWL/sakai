@@ -356,14 +356,20 @@ function setupMessageNav(messageType){
         });
     }
     removeMess();
+	removeMarkAllAsRead();
 }
 
 function removeMess()
 {
 	if ($(".messageNew").size() < 1 && $(".messagePending").size() < 1) {
         $('#messNavHolder').remove();
-        $('.markAllAsRead').remove();
     }
+}
+
+function removeMarkAllAsRead() {
+	if ($(".messageNew").size() < 1) {
+		$('.markAllAsRead').remove();
+	}
 }
 
 function doAjax(messageId, topicId, self){

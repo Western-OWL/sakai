@@ -179,10 +179,6 @@
     font-weight: normal;
     margin-left: 5px;
 }
-
-#messNavHolder{
-	display:inline-block;
-}
 .sakai-table-buttonContainer.threadOptions {
 	margin-bottom: 10px;
 }
@@ -525,22 +521,22 @@ a .textPanelFooter{
 
 .lastRevise{
 	margin:.3em 0;
-	padding:.3em 0;		
+	padding:.3em 0;
 }
-form{margin-bottom:0;}
-
-.messageCommentWrap{
-	border:1px solid  #ddd !important;
+form{
+	margin-bottom:0;
+}
+.messageCommentWrap {
+	max-width: max-content;
+	margin-bottom: 10px;
+	padding: 10px;
+	border: 1px solid #ddd;
 	background: #ffd;
-	padding:3px 5px;
-	margin-bottom:10px
 }
 .messageCommentMD{
-	font-size:.9em;
-	text-decoration: underline;
-	margin-bottom:3px
-}
-.messageCommentBody{
+	display: inline-block;
+	margin-bottom: 4px;
+	border-bottom: 1px solid #ddd;
 }
 .threadMovedMsg{
     font-size:1em;
@@ -725,6 +721,9 @@ div.msgcntr-profile-qtip {
 	display: block;
 }
 
+.singleTopicHeader {
+	margin-bottom: 10px;
+}
 .singleMessage.suppressLinkTitleDisplay a.title,
 .singleTopicHeader.suppressLinkTitleDisplay a.title,
 .singleForumHeader.suppressLinkTitleDisplay a.title,
@@ -761,16 +760,19 @@ div.msgcntr-profile-qtip {
 .messagePending,
 .messageDenied {
 	display: inline-block;
-	height: 1.6em;
+	height: 20px;
 	margin: 0 0 0 4px;
 	padding: 4px;
 	border-radius: 4px;
-	background-color: #f8deae;
+	background-color: transparent;
 	line-height: 1;
 	color: #555;
 	font-size: 12px;
 	font-weight: bold;
 	white-space: nowrap;
+}
+.badge-draft {
+	background-color: #f8deae;
 }
 .badge-locked {
 	background-color: #fbced0; 
@@ -781,8 +783,11 @@ div.msgcntr-profile-qtip {
 .badge-new, .messageNew {
 	background-color: #eaea21;
 }
+.badge-unavailable {
+	background-color: #fbbf72;
+}
 .messagePending{
-	background-color: #bf9;
+	background-color: #91d7ee;
 }
 .messageDenied{
 	background-color: #f9a;
