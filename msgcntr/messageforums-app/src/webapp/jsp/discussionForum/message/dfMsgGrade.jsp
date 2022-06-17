@@ -123,7 +123,7 @@
             <h3><h:outputText value="#{msgs.cdfm_grade_msg}" /></h3>
             <%@ include file="/jsp/discussionForum/includes/topicHeader/singletonTopicHeaderList.jspf"%>
             <h:messages globalOnly="true" infoClass="success" errorClass="alertMessage" rendered="#{! empty facesContext.maximumSeverity}"/>
-            <h:panelGroup layout="block" rendered="#{ForumTool.selectedMessage != null}" styleClass="hideActionButtons suppressAuthorLinkDisplay">
+            <h:panelGroup layout="block" rendered="#{ForumTool.selectedMessage != null}" styleClass="suppressAuthorLinkDisplay">
 				<%@ include file="/jsp/discussionForum/includes/singletonMessageList.jspf"%>
             </h:panelGroup>
 

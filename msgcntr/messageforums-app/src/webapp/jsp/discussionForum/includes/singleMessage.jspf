@@ -73,11 +73,12 @@
 	</h:panelGroup>
 
 	<%-- If message actually deleted, don't display links --%>
-	<h:panelGroup layout="block" rendered="#{!message.deleted && view.viewId != '/jsp/discussionForum/message/dfViewMessage.jsp'}" styleClass="itemToolBar">
-		<%-- reply and other message actions panel for most pages in the tool (except the single message view (dfViewMessage)--%>
+	<h:panelGroup layout="block" rendered="#{!message.deleted &&
+			(view.viewId == '/jsp/discussionForum/message/dfViewThread.jsp' || view.viewId == '/jsp/discussionForum/message/dfFlatView.jsp')}" styleClass="itemToolBar">
+		<%-- reply and other message actions panel for the thread pages in the tool (dfViewThread/dfFlatView)--%>
 		<%@ include file="/jsp/discussionForum/includes/singleMessage/standardButtons.jspf"%>
 	</h:panelGroup>
 	<h:panelGroup layout="block" rendered="#{!ForumTool.deleteMsg && !message.deleted && view.viewId == '/jsp/discussionForum/message/dfViewMessage.jsp'}" styleClass="itemToolBar">
-		<%-- reply and other message actions panel for the single message view only (dfViewMessage) because different buttons and actions are available than on other pages --%>
+		<%-- reply and other message actions panel for the single message view only (dfViewMessage) because different buttons and actions are available than on thread pages --%>
 		<%@ include file="/jsp/discussionForum/includes/singleMessage/dfViewMessageButtons.jspf"%>
 	</h:panelGroup>

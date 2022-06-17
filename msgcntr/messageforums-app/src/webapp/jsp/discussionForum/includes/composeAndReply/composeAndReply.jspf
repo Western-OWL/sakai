@@ -40,7 +40,7 @@
 	  <t:div rendered="#{view.viewId == '/jsp/dfMessageReply.jsp' || view.viewId == '/jsp/dfMessageReplyThread.jsp'}">
 		  <%--********************* Reply To *********************--%>
 		  <a href="#" class="forumsCollapseTrigger" aria-expanded="false"><h:outputText value=" #{msgs.cdfm_read_full_rep_tomessage}" /></a>
-		  <div id="replytomessage" class="hideActionButtons collapse forumsCollapseTarget"><%@ include file="/jsp/discussionForum/includes/singletonMessageList.jspf"%></div>
+		  <div id="replytomessage" class="collapse forumsCollapseTarget"><%@ include file="/jsp/discussionForum/includes/singletonMessageList.jspf"%></div>
 	  </t:div>
 
 			<div>

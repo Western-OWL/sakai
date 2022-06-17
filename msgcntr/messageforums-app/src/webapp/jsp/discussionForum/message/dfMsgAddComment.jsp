@@ -19,7 +19,7 @@
 			
 			<h:messages globalOnly="true" infoClass="success" errorClass="alertMessage" rendered="#{! empty facesContext.maximumSeverity}" />
 
-			<t:div styleClass="hideActionButtons"><%@ include file="/jsp/discussionForum/includes/singletonMessageList.jspf"%></t:div>
+			<t:div><%@ include file="/jsp/discussionForum/includes/singletonMessageList.jspf"%></t:div>
 
 		<div class="instruction">
 			<h:outputText value="#{msgs.cdfm_required}"/> <h:outputText value="#{msgs.pvt_star}" styleClass="reqStarInline" />
