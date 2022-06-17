@@ -770,6 +770,7 @@ div.msgcntr-profile-qtip {
 	color: #555;
 	font-size: 12px;
 	font-weight: bold;
+	white-space: nowrap;
 }
 .badge-locked {
 	background-color: #fbced0; 
