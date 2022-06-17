@@ -43,8 +43,7 @@
 			menuLinkSpan.addClass('current');
 			menuLinkSpan.html(menuLink.text());
 
-			setupMessageNav('messageNew');
-			setupMessageNav('messagePending');
+			removeMess();
  		});
 
         function disableMoveLink() {

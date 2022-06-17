@@ -355,7 +355,12 @@ function setupMessageNav(messageType){
             }
         });
     }
-    if ($(".messageNew").size() < 1 && $(".messagePending").size() < 1) {
+    removeMess();
+}
+
+function removeMess()
+{
+	if ($(".messageNew").size() < 1 && $(".messagePending").size() < 1) {
         $('#messNavHolder').remove();
         $('.markAllAsRead').remove();
     }
