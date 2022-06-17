@@ -37,7 +37,6 @@
  			$('#msgForum\\:messagesInHierDataTable').threadsSorter();
 			//add handles to list for thread operat
 			instrumentThreads('msgForum\\:messagesInHierDataTable');
-			enableDisableMoveThreadLink();
 
 			var menuLink = $('#forumsMainMenuLink');
 			var menuLinkSpan = menuLink.closest('span');
@@ -266,7 +265,7 @@
 				<h:commandLink value="" action="$('.topic-picker').dialog('close');" id="hidden_close_move_thread" ></h:commandLink>
 
 				<%-- link for Move Thread(s)  --%>
-				<a class="button display-topic-picker" id="msgForum:df_move_message_commandLink" onclick="resizeFrameForDialog();" href="#">
+				<a class="button display-topic-picker disabled disabledMoveLink" id="msgForum:df_move_message_commandLink" onclick="resizeFrameForDialog();" href="#">
 					<h:outputText value="#{msgs.move_thread}" />
 				</a>
 			</h:panelGroup>
