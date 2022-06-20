@@ -4094,6 +4094,8 @@ public class DiscussionForumTool {
   	}
 	  // we have to get the first message that is not a response
 	  selectedMessage = getThreadHeadForMessage(selectedMessage.getMessage());
+	  messageManager.markMessageReadForUser(selectedTopic.getTopic().getId(), selectedMessage.getMessage().getId(), true);
+	  selectedMessage.setRead(true);
 	  
 	  List tempMsgs = selectedTopic.getMessages();
 	    if(tempMsgs != null)
@@ -4324,6 +4326,10 @@ public class DiscussionForumTool {
 	    }
 	    message = messageManager.getMessageByIdWithAttachments(message.getId());
 	    selectedMessage = new DiscussionMessageBean(message, messageManager);
+		if (message.getTopic() != null && message.getTopic().getId() != null)
+		{
+			selectedMessage.setRead(messageManager.isMessageReadForUser(message.getTopic().getId(), message.getId()));
+		}
 	  return processDfMsgRvs();
   }
 
@@ -5070,6 +5076,7 @@ public class DiscussionForumTool {
 
 		  messageManager.markMessageApproval(msgId, false);
 		  selectedMessage = new DiscussionMessageBean(messageManager.getMessageByIdWithAttachments(msgId), messageManager);
+		  selectedMessage.setRead(true);
 		  refreshSelectedMessageSettings(selectedMessage.getMessage());
 		  setSuccessMessage(getResourceBundleString("cdfm_denied_alert"));
 		  getThreadFromMessage();
@@ -5144,6 +5151,7 @@ public class DiscussionForumTool {
 		  
 		  
 		  selectedMessage = new DiscussionMessageBean(messageManager.getMessageByIdWithAttachments(msgId), messageManager);
+		  selectedMessage.setRead(true);
 		  refreshSelectedMessageSettings(selectedMessage.getMessage());
 		  setSuccessMessage(getResourceBundleString("cdfm_approved_alert"));
 		  getThreadFromMessage();
