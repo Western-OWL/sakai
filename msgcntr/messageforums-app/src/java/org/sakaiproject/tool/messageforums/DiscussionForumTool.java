@@ -6298,6 +6298,14 @@ public class DiscussionForumTool {
 	    //return displayTopicById(TOPIC_ID); // reconstruct topic again;
 	    setSelectedForumForCurrentTopic(selectedTopic.getTopic());
         selectedTopic = getDecoratedTopic(selectedTopic.getTopic());
+
+		// find out if we came from threaded view or flat view and return there
+		String viewId = FacesContext.getCurrentInstance().getViewRoot().getViewId();
+		if (viewId.endsWith("dfAllMessages.jsp"))  // a bit brittle but still relatively safe
+		{
+			return processActionDisplayThreadedView();
+		}
+
 	    return processActionDisplayFlatView();
   }
   
