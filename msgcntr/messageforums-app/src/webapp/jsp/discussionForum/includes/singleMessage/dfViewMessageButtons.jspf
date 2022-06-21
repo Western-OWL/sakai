@@ -23,10 +23,10 @@
 	<f:param value="Feedback on #{ForumTool.selectedMessage.message.title}" name="subject" />
 	<h:outputText value=" #{msgs.cdfm_button_bar_email}"/>
 </h:outputLink>
-<%-- Copy Link - permalink -- permalink is broken
+<%-- Copy Link - permalink --%>
 <h:outputLink id="permalink1" value="#{ForumTool.messageURL}" styleClass="button permaLink" title="#{msgs.cdfm_button_bar_permalink_message}">
 	<h:outputText value=" #{msgs.cdfm_button_bar_permalink}"/>
-</h:outputLink> --%>
+</h:outputLink>
 <%-- Approve this message--%>
 <h:commandLink styleClass="button" title="#{msgs.cdfm_button_bar_approve}" action="#{ForumTool.processDfMsgApprove}"
 		rendered="#{ForumTool.allowedToApproveMsg}">
