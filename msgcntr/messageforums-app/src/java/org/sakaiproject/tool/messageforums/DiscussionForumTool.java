@@ -2727,6 +2727,7 @@ public class DiscussionForumTool {
 			
 	    messageManager.markMessageReadForUser(selectedTopic.getTopic().getId(),
 	        selectedMessage.getMessage().getId(), true);
+		selectedMessage.setRead(true);
 	    
 	    refreshSelectedMessageSettings(message);  
     }
@@ -2771,6 +2772,7 @@ public class DiscussionForumTool {
 			
 	    messageManager.markMessageReadForUser(selectedTopic.getTopic().getId(),
 	        selectedMessage.getMessage().getId(), true);
+		selectedMessage.setRead(true);
 	    
 	    refreshSelectedMessageSettings(message);  
     }
