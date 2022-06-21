@@ -334,7 +334,8 @@ public class DiscussionForumTool {
   private String selectedMessageShow = SUBJECT_ONLY;
   private String selectedMessageOrganize = "thread"; 
   private String threadAnchorMessageId = null;
-  private boolean deleteMsg;
+  private static final long NO_MESSAGE = Long.MIN_VALUE;
+  private long deleteMsg = NO_MESSAGE;
   private boolean displayUnreadOnly;
   private boolean errorSynch = false;
   // attachment
@@ -4385,9 +4386,19 @@ public class DiscussionForumTool {
     	processActionDisplayMessage();
     }
 
-    deleteMsg = true;
-    setErrorMessage(getResourceBundleString(CONFIRM_DELETE_MESSAGE));
+	if (selectedMessage != null && selectedMessage.getMessage() != null)
+	{
+		Long msgId = selectedMessage.getMessage().getId();
+		deleteMsg = msgId == null ? NO_MESSAGE : msgId;
+		setErrorMessage(getResourceBundleString(CONFIRM_DELETE_MESSAGE));
+	}
     return MESSAGE_VIEW;
+  }
+
+  public String processDfMsgDeleteConfirmNo()
+  {
+	  deleteMsg = NO_MESSAGE;
+	  return MESSAGE_VIEW;
   }
 
 
@@ -4727,7 +4738,19 @@ public class DiscussionForumTool {
    */
   public boolean getDeleteMsg()
   {
-    return deleteMsg;
+	  if (deleteMsg == NO_MESSAGE)
+	  {
+		  return false;
+	  }
+
+	  // if we don't have a selected message or if deleteMsg is set to a different message, reset it
+	  boolean noSelectedMsg = selectedMessage == null || selectedMessage.getMessage() == null || selectedMessage.getMessage().getId() == null;
+	  if (noSelectedMsg || !selectedMessage.getMessage().getId().equals(deleteMsg))
+	  {
+		  deleteMsg = NO_MESSAGE;
+	  }
+
+	  return deleteMsg != NO_MESSAGE;
   }
 
   /**
@@ -4780,7 +4803,7 @@ public class DiscussionForumTool {
 	  if(!uiPermissionsManager.isDeleteAny(topic, forum) && !(selectedMessage.getIsOwn() && uiPermissionsManager.isDeleteOwn(topic, forum)))
 	  {
 		  setErrorMessage(getResourceBundleString(INSUFFICIENT_PRIVILEGES_TO_DELETE));
-		  this.deleteMsg = false;
+		  this.deleteMsg = NO_MESSAGE;
 		  return null;
 	  }
 	  
@@ -4802,7 +4825,7 @@ public class DiscussionForumTool {
 			  .getTopicByIdWithMessages(selectedTopic.getTopic().getId()));   
 	  selectedTopic.getTopic().setBaseForum(selectedForum.getForum());
 
-	  this.deleteMsg = false;
+	  this.deleteMsg = NO_MESSAGE;
 
 	  //Synoptic Message/Forums tool
 	  //Compare previous new message counts to current new message counts after

@@ -88,7 +88,8 @@
 
 			<%@ include file="/jsp/discussionForum/includes/dfViewMessage/msgPrevNext.jspf"%>
 			<h:panelGroup layout="block" rendered="#{ForumTool.deleteMsg && ForumTool.selectedMessage.userCanDelete}" styleClass="act">
-				<h:commandButton id="post" action="#{ForumTool.processDfMsgDeleteConfirmYes}" value="#{msgs.cdfm_button_bar_delete}" accesskey="x" styleClass="active blockMeOnClick" />
+				<h:commandButton id="post" action="#{ForumTool.processDfMsgDeleteConfirmYes}" value="#{msgs.cdfm_button_bar_delete}" accesskey="s" styleClass="active blockMeOnClick" />
+				<h:commandButton id="cancelDelete" action="#{ForumTool.processDfMsgDeleteConfirmNo}" value="#{msgs.cdfm_button_bar_cancel}" immediate="true" accesskey="x" />
 				<h:outputText styleClass="sak-banner-info" style="display:none" value="#{msgs.cdfm_processing_submit_message}" />
 			</h:panelGroup>
 		</h:form>
