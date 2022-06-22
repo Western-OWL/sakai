@@ -124,10 +124,6 @@
 	font-size: .92em;
 	line-height: 1.5em;
 }
-.toggle .textPanel {
-    -ms-word-break: break-word;
-     word-break: break-word;
-}
 .topicBloc{
 	/*inner container topic metadata in forum list view, or single topic view*/
 	border-top: 0 none;
@@ -179,6 +175,9 @@
     font-weight: normal;
     margin-left: 5px;
 }
+.sakai-table-buttonContainer a[href].button {
+	margin-top: 10px;
+}
 .sakai-table-buttonContainer.threadOptions {
 	margin-bottom: 10px;
 }
@@ -197,17 +196,14 @@
 }
 .messagesFlat tbody tr td div.hierItemBlock,.messagesThreaded tbody tr td div.hierItemBlock{
 	padding: 0 10px;
-	border-left: 2px solid #cd5 !important;
+	border-left: 4px solid #7e9614;
 }
 .messagesThreaded > tbody > tr > td.bogus, .messagesFlat > tbody > tr > td.bogus {
 	padding: 10px 0;
 }
-.messagesThreaded tbody tr td div.hierItemBlock .textPanel{
-	clear: both;
-	overflow-x: auto;
-}
-.messagesFlat div.textPanel {
-	overflow-x: auto;
+#messageBody.textPanel {
+	margin: 10px 0;
+	overflow-wrap: break-word;
 }
 .titleBarBorder{
 	/*create an underline under message title + metadata in view body thread view*/
@@ -216,7 +212,7 @@
 }
 .messagesThreaded tbody tr.hierItemBlock td.bogus:first-child{
 	/*first message in thread in visible body view*/
-	border-left: 2px solid #69d;
+	border-left: 4px solid #4f2683;
 	width: 100%;
 }
 .messagesThreaded tbody tr.hierItemBlock td.bogus:first-child > div{
@@ -244,6 +240,12 @@
 .messageMetadata {
 	display: flex;
 	justify-content: space-between;
+	margin-bottom: 10px;
+	padding-bottom: 10px;
+	border-bottom: 1px solid #bad24f; 
+}
+.messageSubject .title {
+	text-decoration: none;
 }
 .messageAuthor, .messageAuthor a[href] {
 	color: #555;
@@ -288,10 +290,6 @@
 	padding: 10px;
 	border-left: 2px solid #69d;
 	background: #f9f9f9;
-}
-.singleMessage .textPanel {
-	/* so non-breaking wide message content doesn't stretch the page */
-	overflow-x: auto;
 }
 .singleMessageReply{
 	/*title + metadata block of a single message display*/
@@ -484,17 +482,9 @@ table.discTria:hover{
 	font-family: Georgia,"Times New Roman",Times,serif;
 	line-height:1.5em;
 }
-.printTable td{
-}
-
-.printBlock .textPanel a{
-		
-}
 .printBlock .textPanel  a:after{
 	content: " (" attr(href) ")";
 }
-
-
 .printTable td .title{
 	font-weight: bold;
 }

@@ -86,12 +86,16 @@
 	<div class="sakai-table-toolBar">
 		<div class="sakai-table-filterContainer">
 			<%@ include file="dfViewSearchBarThread.jsp"%>
+			<div class="sakai-table-buttonContainer">
+				<h:commandLink styleClass="button" value="#{msgs.cdfm_reply_thread}" id="replyThread" 
+					rendered="#{ForumTool.selectedTopic.isNewResponseToResponse && ForumTool.selectedThreadHead.msgApproved && !ForumTool.selectedTopic.locked && !ForumTool.selectedForum.locked == 'true'}"
+					action="#{ForumTool.processDfMsgReplyThread}" immediate="true"/>
+				<h:commandLink styleClass="button" value=" #{msgs.cdfm_mark_all_as_read}" id="markAllRead" action="#{ForumTool.processActionMarkAllThreadAsRead}" 
+					rendered="#{ForumTool.selectedTopic.isMarkAsRead and not ForumTool.selectedTopic.topic.autoMarkThreadsRead}"/>
+			</div>
 		</div>
 		<h:panelGroup layout="block" styleClass="sakai-table-buttonContainer threadOptions" rendered="#{!ForumTool.threadMoved}">
-			<h:commandLink styleClass="button" value="#{msgs.cdfm_reply_thread}" id="replyThread" rendered="#{ForumTool.selectedTopic.isNewResponseToResponse && ForumTool.selectedThreadHead.msgApproved && !ForumTool.selectedTopic.locked && !ForumTool.selectedForum.locked == 'true'}"
-				action="#{ForumTool.processDfMsgReplyThread}" immediate="true"/>
 			<div id="messNavHolder"></div>
-			<h:commandLink styleClass="button" value=" #{msgs.cdfm_mark_all_as_read}" id="markAllRead" action="#{ForumTool.processActionMarkAllThreadAsRead}" rendered="#{ForumTool.selectedTopic.isMarkAsRead and not ForumTool.selectedTopic.topic.autoMarkThreadsRead}"/>
 			<h:outputLink styleClass="button" id="print" value="javascript:printFriendly('#{ForumTool.printFriendlyUrlThread}');">
 				<h:outputText value="#{msgs.cdfm_print}" />
 			</h:outputLink>
