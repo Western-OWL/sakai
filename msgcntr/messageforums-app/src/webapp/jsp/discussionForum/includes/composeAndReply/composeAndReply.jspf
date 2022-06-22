@@ -28,13 +28,14 @@
       </script>
       <%@ include file="/jsp/discussionForum/menu/forumsMenu.jsp" %>
 
-	  <h:outputText styleClass="alertMessage" value="#{msgs.cdfm_reply_deleted}" rendered="#{(view.viewId == '/jsp/dfCompose.jsp' ? msgs.cdfm_tool_bar_message : msgs.cdfm_reply_thread_tool_bar_message) && ForumTool.errorSynch}" />
-
-      <h3>
-		  <h:outputText rendered="#{view.viewId == '/jsp/dfCompose.jsp'}" value="#{msgs.cdfm_tool_bar_message}"/>
-		  <h:outputText rendered="#{view.viewId == '/jsp/dfMsgRevise.jsp'}" value="#{msgs.cdfm_revise_forum_msg}"/>
-		  <h:outputText rendered="#{view.viewId == '/jsp/dfMessageReply.jsp' || view.viewId == '/jsp/dfMessageReplyThread.jsp'}" value="#{msgs.cdfm_reply_thread_tool_bar_message}" />
-	  </h3>
+	<h:outputText styleClass="alertMessage" value="#{msgs.cdfm_reply_deleted}" rendered="#{(view.viewId == '/jsp/dfCompose.jsp' ? msgs.cdfm_tool_bar_message : msgs.cdfm_reply_thread_tool_bar_message) && ForumTool.errorSynch}" />
+	<div class="page-header">
+		<h1>
+			<h:outputText rendered="#{view.viewId == '/jsp/dfCompose.jsp'}" value="#{msgs.cdfm_tool_bar_message}"/>
+			<h:outputText rendered="#{view.viewId == '/jsp/dfMsgRevise.jsp'}" value="#{msgs.cdfm_revise_forum_msg}"/>
+			<h:outputText rendered="#{view.viewId == '/jsp/dfMessageReply.jsp' || view.viewId == '/jsp/dfMessageReplyThread.jsp'}" value="#{msgs.cdfm_reply_thread_tool_bar_message}" />
+		</h1>
+	</div>
 	  <%@ include file="/jsp/discussionForum/includes/topicHeader/singletonTopicHeaderList.jspf"%>
 
 	  <t:div rendered="#{view.viewId == '/jsp/dfMessageReply.jsp' || view.viewId == '/jsp/dfMessageReplyThread.jsp'}">

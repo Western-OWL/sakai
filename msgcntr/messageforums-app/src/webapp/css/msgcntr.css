@@ -97,6 +97,7 @@
 .forumsTopics .sak-banner-info {
 	margin: 0;
 }
+.topicTitle h2,
 .topicTitle h3 {
 	display: flex;
 	align-items: center;
@@ -104,6 +105,13 @@
 	padding: 8px 0; /* to match the button height */
 	font-size: 16px;
 	font-weight: normal;
+}
+.page-header .topicTitle h1,
+.page-header .topicTitle h3 {
+	padding-bottom: 10px;
+}
+.forumsNavBar + .page-header {
+	margin-top: 0;
 }
 .topicBloc a.show,.topicBloc a.hide,.forumHeader a.show,.forumHeader a.hide,.singleMessage a.show,.singleMessage a.hide, .singleMessageReply a.show,.singleMessageReply a.hide{
 	/*show and hide descr links in various places*/
@@ -149,11 +157,15 @@
 .topicBlocLone td {
 	padding: 0;
 }
-.singleMessage .title, .singleMessageReply .title, .pendingApproval .title{
+.singleMessage .title,
+.singleMessageReply .title,
+.pendingApproval .title{
 	/*	title for all the above cases*/
 	font-weight: bold;
 }
-.forumHeader .shortDescription, .topicTitle .shortDescription, .topicBloc .shortDescription{
+.forumHeader .shortDescription,
+.topicTitle .shortDescription,
+.topicBloc .shortDescription{
 	/*	short description whenever one occurs - do not use padding */
 	display: block;
 	margin: 0;
@@ -189,16 +201,19 @@
 /*	display:none; 	comment to hide blue or orange speech balloons by topics in Forum list view */
 }
 /* PART 2 - TOPIC/THREAD VIEWS*/
-.table.messagesFlat,.table.messagesThreaded{
+.table.messagesFlat,
+.table.messagesThreaded{
 	table-layout: fixed;
 	width: 100%;
 	margin-bottom: 0;
 }
-.messagesFlat tbody tr td div.hierItemBlock,.messagesThreaded tbody tr td div.hierItemBlock{
+.messagesFlat tbody tr td div.hierItemBlock,
+.messagesThreaded tbody tr td div.hierItemBlock{
 	padding: 0 10px;
 	border-left: 4px solid #7e9614;
 }
-.messagesThreaded > tbody > tr > td.bogus, .messagesFlat > tbody > tr > td.bogus {
+.messagesThreaded > tbody > tr > td.bogus,
+.messagesFlat > tbody > tr > td.bogus {
 	padding: 10px 0;
 }
 #messageBody.textPanel {
@@ -247,7 +262,8 @@
 .messageSubject .title {
 	text-decoration: none;
 }
-.messageAuthor, .messageAuthor a[href] {
+.messageAuthor,
+.messageAuthor a[href] {
 	color: #555;
 	font-weight: bold;
 	text-decoration: none;
@@ -321,7 +337,7 @@
 .viewMessageDetailsContainer {
 	display: flex;
 	align-items: flex-end;
-	justify-content: space-between;
+	justify-content: flex-end;
 	flex-wrap: wrap;
 }
 #counttotal {
@@ -350,7 +366,9 @@
 	margin: .5em 0;
 	padding: 4px 0 4px 2em;
 }
-span.messageAlert,span.messageInformation,.messageComfirm{
+span.messageAlert,
+span.messageInformation,
+.messageComfirm{
 	padding-right: 1em;
 }
 /*utils, special cases, sakai overrides*/
@@ -366,7 +384,8 @@ td div.title{
 	font-weight: bold;
 	font-size: 1.3em;
 }
-.unreadMsg a:link,.unreadMsg a:visited{
+.unreadMsg a:link,
+.unreadMsg a:visited{
 	color: #f55 !important;
 	text-decoration: none;
 }
@@ -611,11 +630,13 @@ div.msgcntr-profile-qtip {
     display: block;
 }
 
-.navIntraTool li span a img,.navIntraTool li {
+.navIntraTool li span a img,
+.navIntraTool li {
     vertical-align: middle;
 }
 
-#buttonBlocker,.buttonBlocker {
+#buttonBlocker,
+.buttonBlocker {
     z-index:2;
     display:none;
     padding:0 8px;
@@ -623,7 +644,8 @@ div.msgcntr-profile-qtip {
     opacity:0;
     position:absolute
 }
-#buttonBlocker:hover, .buttonBlocker:hover {
+#buttonBlocker:hover,
+.buttonBlocker:hover {
     cursor:progress;
 }
 
@@ -702,7 +724,8 @@ div.msgcntr-profile-qtip {
 	font-size: 20px !important;
 }
 
-#revise\:closeDateSpan #revise\:closeDate, #revise\:openDateSpan #revise\:openDate {
+#revise\:closeDateSpan #revise\:closeDate,
+#revise\:openDateSpan #revise\:openDate {
 	width: auto;
 	margin-left: 10px;
 }
@@ -713,6 +736,9 @@ div.msgcntr-profile-qtip {
 
 .singleTopicHeader {
 	margin-bottom: 10px;
+}
+.singleTopicHeader.page-header {
+	margin: 0;
 }
 .singleMessage.suppressLinkTitleDisplay a.title,
 .singleTopicHeader.suppressLinkTitleDisplay a.title,
@@ -771,7 +797,8 @@ div.msgcntr-profile-qtip {
 .badge-moderated {
 	background-color: #f5dfb0;
 }
-.badge-new, .messageNew {
+.badge-new,
+.messageNew {
 	background-color: #eaea21;
 }
 .badge-unavailable {
@@ -797,7 +824,7 @@ div.msgcntr-profile-qtip {
 	display: flex;
 	flex-wrap: wrap;
 	margin: 10px 0;
-	padding: 0;
+	padding: 7px 0; /* to match the navigation button height and for room to show the outline */
 	list-style: none;
 }
 .standardCrumbs > li + li::before {
@@ -812,6 +839,7 @@ div.msgcntr-profile-qtip {
 	flex-wrap: wrap;
 	margin-left: auto;
 }
-.view-message-nav > a[href].button, .view-message-nav > span {
+.view-message-nav > a[href].button,
+.view-message-nav > span {
 	margin: 10px 0 10px 4px;
 }

@@ -8,7 +8,7 @@
 </jsp:useBean>
 
 <f:view>
-<sakai:view toolCssHref="/messageforums-tool/css/msgcntr.css">
+<sakai:view>
 	<span class="skip" id="firstPendingItemTitleHolder"><h:outputText value="#{msgs.cdfm_gotofirstpendingtitle}" /></span>
 	<span class="skip" id="nextPendingItemTitleHolder"><h:outputText value="#{msgs.cdfm_gotopendtitle}" /></span>
 	<span class="skip" id="lastPendingItemTitleHolder"><h:outputText value="#{msgs.cdfm_lastpendtitle}" /></span>
@@ -21,6 +21,7 @@
        		<script>includeLatestJQuery("msgcntr");</script>
   			<script src="/messageforums-tool/js/dialog.js"></script>
 			<script>includeWebjarLibrary("qtip2");</script>
+			<link rel="stylesheet" href="/messageforums-tool/css/msgcntr.css" type="text/css" />
   			<link rel="stylesheet" type="text/css" href="/messageforums-tool/css/dialog.css" />	
        		<script src="/messageforums-tool/js/sak-10625.js"></script>
 		<script src="/messageforums-tool/js/forum.js"></script>
@@ -72,6 +73,10 @@
 			<%@ include file="/jsp/discussionForum/includes/crumbs/standard.jspf" %>
 		</h:panelGroup>
 		<%@ include file="/jsp/discussionForum/includes/threadPrevNext.jspf"%>
+	</div>
+
+	<div class="page-header">
+		<h1><h:outputText value="#{ForumTool.selectedThreadHead.message.title}"/></h1>
 	</div>
 
 	<div id="dialogDiv" title="Grade Messages" style="display:none">

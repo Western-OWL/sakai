@@ -61,9 +61,6 @@
 			</div>
 			<h:messages globalOnly="true" infoClass="success" errorClass="alertMessage" rendered="#{! empty facesContext.maximumSeverity}"/>
 			<div class="viewMessageDetailsContainer">
-				<%-- topic short description and long description --%>
-				<%@ include file="/jsp/discussionForum/includes/topicHeader/singletonTopicHeaderList.jspf"%>
-
 				<h:panelGroup layout="block" styleClass="messageWordCount">
 					<h:outputText value="#{msgs.cdfm_message_count}" />
 					<h:panelGroup id="counttotal"></h:panelGroup>
