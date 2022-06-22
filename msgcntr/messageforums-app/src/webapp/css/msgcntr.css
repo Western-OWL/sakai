@@ -753,9 +753,10 @@ div.msgcntr-profile-qtip {
 
 .badge-draft, 
 .badge-locked, 
-.badge-moderated, 
+.badge-moderated,
 .badge-new,
 .badge-unavailable,
+.badge-post-first,
 .messageNew,
 .messagePending,
 .messageDenied {
@@ -785,6 +786,9 @@ div.msgcntr-profile-qtip {
 }
 .badge-unavailable {
 	background-color: #fbbf72;
+}
+.badge-post-first {
+	background-color: #b5ffc8;
 }
 .messagePending{
 	background-color: #91d7ee;
