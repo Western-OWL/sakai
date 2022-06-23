@@ -1,13 +1,5 @@
 <%-- different pages require the topic title to have different heading levels:--%>
-<f:verbatim rendered="#{view.viewId == '/jsp/discussionForum/message/dfAllMessages.jsp' || view.viewId == '/jsp/discussionForum/message/dfFlatView.jsp'}">
-	<h1>
-</f:verbatim>
-<f:verbatim rendered="#{view.viewId != '/jsp/discussionForum/message/dfAllMessages.jsp' && view.viewId != '/jsp/discussionForum/message/dfFlatView.jsp' && view.viewId != '/jsp/discussionForum/forumsOnly/dfForums.jsp'}">
-	<h2>
-</f:verbatim>
-<f:verbatim rendered="#{view.viewId == '/jsp/discussionForum/forumsOnly/dfForums.jsp'}">
-	<h3>
-</f:verbatim>
+<%@ include file="openTitleHeading.jspf"%>
 	<h:commandLink action="#{ForumTool.processActionDisplayTopic}" id="topic_title" title=" #{topic.topic.title}" styleClass="title">
 		<f:param value="#{topic.topic.id}" name="topicId"/>
 		<f:param value="#{forum.forum.id}" name="forumId"/>
@@ -27,12 +19,4 @@
 			entity-id="<h:outputText value="#{topic.gradeAssign}" />">
 		</sakai-rubric-student-preview-button>
 	</h:panelGroup>
-<f:verbatim rendered="#{view.viewId == '/jsp/discussionForum/message/dfAllMessages.jsp' || view.viewId == '/jsp/discussionForum/message/dfFlatView.jsp'}">
-	</h1>
-</f:verbatim>
-<f:verbatim rendered="#{view.viewId != '/jsp/discussionForum/message/dfAllMessages.jsp' && view.viewId != '/jsp/discussionForum/message/dfFlatView.jsp' && view.viewId != '/jsp/discussionForum/forumsOnly/dfForums.jsp'}">
-	</h2>
-</f:verbatim>
-<f:verbatim rendered="#{view.viewId == '/jsp/discussionForum/forumsOnly/dfForums.jsp'}">
-	</h3>
-</f:verbatim>
+<%@ include file="closeTitleHeading.jspf"%>

@@ -1,0 +1,10 @@
+<f:verbatim rendered="#{view.viewId == '/jsp/discussionForum/message/dfAllMessages.jsp' || view.viewId == '/jsp/discussionForum/message/dfFlatView.jsp'}">
+	</h1>
+</f:verbatim>
+<f:verbatim rendered="#{view.viewId != '/jsp/discussionForum/message/dfAllMessages.jsp' && view.viewId != '/jsp/discussionForum/message/dfFlatView.jsp' && view.viewId != '/jsp/discussionForum/forumsOnly/dfForums.jsp'}">
+	</h2>
+</f:verbatim>
+<f:verbatim rendered="#{view.viewId == '/jsp/discussionForum/forumsOnly/dfForums.jsp'}">
+	</h3>
+</f:verbatim>
+
