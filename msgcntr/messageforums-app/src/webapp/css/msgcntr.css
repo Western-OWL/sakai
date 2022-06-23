@@ -216,7 +216,7 @@
 .messagesFlat > tbody > tr > td.bogus {
 	padding: 10px 0;
 }
-#messageBody.textPanel {
+.messageBody .textPanel {
 	margin: 10px 0;
 	overflow-wrap: break-word;
 }

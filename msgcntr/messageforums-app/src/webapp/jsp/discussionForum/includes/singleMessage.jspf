@@ -64,7 +64,7 @@
 					</h:panelGroup>
 					<%-- End Rank --%>
 	<%-- the message body--%>
-	<mf:htmlShowArea value="#{message.message.body}" hideBorder="true" rendered="#{!message.deleted}" id="messageBody"/>
+	<t:div rendered="#{!message.deleted}" styleClass="messageBody"><mf:htmlShowArea value="#{message.message.body}" hideBorder="true"/></t:div>
 	<%-- attach list --%>
 	<h:panelGroup rendered="#{!empty message.attachList && !message.deleted}">
 		<t:dataList value="#{message.attachListAsSingletonList}" var="attachList">
