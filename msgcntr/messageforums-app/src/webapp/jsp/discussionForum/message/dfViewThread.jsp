@@ -96,7 +96,8 @@
 					rendered="#{ForumTool.selectedTopic.isNewResponseToResponse && ForumTool.selectedThreadHead.msgApproved && !ForumTool.selectedTopic.locked && !ForumTool.selectedForum.locked == 'true'}"
 					action="#{ForumTool.processDfMsgReplyThread}" immediate="true"/>
 				<h:commandLink styleClass="button markAllAsRead" value=" #{msgs.cdfm_mark_all_as_read}" id="markAllRead" action="#{ForumTool.processActionMarkAllThreadAsRead}"
-					rendered="#{ForumTool.selectedTopic.isMarkAsRead and not ForumTool.selectedTopic.topic.autoMarkThreadsRead}"/>
+					rendered="#{ForumTool.selectedTopic.isMarkAsRead && !ForumTool.selectedTopic.topic.autoMarkThreadsRead
+								&& (!ForumTool.selectedThreadHead.read || ForumTool.selectedThreadHead.childUnread > 0)}"/>
 			</div>
 		</div>
 		<h:panelGroup layout="block" styleClass="sakai-table-buttonContainer threadOptions" rendered="#{!ForumTool.threadMoved}">

@@ -44,7 +44,6 @@
 			menuLinkSpan.html(menuLink.text());
 
 			removeMess();
-			removeMarkAllAsRead();
  		});
 
         function disableMoveLink() {

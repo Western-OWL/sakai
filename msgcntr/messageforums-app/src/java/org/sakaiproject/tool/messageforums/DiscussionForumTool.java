@@ -2450,6 +2450,15 @@ public class DiscussionForumTool {
 	    		((DiscussionMessageBean)selectedThread.get(i)).setRead(Boolean.TRUE);
 	    	}
 	    }
+		else  // calculate unread counts
+		{
+			List<DiscussionMessageBean> selThread = (List<DiscussionMessageBean>) selectedThread;
+			int threadUnreadCount = selThread.stream().map(m -> m.isRead() ? 0 : 1).reduce(0, Integer::sum);
+			Optional<DiscussionMessageBean> selHead = selThread.stream().filter(m -> m.getDepth() == 0).findAny();
+			selHead.ifPresent(m -> selectedThreadHead.setRead(m.isRead()));
+			int deduct = selectedThreadHead.isRead() ? 0 : 1;
+			selectedThreadHead.setChildUnread(threadUnreadCount - deduct);
+		}
 
 	    boolean postFirst = getNeedToPostFirst();	    
 	    if(postFirst){
