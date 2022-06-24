@@ -1,3 +1,10 @@
+:root
+{
+	--msg-primary-border-colour: #7a7483;
+	--msg-secondary-border-colour: #a69db2;
+	--msg-metadata-border-colour: #00875a;
+}
+
 /*PART 1 - FORUM AND TOPIC LISTINGS*/
 .forums {
 	width: 100%;
@@ -210,7 +217,7 @@
 .messagesFlat tbody tr td div.hierItemBlock,
 .messagesThreaded tbody tr td div.hierItemBlock{
 	padding: 0 10px;
-	border-left: 4px solid #7e9614;
+	border-left: 4px solid var(--msg-secondary-border-colour);
 }
 .messagesThreaded > tbody > tr > td.bogus,
 .messagesFlat > tbody > tr > td.bogus {
@@ -227,7 +234,7 @@
 }
 .messagesThreaded tbody tr.hierItemBlock td.bogus:first-child{
 	/*first message in thread in visible body view*/
-	border-left: 4px solid #4f2683;
+	border-left: 4px solid var(--msg-primary-border-colour);
 	width: 100%;
 }
 .messagesThreaded tbody tr.hierItemBlock td.bogus:first-child > div{
@@ -257,7 +264,7 @@
 	justify-content: space-between;
 	margin-bottom: 10px;
 	padding-bottom: 10px;
-	border-bottom: 1px solid #bad24f; 
+	border-bottom: 1px solid var(--msg-metadata-border-colour);
 }
 .messageSubject .title {
 	text-decoration: none;
@@ -304,7 +311,7 @@
 .singleMessage{
 	/*title + metadata block of a single message display*/
 	padding: 10px;
-	border-left: 2px solid #69d;
+	border-left: 4px solid var(--msg-primary-border-colour);
 	background: #f9f9f9;
 }
 .singleMessageReply{
