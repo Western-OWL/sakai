@@ -27,8 +27,8 @@
                 menuLinkSpan.addClass('current');
                 menuLinkSpan.html(menuLink.text());
 
-                setupMessageNav('messageNew');
                 setupMessageNav('messagePending');
+                setupMessageNav('messageNew');
 
             });
         </script>

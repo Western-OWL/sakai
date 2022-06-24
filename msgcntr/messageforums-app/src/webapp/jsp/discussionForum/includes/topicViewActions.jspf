@@ -10,7 +10,9 @@
 	</div>
 	<h:panelGroup layout="block" styleClass="sakai-table-buttonContainer threadOptions" rendered="#{!ForumTool.threadMoved}">
 		<%-- target span container for additional buttons --%>
-		<span id="messNavHolder"></span>
+		<span id="messNavHolder"><h:outputLink styleClass="button jumpToNew" value="#messageNewnewMess0" rendered="#{ForumTool.selectedTopic.unreadNoMessages > 0}">
+					<h:outputText value="#{msgs.cdfm_gotofirstnewtitle}" />
+			</h:outputLink></span>
 		<h:commandLink styleClass="button" value="#{msgs.cdfm_thread_view}"  id="threadView" action="#{ForumTool.processActionDisplayThreadedView}" immediate="true"
 			rendered="#{view.viewId == '/jsp/discussionForum/message/dfFlatView.jsp'}"/>
 		<h:commandLink styleClass="button" value="#{msgs.cdfm_flat_view}" action="#{ForumTool.processActionDisplayFlatView}"

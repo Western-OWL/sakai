@@ -101,7 +101,11 @@
 			</div>
 		</div>
 		<h:panelGroup layout="block" styleClass="sakai-table-buttonContainer threadOptions" rendered="#{!ForumTool.threadMoved}">
-			<div id="messNavHolder"></div>
+			<div id="messNavHolder"><h:outputLink styleClass="button jumpToNew" value="#messageNewnewMess0"
+							  rendered="#{!ForumTool.selectedTopic.topic.autoMarkThreadsRead
+								&& (!ForumTool.selectedThreadHead.read || ForumTool.selectedThreadHead.childUnread > 0)}">
+					<h:outputText value="#{msgs.cdfm_gotofirstnewtitle}" /></h:outputLink>
+			</div>
 			<h:outputLink styleClass="button" id="print" value="javascript:printFriendly('#{ForumTool.printFriendlyUrlThread}');">
 				<h:outputText value="#{msgs.cdfm_print}" />
 			</h:outputLink>
