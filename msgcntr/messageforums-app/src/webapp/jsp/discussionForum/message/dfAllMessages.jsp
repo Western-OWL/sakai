@@ -193,8 +193,8 @@
 				</h:column>
 				<h:column id="_messageCount">
 					<f:facet name="header">
-						<h:outputLink value="#" title="#{msgs.sort_thread}">
-							<h:outputText value="#{msgs.stat_totalMessages}" /> 
+						<h:outputLink value="#" title="#{msgs.sort_num_msgs}">
+							<h:outputText value="#{msgs.cdfm_total}" />
 						</h:outputLink>
 					</f:facet>
 					<%-- // display singular ('message') if total message is 1--%>
@@ -206,8 +206,8 @@
 				</h:column>
 				<h:column id="_unreadMessageCount">
 					<f:facet name="header">
-						<h:outputLink value="#" title="#{msgs.sort_thread}">
-							<h:outputText value="#{msgs.cdfm_lowercase_unread_msg}" /> 
+						<h:outputLink value="#" title="#{msgs.sort_num_unread}">
+							<h:outputText value="#{msgs.cdfm_uppercase_unread_msg}" />
 						</h:outputLink>
 					</f:facet>
 					<%-- // display  ('unread ') if unread message is>= 1 --%>
