@@ -1027,7 +1027,7 @@ public class DiscussionForumTool {
 
 	  String forumId = getExternalParameterByKey(FORUM_ID);
 	  DiscussionForum forum = forumManager.getForumById(Long.valueOf(forumId));
-	  selectedForum = new DiscussionForumBean(forum, uiPermissionsManager, forumManager);
+	  selectedForum = getDecoratedForum(forum);
 
 	  selectedForum.setMarkForDeletion(true);
 	  return FORUM_SETTING;
@@ -1200,12 +1200,8 @@ public class DiscussionForumTool {
         attachments.add(new DecoratedAttachment((Attachment)attachList.get(i)));
       }
     }
-    
-    selectedForum = new DiscussionForumBean(forum, uiPermissionsManager, forumManager);
-    if("true".equalsIgnoreCase(ServerConfigurationService.getString("mc.defaultLongDescription")))
-    {
-    	selectedForum.setReadFullDesciption(true);
-    }
+
+	selectedForum = getDecoratedForum(forum);
 
     setForumBeanAssign();
     setFromMainOrForumOrTopic();
@@ -1647,12 +1643,7 @@ public class DiscussionForumTool {
     }
   
     setSelectedForumForCurrentTopic(topic);
-    selectedTopic = new DiscussionTopicBean(topic, selectedForum.getForum(),
-        uiPermissionsManager, forumManager);
-    if("true".equalsIgnoreCase(ServerConfigurationService.getString("mc.defaultLongDescription")))
-    {
-    	selectedTopic.setReadFullDesciption(true);
-    }
+	selectedTopic = getDecoratedTopic(topic);
 
     setTopicBeanAssign();
     
@@ -1989,8 +1980,8 @@ public class DiscussionForumTool {
 			  setErrorMessage(getResourceBundleString(INSUFFICIENT_PRIVILEGES_NEW_TOPIC));
 			  return gotoMain();
 		  }
-		  selectedTopic = new DiscussionTopicBean(topic, selectedForum.getForum(),uiPermissionsManager, forumManager);
-		
+		  selectedTopic = getDecoratedTopic(topic);
+
 		  selectedTopic.setMarkForDeletion(true);
 		    return TOPIC_SETTING;
 	  }
@@ -2087,12 +2078,7 @@ public class DiscussionForumTool {
       setErrorMessage(getResourceBundleString(INSUFFICIENT_PRIVILEGES_NEW_TOPIC));
       return gotoMain();
     }
-    selectedTopic = new DiscussionTopicBean(topic, selectedForum.getForum(),
-        uiPermissionsManager, forumManager);
-    if("true".equalsIgnoreCase(ServerConfigurationService.getString("mc.defaultLongDescription")))
-    {
-    	selectedTopic.setReadFullDesciption(true);
-    }
+	selectedTopic = getDecoratedTopic(topic);
     
     List attachList = selectedTopic.getTopic().getAttachments();
     if (attachList != null)
@@ -9268,6 +9254,46 @@ public class DiscussionForumTool {
 	public List<DiscussionForumBean> getSelectedForumAsList() {
 		DiscussionForumBean forum = getSelectedForum();
 		return forum == null ? Collections.emptyList() : Collections.singletonList(forum);
+	}
+
+	private Optional<Date> getMostRecentMsgDateForTopic(DiscussionTopicBean topic)
+	{
+		List<DiscussionMessageBean> msgs = topic.getMessages();
+		if (msgs == null)
+		{
+			msgs = Collections.emptyList();
+		}
+
+		return msgs.stream().filter(m -> m.getMessage() != null && m.getMessage().getCreated() != null)
+				.map(m -> m.getMessage().getCreated()).sorted(Comparator.reverseOrder()).findFirst();
+	}
+
+	public String getConfirmDeleteSelectedTopicWarning()
+	{
+		int numMsgs = getSelectedTopic().getTotalNoMessages();
+		String first = getResourceBundleString("cdfm_delete_topic", new Object[]{numMsgs});
+		String mid = numMsgs > 0 ? formatMidDate(getMostRecentMsgDateForTopic(getSelectedTopic()), "cdfm_delete_topic_most_recent") : "";
+		String last = getResourceBundleString("cdfm_delete_topic_sure");
+
+		return String.format("%s %s %s", first, mid, last);
+	}
+
+	public String getConfirmDeleteSelectedForumWarning()
+	{
+		DiscussionForumBean forum = getSelectedForum();
+		int numTopics = forum.getTopicCount();
+		int numMsgs = forum.getTopics().stream().map(DiscussionTopicBean::getTotalNoMessages).reduce(0, Integer::sum);
+		String first = getResourceBundleString("cdfm_delete_forum", new Object[]{numTopics, numMsgs});
+		String last = getResourceBundleString("cdfm_delete_forum_sure");
+
+		return String.format("%s %s", first, last);
+	}
+
+	private String formatMidDate(Optional<Date> date, String bundleKey)
+	{
+		final SimpleDateFormat formatter = new SimpleDateFormat(getResourceBundleString("date_format_date"), getUserLocale());
+		formatter.setTimeZone(getUserTimeZone());
+		return date.map(d -> getResourceBundleString(bundleKey, new Object[]{formatter.format(d)})).orElse("");
 	}
 }
 

@@ -38,8 +38,10 @@
 		<%--//designNote: this just feels weird - presenting somehting that sort of looks like the form used to create the topic (with an editable permissions block!) to comfirm deletion --%>
 <!--jsp/discussionForum/topic/dfTopicSettings.jsp-->
 		<%--<sakai:tool_bar_message value="#{msgs.cdfm_delete_topic_title}"/>--%>
-        
-		<h:outputText id="alert-delete" styleClass="sak-banner-warn" style="display:block" value="#{msgs.cdfm_delete_topic}" rendered="#{ForumTool.selectedTopic.markForDeletion}"/>
+
+		<t:div id="alert-delete" styleClass="sak-banner-warn" rendered="#{ForumTool.selectedTopic.markForDeletion}">
+			<h:outputText value="#{ForumTool.confirmDeleteSelectedTopicWarning}"/>
+		</t:div>
         <h:outputText styleClass="sak-banner-warn" value="#{msgs.cdfm_duplicate_topic_confirm}" rendered="#{ForumTool.selectedTopic.markForDuplication}" style="display:block" />
 		<h:messages styleClass="sak-banner-warn" id="errorMessages" rendered="#{! empty facesContext.maximumSeverity}" />
 		<%@ include file="/jsp/discussionForum/includes/topicHeader/singletonTopicHeaderList.jspf"%>
@@ -69,7 +71,7 @@
           </h:commandButton>
           
           <h:commandButton immediate="true" action="#{ForumTool.processReturnToOriginatingPage}" id="cancel" 
-                           value="#{msgs.cdfm_button_bar_cancel} " accesskey="x" />
+                           value="#{msgs.cdfm_button_bar_cancel}" accesskey="x" />
          <h:outputText styleClass="sak-banner-info" style="display:none" value="#{msgs.cdfm_processing_submit_message}" />
        </div>
 	 </h:form>
