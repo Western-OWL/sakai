@@ -52,8 +52,8 @@ public class ShowAreaRender extends Renderer
     {
       int pos;
       // writer.write("<div>");
-      value = value.replaceAll("<strong>", "<b>");
-      value = value.replaceAll("</strong>", "</b>");
+      //value = value.replaceAll("<strong>", "<b>");
+      //value = value.replaceAll("</strong>", "</b>");
       // writer.write("<table STYLE=\"table-layout:fixed\" width=300><tr width=\"100%\"><td
       // width=\"100%\" STYLE=\"word-wrap: break-all; white-space: -moz-pre-wrap;
       // text-overflow:ellipsis; overflow: auto;\">");
