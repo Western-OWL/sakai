@@ -7605,7 +7605,7 @@ public class DiscussionForumTool {
 
 	  String forumId = getExternalParameterByKey(FORUM_ID);
 	  DiscussionForum forum = forumManager.getForumById(Long.valueOf(forumId));
-	  selectedForum = new DiscussionForumBean(forum, uiPermissionsManager, forumManager);
+	  selectedForum = getDecoratedForum(forum);
       selectedForum.getForum().setTitle(getResourceBundleString(DUPLICATE_COPY_TITLE, new Object[] {selectedForum.getForum().getTitle()}));
 	  selectedForum.setMarkForDuplication(true);
 	  return FORUM_SETTING;
