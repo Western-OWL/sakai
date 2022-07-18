@@ -33,7 +33,7 @@
 	font-size: 18px;
 }
 .forumTitle sakai-rubric-student-preview-button,
-.topicTitle sakai-rubric-student-preview-button {
+.forumsTopics .topicTitle sakai-rubric-student-preview-button {
 	margin-left: 4px;
 }
 .forumsCollapseTrigger[href] {
