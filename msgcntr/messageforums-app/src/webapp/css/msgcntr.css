@@ -255,6 +255,9 @@
 .allMessages .anonymousAuthor{
 	font-size:1.2em;
 }
+.allMessages .markAsReadIcon.button {
+	margin: 0;
+}
 .pendingApproval{
 	/*listing of a message pending aproval*/
 	border-left: 2px solid #ccc;
