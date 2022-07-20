@@ -10,7 +10,7 @@
 <f:view>
 <sakai:view>
 
-	<h:form id="msgForum" styleClass="specialLink">
+	<h:form id="msgForum" styleClass="dfFlatViewForm specialLink">
 
 	<!--jsp/discussionForum/message/dfFlatView.jsp-->
 		<script>includeLatestJQuery("msgcntr");</script>

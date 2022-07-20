@@ -854,3 +854,41 @@ div.msgcntr-profile-qtip {
 .view-message-nav > span {
 	margin: 10px 0 10px 4px;
 }
+
+.topicViewActions #messNavHolder
+{
+	display: flex;
+}
+
+.topicViewActions.sakai-table-toolBar .sakai-table-viewFilter
+{
+	flex-wrap: wrap;
+}
+
+.topicViewActions.sakai-table-toolBar .sakai-table-viewFilter .button
+{
+	margin-top: 10px;
+}
+
+.topicViewActions.sakai-table-toolBar .sakai-table-buttonContainer.threadOptions .button
+{
+	margin-right: 0px;
+	margin-left: 4px;
+}
+
+@media only screen and (min-width: 1031px)
+{
+	.topicViewActions .threadOptions /* this has to be in a media query because it always wins specificity against the default sakai-table-toolBar styles*/
+	{
+		justify-content: flex-end;
+	}
+}
+
+@media only screen and (max-width: 1030px)
+{
+	.topicViewActions.sakai-table-toolBar .sakai-table-filterContainer,
+	.dfViewThreadForm .sakai-table-toolBar .sakai-table-filterContainer
+	{
+		margin-bottom: 0;
+	}
+}

@@ -1,4 +1,4 @@
-<h:panelGroup id="forumsActions" layout="block" styleClass="sakai-table-toolBar">
+<h:panelGroup id="forumsActions" layout="block" styleClass="topicViewActions sakai-table-toolBar">
 	<div class="sakai-table-filterContainer">
 		<div class="sakai-table-viewFilter">
 			<h:commandLink styleClass="button startNewConversation" value="#{msgs.cdfm_container_title_thread}" id="df_compose_message_dfAllMessages"
