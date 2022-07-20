@@ -115,37 +115,6 @@
 		}
 	}
 
-	.allMessages{
-		border: 1px solid #ddd;
-		width: 100%;
-		thead{
-			th{
-				vertical-align: text-bottom;
-				padding: $standard-spacing;
-				background: #eee;
-				border: 1px solid #ddd;
-				text-align: center;
-				&.header{
-					text-align: left;
-				}
-			}
-		}
-		tbody{
-			td{
-				padding: $standard-spacing $standard-space;
-				&.attach{
-					padding: $standard-spacing 0;
-					text-align: center;
-				}
-				&.messageTitle{
-					a[href] {
-						margin-left: $standard-space;
-					}
-				}
-			}
-		}
-	}
-
 	.labeled{
 		display: inline-block;
 		font-weight: 700;

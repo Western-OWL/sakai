@@ -245,8 +245,35 @@
 .hierItemBlock .attachListJSF {
 	margin-bottom: 10px;
 }
-.allMessages td.attach{
-	vertical-align:middle;
+.allMessages {
+	border: 1px solid #ddd;
+	width: 100%;
+}
+.allMessages img {
+	max-width: none;
+}
+.allMessages thead th {
+	padding: 10px;
+	border: 1px solid #ddd;
+	background: #eee;
+	text-align: center;
+}
+.allMessages thead th.header{
+	text-align: left;
+}
+.allMessages tbody td {
+	padding: 10px;
+	border-left: 1px solid #ddd; /* column borders */
+}
+.allMessages tbody td.messageTitle {
+	border-left: 1px solid transparent; /* no column border between expanding arrows and Conversation title */
+}
+.allMessages tbody td.attach{
+	padding: 10px 0;
+	text-align: center;
+}
+.allMessages tbody td.messageTitle a[href] {
+	margin-left: 4px;
 }
 .allMessages td.messagesCountColumn,
 .allMessages td.unreadCountColumn {
