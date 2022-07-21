@@ -322,12 +322,12 @@
 .itemToolBar {
 	display: flex;
 	justify-content: flex-end;
+	flex-wrap: wrap;
+	column-gap: 4px;
 }
-.itemToolBar a.button {
-	margin-top: 10px;
-}
-.itemToolBar.itemToolBar a:last-of-type {
-	margin-right: 0;
+.itemToolBar.itemToolBar a.button,
+.itemToolBar.itemToolBar a.button {
+	margin: 10px 0 0 0;
 }
 .itemToolBar.itemToolBar .replyButton.button {
 	margin-right: auto;
