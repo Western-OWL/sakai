@@ -1,4 +1,5 @@
-<h4><h:outputText value="#{msgs.cdfm_att}" /></h4>
+<div class="attachmentsContainer">
+<h3><h:outputText value="#{msgs.cdfm_att}" /></h3>
 <p>
 <h:outputText value="#{msgs.cdfm_no_attachments}" rendered="#{empty ForumTool.attachments}" styleClass="instruction" style="display:block"/>
 </p>
@@ -38,9 +39,10 @@
 		<h:outputText value="#{eachAttach.attachment.attachmentType}"/>
 	</h:column>
 </h:dataTable>
-<p style="padding:0" class="act">
+<p class="act">
 	<h:commandButton action="#{ForumTool.processAddAttachmentRedirect}" value="#{msgs.cdfm_button_bar_add_attachment_redirect}" accesskey="a"
 		style="font-size:96%"  rendered="#{empty ForumTool.attachments}"/>
 	<h:commandButton action="#{ForumTool.processAddAttachmentRedirect}" value="#{msgs.cdfm_button_bar_add_attachment_more_redirect}" accesskey="a"
 		style="font-size:96%"  rendered="#{!empty ForumTool.attachments}"/>
 </p>
+</div>
