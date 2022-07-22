@@ -399,6 +399,7 @@
 .replyContainer,
 .composeContainer {
 	max-width: 800px;
+	width: 100%;
 }
 .composeContainer > label,
 .composeContainer > input[type="text"],
