@@ -38,6 +38,10 @@
 			</div>
 			<%@ include file="/jsp/discussionForum/includes/topicHeader/singletonTopicHeaderList.jspf"%>
 
+			<h:panelGroup layout="block" styleClass="sak-banner-info" rendered="#{ForumTool.anonymousEnabled && ForumTool.selectedTopic.topic.postAnonymous}">
+				<h:outputText value="#{ForumTool.selectedTopic.topic.revealIDsToRoles ? msgs.cdfm_revealIDsToRoles_blurb :  msgs.cdfm_anonymous_blurb}" rendered="#{ForumTool.anonymousEnabled && ForumTool.selectedTopic.topic.postAnonymous}"/>
+			</h:panelGroup>
+
 			<div class="composeReply">
 				<t:div styleClass="replyContainer" rendered="#{view.viewId == '/jsp/dfMessageReply.jsp' || view.viewId == '/jsp/dfMessageReplyThread.jsp'}">
 					<%--********************* Reply To *********************--%>
@@ -46,9 +50,6 @@
 				</t:div>
 
 				<div class="composeContainer">
-					<h:panelGroup layout="block" rendered="#{ForumTool.anonymousEnabled && ForumTool.selectedTopic.topic.postAnonymous}">
-						<h:outputText value="#{ForumTool.selectedTopic.topic.revealIDsToRoles ? msgs.cdfm_revealIDsToRoles_blurb :  msgs.cdfm_anonymous_blurb}" rendered="#{ForumTool.anonymousEnabled && ForumTool.selectedTopic.topic.postAnonymous}"/>
-					</h:panelGroup>
 
 					<h:messages globalOnly="true" infoClass="sak-banner-info" errorClass="sak-banner-error" rendered="#{(view.viewId == '/jsp/dfMessageReply.jsp' || view.viewId == '/jsp/dfMessageReplyThread.jsp') && ! empty facesContext.maximumSeverity}"/>
 					<h:message for="df_compose_title" warnStyle="sak-banner-warn" errorClass="sak-banner-error" id="titleErrorMessage"/>
@@ -81,8 +82,8 @@
 					<%--********************* Attachment *********************--%>
 					<%@ include file="/jsp/discussionForum/includes/composeAndReply/addAttachments.jspf"%>
 
-					<t:div rendered="#{view.viewId != '/jsp/dfMsgRevise.jsp' && ForumTool.selectedTopic.moderated == 'true'}">
-						<h:outputText value="#{msgs.cdfm_reply_message_note}" styleClass="highlight" /><h:outputText value="#{msgs.cdfm_reply_message_mod_inst}" styleClass="instruction" />
+					<t:div styleClass="sak-banner-info" rendered="#{view.viewId != '/jsp/dfMsgRevise.jsp' && ForumTool.selectedTopic.moderated == 'true'}">
+						<h:outputText value="#{msgs.cdfm_reply_message_note}" styleClass="highlight" /><h:outputText value="#{msgs.cdfm_reply_message_mod_inst}" />
 					</t:div>
 
 					<p class="act">

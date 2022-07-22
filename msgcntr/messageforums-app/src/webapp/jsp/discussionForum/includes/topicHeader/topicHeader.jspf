@@ -2,7 +2,7 @@
 	<%@ include file="topicTitle.jspf"%>
 
 	<%--the topic details --%>
-	<h:outputText id="topic_desc" value="#{topic.topic.shortDescription}" styleClass="shortDescription" />
+	<h:outputText id="topic_desc" value="#{topic.topic.shortDescription}" styleClass="shortDescription"  rendered="#{topic.topic.shortDescription != null && topic.topic.shortDescription != ''}" />
 
 	<f:subview id="desc1" rendered="#{ForumTool.alwaysShowFullDesc}"><%@ include file="topicDesc.jspf"%></f:subview>
 	<%-- render the more link only if there is something to show --%>

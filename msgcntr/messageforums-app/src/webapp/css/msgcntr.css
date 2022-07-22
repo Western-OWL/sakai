@@ -114,10 +114,6 @@
 	font-size: 16px;
 	font-weight: normal;
 }
-.page-header .topicTitle h1,
-.page-header .topicTitle h3 {
-	padding-bottom: 10px;
-}
 .forumsNavBar + .page-header {
 	margin-top: 0;
 }
@@ -176,9 +172,11 @@
 .topicBloc .shortDescription{
 	/*	short description whenever one occurs - do not use padding */
 	display: block;
+	margin: 4px 0 0 0;
+}
+.topicsColumn .topicTitle .shortDescription {
 	margin: 0;
 }
-
 .childrenNewNumber{
 	margin-left: 5px;
 }
@@ -278,9 +276,6 @@
 .allMessages td.messagesCountColumn,
 .allMessages td.unreadCountColumn {
 	text-align: center;
-}
-.allMessages .anonymousAuthor{
-	font-size:1.2em;
 }
 .allMessages .markAsReadIcon.button {
 	margin: 0;
@@ -382,7 +377,6 @@
 	margin-left: 4px;
 }
 #dfCompose .topicTitle h2 {
-	margin-bottom: 8px;
 	font-weight: bold;
 }
 .replyContainer {
@@ -393,8 +387,12 @@
 	background-color: #f9f9f9;
 }
 .replyContainer .forumsCollapseTrigger {
+	display: block;
 	/* indent the disclosure triangle to align with the vertical line of the post: indent + half of the border - half of the triangle icon width */
 	margin-left: calc(1em + (4px / 2) - (14px / 2));
+}
+.replyContainer .forumsCollapseTrigger:hover {
+	text-decoration: none;
 }
 .replyContainer,
 .composeContainer {
@@ -667,10 +665,6 @@ img.authorImage {
 	max-height: 2.5em;
 	width: auto !important;
 	vertical-align: bottom !important;
-}
-.anonymousAuthor {
-	font-family: Consolas,monaco,"Lucida Console","Lucida Sans Typewriter","Bitstream Vera Sans Mono","Andale Mono",AndaleMono,monospace;
-	font-size: 1.2em;
 }
 .moreMenuLink span{
     padding-right:15px;
@@ -978,17 +972,18 @@ div.msgcntr-profile-qtip {
 
 @media only screen and (min-width: 1840px)
 {
-       .composeReply
-       {
-               flex-direction: row-reverse;
-               gap: 0 20px;
-               justify-content: flex-end;
-       }
+	.composeReply
+	{
+		flex-direction: row-reverse;
+		gap: 0 20px;
+		justify-content: flex-end;
+	}
 
-       .replyContainer
-       {
-               width: 100%;
-               height: fit-content;
-       }
+	.replyContainer
+	{
+		width: 100%;
+		height: fit-content;
+		margin-top: 25px;	/* height of Reply Title label */
+	}
 }
 
