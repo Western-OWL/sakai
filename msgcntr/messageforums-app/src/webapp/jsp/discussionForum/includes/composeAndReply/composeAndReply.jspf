@@ -38,65 +38,66 @@
 			</div>
 			<%@ include file="/jsp/discussionForum/includes/topicHeader/singletonTopicHeaderList.jspf"%>
 
-			<t:div styleClass="replyContainer" rendered="#{view.viewId == '/jsp/dfMessageReply.jsp' || view.viewId == '/jsp/dfMessageReplyThread.jsp'}">
-				<%--********************* Reply To *********************--%>
-				<a href="#" class="forumsCollapseTrigger" aria-expanded="false"><h:outputText value=" #{msgs.cdfm_read_full_rep_tomessage}" /></a>
-				<div id="replytomessage" class="collapse forumsCollapseTarget"><%@ include file="/jsp/discussionForum/includes/singletonMessageList.jspf"%></div>
-			</t:div>
-
-			<div class="composeContainer">
-				<h:panelGroup layout="block" rendered="#{ForumTool.anonymousEnabled && ForumTool.selectedTopic.topic.postAnonymous}">
-					<h:outputText value="#{ForumTool.selectedTopic.topic.revealIDsToRoles ? msgs.cdfm_revealIDsToRoles_blurb :  msgs.cdfm_anonymous_blurb}" rendered="#{ForumTool.anonymousEnabled && ForumTool.selectedTopic.topic.postAnonymous}"/>
-				</h:panelGroup>
-
-				<h:messages globalOnly="true" infoClass="sak-banner-info" errorClass="sak-banner-error" rendered="#{(view.viewId == '/jsp/dfMessageReply.jsp' || view.viewId == '/jsp/dfMessageReplyThread.jsp') && ! empty facesContext.maximumSeverity}"/>
-				<h:message for="df_compose_title" warnStyle="sak-banner-warn" errorClass="sak-banner-error" id="titleErrorMessage"/>
-				<h:messages styleClass="sak-banner-error" id="errorMessages" rendered="#{view.viewId == '/jsp/dfMsgRevise.jsp' && ! empty facesContext.maximumSeverity}"/>
-
-				<h:outputLabel for="df_compose_title">
-					<h:outputText value="#{(view.viewId == '/jsp/dfCompose.jsp' || view.viewId == '/jsp/dfMsgRevise.jsp') ? msgs.cdfm_title : msgs.cdfm_reply_title}"/>
-					<h:outputText value=" #{msgs.cdfm_info_required_indicator}"/>
-				</h:outputLabel>
-				<h:inputText value="#{ForumTool.composeTitle}" maxlength="250" required="true" id="df_compose_title" requiredMessage="#{msgs.cdfm_invalidMessageTitleString}">
-					<f:validator validatorId="MessageTitle" />
-					<f:validateLength minimum="1" maximum="255"/>
-				</h:inputText>
-
-				<h:message for="df_compose_body" errorClass="sak-banner-error" id="bodyErrorMessages" />
-
-				<div class="messageComposeHeader">
-					<h:outputLabel value="#{msgs.cdfm_message}" />
-
-					<t:htmlTag value="span" rendered ="#{view.viewId == '/jsp/dfMessageReply.jsp' || view.viewId == '/jsp/dfMessageReplyThread.jsp'}">
-						<%@ include file="replyInsertOrig.jspf"%>
-					</t:htmlTag>
-
-					<div><h:outputText value="#{msgs.cdfm_message_count}" />:<span  id="counttotal">0</span></div>
-				</div>
-
-				<sakai:inputRichText textareaOnly="#{PrivateMessagesTool.mobileSession}" value="#{ForumTool.composeBody}" id="df_compose_body" rows="#{ForumTool.editorRows}" cols="132">
-				</sakai:inputRichText>
-
-				<%--********************* Attachment *********************--%>
-				<%@ include file="/jsp/discussionForum/includes/composeAndReply/addAttachments.jspf"%>
-
-				<t:div rendered="#{view.viewId != '/jsp/dfMsgRevise.jsp' && ForumTool.selectedTopic.moderated == 'true'}">
-					<h:outputText value="#{msgs.cdfm_reply_message_note}" styleClass="highlight" /><h:outputText value="#{msgs.cdfm_reply_message_mod_inst}" styleClass="instruction" />
+			<div class="composeReply">
+				<t:div styleClass="replyContainer" rendered="#{view.viewId == '/jsp/dfMessageReply.jsp' || view.viewId == '/jsp/dfMessageReplyThread.jsp'}">
+					<%--********************* Reply To *********************--%>
+					<a href="#" class="forumsCollapseTrigger" aria-expanded="false"><h:outputText value=" #{msgs.cdfm_read_full_rep_tomessage}" /></a>
+					<div id="replytomessage" class="collapse forumsCollapseTarget"><%@ include file="/jsp/discussionForum/includes/singletonMessageList.jspf"%></div>
 				</t:div>
 
-				<p class="act">
-					<h:commandButton rendered="#{view.viewId == '/jsp/dfCompose.jsp'}" id="post" action="#{ForumTool.processDfMsgPost}" value="#{msgs.cdfm_button_bar_post_message}" accesskey="s" styleClass="active blockMeOnClick"/>
-					<h:commandButton rendered="#{view.viewId == '/jsp/dfMsgRevise.jsp'}" action="#{ForumTool.processDfMsgRevisedPost}" value="#{msgs.cdfm_button_bar_post_revised_msg}" accesskey="s" styleClass="active blockMeOnClick" />
-					<h:commandButton rendered="#{view.viewId == '/jsp/dfMessageReply.jsp' || view.viewId == '/jsp/dfMessageReplyThread.jsp'}" action="#{ForumTool.processDfReplyMsgPost}" value="#{msgs.cdfm_button_bar_post_message}" accesskey="s" styleClass="active blockMeOnClick"/>
+				<div class="composeContainer">
+					<h:panelGroup layout="block" rendered="#{ForumTool.anonymousEnabled && ForumTool.selectedTopic.topic.postAnonymous}">
+						<h:outputText value="#{ForumTool.selectedTopic.topic.revealIDsToRoles ? msgs.cdfm_revealIDsToRoles_blurb :  msgs.cdfm_anonymous_blurb}" rendered="#{ForumTool.anonymousEnabled && ForumTool.selectedTopic.topic.postAnonymous}"/>
+					</h:panelGroup>
 
-					<h:commandButton rendered="#{view.viewId == '/jsp/dfCompose.jsp'}" action="#{ForumTool.processDfMsgCancel}" value="#{msgs.cdfm_button_bar_cancel}" immediate="true" accesskey="x" />
-					<h:commandButton rendered="#{view.viewId == '/jsp/dfMsgRevise.jsp'}" action="#{ForumTool.processDfMsgRevisedCancel}" value="#{msgs.cdfm_button_bar_cancel}" immediate="true" accesskey="x" />
-					<h:commandButton rendered="#{view.viewId == '/jsp/dfMessageReply.jsp' || view.viewId == '/jsp/dfMessageReplyThread.jsp'}" action="#{ForumTool.processDfReplyThreadCancel}" value="#{msgs.cdfm_button_bar_cancel}" immediate="true" accesskey="x" />
+					<h:messages globalOnly="true" infoClass="sak-banner-info" errorClass="sak-banner-error" rendered="#{(view.viewId == '/jsp/dfMessageReply.jsp' || view.viewId == '/jsp/dfMessageReplyThread.jsp') && ! empty facesContext.maximumSeverity}"/>
+					<h:message for="df_compose_title" warnStyle="sak-banner-warn" errorClass="sak-banner-error" id="titleErrorMessage"/>
+					<h:messages styleClass="sak-banner-error" id="errorMessages" rendered="#{view.viewId == '/jsp/dfMsgRevise.jsp' && ! empty facesContext.maximumSeverity}"/>
 
-					<h:outputText styleClass="sak-banner-info" style="display:none" value="#{msgs.cdfm_processing_submit_message}" />
-				</p>
+					<h:outputLabel for="df_compose_title">
+						<h:outputText value="#{(view.viewId == '/jsp/dfCompose.jsp' || view.viewId == '/jsp/dfMsgRevise.jsp') ? msgs.cdfm_title : msgs.cdfm_reply_title}"/>
+						<h:outputText value=" #{msgs.cdfm_info_required_indicator}"/>
+					</h:outputLabel>
+					<h:inputText value="#{ForumTool.composeTitle}" maxlength="250" required="true" id="df_compose_title" requiredMessage="#{msgs.cdfm_invalidMessageTitleString}">
+						<f:validator validatorId="MessageTitle" />
+						<f:validateLength minimum="1" maximum="255"/>
+					</h:inputText>
+
+					<h:message for="df_compose_body" errorClass="sak-banner-error" id="bodyErrorMessages" />
+
+					<div class="messageComposeHeader">
+						<h:outputLabel value="#{msgs.cdfm_message}" />
+
+						<t:htmlTag value="span" rendered ="#{view.viewId == '/jsp/dfMessageReply.jsp' || view.viewId == '/jsp/dfMessageReplyThread.jsp'}">
+							<%@ include file="replyInsertOrig.jspf"%>
+						</t:htmlTag>
+
+						<div><h:outputText value="#{msgs.cdfm_message_count}" />:<span  id="counttotal">0</span></div>
+					</div>
+
+					<sakai:inputRichText textareaOnly="#{PrivateMessagesTool.mobileSession}" value="#{ForumTool.composeBody}" id="df_compose_body" rows="#{ForumTool.editorRows}" cols="132">
+					</sakai:inputRichText>
+
+					<%--********************* Attachment *********************--%>
+					<%@ include file="/jsp/discussionForum/includes/composeAndReply/addAttachments.jspf"%>
+
+					<t:div rendered="#{view.viewId != '/jsp/dfMsgRevise.jsp' && ForumTool.selectedTopic.moderated == 'true'}">
+						<h:outputText value="#{msgs.cdfm_reply_message_note}" styleClass="highlight" /><h:outputText value="#{msgs.cdfm_reply_message_mod_inst}" styleClass="instruction" />
+					</t:div>
+
+					<p class="act">
+						<h:commandButton rendered="#{view.viewId == '/jsp/dfCompose.jsp'}" id="post" action="#{ForumTool.processDfMsgPost}" value="#{msgs.cdfm_button_bar_post_message}" accesskey="s" styleClass="active blockMeOnClick"/>
+						<h:commandButton rendered="#{view.viewId == '/jsp/dfMsgRevise.jsp'}" action="#{ForumTool.processDfMsgRevisedPost}" value="#{msgs.cdfm_button_bar_post_revised_msg}" accesskey="s" styleClass="active blockMeOnClick" />
+						<h:commandButton rendered="#{view.viewId == '/jsp/dfMessageReply.jsp' || view.viewId == '/jsp/dfMessageReplyThread.jsp'}" action="#{ForumTool.processDfReplyMsgPost}" value="#{msgs.cdfm_button_bar_post_message}" accesskey="s" styleClass="active blockMeOnClick"/>
+
+						<h:commandButton rendered="#{view.viewId == '/jsp/dfCompose.jsp'}" action="#{ForumTool.processDfMsgCancel}" value="#{msgs.cdfm_button_bar_cancel}" immediate="true" accesskey="x" />
+						<h:commandButton rendered="#{view.viewId == '/jsp/dfMsgRevise.jsp'}" action="#{ForumTool.processDfMsgRevisedCancel}" value="#{msgs.cdfm_button_bar_cancel}" immediate="true" accesskey="x" />
+						<h:commandButton rendered="#{view.viewId == '/jsp/dfMessageReply.jsp' || view.viewId == '/jsp/dfMessageReplyThread.jsp'}" action="#{ForumTool.processDfReplyThreadCancel}" value="#{msgs.cdfm_button_bar_cancel}" immediate="true" accesskey="x" />
+
+						<h:outputText styleClass="sak-banner-info" style="display:none" value="#{msgs.cdfm_processing_submit_message}" />
+					</p>
+				</div>
 			</div>
-
 			<f:subview id="replyScripts" rendered ="#{view.viewId == '/jsp/dfMessageReply.jsp' || view.viewId == '/jsp/dfMessageReplyThread.jsp'}">
 				<%@ include file="replyScripts.jspf"%>
 			</f:subview>

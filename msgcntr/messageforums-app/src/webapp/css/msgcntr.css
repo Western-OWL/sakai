@@ -967,3 +967,27 @@ div.msgcntr-profile-qtip {
 		margin-bottom: 0;
 	}
 }
+
+.composeReply
+{
+       display: flex;
+       flex-direction: column;
+       gap: 10px 0;
+}
+
+@media only screen and (min-width: 1840px)
+{
+       .composeReply
+       {
+               flex-direction: row-reverse;
+               gap: 0 20px;
+               justify-content: flex-end;
+       }
+
+       .replyContainer
+       {
+               width: 100%;
+               height: fit-content;
+       }
+}
+
