@@ -396,6 +396,7 @@
 	/* indent the disclosure triangle to align with the vertical line of the post: indent + half of the border - half of the triangle icon width */
 	margin-left: calc(1em + (4px / 2) - (14px / 2));
 }
+.replyContainer,
 .composeContainer {
 	max-width: 800px;
 }

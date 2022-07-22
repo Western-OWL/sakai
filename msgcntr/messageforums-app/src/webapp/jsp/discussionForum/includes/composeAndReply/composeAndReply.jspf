@@ -44,15 +44,15 @@
 				<div id="replytomessage" class="collapse forumsCollapseTarget"><%@ include file="/jsp/discussionForum/includes/singletonMessageList.jspf"%></div>
 			</t:div>
 
-			<h:panelGroup layout="block" rendered="#{ForumTool.anonymousEnabled && ForumTool.selectedTopic.topic.postAnonymous}">
-				<h:outputText value="#{ForumTool.selectedTopic.topic.revealIDsToRoles ? msgs.cdfm_revealIDsToRoles_blurb :  msgs.cdfm_anonymous_blurb}" rendered="#{ForumTool.anonymousEnabled && ForumTool.selectedTopic.topic.postAnonymous}"/>
-			</h:panelGroup>
-
-			<h:messages globalOnly="true" infoClass="sak-banner-info" errorClass="sak-banner-error" rendered="#{(view.viewId == '/jsp/dfMessageReply.jsp' || view.viewId == '/jsp/dfMessageReplyThread.jsp') && ! empty facesContext.maximumSeverity}"/>
-			<h:message for="df_compose_title" warnStyle="sak-banner-warn" errorClass="sak-banner-error" id="titleErrorMessage"/>
-			<h:messages styleClass="sak-banner-error" id="errorMessages" rendered="#{view.viewId == '/jsp/dfMsgRevise.jsp' && ! empty facesContext.maximumSeverity}"/>
-
 			<div class="composeContainer">
+				<h:panelGroup layout="block" rendered="#{ForumTool.anonymousEnabled && ForumTool.selectedTopic.topic.postAnonymous}">
+					<h:outputText value="#{ForumTool.selectedTopic.topic.revealIDsToRoles ? msgs.cdfm_revealIDsToRoles_blurb :  msgs.cdfm_anonymous_blurb}" rendered="#{ForumTool.anonymousEnabled && ForumTool.selectedTopic.topic.postAnonymous}"/>
+				</h:panelGroup>
+
+				<h:messages globalOnly="true" infoClass="sak-banner-info" errorClass="sak-banner-error" rendered="#{(view.viewId == '/jsp/dfMessageReply.jsp' || view.viewId == '/jsp/dfMessageReplyThread.jsp') && ! empty facesContext.maximumSeverity}"/>
+				<h:message for="df_compose_title" warnStyle="sak-banner-warn" errorClass="sak-banner-error" id="titleErrorMessage"/>
+				<h:messages styleClass="sak-banner-error" id="errorMessages" rendered="#{view.viewId == '/jsp/dfMsgRevise.jsp' && ! empty facesContext.maximumSeverity}"/>
+
 				<h:outputLabel for="df_compose_title">
 					<h:outputText value="#{(view.viewId == '/jsp/dfCompose.jsp' || view.viewId == '/jsp/dfMsgRevise.jsp') ? msgs.cdfm_title : msgs.cdfm_reply_title}"/>
 					<h:outputText value=" #{msgs.cdfm_info_required_indicator}"/>
