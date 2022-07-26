@@ -60,12 +60,6 @@
 				<%@ include file="/jsp/discussionForum/includes/threadPrevNext.jspf"%>
 			</div>
 			<h:messages globalOnly="true" infoClass="success" errorClass="alertMessage" rendered="#{! empty facesContext.maximumSeverity}"/>
-			<div class="viewMessageDetailsContainer">
-				<h:panelGroup layout="block" styleClass="messageWordCount">
-					<h:outputText value="#{msgs.cdfm_message_count}" />
-					<h:panelGroup id="counttotal"></h:panelGroup>
-				</h:panelGroup>
-			</div>
 
 			<h:panelGroup layout="block" id="permalinkHolder">
 				<h:outputLink styleClass="closeMe" value="#"><h:panelGroup styleClass="icon-sakai--delete"></h:panelGroup></h:outputLink>

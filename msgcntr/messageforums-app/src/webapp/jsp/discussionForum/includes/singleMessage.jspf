@@ -43,10 +43,18 @@
 						<f:convertDateTime pattern="#{msgs.date_format}" timeZone="#{ForumTool.userTimeZone}" locale="#{ForumTool.userLocale}"/>
 					</h:outputText>
 				</div>
-				<%--read by count --%>
-				<div class="messageReadByCount">
-					<h:outputText styleClass="readBy" value="#{msgs.cdfm_readby}" />
-					<h:outputText styleClass="readByCount" value="#{message.message.numReaders}" />
+				<div class="messageCounts">
+					<%--word count --%>
+					<h:panelGroup layout="block" styleClass="messageWordCount" rendered="#{view.viewId == '/jsp/discussionForum/message/dfViewMessage.jsp'}">
+						<h:outputText value="#{msgs.cdfm_message_count}" />
+						<div id="counttotal"></div>
+					</h:panelGroup>
+
+					<%--read by count --%>
+					<div class="messageReadByCount">
+						<h:outputText styleClass="readBy" value="#{msgs.cdfm_readby}" />
+						<h:outputText styleClass="readByCount" value="#{message.message.numReaders}" />
+					</div>
 				</div>
 			</h:panelGroup>
 			<%-- End of div for messageMetadata --%>
