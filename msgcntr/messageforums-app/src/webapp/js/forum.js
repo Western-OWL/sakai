@@ -382,9 +382,16 @@ function doAjax(messageId, topicId, self){
                     if ($(self).parent('td').size() === 1) {
                         var thisTheadClassArr = $(thisRow).prop('class').split(' ');
                         var thisThread = thisTheadClassArr[thisTheadClassArr.length - 1];
-                        var unread = parseInt($('.hierItemBlock.' + thisThread + ' .childrenNewNumber').text(), 10);
+                        const $childrenNewNumber = $('.hierItemBlock.' + thisThread + ' .childrenNewNumber');
+                        const unreadText = $childrenNewNumber.text();
+                        const unread = parseInt(unreadText, 10);
+                        const noNumText = unreadText.replace(/\d+/g, "");
                         if (unread > 0) {
-                            $('.hierItemBlock.' + thisThread + ' .childrenNewNumber').text(unread - 1);
+                            $childrenNewNumber.text((unread - 1) + noNumText);
+                            if (unread === 1)
+                            {
+                                $childrenNewNumber.removeClass();
+                            }
                         }
                         $('.' + thisThread).find('em').text($('.' + thisThread).find('em').text() - 1);
 						//hide "New Messages" in thread seed if all messages have been marked as "read"
