@@ -51,9 +51,9 @@
 
 				<div class="composeContainer">
 
-					<h:messages globalOnly="true" infoClass="sak-banner-info" errorClass="sak-banner-error" rendered="#{(view.viewId == '/jsp/dfMessageReply.jsp' || view.viewId == '/jsp/dfMessageReplyThread.jsp') && ! empty facesContext.maximumSeverity}"/>
+					<h:messages id="errorMessages" globalOnly="true" infoClass="sak-banner-info" errorClass="sak-banner-error" rendered="#{! empty facesContext.maximumSeverity}"/>
+
 					<h:message for="df_compose_title" warnStyle="sak-banner-warn" errorClass="sak-banner-error" id="titleErrorMessage"/>
-					<h:messages styleClass="sak-banner-error" id="errorMessages" rendered="#{view.viewId == '/jsp/dfMsgRevise.jsp' && ! empty facesContext.maximumSeverity}"/>
 
 					<h:outputLabel for="df_compose_title">
 						<h:outputText value="#{(view.viewId == '/jsp/dfCompose.jsp' || view.viewId == '/jsp/dfMsgRevise.jsp') ? msgs.cdfm_title : msgs.cdfm_reply_title}"/>

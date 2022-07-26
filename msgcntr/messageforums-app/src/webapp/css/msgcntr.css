@@ -987,3 +987,8 @@ div.msgcntr-profile-qtip {
 	}
 }
 
+.composeContainer #dfCompose\:errorMessages
+{
+	padding-left: 0;
+}
+
