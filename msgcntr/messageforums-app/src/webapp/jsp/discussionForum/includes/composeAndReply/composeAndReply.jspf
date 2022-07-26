@@ -73,7 +73,7 @@
 							<%@ include file="replyInsertOrig.jspf"%>
 						</t:htmlTag>
 
-						<div><h:outputText value="#{msgs.cdfm_message_count}" />:<span  id="counttotal">0</span></div>
+						<div class="extWordCount"><h:outputText value="#{msgs.cdfm_message_count}" />:<span  id="counttotal">0</span></div>
 					</div>
 
 					<sakai:inputRichText textareaOnly="#{PrivateMessagesTool.mobileSession}" value="#{ForumTool.composeBody}" id="df_compose_body" rows="#{ForumTool.editorRows}" cols="132">

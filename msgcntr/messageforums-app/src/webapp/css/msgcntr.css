@@ -991,3 +991,13 @@ div.msgcntr-profile-qtip {
 	padding-left: 0;
 }
 
+.messageComposeHeader .extWordCount
+{
+	display: none;
+}
+
+.composeReply .composeContainer .messageComposeHeader a.button
+{
+	margin-right: 0;
+}
+
