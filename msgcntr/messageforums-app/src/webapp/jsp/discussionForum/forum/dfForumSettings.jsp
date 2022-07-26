@@ -76,13 +76,13 @@ if (thisId == null)
           
           <h:commandButton id="delete" action="#{ForumTool.processActionDeleteForum}" 
                            value="#{msgs.cdfm_button_bar_delete_forum}" rendered="#{ForumTool.selectedForum.markForDeletion}"
-                           accesskey="" styleClass="blockMeOnClick">
+                           accesskey="" styleClass="active blockMeOnClick">
 	        	<f:param value="#{ForumTool.selectedForum.forum.id}" name="forumId"/>
           </h:commandButton>
           
           <h:commandButton id="duplicate" action="#{ForumTool.processActionDuplicateForum}" 
                            value="#{msgs.cdfm_duplicate_forum}" rendered="#{ForumTool.selectedForum.markForDuplication}"
-                           accesskey="s" styleClass="blockMeOnClick">
+                           accesskey="s" styleClass="active blockMeOnClick">
 	        	<f:param value="#{ForumTool.selectedForum.forum.id}" name="forumId"/>
           </h:commandButton>
           
