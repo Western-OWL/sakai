@@ -124,7 +124,9 @@
 	#revise{
 		label{
 			font-weight: 400;
-			margin: 1em 0 0.25em 0;
+			margin: $standard-spacing 0 $standard-space 0;
+			padding-left: 0;
+
 			input[type="radio"]{
 				margin: 0 0.5em 0 -2em;
 			}
@@ -160,7 +162,8 @@
 				margin: 0 10px;
 				position: inherit;
 				+ label{
-					padding-left: 10px;
+					margin-left: 0;
+					padding-left: 0;
 					padding-right: 40px;
 					@media #{$phone}{
 						max-width: calc(100% - 50px);

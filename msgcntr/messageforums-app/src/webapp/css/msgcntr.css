@@ -1001,3 +1001,11 @@ div.msgcntr-profile-qtip {
 	margin-right: 0;
 }
 
+/* temporary styles to fix Lessons missing Forums SASS rules for Settings pages */
+#revise .checkbox input[type="checkbox"] {
+	margin: 0;
+}
+#revise .checkbox input[type="checkbox"] + label {
+	margin-left: 10px;
+	padding: 0 10px;
+}
