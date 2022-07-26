@@ -91,7 +91,7 @@
 	<div class="sakai-table-toolBar">
 		<div class="sakai-table-filterContainer">
 			<%@ include file="dfViewSearchBarThread.jsp"%>
-			<div class="sakai-table-buttonContainer">
+			<div class="sakai-table-searchFilter">
 				<h:commandLink styleClass="button" value="#{msgs.cdfm_reply_thread}" id="replyThread" 
 					rendered="#{ForumTool.selectedTopic.isNewResponseToResponse && ForumTool.selectedThreadHead.msgApproved && !ForumTool.selectedTopic.locked && !ForumTool.selectedForum.locked == 'true'}"
 					action="#{ForumTool.processDfMsgReplyThread}" immediate="true"/>
