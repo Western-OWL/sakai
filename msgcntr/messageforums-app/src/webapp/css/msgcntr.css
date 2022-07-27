@@ -50,6 +50,8 @@
 .forumsCollapseTrigger[aria-expanded="true"]:before {
 	content: "\f0d7";
 }
+h1 + .forumsCollapseTrigger,
+h2 + .forumsCollapseTrigger,
 .shortDescription + .forumsCollapseTrigger {
 	margin-top: 8px; /* to match title's spacing when both short description and details are set */
 }
