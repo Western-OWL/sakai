@@ -394,6 +394,7 @@
 	text-decoration: none;
 }
 .replyContainer,
+.composeAnonWarning,
 .composeContainer {
 	max-width: 800px;
 	width: 100%;
