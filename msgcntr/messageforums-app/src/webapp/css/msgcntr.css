@@ -485,26 +485,15 @@ td div.title{
 }
 .attachPanel{
 /*panel listing attachmetns when in edit mode for forum/topic/message*/
-	border: 1px solid #eee;
+	border: 1px solid #e5e5e5;
 	background: #fff;
-	font-size: 1em;
 }
-.attachPanel tr:hover{
-	background: none !important;
-}
-.attachPanel th{
-	background: #ffe;
-	border-bottom: 1px solid #eee;
-	text-align: left;
-	font-weight: normal;
-	padding: .2em .5em;
-}
-.attachPanel td{
-	padding: .2em .5em;
-	vertical-align: top;
+.attachPanel th {
+	background-color: #eee;
 }
 .attachPanel td.attach{
-	width: 1em;
+	/* image's width plus cell's padding: */
+	width: 32px;
 }
 .attachListJSF {
 	margin: 0;
@@ -518,7 +507,7 @@ td div.title{
 	margin-right: 4px;
 }
 .permissionTable {
-	width: 675px;	
+	width: 675px;
 }
 .permissionRoleLabel {
 	display:inline-block;

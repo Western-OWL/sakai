@@ -1,20 +1,20 @@
 <div class="attachmentsContainer">
 <h3><h:outputText value="#{msgs.cdfm_att}" /></h3>
-<p>
-<h:outputText value="#{msgs.cdfm_no_attachments}" rendered="#{empty ForumTool.attachments}" styleClass="instruction" style="display:block"/>
-</p>
+<h:panelGroup layout="block" rendered="#{empty ForumTool.attachments}" styleClass="instruction">
+	<h:outputText value="#{msgs.cdfm_no_attachments}" />
+</h:panelGroup>
 
-<h:dataTable styleClass="attachPanel" id="attmsg" width="100%" value="#{ForumTool.attachments}"  rendered="#{!empty ForumTool.attachments}" var="eachAttach"  columnClasses=",itemAction specialLink,," cellpadding="0" cellspacing="0" style="width:auto">
-  <h:column rendered="#{!empty ForumTool.attachments}">
+<h:dataTable styleClass="table table-hover attachPanel" id="attmsg" value="#{ForumTool.attachments}" rendered="#{!empty ForumTool.attachments}" var="eachAttach" columnClasses=",itemAction specialLink,,">
+	<h:column rendered="#{!empty ForumTool.attachments}">
 		<f:facet name="header">
 			<h:outputText value="#{msgs.cdfm_title}"/>
 		</f:facet>
 		<sakai:contentTypeMap fileType="#{eachAttach.attachment.attachmentType}" mapType="image" var="imagePath" pathPrefix="/library/image/"/>
 		<h:graphicImage id="exampleFileIcon" value="#{imagePath}" />
-<h:outputText value=" "/>
-			<h:outputText value="#{eachAttach.attachment.attachmentName}"/>
-		</h:column>
-		<h:column>
+		<h:outputText value=" "/>
+		<h:outputText value="#{eachAttach.attachment.attachmentName}"/>
+	</h:column>
+	<h:column>
 			<h:commandLink rendered="#{view.viewId != '/jsp/dfMsgRevise.jsp'}"
 				action="#{ForumTool.processDeleteAttach}" immediate="true" onfocus="document.forms[0].onsubmit();" title="#{msgs.cdfm_remove}">
 				<h:outputText value="#{msgs.cdfm_remove}"/>
@@ -26,15 +26,15 @@
 				<f:param value="#{eachAttach.attachment.attachmentId}" name="dfmsg_current_attach"/>
 			</h:commandLink>
 	</h:column>
-  <h:column rendered="#{!empty ForumTool.attachments}">
+	<h:column rendered="#{!empty ForumTool.attachments}">
 		<f:facet name="header">
 			<h:outputText value="#{msgs.cdfm_attsize}" />
 		</f:facet>
 		<h:outputText value="#{eachAttach.attachment.attachmentSize}"/>
 	</h:column>
-  <h:column rendered="#{!empty ForumTool.attachments}">
+	<h:column rendered="#{!empty ForumTool.attachments}">
 		<f:facet name="header">
-	<h:outputText value="#{msgs.cdfm_atttype}" />
+		<h:outputText value="#{msgs.cdfm_atttype}" />
 		</f:facet>
 		<h:outputText value="#{eachAttach.attachment.attachmentType}"/>
 	</h:column>

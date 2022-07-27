@@ -189,7 +189,7 @@
 	      </h2>
 
 				<%--designNote: would be nice to make this an include, as well as a more comprehensive MIME type check  --%> 
-			<h:dataTable styleClass="attachPanel" id="attmsg"  value="#{ForumTool.attachments}" var="eachAttach"  cellpadding="0" cellspacing="0" columnClasses="attach,bogus,specialLink,bogus,bogus" rendered="#{!empty ForumTool.attachments}">
+			<h:dataTable styleClass="table table-hover attachPanel" id="attmsg" value="#{ForumTool.attachments}" var="eachAttach" columnClasses="attach,bogus,specialLink,bogus,bogus" rendered="#{!empty ForumTool.attachments}">
 				<h:column>
 					<f:facet name="header">   <h:outputText value=" "/>
 						</f:facet>

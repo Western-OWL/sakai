@@ -103,7 +103,7 @@
                 <h:outputText value="#{msgs.cdfm_no_attachments}" rendered="#{empty ForumTool.attachments}" styleClass="instruction" style="display:block"/>
             </p>    
                 
-            <h:dataTable styleClass="attachPanel" id="attmsg" width="100%" value="#{ForumTool.attachments}"  rendered="#{!empty ForumTool.attachments}" var="eachAttach"  columnClasses=",itemAction specialLink,," cellpadding="0" cellspacing="0" style="width:auto">
+            <h:dataTable styleClass="table table-hover attachPanel" id="attmsg" value="#{ForumTool.attachments}" rendered="#{!empty ForumTool.attachments}" var="eachAttach" columnClasses=",itemAction specialLink,,">
                 <h:column rendered="#{!empty ForumTool.attachments}">
                     <f:facet name="header">
                         <h:outputText value="#{msgs.cdfm_title}"/>
