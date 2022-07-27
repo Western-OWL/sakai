@@ -10,6 +10,7 @@
 	<h:outputText styleClass="badge-locked" value="#{msgs.cdfm_forum_locked_flag}" rendered="#{forum.locked == 'true' || topic.locked == 'true'}" />
 	<h:outputText id="topic_moderated" styleClass="badge-moderated" value="#{msgs.cdfm_forum_moderated_flag}" rendered="#{topic.moderated == 'true' && topic.isRead}" />
 	<h:outputText styleClass="badge-post-first" value="#{msgs.cdfm_topic_post_first_flag}" rendered="#{topic.postFirst}" />
+	<h:outputText styleClass="badge-anon" value="#{msgs.cdfm_topic_anon_flag}" rendered="#{ForumTool.anonymousEnabled && topic.postAnonymous}" />
 	<%-- Rubrics marker --%>
 	<h:panelGroup rendered="#{topic.hasRubric == 'true'}">
 		<sakai-rubric-student-preview-button

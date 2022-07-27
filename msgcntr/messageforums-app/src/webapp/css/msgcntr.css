@@ -854,6 +854,7 @@ div.msgcntr-profile-qtip {
 .badge-new,
 .badge-unavailable,
 .badge-post-first,
+.badge-anon,
 .messageNew,
 .messagePending,
 .messageDenied {
@@ -887,6 +888,9 @@ div.msgcntr-profile-qtip {
 }
 .badge-post-first {
 	background-color: #b5ffc8;
+}
+.badge-anon {
+	background-color: #aeeef8;
 }
 .messagePending{
 	background-color: #91d7ee;
