@@ -12,6 +12,7 @@
 	       		<script>includeLatestJQuery("msgcntr");</script>
        		<script src="/messageforums-tool/js/sak-10625.js"></script>
        		<script src="/messageforums-tool/js/messages.js"></script>
+			<script src="/messageforums-tool/js/forum.js"></script>
 		<h:form id="dfMsgAddComment">
 
 			<h3><h:outputText value="#{msgs.cdfm_add_comment}" /></h3>
