@@ -32,6 +32,7 @@ import static org.sakaiproject.assignment.api.AssignmentServiceConstants.*;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.fileupload.FileItem;
+import org.sakaiproject.assignment.api.AssignmentConstants;
 
 import org.sakaiproject.assignment.api.AssignmentReferenceReckoner;
 import org.sakaiproject.assignment.api.AssignmentService;
@@ -390,7 +391,7 @@ public class AssignmentEntityProvider extends AbstractEntityProvider implements 
             throw new EntityNotFoundException("No access to site: " + siteId, siteId);
         }
 
-        assignmentService.getAssignmentsForContext(siteId).stream().map(SimpleAssignment::new).forEach(rv::add);
+        assignmentService.getAssignmentsForContext(siteId).stream().map(this::sanitized).forEach(rv::add);
         return rv;
     }
 
@@ -410,7 +411,7 @@ public class AssignmentEntityProvider extends AbstractEntityProvider implements 
         // get all assignments from each site
         for (Site site : sites) {
             String siteId = site.getId();
-            assignmentService.getAssignmentsForContext(siteId).stream().map(SimpleAssignment::new).forEach(rv::add);
+            assignmentService.getAssignmentsForContext(siteId).stream().map(this::sanitized).forEach(rv::add);
         }
 
         return rv;
@@ -434,8 +435,63 @@ public class AssignmentEntityProvider extends AbstractEntityProvider implements 
         } catch (PermissionException e) {
             throw new EntityNotFoundException("No access to assignment: " + assignmentId, assignmentId);
         }
-        return new SimpleAssignment(a);
+
+        return sanitized(a);
     }
+
+	private SimpleAssignment sanitized(Assignment a)
+	{
+		SimpleAssignment sa = new SimpleAssignment(a);
+
+		boolean isStudent = !canGrade(a) && !canAdd(a) && !canUpdate(a);
+
+		// 1. hidden due date
+		if (Boolean.TRUE.equals(a.getHideDueDate()) && isStudent)
+		{
+			sa.setCloseTime(Instant.EPOCH);
+			sa.setCloseTimeString("");
+			sa.setDropDeadTime(Instant.EPOCH);
+			sa.setDropDeadTimeString("");
+			sa.setDueTime(Instant.EPOCH);
+			sa.setDueTimeString("");
+		}
+
+		// 2. model answer
+		// we don't have a submission in this context so we have to replicate some of the service logic here
+		// to provide the model answer to students only if we are certain it is permitted
+		if (isStudent)
+		{
+			AssignmentModelAnswerItem m = assignmentSupplementItemService.getModelAnswer(a.getId());
+			Integer showTo = m == null ? null : m.getShowTo();
+			if (showTo == null || showTo == AssignmentConstants.MODEL_ANSWER_SHOW_TO_STUDENT_AFTER_SUBMIT
+					|| showTo == AssignmentConstants.MODEL_ANSWER_SHOW_TO_STUDENT_AFTER_GRADE_RETURN
+					|| (showTo == AssignmentConstants.MODEL_ANSWER_SHOW_TO_STUDENT_AFTER_ACCEPT_UTIL && a.getCloseDate().isAfter(Instant.now())))
+			{
+				sa.setModelAnswerText("");
+			}
+		}
+
+		// 3. private note
+		if (!assignmentSupplementItemService.canReadNoteItem(a, a.getContext()))
+		{
+			sa.setPrivateNoteText("");
+		}
+
+		// 4. all purpose item
+		if (!assignmentSupplementItemService.canViewAllPurposeItem(a))
+		{
+			sa.setAllPurposeItemText("");
+		}
+
+		// 5. gb integration
+		if (isStudent)
+		{
+			sa.setGradebookItemId(-1L);
+			sa.setGradebookItemName("");
+		}
+
+		return sa;
+	}
 
     @Getter
     public class GraderUser {
@@ -696,6 +752,11 @@ public class AssignmentEntityProvider extends AbstractEntityProvider implements 
         AssignmentSubmission as = null;
         try {
             as = assignmentService.getSubmission(submissionId);
+
+			if (!canGrade(as.getAssignment())) {
+				throw new EntityException("Forbidden", "", HttpServletResponse.SC_FORBIDDEN);
+			}
+
             as.getFeedbackAttachments().remove(ref);
             assignmentService.updateSubmission(as);
         } catch (IdUnusedException iue) {
@@ -937,6 +998,17 @@ public class AssignmentEntityProvider extends AbstractEntityProvider implements 
         String reference = AssignmentReferenceReckoner.reckoner().assignment(assignment).reckon().getReference();
         return assignmentService.allowGradeSubmission(reference);
     }
+
+	private boolean canAdd(Assignment assignment)
+	{
+		return assignmentService.allowAddAssignment(assignment.getContext());
+	}
+
+	private boolean canUpdate(Assignment assignment)
+	{
+		String reference = AssignmentReferenceReckoner.reckoner().assignment(assignment).reckon().getReference();
+		return assignmentService.allowUpdateAssignment(reference);
+	}
 
     @AllArgsConstructor
     public class DecoratedAttachment implements Comparable<Object> {
