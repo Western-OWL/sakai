@@ -391,7 +391,7 @@ public class AssignmentEntityProvider extends AbstractEntityProvider implements 
             throw new EntityNotFoundException("No access to site: " + siteId, siteId);
         }
 
-        assignmentService.getAssignmentsForContext(siteId).stream().map(this::sanitized).forEach(rv::add);
+        assignmentService.getAssignmentsForContext(siteId).stream().filter(a -> canViewAssignment(a)).map(this::sanitized).forEach(rv::add);
         return rv;
     }
 
@@ -411,7 +411,7 @@ public class AssignmentEntityProvider extends AbstractEntityProvider implements 
         // get all assignments from each site
         for (Site site : sites) {
             String siteId = site.getId();
-            assignmentService.getAssignmentsForContext(siteId).stream().map(this::sanitized).forEach(rv::add);
+            assignmentService.getAssignmentsForContext(siteId).stream().filter(a -> canViewAssignment(a)).map(this::sanitized).forEach(rv::add);
         }
 
         return rv;
@@ -1009,6 +1009,15 @@ public class AssignmentEntityProvider extends AbstractEntityProvider implements 
 		String reference = AssignmentReferenceReckoner.reckoner().assignment(assignment).reckon().getReference();
 		return assignmentService.allowUpdateAssignment(reference);
 	}
+
+    private boolean canViewAssignment(Assignment a) {
+        try {
+            assignmentService.getAssignment(a.getId());
+            return true;
+        } catch (IdUnusedException | PermissionException e) {
+            return false;
+        }
+    }
 
     @AllArgsConstructor
     public class DecoratedAttachment implements Comparable<Object> {
