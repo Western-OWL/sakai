@@ -120,7 +120,7 @@ public class SiteTitleAdvisorCMS implements SiteTitleAdvisor
                 }
 
                 // Short circuit - only continue if there are more than one provider ID (cross listed site)
-                if( CollectionUtils.isNotEmpty( providerIDs ) )
+                if( CollectionUtils.isNotEmpty( providerIDs ) && providerIDs.size() > 1 )
                 {
                     // Get the current user's section membership/role map
                     Map<String, String> sectionRoles = cms.findSectionRoles( currentUser.getEid() );
