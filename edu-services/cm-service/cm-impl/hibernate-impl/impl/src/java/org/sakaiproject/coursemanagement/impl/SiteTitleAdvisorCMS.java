@@ -21,8 +21,8 @@
 
 package org.sakaiproject.coursemanagement.impl;
 
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -116,7 +116,7 @@ public class SiteTitleAdvisorCMS implements SiteTitleAdvisor
                 if( providerIDs == null )
                 {
                     String realmID = site.getReference();
-                    providerIDs = azgs.getProviderIDsForRealms( ((List<String>) Arrays.asList( new String[] {realmID} )) ).get( realmID );
+                    providerIDs = azgs.getProviderIDsForRealms( Collections.singletonList( realmID ) ).get( realmID );
                 }
 
                 // Short circuit - only continue if there are more than one provider ID (cross listed site)
@@ -158,9 +158,10 @@ public class SiteTitleAdvisorCMS implements SiteTitleAdvisor
                             }
                         }
                     }
-                    if (titleOfSectionWithStudentRole != null)
+
+                    // If the user is not enrolled in any sections with the preferred category, but they are enrolled in at least one section as a student; display a section title
+                    if( titleOfSectionWithStudentRole != null )
                     {
-                        // The user is not enrolled in any sections with the preferred category, but they are enrolled in at least one section as a student; display a section title
                         return titleOfSectionWithStudentRole;
                     }
                 }
