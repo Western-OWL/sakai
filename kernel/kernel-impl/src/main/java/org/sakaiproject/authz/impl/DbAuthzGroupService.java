@@ -28,11 +28,13 @@ import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -121,6 +123,8 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
     private Cache maintainRolesCache;
 
     private Cache realmLocksCache;
+
+    private Cache<String, List<String>> realmProvidersCache;
 
 	/** KNL-1325 provide a more efficent refreshAuthzGroup */
     public static final String REFRESH_MAX_TIME_PROPKEY = "authzgroup.refresh.max.time";
@@ -255,6 +259,7 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 			authzUserGroupIdsCache = m_memoryService.getCache("org.sakaiproject.authz.impl.DbAuthzGroupService.authzUserGroupIdsCache");
 			maintainRolesCache = m_memoryService.getCache("org.sakaiproject.authz.impl.DbAuthzGroupService.maintainRolesCache");
 			realmLocksCache = m_memoryService.getCache("org.sakaiproject.authz.impl.DbAuthzGroupService.realmLocksCache");
+			realmProvidersCache = m_memoryService.getCache("org.sakaiproject.authz.impl.DbAuthzGroupService.realmProvidersCache");
 
             //get the set of maintain roles and cache them on startup
             getMaintainRoles();
@@ -308,6 +313,7 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 		authzUserGroupIdsCache.close();
 		maintainRolesCache.close();
 		realmLocksCache.close();
+		realmProvidersCache.close();
 
 		log.info(this +".destroy()");
 	}
@@ -620,7 +626,7 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 
 			if (realmId != null) {
 				if (log.isDebugEnabled()) {
-					log.debug("clear authzUserGroupIdsCache/realmRoleGRCache/realmLocksCache for {}", realmId);
+					log.debug("clear authzUserGroupIdsCache/realmRoleGRCache/realmLocksCache/realmProvidersCache for {}", realmId);
 				}
 
 				for (String user : getAuthzUsersInGroups(new HashSet<String>(Arrays.asList(realmId)))) {
@@ -629,6 +635,7 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 
 				m_realmRoleGRCache.remove(realmId);
 				realmLocksCache.remove(realmId);
+				realmProvidersCache.remove(realmId);
 			} else {
 				// This should never happen as the events we generate should always have
 				// a /realm/ prefix on the resource.
@@ -1179,54 +1186,82 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 
 		/**
 		 * {@inheritDoc}
+		 * Uses a cache to minimize db lookups.
 		 */
+		@Override
 		public Map<String, List<String>> getProviderIDsForRealms(List<String> realmIDs)
 		{
-			/* I'm keeping code close to original reduce any risk of backport conflicts.
-			 * When contributing, return an empty Map if realmIDs == null || realmIDs.size() == 0,
-			 * then remove the following 'if' condition  --bbailla2 */
-			if (realmIDs != null && realmIDs.size() > 0)
+			if (CollectionUtils.isEmpty(realmIDs))
 			{
-				// Custom reader to get only realm_id and provider_id
-				SqlReader reader = (result)-> {
-					try
-					{
-						String realmID = result.getString(1);
-						String providerIDs = result.getString(2);
-						List<String> retVal = new ArrayList<>(2);
-						retVal.add(realmID);
-						retVal.add(providerIDs);
-						return retVal;
-					}
-					catch (SQLException ex)
-					{
-						// Avoid nulls by returning an empty Colleciton<String>
-						log.warn("getProviderIDsForRealms.readSqlResultRecord: " + ex);
-						return Collections.<String>emptyList();
-					}
-				};
-
-				// Execute the SQL statement
-				String sql = dbAuthzGroupSql.getSelectRealmsProviderIDsSql(orInClause(realmIDs.size(), "r.realm_id"));
-				Object[] fields = realmIDs.toArray();
-				List<List<String>> results = (List<List<String>>) m_sql.dbRead(sql, fields, reader);
-
-				// Build the realm-provider map
-				Map<String, List<String>> realmProviderMap = new HashMap<>(results.size());
-				for (List<String> list : results)
-				{
-					String realmID = list.get(0);
-					String providerIDs = list.get(1);
-
-					if (StringUtils.isNotBlank(realmID) && StringUtils.isNotBlank(providerIDs))
-					{
-						realmProviderMap.put(realmID, Arrays.asList(providerIDs.split("\\+")));
-					}
-				}
-				return realmProviderMap;
+				return Collections.emptyMap();
 			}
 
-			return Collections.emptyMap();
+			Map<String, List<String>> providers = new HashMap<>(realmIDs.size());
+
+			// Check cache first
+			List<String> cacheMisses = Collections.emptyList();
+			for (String realm : realmIDs)
+			{
+				List<String> providerIDs = realmProvidersCache.get(realm);
+				if (providerIDs != null)
+				{
+					providers.put(realm, providerIDs);
+				}
+				else
+				{
+					if (cacheMisses.isEmpty())
+					{
+						cacheMisses = new ArrayList<>();
+					}
+					cacheMisses.add(realm);
+				}
+			}
+
+			// For any not cached, fetch from db and cache results for next time
+			List<RealmAndProviders> results = getRealmAndProviders(cacheMisses);
+			results.stream().forEach(rp -> providers.put(rp.realm, rp.providers));
+
+			return providers;
+		}
+
+		/**
+		 * Returns a list of realm/providerid combos. Caches results.
+		 * @param realmIds the realm uuids to retrieve providers for
+		 * @return a map of realms uuids to a list of their associated providers
+		 */
+		private List<RealmAndProviders> getRealmAndProviders(List<String> realmIds)
+		{
+			if (realmIds.isEmpty())
+			{
+				return Collections.emptyList();
+			}
+
+			// Custom reader to get only realm_id and provider_id
+			SqlReader reader = (result)-> {
+				try
+				{
+					String realmId = result.getString(1);
+					String providerId = StringUtils.trimToEmpty(result.getString(2));
+					if (StringUtils.isNotBlank(realmId))
+					{
+						List<String> providerIds = providerId.isEmpty() ? Collections.emptyList() : Arrays.asList(providerId.split("\\+"));
+						realmProvidersCache.put(realmId, providerIds);
+						return Optional.of(new RealmAndProviders(realmId, providerIds));
+					}
+				}
+				catch (SQLException ex)
+				{
+					log.warn("getRealmAndProviders.readSqlResultRecord: " + ex);
+				}
+
+				return Optional.empty();
+			};
+
+			// Execute the SQL statement
+			String sql = dbAuthzGroupSql.getSelectRealmsProviderIDsSql(orInClause(realmIds.size(), "r.realm_id"));
+			Object[] fields = realmIds.toArray();
+			List<Optional<RealmAndProviders>> results = (List<Optional<RealmAndProviders>>) m_sql.dbRead(sql, fields, reader);
+			return results.stream().filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
 		}
 
 		/**
@@ -3269,6 +3304,18 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 			{
 				this.realmId = id;
 				this.providerId = provider;
+			}
+		}
+
+		public class RealmAndProviders
+		{
+			public final String realm;
+			public final List<String> providers;
+
+			public RealmAndProviders(String realm, List<String> providers)
+			{
+				this.realm = realm;
+				this.providers = providers;
 			}
 		}
 

@@ -372,13 +372,8 @@ public class PortalSiteHelperImpl implements PortalSiteHelper
 	 */
 	public static List<String> getProviderIDsForSite(Site site)
 	{
-		List<String> providers = new ArrayList<>();
-		if (site != null)
-		{
-			providers.addAll(getAuthzGroupService().getProviderIds(site.getReference()));
-		}
-
-		return providers;
+		List<String> providers = getProviderIDsForSites(Collections.singletonList(site)).get(site.getReference());
+		return providers == null ? Collections.emptyList() : providers;
 	}
 
 	/**
