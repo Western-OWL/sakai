@@ -86,8 +86,8 @@ public class SiteTitleAdvisorCMS implements SiteTitleAdvisor
      */
     public String getUserSpecificSiteTitle( Site site, String userID, List<String> siteProviders )
     {
-        // Short circuit - only continue if sakai.property set to true
-        if( portalUseSectionTitle )
+        // Short circuit - only continue if sakai.property set to true, AND this is a course site (project sites don't have providers)
+        if( portalUseSectionTitle && site.isType( "course" ) )
         {
             // Get the user by the ID supplied
             User currentUser = null;
