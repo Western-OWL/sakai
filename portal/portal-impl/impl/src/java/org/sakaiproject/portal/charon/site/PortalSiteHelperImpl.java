@@ -86,6 +86,7 @@ import org.sakaiproject.util.RequestFilter;
 import org.sakaiproject.util.comparator.AliasCreatedTimeComparator;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 
 /**
  * @author ieb
@@ -384,17 +385,27 @@ public class PortalSiteHelperImpl implements PortalSiteHelper
 	 */
 	public static Map<String, List<String>> getProviderIDsForSites(List<Site> sites)
 	{
-		Map<String, List<String>> realmProviderMap = new HashMap<>();
-		if (!sites.isEmpty())
+		if (CollectionUtils.isEmpty(sites))
 		{
-			List<String> realmIDs = new ArrayList<>();
-			for (Site site : sites)
+			return Collections.emptyMap();
+		}
+
+		Map<String, List<String>> realmProviderMap = new HashMap<>(sites.size());
+
+		List<String> realmIDs = new ArrayList<>();
+		for (Site site : sites)
+		{
+			if ("course".equals(site.getType())) // only course site realms have providers
 			{
 				realmIDs.add(site.getReference());
 			}
-
-			realmProviderMap = getAuthzGroupService().getProviderIDsForRealms(realmIDs);
+			else
+			{
+				realmProviderMap.put(site.getReference(), Collections.emptyList());
+			}
 		}
+
+		realmProviderMap.putAll(getAuthzGroupService().getProviderIDsForRealms(realmIDs));
 
 		return realmProviderMap;
 	}
