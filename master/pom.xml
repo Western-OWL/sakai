@@ -40,7 +40,7 @@
     <sakai.hikaricp.version>3.4.2</sakai.hikaricp.version>
     <sakai.httpclient.version>4.5.13</sakai.httpclient.version>
     <sakai.httpcore.version>4.4.13</sakai.httpcore.version>
-    <sakai.jackson.version>2.10.1</sakai.jackson.version>
+    <sakai.jackson.version>2.12.6.1</sakai.jackson.version>
     <sakai.jsoup.version>1.14.2</sakai.jsoup.version>
     <sakai.httpmime.version>4.5.13</sakai.httpmime.version>
     <sakai.woodstox.version>5.2.1</sakai.woodstox.version>
