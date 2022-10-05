@@ -53,6 +53,14 @@ import org.sakaiproject.entitybroker.DeveloperHelperService;
 import java.lang.IllegalArgumentException;
 import java.lang.SecurityException;
 import java.lang.IllegalStateException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
+import org.sakaiproject.exception.IdUnusedException;
+import org.sakaiproject.site.api.Group;
+import org.sakaiproject.site.api.Site;
+import org.sakaiproject.site.api.SiteService;
 
 
 
@@ -72,6 +80,7 @@ public class PublishedAssessmentEntityProviderImpl implements PublishedAssessmen
   private PublishedAssessmentFacadeQueriesAPI publishedAssessmentFacadeQueries;
   private SecurityService securityService;
   private GradingServiceAPI gradingService = null;
+  private SiteService siteService;
   
   public String getEntityPrefix() {
     return ENTITY_PREFIX;
@@ -177,7 +186,7 @@ public class PublishedAssessmentEntityProviderImpl implements PublishedAssessmen
 	  if(userId==null)return results;
 	  if(siteId==null) return results;
 	   String orderBy = "title";
-	   List assessments = null;
+	   List<PublishedAssessmentFacade> assessments = null;
 	   boolean canPublish = false;
 	   Date currentDate = new Date();
 
@@ -194,6 +203,26 @@ public class PublishedAssessmentEntityProviderImpl implements PublishedAssessmen
 	    else if (securityService.unlock(CAN_TAKE, "/site/"+siteId)) {
 	      assessments = publishedAssessmentFacadeQueries
 	        .getBasicInfoOfAllActivePublishedAssessments(orderBy, siteId, true);
+		  // this call returns every active assessment so filter out assignments for groups this user doesn't belong to
+		  // and wouldn't be able to see in the UI. Also wipe any group information on the assessment to avoid leaks.
+		 Collection<Group> siteGroups = Collections.emptyList();
+			try
+			{
+				Site s = siteService.getSite(siteId);
+				if (s != null)
+				{
+					siteGroups = s.getGroupsWithMember(userId);
+				}
+			}
+			catch (IdUnusedException ex) {
+				// no site found, we can't continue
+				return results;
+			}
+			final List<String> groupIds = siteGroups.stream().map(g -> StringUtils.trimToEmpty(g.getId())).filter(g -> !g.isEmpty()).collect(Collectors.toList());
+			assessments = assessments.stream()
+					.filter(a -> a.getReleaseToGroups() == null || a.getReleaseToGroups().isEmpty() || a.getReleaseToGroups().keySet().stream().anyMatch(g -> groupIds.contains((String) g)))
+					.collect(Collectors.toList());
+			assessments.stream().filter(a -> a.getReleaseToGroups() != null).forEach(a -> a.getReleaseToGroups().clear());
 	    }
 
 		if (assessments != null) {
@@ -384,5 +413,13 @@ public class PublishedAssessmentEntityProviderImpl implements PublishedAssessmen
   public void setDeveloperHelperService(DeveloperHelperService developerHelperService) {
      this.developerHelperService = developerHelperService;
 }
+
+  public SiteService getSiteService() {
+        return siteService;
+    }
+
+    public void setSiteService(SiteService siteService) {
+        this.siteService = siteService;
+    }
 
 }
