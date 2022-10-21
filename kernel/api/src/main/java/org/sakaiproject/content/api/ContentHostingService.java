@@ -2124,6 +2124,4 @@ public interface ContentHostingService extends EntityProducer
 	 */
 
 	public String expandMacros(String url);
-
-	public Map<String,String> getHtmlForRef(String ref);
 }

@@ -249,18 +249,6 @@ public class ContentEntityProvider extends AbstractEntityProvider implements Ent
 		return resourceDetails;
 	}
 
-	@EntityCustomAction(action="htmlForRef", viewKey=EntityView.VIEW_SHOW)
-	public ActionReturn getHtmlForRef(EntityView view, Map<String, Object> params) throws EntityPermissionException {
-
-		String ref = (String) params.get("ref");
-
-		if (StringUtils.isBlank(ref)) {
-			throw new EntityException("You need to supply the ref parameter.", null, HttpServletResponse.SC_BAD_REQUEST);
-		}
-
-		return new ActionReturn(contentHostingService.getHtmlForRef(ref));
-	}
-
 	/**
 	 *
 	 * @param entity The entity to load details of.
