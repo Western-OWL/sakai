@@ -155,7 +155,10 @@ public class SiteStatsEntityProvider extends AbstractEntityProvider implements A
         if (StringUtils.isBlank(reportDef.getReportParams().getSiteId())) {
             reportDef.getReportParams().setSiteId(siteId);
         }
-        
+        else if (!reportDef.getReportParams().getSiteId().equals(siteId)) {
+            throw new EntityException("The report you are trying to run does not belong to this site. Please provide the correct site id.", "", HttpServletResponse.SC_FORBIDDEN);
+        }
+
         Report report = reportManager.getReport(reportDef, true);
 
         List<StrippedStat> stripped = new ArrayList<StrippedStat>();
