@@ -19,10 +19,12 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.velocity.Template;
@@ -222,7 +224,7 @@ public class PortalEntityProvider extends AbstractEntityProvider implements Auto
 
 		ResourceLoader rl = Resource.getResourceLoader("org.sakaiproject.portal.api.PortalService", "profile-popup");
 
-		UserProfile userProfile = (UserProfile) profileLogic.getUserProfile(ref.getId());
+		UserProfile userProfile = (UserProfile) profileLogic.getUserProfile(currentUserId);
 
 		String connectionUserId = userProfile.getUserUuid();
 
@@ -283,6 +285,12 @@ public class PortalEntityProvider extends AbstractEntityProvider implements Auto
 
 		String currentUserId = getCheckedCurrentUser();
 
+		boolean searchEnabled = serverConfigurationService.getBoolean("search.enable", false);
+		String profileEnabled = serverConfigurationService.getString("portal.profiletool", "sakai.profile2");
+		if ("none".equals(profileEnabled) && !searchEnabled) {
+			throw new EntityException("This method is disabled.", "connectionsearch", HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+		}
+
 		String query = (String) params.get("query");
 		if (StringUtils.isBlank(query)) {
 			throw new EntityException("No query supplied", "");
@@ -306,26 +314,31 @@ public class PortalEntityProvider extends AbstractEntityProvider implements Auto
 				workspaceIds.forEach(id -> log.debug("workspace id: {}", id));
 			}
 
-			SearchList results = searchService.search(query, workspaceIds, 0, 100);
+			Set<BasicConnection> hits = new HashSet<>();
 
-			Set<BasicConnection> hits = results.stream().filter(r -> "profile".equals(r.getTool()))
-				.map(r ->
-					{
-						try {
-							return connectionFromUser(userDirectoryService.getUser(r.getId()));
-						} catch (UserNotDefinedException unde) {
-							log.error("No user for id " + r.getId() + ". Returning null ...");
-							return null;
-						} catch (Exception e) {
-							log.error("Exception caught whilst looking up user " + r.getId() + ". Returning null ...", e);
-							return null;
-						}
-					}).collect(Collectors.toSet());
+			if (searchEnabled)
+			{
+				SearchList results = searchService.search(query, workspaceIds, 0, 100);
+				hits = results.stream().filter(r -> "profile".equals(r.getTool()))
+					.map(r ->
+						{
+							try {
+								return connectionFromUser(userDirectoryService.getUser(r.getId()));
+							} catch (UserNotDefinedException unde) {
+								log.error("No user for id " + r.getId() + ". Returning null ...");
+								return null;
+							} catch (Exception e) {
+								log.error("Exception caught whilst looking up user " + r.getId() + ". Returning null ...", e);
+								return null;
+							}
+						}).collect(Collectors.toSet());
+			}
 
 			if (log.isDebugEnabled()) {
 				hits.forEach(hit -> log.debug("User ID: " + hit.getUuid()));
 			}
 
+			// TODO: maybe we should only do this part if profile2.connections.enabled=false
 			// Now search the users. TODO: Move to ElasticSearch eventually.
 			List<User> users = userDirectoryService.searchUsers(query, 1, 100);
 			users.addAll(userDirectoryService.searchExternalUsers(query, 1, 100));
