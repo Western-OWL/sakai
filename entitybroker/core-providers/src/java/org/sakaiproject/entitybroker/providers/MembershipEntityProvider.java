@@ -40,6 +40,8 @@ import java.util.Set;
 
 import lombok.extern.slf4j.Slf4j;
 
+import org.apache.commons.lang3.StringUtils;
+
 import org.sakaiproject.api.privacy.PrivacyManager;
 import org.sakaiproject.authz.api.AuthzRealmLockException;
 import org.sakaiproject.authz.api.SecurityService;
@@ -262,10 +264,7 @@ RESTful, ActionsExecutable {
 
         SiteGroup sg = findLocationByReference(locationReference);
         String roleId = (String) params.get("memberRole");
-        String notificationMessage = (String) params.get("notificationMessage");
-        if ((notificationMessage != null) && (notificationMessage.trim().length() == 0)) {
-            notificationMessage = null;
-        }
+        String notificationMessage = StringUtils.trimToNull((String) params.get("notificationMessage"));
         boolean active = true;
 
         Map<String, String> responseHeaders = new HashMap<String, String>();
@@ -290,19 +289,21 @@ RESTful, ActionsExecutable {
             String currentUserEmail = userEntityProvider.getCurrentUser(null).getEmail();
             for (EntityUser user : users) {
                 sg.site.addMember(user.getId(), roleId, active, false);
-                if (notificationMessage != null) {
-                    /**
-                     * TODO Should the From address be the site contact or the "setup.request" Sakai
-                     * property? TODO We need to retrieve a localized message title and additional
-                     * body (if any) instead of hard-coding it. See the new Email Template Service
-                     * for a likely approach.
-                     */
-                    emailService.send(currentUserEmail, user.getEmail(),
-                            "New Site Membership Notification", notificationMessage, null, null,
-                            null);
-                }
             }
             saveSiteMembership(sg.site);
+
+            // Only send the emails if the site membership was saved successfully (no exceptions thrown), and there is a notificationMessage provided
+            if (notificationMessage != null) {
+                /**
+                 * TODO Should the From address be the site contact or the "setup.request" Sakai
+                 * property? TODO We need to retrieve a localized message title and additional
+                 * body (if any) instead of hard-coding it. See the new Email Template Service
+                 * for a likely approach.
+                 *
+                 * It's also a little risky to allow the user to define the body of the email. This entire thing should just be replaced with a template.
+                 */
+                users.forEach(user -> emailService.send(currentUserEmail, user.getEmail(), "New Site Membership Notification", notificationMessage, null, null, null));
+            }
             responseHeaders.put("x-success-count", String.valueOf(users.size()));
         }
         if (!valuesNotFound.isEmpty()) {
@@ -1231,13 +1232,25 @@ RESTful, ActionsExecutable {
             String siteId = site.getId();
             if (siteService.allowViewRoster(siteId)) {
                 return true;
-            } else if(g != null && Boolean.TRUE.toString().equals(g.getProperties().getProperty(Group.GROUP_PROP_VIEW_MEMBERS))){
+            } else if(userHasGroupAccess(g, userReference)){
             	return true;
             }else{
             	throw new SecurityException("Memberships in this site (" + site.getReference()
                         + ") are not accessible for the current user: " + userReference);
             }
         }
+    }
+
+    /**
+     * Check if the given user has access to the given group. Group must exist, must have the property group_prop_view_members=true,
+     * and user must be a member of the group.
+     * @param group Group object
+     * @param userRef user ref string
+     * @return true if the user can access group member list for the provided group, false otherwise.
+     */
+    private boolean userHasGroupAccess(Group group, String userRef) {
+        return group != null && Boolean.TRUE.toString().equals(group.getProperties().getProperty(Group.GROUP_PROP_VIEW_MEMBERS))
+                && group.getMember(developerHelperService.getUserIdFromRef(userRef)) != null;
     }
 
     /**
