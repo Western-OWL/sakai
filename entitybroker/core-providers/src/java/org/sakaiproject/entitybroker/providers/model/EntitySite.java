@@ -172,6 +172,10 @@ public class EntitySite implements Site {
 
 
     public EntitySite(Site site, boolean includeGroups) {
+        this(site, includeGroups, true);
+    }
+
+    public EntitySite(Site site, boolean includeGroups, boolean isAdmin) {
         this.site = site;
         this.id = site.getId();
         this.title = site.getTitle();
@@ -190,24 +194,30 @@ public class EntitySite implements Site {
         this.type = site.getType();
         this.customPageOrdered = site.isCustomPageOrdered();
         this.maintainRole = site.getMaintainRole();
-        this.providerGroupId = site.getProviderGroupId();
+
         this.owner = site.getCreatedBy() == null ? null : site.getCreatedBy().getId();
         this.lastModified = site.getModifiedTime() == null ? System.currentTimeMillis() : site.getModifiedTime().getTime();
         getUserRoles(); // populate the user roles
-        // properties
-        ResourceProperties rp = site.getProperties();
-        for (Iterator<String> iterator = rp.getPropertyNames(); iterator.hasNext(); ) {
-            String name = iterator.next();
-            String value = rp.getProperty(name);
-            this.setProperty(name, value);
-        }
-        // add in the groups
-        if (includeGroups) {
-            Collection<Group> groups = site.getGroups();
-            siteGroupsList = new Vector<EntityGroup>(groups.size());
-            for (Group group : groups) {
-                EntityGroup eg = new EntityGroup(group);
-                siteGroupsList.add(eg);
+
+        if (isAdmin) {
+            this.providerGroupId = site.getProviderGroupId();
+
+            // properties
+            ResourceProperties rp = site.getProperties();
+            for (Iterator<String> iterator = rp.getPropertyNames(); iterator.hasNext(); ) {
+                String name = iterator.next();
+                String value = rp.getProperty(name);
+                this.setProperty(name, value);
+            }
+
+            // add in the groups
+            if (includeGroups) {
+                Collection<Group> groups = site.getGroups();
+                siteGroupsList = new Vector<EntityGroup>(groups.size());
+                for (Group group : groups) {
+                    EntityGroup eg = new EntityGroup(group);
+                    siteGroupsList.add(eg);
+                }
             }
         }
     }
