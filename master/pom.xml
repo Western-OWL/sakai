@@ -559,7 +559,7 @@
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-databind</artifactId>
-        <version>${sakai.jackson.version}</version>
+        <version>2.13.4.1</version>
         <scope>provided</scope>
       </dependency>
       <dependency>
