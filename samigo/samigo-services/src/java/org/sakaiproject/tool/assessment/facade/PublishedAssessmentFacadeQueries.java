@@ -23,6 +23,7 @@ package org.sakaiproject.tool.assessment.facade;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -37,6 +38,7 @@ import java.util.Vector;
 import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Hibernate;
 import org.hibernate.Query;
 import org.sakaiproject.authz.api.SecurityService;
@@ -69,6 +71,7 @@ import org.sakaiproject.tool.assessment.data.ifc.assessment.SectionAttachmentIfc
 import org.sakaiproject.tool.assessment.data.ifc.assessment.SectionDataIfc;
 import org.sakaiproject.tool.assessment.data.dao.assessment.ItemTag;
 import org.sakaiproject.tool.assessment.data.dao.assessment.PublishedItemTag;
+import org.sakaiproject.tool.assessment.data.ifc.assessment.AssessmentMetaDataIfc;
 import org.sakaiproject.tool.assessment.facade.util.PagingUtilQueriesAPI;
 import org.sakaiproject.tool.assessment.integration.context.IntegrationContextFactory;
 import org.sakaiproject.tool.assessment.integration.helper.ifc.GradebookServiceHelper;
@@ -1128,6 +1131,11 @@ public class PublishedAssessmentFacadeQueries extends HibernateDaoSupport implem
 		} else {
 			data = (PublishedAssessmentData) assessment;
 		}
+		if (data != null)
+		{
+			Set<PublishedMetaData> metaData = data.getAssessmentMetaDataSet();
+			metaData.stream().forEach(this::validateAlias);
+		}
 
 		int retryCount = PersistenceService.getInstance().getPersistenceHelper().getRetryCount();
 		while (retryCount > 0) {
@@ -1580,7 +1588,40 @@ public class PublishedAssessmentFacadeQueries extends HibernateDaoSupport implem
         return null;
     }
 
+	private boolean aliasExists(String alias)
+	{
+		if (StringUtils.isBlank(alias))
+		{
+			return false;
+		}
+
+		final HibernateCallback<List<Long>> hcb = session -> session
+				.createQuery("select m.id from PublishedMetaData m where m.label = :label and m.entry = :entry")
+				.setString("label", AssessmentMetaDataIfc.ALIAS)
+				.setString("entry", alias)
+				.list();
+        List<Long> list = getHibernateTemplate().execute(hcb);
+
+		return !list.isEmpty();
+	}
+
+	private List<String> getPublishedMetaDataEntries(Long publishedAssessmentId, String label)
+	{
+		final HibernateCallback<List<String>> hcb = session -> session
+				.createQuery("select m.entry from PublishedAssessmentData p, PublishedMetaData m where p=m.assessment and p.publishedAssessmentId = :pubassid and m.label = :label")
+				.setString("label", label)
+				.setLong("pubassid", publishedAssessmentId)
+				.list();
+        List<String> list = getHibernateTemplate().execute(hcb);
+		if (list != null && !list.isEmpty())
+		{
+			return list;
+        }
+        return Collections.emptyList();
+	}
+
 	public void saveOrUpdateMetaData(PublishedMetaData meta) {
+		validateAlias(meta);
 		int retryCount = PersistenceService.getInstance().getPersistenceHelper().getRetryCount();
 		while (retryCount > 0) {
 			try {
@@ -1590,6 +1631,49 @@ public class PublishedAssessmentFacadeQueries extends HibernateDaoSupport implem
 				log.warn("problem save or update meta data: " + e.getMessage());
 				retryCount = PersistenceService.getInstance().getPersistenceHelper().retryDeadlock(e, retryCount);
 			}
+		}
+	}
+
+	// an existing alias should never be overwritten, and aliases should be unique
+	// this can be a problem with multiple tabs and possibly other bugs
+	private void validateAlias(PublishedMetaData meta)
+	{
+		if (!AssessmentMetaDataIfc.ALIAS.equals(meta.getLabel()))
+		{
+			return; // not an alias entry, nothing to do
+		}
+
+		AssessmentBaseIfc ifc = meta.getAssessment();
+		if (ifc == null || !(ifc instanceof PublishedAssessmentData))
+		{
+			return; // we're dealing with publishedmetadata so if the assessment isn't published for some reason, there is nothing to check
+		}
+
+		PublishedAssessmentData pub = (PublishedAssessmentData) ifc;
+		Long pubAssId = pub.getPublishedAssessmentId();
+		List<String> aliases = pubAssId == null ? Collections.emptyList() : getPublishedMetaDataEntries(pubAssId, AssessmentMetaDataIfc.ALIAS);
+		if (!aliases.isEmpty())  // existing alias, do not overwrite
+		{
+			if (aliases.size() != 1)
+			{
+				log.error("Multiple aliases detected for published assessment {}", pubAssId);
+			}
+			else
+			{
+				String metaAlias = StringUtils.trimToEmpty(meta.getEntry());
+				String dbAlias = StringUtils.trimToEmpty(aliases.get(0));
+				if (!dbAlias.isEmpty() && !metaAlias.equals(dbAlias))
+				{
+					// revert to db alias, once created an alias should not change
+					meta.setEntry(dbAlias);
+				}
+			}
+		}
+		else if (aliasExists(meta.getEntry())) // new alias, confirm it is unique
+		{
+			log.warn("Attempted to set alias {} for published assessment {}, but alias already in use. Generating new alias.", meta.getEntry(), pubAssId);
+			String newAlias = AgentFacade.getAgentString() + (new Date()).getTime();
+			meta.setEntry(newAlias);
 		}
 	}
 
