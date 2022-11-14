@@ -301,8 +301,13 @@ RESTful, ActionsExecutable {
                  * for a likely approach.
                  *
                  * It's also a little risky to allow the user to define the body of the email. This entire thing should just be replaced with a template.
+				 * For now we just ignore the user-supplied message (if not admin) and use a simple static message. This makes the notificationMessage param
+				 * purely a true/false flag to send the notification email or not
                  */
-                users.forEach(user -> emailService.send(currentUserEmail, user.getEmail(), "New Site Membership Notification", notificationMessage, null, null, null));
+				boolean isAdmin = developerHelperService.isUserAdmin(developerHelperService.getCurrentUserReference());
+				String name = developerHelperService.getConfigurationSetting("version.service", "Sakai");
+				String body = isAdmin ? notificationMessage : "You have just been added to the " + name + " site " + sg.site.getTitle();
+                users.forEach(user -> emailService.send(currentUserEmail, user.getEmail(), "New Site Membership Notification", body, null, null, null));
             }
             responseHeaders.put("x-success-count", String.valueOf(users.size()));
         }
@@ -1009,8 +1014,10 @@ RESTful, ActionsExecutable {
         Member member = null;
         SiteGroup sg = findLocationByReference(locationReference);
         String currentUserId = developerHelperService.getCurrentUserId();
-        if (!userId.equals(currentUserId)) {
-            isAllowedAccessMembers(sg.site, sg.group);
+		boolean isSelf = userId.equals(currentUserId);
+		AccessLevel memberAccessLevel = AccessLevel.SELF;
+        if (!isSelf) {
+            memberAccessLevel = isAllowedAccessMembers(sg.site, sg.group);
         }
         boolean viewHidden = securityService.unlock("roster.viewHidden", sg.site.getReference());
         if (sg.group == null) {
@@ -1024,10 +1031,38 @@ RESTful, ActionsExecutable {
         }
         if (member != null && !privacyManager.findHidden(sg.site.getReference(), new HashSet<String>(Arrays.asList(userId))).contains(userId)) {
             EntityUser eu = userEntityProvider.getUserById(userId);
-            em = new EntityMember(member, sg.locationReference, eu);
+			if (memberAccessLevel == AccessLevel.GROUP_MEMBERS) {
+				em = sanitizeGroupEntityMember(member, sg.locationReference, eu);
+			}
+			else {
+				em = new EntityMember(member, sg.locationReference, eu);
+			}
         }
         return em;
     }
+
+	private EntityMember sanitizeGroupEntityMember(Member m, String locRef, EntityUser u)
+	{
+		// viewing other group members in the UI does not show all their info, so we should not reveal it here
+		return new EntityMember(m, locRef, u)
+		{
+			@Override
+			public String getUserEid()
+			{
+				return "";
+			}
+			@Override
+			public String getUserDisplayId()
+			{
+				return "";
+			}
+			@Override
+			public Role getRole()
+			{
+				return null;
+			}
+		};
+	}
 
     /**
      * @param locationReference
@@ -1044,7 +1079,7 @@ RESTful, ActionsExecutable {
         } catch (IllegalArgumentException e) {
             throw new EntityNotFoundException("Could not find the location based on the ref ("+locationReference+"): " + e, locationReference);
         }
-       	isAllowedAccessMembers(sg.site, sg.group);
+       	AccessLevel memberAccessLevel = isAllowedAccessMembers(sg.site, sg.group);
         boolean viewHidden = viewHidden = securityService.unlock("roster.viewHidden", sg.site.getReference());
         Set<String> hiddenUsers = new HashSet<String>();
         if (sg.group == null) {
@@ -1068,8 +1103,13 @@ RESTful, ActionsExecutable {
         for (Member member : members) {
             EntityUser eu = userEntityProvider.getUserById(member.getUserId());
             if (eu != null && !hiddenUsers.contains(member.getUserId())) {
-                EntityMember em = new EntityMember(member, sg.locationReference, eu);
-                l.add(em);
+				if (memberAccessLevel == AccessLevel.GROUP_MEMBERS
+						&& !developerHelperService.getCurrentUserId().equals(member.getUserId())) {
+					l.add(sanitizeGroupEntityMember(member, sg.locationReference, eu));
+				}
+				else {
+					l.add(new EntityMember(member, sg.locationReference, eu));
+				}
             }
         }
         return l;
@@ -1215,6 +1255,8 @@ RESTful, ActionsExecutable {
         return site;
     }
 
+	protected enum AccessLevel { SITE_MEMBERS, GROUP_MEMBERS, SELF };
+
     /**
      * @param site
      *            the site to check perms in
@@ -1222,7 +1264,7 @@ RESTful, ActionsExecutable {
      * @throws SecurityException
      *             if not allowed
      */
-    protected boolean isAllowedAccessMembers(Site site, Group g) {
+    protected AccessLevel isAllowedAccessMembers(Site site, Group g) {
         // check if the current user can access this
         String userReference = developerHelperService.getCurrentUserReference();
         if (userReference == null) {
@@ -1231,9 +1273,9 @@ RESTful, ActionsExecutable {
         } else {
             String siteId = site.getId();
             if (siteService.allowViewRoster(siteId)) {
-                return true;
+                return AccessLevel.SITE_MEMBERS;
             } else if(userHasGroupAccess(g, userReference)){
-            	return true;
+            	return AccessLevel.GROUP_MEMBERS;
             }else{
             	throw new SecurityException("Memberships in this site (" + site.getReference()
                         + ") are not accessible for the current user: " + userReference);
