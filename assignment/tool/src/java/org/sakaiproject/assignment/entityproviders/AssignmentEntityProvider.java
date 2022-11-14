@@ -478,7 +478,7 @@ public class AssignmentEntityProvider extends AbstractEntityProvider implements 
 		}
 
 		// 4. all purpose item
-		if (!assignmentSupplementItemService.canViewAllPurposeItem(a))
+		if (!canUpdate(a) && !assignmentSupplementItemService.canViewAllPurposeItem(a))
 		{
 			sa.setAllPurposeItemText("");
 		}
