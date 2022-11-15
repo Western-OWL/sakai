@@ -788,10 +788,10 @@ public class SiteEntityProvider extends AbstractEntityProvider implements CoreEn
             }
         }
 
-        if (!FormattedText.validateURL(iconURL)) {
+        if (iconURL != null && !FormattedText.validateURL(iconURL)) {
             throw new IllegalArgumentException("Invalid address provided for icon URL");
         }
-        if (!FormattedText.validateURL(infoURL)) {
+        if (infoURL != null && !FormattedText.validateURL(infoURL)) {
             throw new IllegalArgumentException("Invalid address provided for info URL");
         }
 
@@ -923,10 +923,10 @@ public class SiteEntityProvider extends AbstractEntityProvider implements CoreEn
 
             String iconURL = site.getIconUrl();
             String infoURL = site.getInfoUrl();
-            if (!FormattedText.validateURL(iconURL)) {
-            throw new IllegalArgumentException("Invalid address provided for icon URL");
+            if (iconURL != null && !FormattedText.validateURL(iconURL)) {
+                throw new IllegalArgumentException("Invalid address provided for icon URL");
             }
-            if (!FormattedText.validateURL(infoURL)) {
+            if (infoURL != null && !FormattedText.validateURL(infoURL)) {
                 throw new IllegalArgumentException("Invalid address provided for info URL");
             }
 
@@ -1011,10 +1011,10 @@ public class SiteEntityProvider extends AbstractEntityProvider implements CoreEn
 
             String iconURL = site.getIconUrl();
             String infoURL = site.getInfoUrl();
-            if (!FormattedText.validateURL(iconURL)) {
-            throw new IllegalArgumentException("Invalid address provided for icon URL");
+            if (iconURL != null && !FormattedText.validateURL(iconURL)) {
+                throw new IllegalArgumentException("Invalid address provided for icon URL");
             }
-            if (!FormattedText.validateURL(infoURL)) {
+            if (infoURL != null && !FormattedText.validateURL(infoURL)) {
                 throw new IllegalArgumentException("Invalid address provided for info URL");
             }
 
