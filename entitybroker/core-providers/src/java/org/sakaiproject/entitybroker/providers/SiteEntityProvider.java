@@ -141,6 +141,8 @@ public class SiteEntityProvider extends AbstractEntityProvider implements CoreEn
 
     private static String[] updateableSiteProps;
 
+	private static boolean nonAdminSiteCreationAllowed = false;
+
     public void init() {
         int dps = serverConfigurationService.getInt(
                 PROP_SITE_PROVIDER_PAGESIZE_DEFAULT, defaultPageSize);
@@ -161,6 +163,8 @@ public class SiteEntityProvider extends AbstractEntityProvider implements CoreEn
         if (updateableSiteProps == null) {
             updateableSiteProps = new String[]{"contact-email", "contact-name"};
         }
+
+		nonAdminSiteCreationAllowed = serverConfigurationService.getBoolean("site.entity.creation.nonadmin.allow", false);
     }
 
     // ACTIONS
@@ -696,6 +700,15 @@ public class SiteEntityProvider extends AbstractEntityProvider implements CoreEn
 
     public String createEntity(EntityReference ref, Object entity, Map<String, Object> params) {
         boolean admin = developerHelperService.isUserAdmin(developerHelperService.getCurrentUserReference());
+		// This method is useless to regular users as a REST endpoint, the end product is unusable.
+		// Therefore, we want to restrict it to admins only to avoid any potential abuse. However, this may break internal processes.
+		// It does not seem involved in the WorkSite Setup site creation workflow, but to be on the safe side
+		// we'll add a sakai.property to re-enable this for non-admins. Default will be false.
+		if (!admin && !nonAdminSiteCreationAllowed)
+		{
+			throw new SecurityException("Permission denied: Non-admins are not authorized to use this method to create sites.");
+		}
+
         String siteId = null;
         if (ref.getId() != null && ref.getId().length() > 0) {
             siteId = ref.getId();
@@ -829,11 +842,8 @@ public class SiteEntityProvider extends AbstractEntityProvider implements CoreEn
                 if (("project".equals(siteType) && admin) || "course".equals(siteType) ) {
                     s.setProviderGroupId(providerID);
                 }
-            } else {
-                if (!admin) {
-                    throw new IllegalArgumentException("Non-admin users must supply provider ID for course sites");
-                }
-                s.setProviderGroupId(providerID);
+            } else if (!admin && "course".equals(siteType)) {
+				throw new IllegalArgumentException("Non-admin users must supply provider ID for course sites");
             }
 
             if (admin) {
@@ -943,18 +953,11 @@ public class SiteEntityProvider extends AbstractEntityProvider implements CoreEn
             s.setTitle(title);
 
             // attempt to set provider ID as requested. rules are:
-            // * project sites can only have provider ID if user is admin
-            // * course sites must have provider ID if user is not admin
+            // only admins can set providerID as there is no validation that the current user has access to the given provider (roster)
+			// if no provider given, don't change anything
             String providerID = site.getProviderGroupId();
-            if (StringUtils.isNotBlank(providerID)) {
-                if (("project".equals(site.getType()) && admin) || "course".equals(site.getType()) ) {
-                    s.setProviderGroupId(providerID);
-                }
-            } else {
-                if (!admin) {
-                    throw new IllegalArgumentException("Non-admin users must supply provider ID for course sites");
-                }
-                s.setProviderGroupId(providerID);
+            if (StringUtils.isNotBlank(providerID) && admin) {
+				s.setProviderGroupId(providerID);
             }
 
             // put in properties if admin, otherwise allow update of specific configurable fields.
@@ -1038,18 +1041,11 @@ public class SiteEntityProvider extends AbstractEntityProvider implements CoreEn
                 s.setInfoUrl(infoURL);
 
             // attempt to set provider ID as requested. rules are:
-            // * project sites can only have provider ID if user is admin
-            // * course sites must have provider ID if user is not admin
+            // only admins can set providerID as there is no validation that the current user has access to the given provider (roster)
+			// if no provider given, don't change anything
             String providerID = site.getProviderGroupId();
-            if (StringUtils.isNotBlank(providerID)) {
-                if (("project".equals(site.getType()) && admin) || "course".equals(site.getType()) ) {
-                    s.setProviderGroupId(providerID);
-                }
-            } else {
-                if (!admin) {
-                    throw new IllegalArgumentException("Non-admin users must supply provider ID for course sites");
-                }
-                s.setProviderGroupId(providerID);
+            if (StringUtils.isNotBlank(providerID) && admin) {
+				s.setProviderGroupId(providerID);
             }
 
             // put in properties if admin, otherwise allow update of specific configurable fields.
