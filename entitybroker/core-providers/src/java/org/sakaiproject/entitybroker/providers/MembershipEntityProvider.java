@@ -1137,7 +1137,7 @@ RESTful, ActionsExecutable {
             Group group = siteService.findGroup(groupId);
             // an invalid group ID might be passed which results in a null here
             if (group == null) {
-                throw new IllegalArgumentException("No group found for id: "+groupId);
+                throw new SecurityException("User does not have permission to view the group: "+groupId);
             }
             Site site = group.getContainingSite();
             holder.locationReference = locationReference;
@@ -1250,7 +1250,7 @@ RESTful, ActionsExecutable {
         try {
             site = siteService.getSite(siteId);
         } catch (IdUnusedException e) {
-            throw new IllegalArgumentException("Cannot find site by siteId: " + siteId, e);
+            throw new SecurityException("User does not have permission for siteId: " + siteId, e);
         }
         return site;
     }
