@@ -1031,38 +1031,10 @@ RESTful, ActionsExecutable {
         }
         if (member != null && !privacyManager.findHidden(sg.site.getReference(), new HashSet<String>(Arrays.asList(userId))).contains(userId)) {
             EntityUser eu = userEntityProvider.getUserById(userId);
-			if (memberAccessLevel == AccessLevel.GROUP_MEMBERS) {
-				em = sanitizeGroupEntityMember(member, sg.locationReference, eu);
-			}
-			else {
-				em = new EntityMember(member, sg.locationReference, eu);
-			}
+			em = new EntityMember(member, sg.locationReference, eu, memberAccessLevel == AccessLevel.GROUP_MEMBERS);
         }
         return em;
     }
-
-	private EntityMember sanitizeGroupEntityMember(Member m, String locRef, EntityUser u)
-	{
-		// viewing other group members in the UI does not show all their info, so we should not reveal it here
-		return new EntityMember(m, locRef, u)
-		{
-			@Override
-			public String getUserEid()
-			{
-				return "";
-			}
-			@Override
-			public String getUserDisplayId()
-			{
-				return "";
-			}
-			@Override
-			public Role getRole()
-			{
-				return null;
-			}
-		};
-	}
 
     /**
      * @param locationReference
@@ -1103,13 +1075,9 @@ RESTful, ActionsExecutable {
         for (Member member : members) {
             EntityUser eu = userEntityProvider.getUserById(member.getUserId());
             if (eu != null && !hiddenUsers.contains(member.getUserId())) {
-				if (memberAccessLevel == AccessLevel.GROUP_MEMBERS
-						&& !developerHelperService.getCurrentUserId().equals(member.getUserId())) {
-					l.add(sanitizeGroupEntityMember(member, sg.locationReference, eu));
-				}
-				else {
-					l.add(new EntityMember(member, sg.locationReference, eu));
-				}
+				boolean sanitize = memberAccessLevel == AccessLevel.GROUP_MEMBERS
+						&& !developerHelperService.getCurrentUserId().equals(member.getUserId());
+				l.add(new EntityMember(member, sg.locationReference, eu, sanitize));
             }
         }
         return l;

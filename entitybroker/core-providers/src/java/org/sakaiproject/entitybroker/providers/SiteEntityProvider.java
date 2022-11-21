@@ -22,6 +22,8 @@ package org.sakaiproject.entitybroker.providers;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Properties;
@@ -220,12 +222,12 @@ public class SiteEntityProvider extends AbstractEntityProvider implements CoreEn
         // expects site/siteId/perms[/:PREFIX:]
         String prefix = view.getPathSegment(3);
 
-        if (!developerHelperService.isUserAdmin(developerHelperService.getCurrentUserReference())) {
-            throw new SecurityException("This action (perms) is only accessible to admins.");
-        }
-
         String siteId = view.getEntityReference().getId();
         Site site = getSiteById(siteId);
+		if (!developerHelperService.isUserAdmin(developerHelperService.getCurrentUserReference())
+				&& !siteService.allowUpdateSite(siteId)) {
+            throw new SecurityException("This action (perms) is only accessible to admins and site maintainers.");
+        }
         Set<Role> roles = site.getRoles();
         Map<String, Set<String>> on = new HashMap<>();
         for (Role role : roles) {
@@ -318,7 +320,13 @@ public class SiteEntityProvider extends AbstractEntityProvider implements CoreEn
         // check if the user can access site
         isAllowedAccessSite(site);
 
-        List<EntityGroup> groups = site.getGroups().stream().map(EntityGroup::new).collect(Collectors.toList());
+		boolean isMaintainer = siteService.allowUpdateSite(siteId);
+		Collection<Group> siteGroups = site.getGroups();
+		if (!isMaintainer) {
+			List<String> userGroupIds = site.getGroupsWithMember(developerHelperService.getCurrentUserId()).stream().map(Group::getId).collect(Collectors.toList());
+			siteGroups = siteGroups.stream().filter(g -> userGroupIds.contains(g.getId())).collect(Collectors.toList());
+		}
+        List<EntityGroup> groups = siteGroups.stream().map(g -> new EntityGroup(g, !isMaintainer)).collect(Collectors.toList());
         return new ActionReturn(groups);
     }
 
@@ -1123,7 +1131,13 @@ public class SiteEntityProvider extends AbstractEntityProvider implements CoreEn
         // check if the user can access site
         isAllowedAccessSite(site);
         // convert
-        EntitySite es = new EntitySite(site, includeGroups, developerHelperService.isUserAdmin(developerHelperService.getCurrentUserReference()));
+		boolean isMaintainer = siteService.allowUpdateSite(siteId);
+		List<String> userGroupIds = Collections.emptyList();
+		if (!isMaintainer) {
+			userGroupIds = site.getGroupsWithMember(developerHelperService.getCurrentUserId()).stream().map(Group::getId).collect(Collectors.toList());
+		}
+        EntitySite es = new EntitySite(site, includeGroups, !isMaintainer, userGroupIds);
+
         return es;
     }
 
