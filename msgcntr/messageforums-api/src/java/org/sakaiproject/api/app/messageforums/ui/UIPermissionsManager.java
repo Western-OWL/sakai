@@ -38,7 +38,7 @@ public interface UIPermissionsManager
   /**
    * @return
    */
-  public boolean isNewForum();
+  public boolean isNewForum();  // OWLTODO: probably safe, but double check it once everything else is fixed, it assumes current placement
   
   /**
    * @return
@@ -65,6 +65,13 @@ public interface UIPermissionsManager
    * @param contextId
    * @return
    */
+  // OWLTODO: find callers of this and other methods here that accept a siteid
+  // if not all callers are deriving site id from the forum,
+  // check the method implementation and if it is blindly trusting the siteid, we should
+  // either validate (wasteful because we need to derive site id from forum and also string compare)
+  // or remove the method from the public api to force use of overloads that derive the siteid
+  // leave the method in place but private, because passing the siteid is still good for performance reasons,
+  // as a scenario where deriving siteid requires a db lookup will be expensive
   public boolean isNewResponse(DiscussionTopic topic, DiscussionForum forum, String userId, String contextId);
 
   /**
@@ -212,7 +219,7 @@ public interface UIPermissionsManager
    * (role + groups/sections) 
    * @return
    */
-  public List getCurrentUserMemberships();
+  //public List getCurrentUserMemberships(); // OWLTODO: remove
   public List getCurrentUserMemberships(String siteId);
   
   public Set getAreaItemsSet(Area area);
@@ -220,4 +227,12 @@ public interface UIPermissionsManager
   public Set getForumItemsSet(DiscussionForum forum);
   
   public Set getTopicItemsSet(DiscussionTopic topic);
+
+  public boolean hasAccessPrivileges(DiscussionForum forum);
+
+  // Having access to the parent forum is a requirement that is automatically also checked by these methods
+  // Note also that if these methods return true, it does not necessarily imply they have read access to any message in the topic,
+  // only that they have the permission to see the topic itself, perhaps only to change its settings or create a new message
+  public boolean hasAccessPrivileges(DiscussionTopic topic);
+  public boolean hasAccessPrivileges(DiscussionTopic topic, DiscussionForum forum);
 }

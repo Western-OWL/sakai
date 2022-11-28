@@ -22,16 +22,20 @@ package org.sakaiproject.component.app.messageforums.ui;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import org.sakaiproject.api.app.messageforums.Area;
 import org.sakaiproject.api.app.messageforums.AreaManager;
@@ -60,6 +64,7 @@ import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.user.api.User;
 import org.sakaiproject.user.api.UserDirectoryService;
+import org.sakaiproject.user.api.UserNotDefinedException;
 
 /**
  * @author <a href="mailto:rshastri@iupui.edu">Rashmi Shastri</a>
@@ -183,6 +188,7 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
   /**
    * @see org.sakaiproject.api.app.messageforums.ui.UIPermissionsManager#isNewForum()
    */
+  @Override
   public boolean isNewForum()
   {
     log.debug("isNewForum()");
@@ -193,7 +199,9 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
     
     try
     {
-      Iterator iter = getAreaItemsByCurrentUser();
+		// OWLTODO: sometimes this can be called in a scenario where we can derive the correct site id, such
+		// as when duplicating a forum. if we get the forum's area can we replace the getAreaItems call?
+      Iterator iter = getAreaItemsByCurrentUser(); // OWLTODO: what is an area item exactly?
       while (iter.hasNext())
       {
         DBMembershipItem item = (DBMembershipItem) iter.next();
@@ -217,22 +225,40 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
    */
   public boolean isChangeSettings(DiscussionForum forum)
   {
+	  return isChangeSettings(forum, forumManager.getSiteIdForForum(forum));
+  }
+
+  /**
+   * Determines if the current user is allowed to change forum settings.
+   * This method is private because it trusts the forum and siteid match.
+   * OWLTODO: This method exists to eliminate the chance that deriving
+   * a siteId from the forum will hit the db. If this turns out to be highly
+   * unlikely due to hierarchy stability or caching, all these methods that
+   * take a siteId explicitly can and probably should be eliminated.
+   * However, there seems to be a problem with newly created forums vs existing
+   * forums and we may need to keep this method around to work around the issue.
+   * @param forum the forum in question
+   * @param siteId the site the forum belongs to
+   * @return true if the user is admin/instructor/owner, or has change settings permission
+   */
+  private boolean isChangeSettings(DiscussionForum forum, String siteId)
+  {
 
     log.debug("isChangeSettings(DiscussionForum {})", forum);
     if (isSuperUser())
     {
       return true;
     }
-    if (securityService.unlock(siteService.SECURE_UPDATE_SITE, getContextSiteId())){
+    if (isInstructor(siteId)){
       if (!forum.getRestrictPermissionsForGroups()){
         return true;
       }
       //if restricted && belongs to group
-      if(isInstructorForAllowedGroup(forum.getId(), true)){
+      if(isInstructorForAllowedGroup(forum.getId(), siteId, true)){
         return true;
       }
     }
-    if (forumManager.isForumOwner(forum))
+    if (forumManager.isForumOwner(forum)) // this allows a brand new forum object that doesn't even have an id or area yet to pass this check
     {
       return true;
     }
@@ -257,9 +283,9 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
     return false;
   }
 
-  public boolean isInstructorForAllowedGroup(Long objectId, boolean isForum){
+  public boolean isInstructorForAllowedGroup(Long objectId, String siteId, boolean isForum){
 
-    if(objectId == null || !isInstructor()){
+    if(objectId == null || !isInstructor(siteId)){
         return false;
     }
 
@@ -271,7 +297,7 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
     }
     log.debug("Allowed group title {} for object {}", groupTitle, objectId);
     try {
-      Site site = siteService.getSite(toolManager.getCurrentPlacement().getContext());
+	  Site site = siteService.getSite(siteId);
       Set<String> groups = getGroupsWithMember(site, getCurrentUserId());
             return groups.stream().map(site::getGroup).anyMatch(g -> groupTitle.contains(g.getTitle()));
     } catch(Exception e){
@@ -285,13 +311,18 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
    */
   public boolean isNewTopic(DiscussionForum forum)
   {
+	  return isNewTopic(forum, forumManager.getSiteIdForForum(forum));
+  }
+
+  private boolean isNewTopic(DiscussionForum forum, String siteId)
+  {
     log.debug("isNewTopic(DiscussionForum {})", forum);
     if (isSuperUser())
     {
       return true;
     }
-    if (securityService.unlock(siteService.SECURE_UPDATE_SITE, getContextSiteId())){
-      if (forum.getRestrictPermissionsForGroups() && isInstructorForAllowedGroup(forum.getId(), true)){
+    if (isInstructor(siteId)){
+      if (forum.getRestrictPermissionsForGroups() && isInstructorForAllowedGroup(forum.getId(), siteId, true)){
         return true;
       }
     }
@@ -321,7 +352,7 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
    */
   public boolean isNewResponse(DiscussionTopic topic, DiscussionForum forum)
   {
-	  return isNewResponse(topic, forum, getCurrentUserId(), getContextId());
+	  return isNewResponse(topic, forum, getCurrentUserId(), forumManager.getSiteIdForForum(forum));
   }
   
   public boolean isNewResponse(DiscussionTopic topic, DiscussionForum forum, String userId, String contextId){
@@ -360,12 +391,13 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
    * @see org.sakaiproject.api.app.messageforums.ui.UIPermissionsManager#isNewResponseToResponse(org.sakaiproject.api.app.messageforums.DiscussionTopic,
    *      org.sakaiproject.api.app.messageforums.DiscussionForum)
    */
-  public boolean isNewResponseToResponse(DiscussionTopic topic,
-      DiscussionForum forum)
+  @Override
+  public boolean isNewResponseToResponse(DiscussionTopic topic, DiscussionForum forum)
   {
-	return isNewResponseToResponse(topic, forum, getCurrentUserId(), getContextId());
+	return isNewResponseToResponse(topic, forum, getCurrentUserId(), forumManager.getSiteIdForForum(forum));
   }
-  
+
+  @Override
   public boolean isNewResponseToResponse(DiscussionTopic topic, DiscussionForum forum, String userId, String contextId) {
     log.debug("isNewResponseToResponse(DiscussionTopic {}, DiscussionForum {})", topic, forum);
 
@@ -441,24 +473,41 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
    * @see org.sakaiproject.api.app.messageforums.ui.UIPermissionsManager#isChangeSettings(org.sakaiproject.api.app.messageforums.DiscussionTopic,
    *      org.sakaiproject.api.app.messageforums.DiscussionForum)
    */
+  @Override
   public boolean isChangeSettings(DiscussionTopic topic, DiscussionForum forum)
   {
 	  return isChangeSettings(topic, forum, getCurrentUserId());
   }
-  
+
+  @Override
   public boolean isChangeSettings(DiscussionTopic topic, DiscussionForum forum, String userId)
+  {
+	  return isChangeSettings(topic, forum, userId, forumManager.getSiteIdForForum(forum));
+  }
+
+  private boolean isChangeSettings(DiscussionTopic topic, DiscussionForum forum, String userId, String siteId)
   {
     log.debug("isChangeSettings(DiscussionTopic {}), DiscussionForum {}", topic, forum);
     if (isSuperUser(userId))
     {
       return true;
     }
-    if (securityService.unlock(userId, siteService.SECURE_UPDATE_SITE, getContextSiteId())){
+	// make sure the topic belongs to the forum, as we use the forum to get the site id
+	// OWLTODO: null checks here, getBaseForum can return null, perhaps getOpenForum can as well
+	// what to do in the case there topic's forum is null? reject?
+	// OWLTODO: probably should have similar validation in other methods that take topic and forum, extract
+	// validation logic to method?
+	if (!forum.getId().equals(topic.getOpenForum().getId()))
+	{
+		log.error("Given topic {} does not belong to given forum {}", topic.getId(), forum.getId());
+		return false;
+	}
+    if (isInstructor(userId, siteId)){
       if (!forum.getRestrictPermissionsForGroups() && !topic.getRestrictPermissionsForGroups()){
         return true;
       }
       //if restricted && belongs to group
-      if ((forum.getRestrictPermissionsForGroups() && isInstructorForAllowedGroup(forum.getId(), true)) || (topic.getRestrictPermissionsForGroups() && isInstructorForAllowedGroup(topic.getId(), false))){
+      if ((forum.getRestrictPermissionsForGroups() && isInstructorForAllowedGroup(forum.getId(), siteId, true)) || (topic.getRestrictPermissionsForGroups() && isInstructorForAllowedGroup(topic.getId(), siteId, false))){
         return true;
       }
     }
@@ -473,7 +522,7 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
       // if owner then allow change of settings on the topic or on forum.
       if (forumManager.isTopicOwner(topic, userId))
       {
-        return true;
+        return true; // OWLTODO: this is questionable, a user can create a topic and be demoted to a role that can't, however it might be required for new topics to pass this check
       }
       Iterator iter = getTopicItemsByUser(topic, userId);
       while (iter.hasNext())
@@ -502,15 +551,18 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
    * @see org.sakaiproject.api.app.messageforums.ui.UIPermissionsManager#isPostToGradebook(org.sakaiproject.api.app.messageforums.DiscussionTopic,
    *      org.sakaiproject.api.app.messageforums.DiscussionForum)
    */
+  @Override
   public boolean isPostToGradebook(DiscussionTopic topic, DiscussionForum forum){
 	  return isPostToGradebook(topic, forum, getCurrentUserId());
   }
-  
+
+  @Override
   public boolean isPostToGradebook(DiscussionTopic topic, DiscussionForum forum, String userId)
   {
-	  return isPostToGradebook(topic, forum, userId, getContextId());
+	  return isPostToGradebook(topic, forum, userId, forumManager.getSiteIdForForum(forum));
   }
-  
+
+  @Override
   public boolean isPostToGradebook(DiscussionTopic topic, DiscussionForum forum, String userId, String contextId)
   {
     log.debug("isPostToGradebook(DiscussionTopic {}, DiscussionForum {})", topic, forum);
@@ -546,35 +598,39 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
    * @see org.sakaiproject.api.app.messageforums.ui.UIPermissionsManager#isRead(org.sakaiproject.api.app.messageforums.DiscussionTopic,
    *      org.sakaiproject.api.app.messageforums.DiscussionForum)
    */
-  
+
+  @Override
   public boolean isRead(DiscussionTopic topic, DiscussionForum forum){
 	  return isRead(topic, forum, getCurrentUserId());
   }
-  
+
+  @Override
   public boolean isRead(DiscussionTopic topic, DiscussionForum forum, String userId){
 	  String contextId = null;
 	  try{
 		  //context could be null b/c of external queries... first check
 		  //since its faster than a DB lookup
-		  contextId = getContextId();
+		  contextId = forumManager.getSiteIdForForum(forum);
 	  }catch (Exception e) {
-		  contextId = forumManager.getContextForForumById(forum.getId());
+		  contextId = forumManager.getContextForForumById(forum.getId()); // OWLTODO: getSiteIdForForum will do this as a fallback eventually, so remove it later when it becomes redundant?
 	}
 	  return isRead(topic, forum, userId, contextId);
   }
   
+  @Override
   public boolean isRead(DiscussionTopic topic, DiscussionForum forum, String userId, String siteId)
   {
       log.debug("isRead(DiscussionTopic {}, DiscussionForum {})", topic, forum);
 	  return isRead(topic.getId(), topic.getDraft(), forum.getDraft(), userId, siteId);
   }
   
+  @Override
   public boolean isRead(Long topicId, Boolean isTopicDraft, Boolean isForumDraft, String userId, String siteId)
   {
     
     try
     {
-      if (checkBaseConditions(null, null, userId, "/site/" + siteId))
+      if (checkBaseConditions(null, null, userId, "/site/" + siteId)) // OWLTODO: this looks wrong, doesn't take a site ref, just a site id
       {
         return true;
       }
@@ -607,7 +663,7 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
    */
   public boolean isReviseAny(DiscussionTopic topic, DiscussionForum forum)
   {
-	  return isReviseAny(topic, forum, getCurrentUserId(), getContextId());
+	  return isReviseAny(topic, forum, getCurrentUserId(), forumManager.getSiteIdForForum(forum));
   }
   
   public boolean isReviseAny(DiscussionTopic topic, DiscussionForum forum, String userId, String contextId){
@@ -656,7 +712,7 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
    */
   public boolean isReviseOwn(DiscussionTopic topic, DiscussionForum forum)
   {
-	  return isReviseOwn(topic, forum, getCurrentUserId(), getContextId());	  
+	  return isReviseOwn(topic, forum, getCurrentUserId(), forumManager.getSiteIdForForum(forum));
   }
   
   public boolean isReviseOwn(DiscussionTopic topic, DiscussionForum forum, String userId, String contextId){
@@ -704,11 +760,13 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
    * @see org.sakaiproject.api.app.messageforums.ui.UIPermissionsManager#isDeleteAny(org.sakaiproject.api.app.messageforums.DiscussionTopic,
    *      org.sakaiproject.api.app.messageforums.DiscussionForum)
    */
+  @Override
   public boolean isDeleteAny(DiscussionTopic topic, DiscussionForum forum)
   {
-	return isDeleteAny(topic, forum, getCurrentUserId(), getContextId());
+	return isDeleteAny(topic, forum, getCurrentUserId(), forumManager.getSiteIdForForum(forum));
   }
   
+  @Override
   public boolean isDeleteAny(DiscussionTopic topic, DiscussionForum forum, String userId, String contextId){
     log.debug("isDeleteAny(DiscussionTopic {}, DiscussionForum {})", topic, forum);
     try
@@ -753,11 +811,13 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
    * @see org.sakaiproject.api.app.messageforums.ui.UIPermissionsManager#isDeleteOwn(org.sakaiproject.api.app.messageforums.DiscussionTopic,
    *      org.sakaiproject.api.app.messageforums.DiscussionForum)
    */
+  @Override
   public boolean isDeleteOwn(DiscussionTopic topic, DiscussionForum forum)
   {
-	  return isDeleteOwn(topic, forum, getCurrentUserId(), getContextId());
+	  return isDeleteOwn(topic, forum, getCurrentUserId(), forumManager.getSiteIdForForum(forum));
   }
   
+  @Override
   public boolean isDeleteOwn(DiscussionTopic topic, DiscussionForum forum, String userId, String contextId){
     log.debug("isDeleteOwn(DiscussionTopic {}, DiscussionForum {})", topic, forum);
     try
@@ -848,27 +908,31 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
    * @see org.sakaiproject.api.app.messageforums.ui.UIPermissionsManager#isModerate(org.sakaiproject.api.app.messageforums.DiscussionTopic,
    *      org.sakaiproject.api.app.messageforums.DiscussionForum)
    */
+  @Override
   public boolean isModeratePostings(DiscussionTopic topic, DiscussionForum forum){
 	  return isModeratePostings(topic, forum, getCurrentUserId());
   }
   
+  @Override
   public boolean isModeratePostings(DiscussionTopic topic, DiscussionForum forum, String userId)
   {
-	return isModeratePostings(topic, forum, userId, getContextId());
+	return isModeratePostings(topic, forum, userId, forumManager.getSiteIdForForum(forum));
   }
   
+  @Override
   public boolean isModeratePostings(DiscussionTopic topic, DiscussionForum forum, String userId, String siteId)
   {
 	  return isModeratePostings(topic.getId(), forum.getLocked(), forum.getDraft(), topic.getLocked(), topic.getDraft(), userId, siteId);
   }
   
+  @Override
   public boolean isModeratePostings(Long topicId, Boolean isForumLocked, Boolean isForumDraft, Boolean isTopicLocked, Boolean isTopicDraft, String userId, String siteId)
   {
     // NOTE: the forum or topic being locked should not affect a user's ability to moderate,
     // so logic related to the locked status was removed
     try
     {
-      if (checkBaseConditions(null, null, userId, "/site/" + siteId))
+      if (checkBaseConditions(null, null, userId, siteId))
       {
         return true;
       }
@@ -908,7 +972,8 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
 
     try
     {
-      Iterator iter = getTopicItemsByUser(topic.getId(), currentUserId, getContextId());
+		// OWLTODO: is this always DiscussionTopic? should the getSiteId method take just a Topic instead? We wrote this method so perhaps Topic is unnecessarily broad, usually DiscussionTopic is used in this class
+      Iterator iter = getTopicItemsByUser(topic.getId(), currentUserId, forumManager.getSiteIdForTopic((DiscussionTopic) topic));
       while (iter.hasNext())
       {
         DBMembershipItem item = (DBMembershipItem) iter.next();
@@ -926,14 +991,7 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
     return false;
   }
   
-  /*
-   * (non-Javadoc)
-   * @see org.sakaiproject.api.app.messageforums.ui.UIPermissionsManager#getCurrentUserMemberships()
-   */
-  public List getCurrentUserMemberships() {
-	return getCurrentUserMemberships(getContextId());  
-  }
-  
+  @Override
   public List<String> getCurrentUserMemberships(String siteId)
   {
 	  List<String> userMemberships = new ArrayList<>();
@@ -944,7 +1002,7 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
 	  }
 	  // now, add any groups the user is a member of
 	  try {
-		  Site site = siteService.getSite(toolManager.getCurrentPlacement().getContext());
+		  Site site = siteService.getSite(siteId);
 		  Set<String> groups = getGroupsWithMember(site, getCurrentUserId());
 		  groups.stream().map(site::getGroup).filter(Objects::nonNull).map(Group::getTitle).forEach(userMemberships::add);
 	  } catch (IdUnusedException iue) {
@@ -953,69 +1011,25 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
 	  
 	  return userMemberships;
   }
-
-  
-  private Iterator<String> getGroupsByCurrentUser()
-  {
-    List<String> memberof = new ArrayList<>();
-    try
-    {
-      Site site = siteService.getSite(toolManager.getCurrentPlacement().getContext());
-	  memberof.addAll(getGroupsWithMember(site, getCurrentUserId()));
-    }
-    catch (IdUnusedException e)
-    {
-      log.debug("Group not found");
-    }
-    return memberof.iterator();
-  }
-  
-  /**
-   * Returns a list of names of the groups/sections
-   * the current user is a member of
-   * @return
-   */
-  private Iterator<String> getGroupNamesByCurrentUser(String siteId)
-  {
-    List<String> memberof = new ArrayList<>();
-    try
-    {
-    	Site site = siteService.getSite(siteId);
-    	getGroupsWithMember(site, getCurrentUserId()).stream()
-                .map(site::getGroup).map(Group::getTitle).forEach(memberof::add);
-    }
-    catch (IdUnusedException e)
-    {
-      log.debug("Group not found");
-    }
-    return memberof.iterator();
-  }
-
-  private DBMembershipItem getAreaItemByUserRole()
-  { 
-  	if (log.isDebugEnabled())
-    {
-      log.debug("getAreaItemByUserRole()");
-    }	 
-    Set membershipItems = forumManager.getDiscussionForumArea()
-      .getMembershipItemSet();
-    return forumManager.getDBMember(membershipItems, getCurrentUserRole(),
-      DBMembershipItem.TYPE_ROLE);
-  }
   
   private Iterator<DBMembershipItem> getAreaItemsByCurrentUser()
   { 
     log.debug("getAreaItemsByCurrentUser()");
 
   	List<DBMembershipItem> areaItems = new ArrayList<>();
+
+	String siteId = toolManager.getCurrentPlacement().getContext();
   	
 		if (threadLocalManager.get("message_center_permission_set") == null || !((Boolean)threadLocalManager.get("message_center_permission_set")).booleanValue())
 		{
-			initMembershipForSite();
+			initMembershipForSite(siteId);
+			// OWLTODO: this appears to be one situation where we don't have any site reference available
+			// from a forums object, so we likely have to rely on getCurrentPlacement() here
+			// come back after all the holes are plugged and make sure this is not exploitable
 		}
 
 	Set areaItemsInThread = (Set) threadLocalManager.get("message_center_membership_area");
-	DBMembershipItem item = forumManager.getDBMember(areaItemsInThread, getCurrentUserRole(),
+	DBMembershipItem item = forumManager.getDBMember(areaItemsInThread, getCurrentUserRole(siteId),
 			DBMembershipItem.TYPE_ROLE);
     
     if (item != null){
@@ -1024,7 +1038,10 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
     
     // for group awareness
     try {
-    	Site currentSite = siteService.getSite(getContextId());
+		// OWLTODO: this method is called from isNewForum() which figures out if you can create forums in the site...
+		// it has nothing to reference (I think) so it has to use the current placement (see above)
+    	//Site currentSite = siteService.getSite(getContextId());
+		Site currentSite = siteService.getSite(siteId);
     	Set<String> groups = getGroupsWithMember(currentSite, getCurrentUserId());
     	if (groups != null) {
     	    groups.stream().map(currentSite::getGroup)
@@ -1044,7 +1061,7 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
   {
 		if (threadLocalManager.get("message_center_permission_set") == null || !((Boolean)threadLocalManager.get("message_center_permission_set")).booleanValue())
 		{
-			initMembershipForSite();
+			initMembershipForSite(area.getContextId());
 		}
 		Set allAreaSet = (Set) threadLocalManager.get("message_center_membership_area");
 		Set returnSet = new HashSet();
@@ -1069,10 +1086,11 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
     List<DBMembershipItem> forumItems = new ArrayList<>();
     //Set membershipItems = forum.getMembershipItemSet();
 
+	String siteId = forumManager.getSiteIdForForum(forum);
 
 		if (threadLocalManager.get("message_center_permission_set") == null || !((Boolean)threadLocalManager.get("message_center_permission_set")).booleanValue())
 		{
-			initMembershipForSite();
+			initMembershipForSite(siteId);
 		}
 
 		Set forumItemsInThread = (Set) threadLocalManager.get("message_center_membership_forum");
@@ -1101,7 +1119,7 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
     
 //    DBMembershipItem item = forumManager.getDBMember(membershipItems, getCurrentUserRole(),
 //        DBMembershipItem.TYPE_ROLE);
-		DBMembershipItem item = forumManager.getDBMember(thisForumItemSet, getCurrentUserRole(),
+		DBMembershipItem item = forumManager.getDBMember(thisForumItemSet, getCurrentUserRole(siteId),
 			DBMembershipItem.TYPE_ROLE);
     
     if (item != null){
@@ -1110,7 +1128,7 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
     
 	//  for group awareness
     try {
-    	Site currentSite = siteService.getSite(getContextId());
+		Site currentSite = siteService.getSite(siteId);
     	Set<String> groups = getGroupsWithMember(currentSite, getCurrentUserId());
 
     	if(groups != null) {
@@ -1147,7 +1165,12 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
   {
 		if (threadLocalManager.get("message_center_permission_set") == null || !((Boolean)threadLocalManager.get("message_center_permission_set")).booleanValue())
 		{
-			initMembershipForSite();
+			// OWLTODO: special case handling when the forum is new, it has no id and we can't retrieve anything from it
+			// resort to current placement. If we end up having to do this in many places, consider a method for it
+			String siteId = forum.getId() != null ? forumManager.getSiteIdForForum(forum) : toolManager.getCurrentPlacement().getContext();
+			// OWLTODO: is this strictly necessary? it was done to avoid NPE but now getSiteIdForForum() returns empty string in this case
+			// determine if empty string for siteId here will cause any real issues and avoid current placement if possible
+			initMembershipForSite(siteId);
 		}
 
 		Set allForumSet = (Set) threadLocalManager.get("message_center_membership_forum");
@@ -1170,7 +1193,7 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
   }
   
   private Iterator getTopicItemsByUser(DiscussionTopic topic, String userId){
-	  return getTopicItemsByUser(topic, userId, getContextId());
+	  return getTopicItemsByUser(topic, userId, forumManager.getSiteIdForTopic(topic));
   }
   
   private Iterator getTopicItemsByUser(DiscussionTopic topic, String userId, String siteId)
@@ -1245,7 +1268,15 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
   {
 		if (threadLocalManager.get("message_center_permission_set") == null || !((Boolean)threadLocalManager.get("message_center_permission_set")).booleanValue())
 		{
-			initMembershipForSite();
+			// OWLTODO: when creating a topic this is called with a topic that has not yet been persisted and therefore doesn't have
+			// a hierarchy yet, or even an id. We have to support this scenario by using the current placement...
+			// for the create topic workflow we have to permission check early, and we might need an overload for this method
+			// need to check usages, there may be other workflows that involve topics that are not yet persisted
+			// I suspect there is "create" code that works with unpersisted objects and regular code that call the same methods
+			// and in the past relied on the current placement to get site ids...this might be tricky to untangle...
+			// perhaps in the create topic scenario this method doesn't actually do anything? need to confirm...
+			String topicSiteId = topic.getId() == null ? toolManager.getCurrentPlacement().getContext() : forumManager.getSiteIdForTopic(topic);
+			initMembershipForSite(topicSiteId);
 		}
 
 		Set allTopicSet = (Set) threadLocalManager.get("message_center_membership_topic");
@@ -1266,10 +1297,9 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
   /**
    * @see org.sakaiproject.api.app.messageforums.ui.DiscussionForumManager#isInstructor()
    */
-  public boolean isInstructor()
+  public boolean isInstructor(String siteId)
   {
-    log.debug("isInstructor()");
-    return isInstructor(userDirectoryService.getCurrentUser());
+	  return isInstructor(userDirectoryService.getCurrentUser(), siteId);
   }
 
   /**
@@ -1278,22 +1308,32 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
    * @param user
    * @return
    */
-  private boolean isInstructor(User user)
+  private boolean isInstructor(String userId, String siteId)
   {
-    log.debug("isInstructor(User {})", user);
-    if (user != null)
-      return securityService.unlock(user, "site.upd", getContextSiteId());
-    else
-      return false;
+	  try
+	  {
+		  return isInstructor(userDirectoryService.getUser(userId), siteId);
+	  }
+	  catch (UserNotDefinedException e)
+	  {
+		  return false;
+	  }
   }
 
-  /**
-   * @return siteId
-   */
-  private String getContextSiteId()
+  private boolean isInstructor(User user, String siteId)
   {
-    log.debug("getContextSiteId()");
-    return ("/site/" + toolManager.getCurrentPlacement().getContext());
+    log.debug("isInstructor(User {})", user);
+    if (user == null || StringUtils.isBlank(siteId))
+	{
+		return false;
+	}
+
+    return securityService.unlock(user, SiteService.SECURE_UPDATE_SITE, toSiteRef(siteId));
+  }
+
+  private String toSiteRef(String siteId)
+  {
+	  return "/site/" + siteId;
   }
 
   public void setPermissionLevelManager(
@@ -1321,11 +1361,7 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
 
   /**
    * @return
-   */
-  private String getCurrentUserRole() {
-	  return getCurrentUserRole(getContextId());
-  }
-  
+   */  
   private String getCurrentUserRole(String siteId)
   {
 	  log.debug("getCurrentUserRole()");
@@ -1369,17 +1405,18 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
   /**
    * @return
    */
-  private String getContextId()
+   // OWLTODO: this was commented out and broke a lot of things, they should be fixed now and this method should be deleted, but see comment below about tests first
+  /*private String getContextId()
   {
     log.debug("getContextId()");
-    if (TestUtil.isRunningTests())
+    if (TestUtil.isRunningTests())  // OWLTODO: what does this even do? is it safe to remove this method or do we have to keep it for tests? So far it looks like tests still run fine...
     {
       return "test-context";
     }
     Placement placement = toolManager.getCurrentPlacement();
     String presentSiteId = placement.getContext();
     return presentSiteId;
-  }
+  }*/
 
   /**
    * @return
@@ -1403,58 +1440,24 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
    * @param forum
    * @return
    */
-  private boolean checkBaseConditions(DiscussionTopic topic,
-	      DiscussionForum forum){
-	  return checkBaseConditions(topic, forum, getCurrentUserId(), getContextId());
+  private boolean checkBaseConditions(DiscussionTopic topic, DiscussionForum forum){
+	  return checkBaseConditions(topic, forum, getCurrentUserId(), forumManager.getSiteIdForForum(forum));
   }
   
 
-  
-  private boolean checkBaseConditions(DiscussionTopic topic,
-		  DiscussionForum forum, String userId, String contextSiteId)
+  // OWLTODO: it is assumed that the forum belongs to the given site, add comments outlining this assumption
+  // this needs javadocs in general, topic or forum can be null and it will still work as intended...
+  private boolean checkBaseConditions(DiscussionTopic topic, DiscussionForum forum, String userId, String siteId)
   {
     log.debug("checkBaseConditions(DiscussionTopic {}, DiscussionForum {})", topic, forum);
     if (isSuperUser(userId))
     {
       return true;
     }
-    //if restricted && belongs to group
-    if ((forum != null && forum.getRestrictPermissionsForGroups() && isInstructorForAllowedGroup(forum.getId(), true)) || (topic != null && topic.getRestrictPermissionsForGroups() && isInstructorForAllowedGroup(topic.getId(), false))){
-        return true;
-    }
-    return false;
-  }
-  
-  private boolean isRoleMember(String roleId)
-  {
-    log.debug("isRoleMember(String {})", roleId);
-    if (getCurrentUserRole().equals(roleId))
-    {
-      return true;
-    }
-    return false;
-  }
 
-  private boolean isGroupMember(String groupId)
-  {
-    log.debug("setAuthzGroupService(AuthzGroupService {})", authzGroupService);
-    try
-    {
-      Site site = siteService.getSite(toolManager.getCurrentPlacement().getContext());
-      Set<String> groups = getGroupsWithMember(site, getCurrentUserId());
-      return groups.contains(groupId);
-    }
-    catch (IdUnusedException e)
-    {
-      log.debug("Group with id {} not found", groupId);
-      return false;
-    }
+    return (forum != null && forum.getRestrictPermissionsForGroups() && isInstructorForAllowedGroup(forum.getId(), siteId, true)) ||
+			(topic != null && topic.getRestrictPermissionsForGroups() && isInstructorForAllowedGroup(topic.getId(), siteId, false));
   }
-  
-  private void initMembershipForSite(){
-	  initMembershipForSite(getContextId());
-  }
-  
   
   private void initMembershipForSite(String contextSiteId){
 	  initMembershipForSite(contextSiteId, getCurrentUserId());
@@ -1518,5 +1521,109 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
 	
 	public void setMemoryService(MemoryService memoryService) {
 		this.memoryService = memoryService;
+	}
+
+	@Override
+	public boolean hasAccessPrivileges(DiscussionForum forum)
+	{
+		String userId = getCurrentUserId();
+		String siteId = forumManager.getSiteIdForForum(forum);
+		// OWLTODO: at this stage we can technically check if the user is even in the site, but
+		// 1. virtually all requests will be for a site the user has access to, so checking prematurely is wasteful
+		// 2. the final forum/topic permission checks (ie. isRead) should fail for anyone not in the site
+		
+		return isAdminOrInstructor(Optional.empty(), forum, userId, siteId) || hasNonInstructorAccessPrivileges(forum, userId, siteId);
+	}
+
+	private boolean hasNonInstructorAccessPrivileges(DiscussionForum forum, String userId, String siteId)
+	{
+		// can you change the settings for this forum? regardless of other forum settings and permissions, someone
+		// with this permission needs to be able to see the forum itself (seeing topics in the forum is separate)
+		if (isChangeSettings(forum, siteId))
+		{
+			return true;
+		}
+
+		// any user who would be able to see draft or unavailable forums has already been let in
+		if (forum.getDraft() || !forum.getAvailability()) 
+		{
+			return false;
+		}
+
+		// at this point we have a non-draft, available forum so any user with the ability to create topics needs access
+		if (isNewTopic(forum, siteId))
+		{
+			return true;
+		}
+
+		// if we made it this far we can access the forum itself based on its own settings, but topic settings also have to be considered
+		List<DiscussionTopic> topics = (List<DiscussionTopic>) forum.getTopics(); // OWLTODO: can this be trusted? better eventually add null check at least...but what to do if null? assume no topics, or assume bug?
+		// users who can access at least one topic in the forum need access
+		// this also prevents access to forums with no topics, as only users with isNewTopic should be allowed, and this was checked earlier
+		return topics.stream().anyMatch(t -> hasNonInstructorAccessPrivileges(t, forum, userId, siteId));
+	}
+
+	private boolean isAdminOrInstructor(Optional<DiscussionTopic> topic, DiscussionForum forum, String userId, String siteId)
+	{
+		return checkBaseConditions(topic.orElse(null), forum, userId, siteId) || isInstructor(userId, siteId);
+	}
+
+	@Override
+	public boolean hasAccessPrivileges(DiscussionTopic topic)
+	{
+		Optional<DiscussionForum> forum = forumManager.getDiscussionForumForTopic(topic);
+		if (forum.isPresent())
+		{
+			return hasAccessPrivileges(topic, forum.get());
+		}
+
+		return false;
+	}
+
+	/**
+	 * Call this one if you already have the forum. This method assumes the topic belongs to the given forum.
+	 * @param topic the topic to check access to
+	 * @param forum the topic's forum
+	 * @return true if the current user has access to the topic and forum
+	 */
+	@Override
+	public boolean hasAccessPrivileges(DiscussionTopic topic, DiscussionForum forum)
+	{
+		String userId = getCurrentUserId();
+		String siteId = forumManager.getSiteIdForTopic(topic);
+		// OWLTODO: at this stage we can technically check if the user is even in the site, but
+		// 1. virtually all requests will be for a site the user has access to, so checking prematurely is wasteful
+		// 2. the assumed final topic/message permission checks (ie. isRead) should fail for anyone not in the site
+
+		if (isAdminOrInstructor(Optional.of(topic), forum, userId, siteId))
+		{
+			return true;
+		}
+
+		if (!hasNonInstructorAccessPrivileges(forum, userId, siteId))
+		{
+			return false;
+		}
+		
+		return hasNonInstructorAccessPrivileges(topic, forum, userId, siteId); // OWLTODO: possible optimization opportunity here because the call above may have already checked this topic's permissions (see impl)
+	}
+
+	private boolean hasNonInstructorAccessPrivileges(DiscussionTopic topic, DiscussionForum forum, String userId, String siteId)
+	{
+		// can you change the settings for this topic? regardless of other topic settings and permissions, someone
+		// with this permission needs to be able to see the topic itself (seeing messages in the topic is separate)
+		if (isChangeSettings(topic, forum, userId, siteId))
+		{
+			return true; // note the isChangeSettings() check covers topic owners and grants access for them always regardless of their current status in the site
+		}
+
+		// any user who would be able to see draft or unavailable topics has already been let in
+		if (topic.getDraft() || !topic.getAvailability())
+		{
+			return false;
+		}
+
+		// at this point we have a non-draft, available topic and a user who is not a maintainer
+		return isRead(topic, forum, userId, siteId) || isNewResponse(topic, forum, userId, siteId);
 	}
 }

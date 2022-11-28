@@ -2143,7 +2143,7 @@ public class MessageForumStatisticsBean {
 	{
 		log.debug("processActionStatisticsUser");
 		
-		selectedSiteUserId = getExternalParameterByKey(SITE_USER_ID);
+		selectedSiteUserId = getExternalParameterByKey(SITE_USER_ID);  // OWLTODO: is this safe?
 		//reset cache
 		userReadStatisticsCache = new HashMap<String, List>();
 		userAuthoredStatisticsCache = new HashMap<String, List>();
@@ -2276,7 +2276,7 @@ public class MessageForumStatisticsBean {
 	public String processActionDisplayMsgBody() {
 		log.debug("processActionDisplayMsgBody");
 
-		selectedMsgId = getExternalParameterByKey("msgId");
+		selectedMsgId = getExternalParameterByKey("msgId");  // OWLTODO: needs validation
 		Message message =(Message) messageManager.getMessageById(Long.parseLong(selectedMsgId));
 		selectedMsgSubject = message.getTitle();
 		
@@ -2432,11 +2432,11 @@ public class MessageForumStatisticsBean {
 		log.debug("processActionStatisticsByTopic");
 		
 		//to save some speed, only update if the values have changed
-		boolean newTopic = !getExternalParameterByKey(TOPIC_ID).equals(selectedAllTopicsTopicId);
-		boolean newForum = !getExternalParameterByKey(FORUM_ID).equals(selectedAllTopicsForumId);
+		boolean newTopic = !getExternalParameterByKey(TOPIC_ID).equals(selectedAllTopicsTopicId); // OWLTODO: needs validation, but not here
+		boolean newForum = !getExternalParameterByKey(FORUM_ID).equals(selectedAllTopicsForumId);  // OWLTODO: needs validation, but not here
 		
-		selectedAllTopicsTopicId = getExternalParameterByKey(TOPIC_ID);
-		selectedAllTopicsForumId = getExternalParameterByKey(FORUM_ID);
+		selectedAllTopicsTopicId = getExternalParameterByKey(TOPIC_ID); // OWLTODO: needs validation
+		selectedAllTopicsForumId = getExternalParameterByKey(FORUM_ID); // OWLTODO: needs validation
 		if(newForum){
 			if(selectedAllTopicsForumId != null && !"".equals(selectedAllTopicsForumId)){
 				try{
@@ -2462,7 +2462,7 @@ public class MessageForumStatisticsBean {
 		// The default gradebook assignment must be known before we get the statistics, since grades will be included
 		setDefaultSelectedAssign();
 		getTopicStatistics();
-		return FORUM_STATISTICS_BY_TOPIC;
+		return FORUM_STATISTICS_BY_TOPIC;  // OWLTODO: what about users that don't have grade perms? Having the link implies they do, and we can stop cross-site issues, but what about crafting the link?
 	}
 
 	public String getSelectedAllTopicsTopicTitle() {

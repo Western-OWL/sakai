@@ -490,8 +490,12 @@ public class MessageForumsForumManagerImpl extends HibernateDaoSupport implement
         };
 
         // unproxy to avoid ClassCastException in certain scenarios
-        return (Topic) HibernateUtils.unproxy(getHibernateTemplate().execute(hcb));
+        Topic t = (Topic) HibernateUtils.unproxy(getHibernateTemplate().execute(hcb));
+		if (t.getOpenForum() != null) {
+			t.setOpenForum((OpenForum) HibernateUtils.unproxy(t.getOpenForum()));
+		}
 
+		return t;
     }
 
     public PrivateForum getPrivateForumByOwner(final String owner) {

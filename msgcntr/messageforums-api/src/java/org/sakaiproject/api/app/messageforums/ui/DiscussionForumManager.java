@@ -666,4 +666,12 @@ public interface DiscussionForumManager
    * @return the LRS statement, or empty if student not found or LRS service not available
    */
   public Optional<LRS_Statement> getStatementForGrade(String studentUid, String forumTitle, double score);
+
+  // OWLTODO: just stub methods for now, will need robust impls later
+  public String getSiteIdForForum(DiscussionForum forum);
+  public String getSiteIdForTopic(DiscussionTopic topic);
+
+  // OWLTODO: these methods may be collapsed into one, or one public/one private
+  public Optional<DiscussionForum> getDiscussionForumFromTopic(DiscussionTopic topic);
+  public Optional<DiscussionForum> getDiscussionForumForTopic(DiscussionTopic topic);
 }

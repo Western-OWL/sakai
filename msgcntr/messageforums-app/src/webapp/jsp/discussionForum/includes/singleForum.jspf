@@ -51,7 +51,7 @@
 		</h:panelGroup>
 		<h:panelGroup layout="block" id="topics" styleClass="forumsTopics" rendered="#{!empty forum.topics}">
 			<t:dataList value="#{forum.topics}" var="topic">
-				<div class="forumTopic">
+				<t:div rendered="#{! topic.nonePermission}" styleClass="forumTopic">
 					<%@ include file="/jsp/discussionForum/includes/topicHeader/topicHeader.jspf"%>
 					<div class="topicCountAndActionsContainer">
 						<h:panelGroup layout="block" styleClass="messagesCountColumn">
@@ -72,22 +72,22 @@
 								rendered="#{topic.isRead && topic.unreadNoMessages == 0}"/>
 						</h:panelGroup>
 
-						<h:panelGroup layout="block" styleClass="actionsColumn" rendered="#{forum.newTopic || forum.changeSettings || ForumTool.instructor}">
+						<h:panelGroup layout="block" styleClass="actionsColumn" rendered="#{forum.newTopic || topic.changeSettings || ForumTool.instructor}">
 							<%--//desNote: links to act on this topic --%>
-							<h:panelGroup layout="block" styleClass="topicActions" rendered="#{forum.newTopic || forum.changeSettings || ForumTool.instructor}">
+							<h:panelGroup layout="block" styleClass="topicActions" rendered="#{forum.newTopic || topic.changeSettings || ForumTool.instructor}">
 								<div class="dropdown">
 									<button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 										<h:outputText styleClass="optionsText" value="#{msgs.cdfm_topic_options}" />
 										<span class="caret"></span>
 									</button>
 									<ul class="dropdown-menu dropdown-menu-right">
-										<t:htmlTag value="li" rendered="#{forum.changeSettings}">
+										<t:htmlTag value="li" rendered="#{topic.changeSettings}">
 											<h:commandLink action="#{ForumTool.processActionTopicSettings}" id="topic_setting" value="#{msgs.cdfm_topic_settings}" rendered="#{topic.changeSettings}">
 												<f:param value="#{topic.topic.id}" name="topicId"/>
 												<f:param value="#{forum.forum.id}" name="forumId"/>
 											</h:commandLink>
 										</t:htmlTag>
-										<t:htmlTag value="li" rendered="#{ForumTool.newForum}">
+										<t:htmlTag value="li" rendered="#{forum.newTopic}">
 											<h:commandLink action="#{ForumTool.processActionDuplicateTopicMainConfirm}" id="duplicate_confirm" value="#{msgs.cdfm_duplicate_topic}" rendered="#{forum.newTopic}">
 												<f:param value="#{topic.topic.id}" name="topicId"/>
 												<f:param value="#{forum.forum.id}" name="forumId"/>
@@ -100,7 +100,7 @@
 												<h:outputText value="#{msgs.cdfm_button_bar_grade}" />
 											</h:commandLink>
 										</t:htmlTag>
-										<t:htmlTag value="li" rendered="#{forum.changeSettings}">
+										<t:htmlTag value="li" rendered="#{topic.changeSettings}">
 											<h:commandLink action="#{ForumTool.processActionDeleteTopicMainConfirm}" id="delete_confirm" value="#{msgs.cdfm_button_bar_delete_topic}" accesskey="d" rendered="#{topic.changeSettings}">
 												<f:param value="#{topic.topic.id}" name="topicId"/>
 												<f:param value="#{forum.forum.id}" name="forumId"/>
@@ -111,7 +111,7 @@
 							</h:panelGroup>
 						</h:panelGroup>
 					</div>
-				</div>
+				</t:div>
 			</t:dataList>
 		</h:panelGroup>
 	</h:panelGroup>

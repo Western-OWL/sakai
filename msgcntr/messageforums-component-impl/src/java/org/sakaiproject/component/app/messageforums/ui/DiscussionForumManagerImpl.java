@@ -412,7 +412,7 @@ public class DiscussionForumManagerImpl extends HibernateDaoSupport implements
    */
   public Area getDiscussionForumArea()
   {
-	return getDiscussionForumArea(toolManager.getCurrentPlacement().getContext());  
+	return getDiscussionForumArea(toolManager.getCurrentPlacement().getContext());  // OWLTODO: yikes! is this safe, getting the current site id? what calls this?
   }
   
   public Area getDiscussionForumArea(String siteId)
@@ -615,7 +615,7 @@ public class DiscussionForumManagerImpl extends HibernateDaoSupport implements
    * 
    * @see org.sakaiproject.api.app.messageforums.ui.DiscussionForumManager#getDiscussionForums()
    */
-  public List getDiscussionForums()
+  public List getDiscussionForums() // OWLTODO: this probably gets current site, see about removing it in favour of the one below that takes a site id, if necessary
   {
     log.debug("getDiscussionForums()");
     if (usingHelper)
@@ -2188,7 +2188,7 @@ public class DiscussionForumManagerImpl extends HibernateDaoSupport implements
   
   public DBMembershipItem getDBMember(Set originalSet, String name,
 			Integer type) {
-	  return getDBMember(originalSet, name, type, getContextSiteId());
+	  return getDBMember(originalSet, name, type, getContextSiteId());  // OWLTODO: yikes?! is getting current site id safe for this?
 	}
 
   public DBMembershipItem getDBMember(Set originalSet, String name,
@@ -2560,4 +2560,90 @@ public class DiscussionForumManagerImpl extends HibernateDaoSupport implements
 	public Optional<LRS_Statement> getStatementForGrade(String studentUid, String forumTitle, double score) {
 		return LRSDelegate.getStatementForGrade(learningResourceStoreService, userDirectoryService, studentUid, forumTitle, score);
 	}
+
+	// OWLTODO: just a stub method for now
+	@Override
+	public String getSiteIdForForum(DiscussionForum forum)
+	{
+		// if the forum object is brand new and has not yet been persisted, there is nothing we can do with it, just return empty string
+		if (forum.getId() == null)
+		{
+			return "";
+		}
+
+		// OWLTODO: leave this naive until the end to get an idea of how stable the hierarchy is through the power of NPE
+		return forum.getArea().getContextId(); // see also getContextForForumById()
+		// OWLTODO: this actual impl should live in MessageForumsForumManager instead so it can be used in rest endpoints
+		// OWLTODO: add logging so we can measure how often the chain fails and db lookup is required
+		// OWLTODO: if it appears that the hierarchy is unstable and db lookups are common, consider adding a cache
+		// to map forums/topics to their siteid. I think this is unlikely to be necessary however. But this method is a called a massive amount of times!
+	}
+
+	// OWLTODO: just a stub method for now
+	@Override
+	public String getSiteIdForTopic(DiscussionTopic topic)
+	{
+		// OWLTODO: leave this naive until the end to get an idea of how stable the hierarchy is through the power of NPE
+		// OWLTODO: topic.getBaseForum() will return null if you have a DiscussionTopic...always?
+		return topic.getOpenForum().getArea().getContextId(); // see also getContextForForumById()
+		// OWLTODO: this should live in MessageForumsForumManager instead so it can be used in rest endpoints
+	}
+
+	// OWLTODO: again these impls above and below should probably live in MessageForumsForumManager so they can be used in rest endpoints
+
+	/**
+   * Attempts to navigate Hibernate query minefields to return an actual DiscussionForum object for the given topic.
+   * This is necessary because depending on the source of the topic, getOpenForum or getBaseForum will contain the topic,
+   * which may or may not be an actual DiscussionTopic
+   * @param topic the topic to retrieve the forum for
+   * @return a DiscussionForum object, if one can be sourced from the given topic object
+   */
+	@Override
+	public Optional<DiscussionForum> getDiscussionForumFromTopic(DiscussionTopic topic)
+	{
+	  if (topic == null)
+	  {
+		  return Optional.empty();
+	  }
+	  // OWLTODO: during development, we're doing simple casting without instanceof checks here to identify scenarios where
+	  // unproxying needs to happen. We want to minimize cases where this can't find a forum, because
+	  // that will probably result in db querying to find the forum instead. Before finalizing this fix,
+	  // switch to instanceof checks to avoid classcastexceptions in production.
+	  DiscussionForum forum = (DiscussionForum) topic.getOpenForum();
+	  if (forum == null) // try the base forum
+	  {
+		  forum = (DiscussionForum) topic.getBaseForum();
+	  }
+
+	  return Optional.ofNullable(forum);
+	}
+
+	@Override
+	public Optional<DiscussionForum> getDiscussionForumForTopic(DiscussionTopic topic)
+	{
+		// first we try to get a usable forum from the topic object
+		Optional<DiscussionForum> forumOpt = getDiscussionForumFromTopic(topic);
+		if (forumOpt.isPresent())
+		{
+		  return forumOpt;
+		}
+
+		// otherwise, resort to db lookup if we have an available forum id param
+		// OWLTODO: should we just reject this option? if the topic object doesn't have a proper forum attached, why should we trust the params at all? to let Hibernate be lazy?
+		// maybe we force an access check if that happens?
+		/*Long forumId = NumberUtils.toLong(getExternalParameterByKey(FORUM_ID), -1L);
+		if (forumId > 0L)
+		{
+		  return Optional.ofNullable(forumManager.getForumById(forumId)); // OWLTODO: we shouldn't really hit this often, but if we do, note the workflow
+		}
+		return Optional.empty();*/
+		// OWLTODO: the above db retrieval from a request param should not be necessary, but throwing an exception here will allow us to
+		// identify cases where it still may be required. This exception should be removed before going to production.
+		// Ideally this method will just be a call to getDiscussionForumFromTopic(), in other words, an unnecessary wrapper we can throw away
+		// Another possibility is that we can accomplish something like topic.getBase/OpenForum.getId() and then do a db lookup from that, even
+		// though getBaseForum may not be populated as a DiscussionForum, if we can still get the id we can do a query. This kind of fallback
+		// is used elsewhere, so something to consider.
+		throw new RuntimeException("Bad topic -> forum hierarchy!");
+	}
+
 }
