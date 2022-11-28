@@ -544,6 +544,7 @@
         <property name="userDirectoryService">
         	<ref bean="org.sakaiproject.user.api.UserDirectoryService"/>
         </property>
+		<property name="anonymousManager" ref="org.sakaiproject.api.app.messageforums.AnonymousManager" />
     </bean>
 
 	<bean id="org.sakaiproject.api.app.messageforums.SynopticMsgcntrItemProvider" class="org.sakaiproject.component.app.messageforums.entity.SynopticMsgcntrItemEntityProviderImpl">
@@ -774,6 +775,9 @@
                 <property name="serverConfigurationService">
                     <ref bean="org.sakaiproject.component.api.ServerConfigurationService"/>
                 </property>
+				<property name="uiPermissionsManager">
+					<ref bean="org.sakaiproject.api.app.messageforums.ui.UIPermissionsManager"/>
+				</property>
             </bean>
         </property>
         <property name="transactionAttributes">

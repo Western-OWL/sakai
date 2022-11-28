@@ -31,7 +31,7 @@
 	String dialogDivId = request.getParameter("dialogDivId");
 	boolean isDialogBox = false;
 
-	if(selectedUserId != null && !"".equals(selectedUserId)){
+	if(selectedUserId != null && !"".equals(selectedUserId) && statsBean.canViewMemberStatistics(selectedUserId)){
 		isDialogBox = true;
 		statsBean.selectedSiteUserId = selectedUserId;
 		//set up default settings:

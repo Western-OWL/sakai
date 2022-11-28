@@ -496,8 +496,11 @@ public interface DiscussionForumManager
    */
   public void setCourseMemberMapToNull();
 
+  @Deprecated
   public DBMembershipItem getAreaDBMember(Set originalSet, String name, Integer type);
+  public DBMembershipItem getAreaDBMember(Set originalSet, String name, Integer type, String contextSiteId);
 
+  @Deprecated
   public DBMembershipItem getDBMember(Set originalSet, String name, Integer type);
   public DBMembershipItem getDBMember(Set originalSet, String name, Integer type, String contextSiteId);
   
@@ -666,4 +669,11 @@ public interface DiscussionForumManager
    * @return the LRS statement, or empty if student not found or LRS service not available
    */
   public Optional<LRS_Statement> getStatementForGrade(String studentUid, String forumTitle, double score);
+
+  public String getSiteIdForForum(DiscussionForum forum);
+  public String getSiteIdForTopic(DiscussionTopic topic);
+
+  public Optional<DiscussionForum> getDiscussionForumForTopic(DiscussionTopic topic);
+
+  public Optional<DiscussionTopic> getDiscussionTopicForMessage(Message msg);
 }

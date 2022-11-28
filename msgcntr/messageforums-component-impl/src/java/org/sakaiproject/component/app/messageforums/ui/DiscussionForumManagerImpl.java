@@ -42,6 +42,7 @@ import org.sakaiproject.api.app.messageforums.Area;
 import org.sakaiproject.api.app.messageforums.AreaControlPermission;
 import org.sakaiproject.api.app.messageforums.AreaManager;
 import org.sakaiproject.api.app.messageforums.Attachment;
+import org.sakaiproject.api.app.messageforums.BaseForum;
 import org.sakaiproject.api.app.messageforums.DBMembershipItem;
 import org.sakaiproject.api.app.messageforums.DiscussionForum;
 import org.sakaiproject.api.app.messageforums.DiscussionForumService;
@@ -56,6 +57,7 @@ import org.sakaiproject.api.app.messageforums.MessageForumsMessageManager;
 import org.sakaiproject.api.app.messageforums.MessageForumsTypeManager;
 import org.sakaiproject.api.app.messageforums.MessageForumsUser;
 import org.sakaiproject.api.app.messageforums.MessagePermissions;
+import org.sakaiproject.api.app.messageforums.OpenForum;
 import org.sakaiproject.api.app.messageforums.PermissionLevel;
 import org.sakaiproject.api.app.messageforums.PermissionLevelManager;
 import org.sakaiproject.api.app.messageforums.PermissionManager;
@@ -85,6 +87,7 @@ import org.sakaiproject.event.api.LearningResourceStoreService.LRS_Statement;
 import org.sakaiproject.event.api.LearningResourceStoreService.LRS_Verb.SAKAI_VERB;
 import org.sakaiproject.event.api.NotificationService;
 import org.sakaiproject.exception.IdUnusedException;
+import org.sakaiproject.hibernate.HibernateUtils;
 import org.sakaiproject.memory.api.Cache;
 import org.sakaiproject.memory.api.MemoryService;
 import org.sakaiproject.site.api.Group;
@@ -412,7 +415,7 @@ public class DiscussionForumManagerImpl extends HibernateDaoSupport implements
    */
   public Area getDiscussionForumArea()
   {
-	return getDiscussionForumArea(toolManager.getCurrentPlacement().getContext());  
+	return getDiscussionForumArea(toolManager.getCurrentPlacement().getContext());
   }
   
   public Area getDiscussionForumArea(String siteId)
@@ -615,7 +618,7 @@ public class DiscussionForumManagerImpl extends HibernateDaoSupport implements
    * 
    * @see org.sakaiproject.api.app.messageforums.ui.DiscussionForumManager#getDiscussionForums()
    */
-  public List getDiscussionForums()
+  public List getDiscussionForums() 
   {
     log.debug("getDiscussionForums()");
     if (usingHelper)
@@ -1714,12 +1717,12 @@ public class DiscussionForumManagerImpl extends HibernateDaoSupport implements
   
   public boolean isForumOwner(DiscussionForum forum, String userId)
   {
-	return isForumOwner(forum, userId, getContextSiteId());
+	return isForumOwner(forum, userId, getSiteIdForForum(forum));
   }
   
   public boolean isForumOwner(DiscussionForum forum, String userId, String siteId)
   {
-	  return isForumOwner(forum.getId(), forum.getCreatedBy(), userId, siteId);
+	  return isForumOwner(forum.getId(), forum.getCreatedBy(), userId, "/site/" + siteId);
   }
   
   public boolean isForumOwner(Long forumId, String forumCreatedBy, String userId, String siteId)
@@ -1747,12 +1750,12 @@ public class DiscussionForumManagerImpl extends HibernateDaoSupport implements
   
   public boolean isTopicOwner(DiscussionTopic topic, String userId)
   {
-	  return isTopicOwner(topic, userId, getContextSiteId());
+	  return isTopicOwner(topic, userId, getSiteIdForTopic(topic));
   }
   
   public boolean isTopicOwner(DiscussionTopic topic, String userId, String siteId)
   {
-	  return isTopicOwner(topic.getId(), topic.getCreatedBy(), userId, siteId);
+	  return isTopicOwner(topic.getId(), topic.getCreatedBy(), userId, "/site/" + siteId);
   }
   
   public boolean isTopicOwner(Long topicId, String topicCreatedBy, String userId, String siteId)
@@ -2179,13 +2182,21 @@ public class DiscussionForumManagerImpl extends HibernateDaoSupport implements
     return getContributorAccessorList(iterator);
   }
 
+  @Deprecated
   public DBMembershipItem getAreaDBMember(Set originalSet, String name,
       Integer type)
   {
     DBMembershipItem newItem = getDBMember(originalSet, name, type);
     return newItem;
   }
+
+  public DBMembershipItem getAreaDBMember(Set originalSet, String name, Integer type, String contextSiteId)
+  {
+    DBMembershipItem newItem = getDBMember(originalSet, name, type, contextSiteId);
+    return newItem;
+  }
   
+  @Deprecated
   public DBMembershipItem getDBMember(Set originalSet, String name,
 			Integer type) {
 	  return getDBMember(originalSet, name, type, getContextSiteId());
@@ -2459,7 +2470,7 @@ public class DiscussionForumManagerImpl extends HibernateDaoSupport implements
   	  // we need to get the membership items for the roles separately b/c of default permissions
   	  if (rolesInSite != null) {
   		  for (Role role : rolesInSite) {
-  			  DBMembershipItem roleItem = getDBMember(topicItems, role.getId(), DBMembershipItem.TYPE_ROLE);
+  			  DBMembershipItem roleItem = getDBMember(topicItems, role.getId(), DBMembershipItem.TYPE_ROLE, "/site/" + siteId);
   			  if (roleItem != null) {
   				  revisedMembershipItemSet.add(roleItem);
   			  }
@@ -2467,7 +2478,7 @@ public class DiscussionForumManagerImpl extends HibernateDaoSupport implements
   	  }
   	  // now add in the group perms
   	  for (Group group : groupsInSite) {
-  		  DBMembershipItem groupItem = getDBMember(topicItems, group.getTitle(), DBMembershipItem.TYPE_GROUP);
+  		  DBMembershipItem groupItem = getDBMember(topicItems, group.getTitle(), DBMembershipItem.TYPE_GROUP, "/site/" + siteId);
   		  if (groupItem != null) {
   			  revisedMembershipItemSet.add(groupItem);
   		  }
@@ -2559,5 +2570,137 @@ public class DiscussionForumManagerImpl extends HibernateDaoSupport implements
 	@Override
 	public Optional<LRS_Statement> getStatementForGrade(String studentUid, String forumTitle, double score) {
 		return LRSDelegate.getStatementForGrade(learningResourceStoreService, userDirectoryService, studentUid, forumTitle, score);
+	}
+
+	@Override
+	public String getSiteIdForForum(DiscussionForum forum)
+	{
+		if (forum == null)
+		{
+			return "";
+		}
+
+		Area area = forum.getArea();
+		if (area == null) {
+			if (forum.getId() != null) {
+				log.warn("getSiteIdForForum: area is null for forum: {}; going to the database. Implement a cache if this is common", forum.getId());
+				return getContextForForumById(forum.getId());
+			}
+			return ""; // likely a brand new forum object that has not been persisted yet, no way to get a site from it
+		}
+		
+		return area.getContextId();
+	}
+
+	@Override
+	public String getSiteIdForTopic(DiscussionTopic topic)
+	{
+		if (topic == null) {
+			return "";
+		}
+
+		OpenForum openForum = topic.getOpenForum();
+		if (openForum != null) {
+			Area area = openForum.getArea();
+			if (area == null) {
+				log.warn("getSiteIdForTopic: area is null for topic: {}, open forum: {}; going to the database. Implement a cache if this is common", topic.getId(), openForum.getId());
+				return getContextForForumById(openForum.getId());
+			}
+			return area.getContextId();
+		}
+
+		BaseForum baseForum = topic.getBaseForum();
+		if (baseForum != null) {
+			Area area = baseForum.getArea();
+			if (area == null) {
+				log.warn("getSiteIdForTopic: area is null for topic: {}, base forum: {}; going to the database. Implement a cache if this is common", topic.getId(), baseForum.getId());
+				return getContextForForumById(baseForum.getId());
+			}
+			return area.getContextId();
+		}
+
+		if (topic.getId() != null) {
+			log.error("Topic {} has neither an openforum nor a baseforum object attached, going to the database.", topic.getId());
+			return getContextForTopicById(topic.getId());
+		}
+		return "";
+	}
+
+	@Override
+	public Optional<DiscussionForum> getDiscussionForumForTopic(DiscussionTopic topic)
+	{
+	  if (topic == null)
+	  {
+		  return Optional.empty();
+	  }
+
+	  Long forumId = null;
+
+	  OpenForum openForum = topic.getOpenForum();
+	  if (openForum != null) {
+		  openForum = (OpenForum)HibernateUtils.unproxy(openForum);
+		  topic.setOpenForum(openForum);
+		  forumId = openForum.getId();
+		  if (openForum instanceof DiscussionForum) {
+			  return Optional.of((DiscussionForum)openForum);
+		  }
+	  }
+	  // try the base forum
+	  BaseForum baseForum = topic.getBaseForum();
+	  if (baseForum != null) {
+		  baseForum = (BaseForum)HibernateUtils.unproxy(baseForum);
+		  topic.setBaseForum(baseForum);
+		  forumId = forumId == null ? baseForum.getId() : forumId;
+		  if (baseForum instanceof DiscussionForum) {
+			  return Optional.of((DiscussionForum)baseForum);
+		  }
+	  }
+
+	  if (forumId == null) {
+		  return Optional.empty();
+	  }
+
+	  log.warn("getDiscussionForumForTopic - neither topic.getOpenForum() nor topic.getBaseForum() could be unproxied to a DiscussionForum instance; will hit the DB. TopicID: {} ForumID: {}", topic.getId(), forumId);
+	  DiscussionForum forum = getForumById(forumId);
+	  if (forum == null) {
+		  return Optional.empty();
+	  }
+
+	  topic.setOpenForum(forum);
+	  return Optional.of(forum);
+	}
+
+	@Override
+	public Optional<DiscussionTopic> getDiscussionTopicForMessage(Message msg)
+	{
+		if (msg == null)
+		{
+			return Optional.empty();
+		}
+		if (msg.getTopic() == null)
+		{
+			log.error("Message {} has no topic attached.", msg.getId());
+			return Optional.empty();
+		}
+		Topic msgTopic = (Topic) HibernateUtils.unproxy(msg.getTopic());
+		msg.setTopic(msgTopic);
+		if (msgTopic instanceof DiscussionTopic)
+		{
+			DiscussionTopic topic = (DiscussionTopic) msg.getTopic();
+			topic.setOpenForum((OpenForum) HibernateUtils.unproxy(topic.getOpenForum()));
+			return Optional.of(topic);
+		}
+
+		log.warn("getDiscussionTopicForMessage - message.getTopic() could not be be unproxied to a DiscussionTopic instance; will hit the DB. MsgID: {} TopicID: {}", msg.getId(), msgTopic.getId());
+		DiscussionTopic dbTopic = getTopicById(msgTopic.getId());
+		if (dbTopic == null)
+		{
+			log.error("Topic {} for message {} is not a DiscussionTopic", msg.getTopic().getId(), msg.getId());
+			return Optional.empty();
+		}
+
+		dbTopic.setOpenForum((OpenForum) HibernateUtils.unproxy(dbTopic.getOpenForum()));
+		msg.setTopic(dbTopic);
+		return Optional.of(dbTopic);
 	}
 }

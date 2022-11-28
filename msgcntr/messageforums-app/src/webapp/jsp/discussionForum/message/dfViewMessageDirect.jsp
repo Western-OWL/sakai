@@ -13,7 +13,6 @@
     String portalPath = ServerConfigurationService.getString("portalPath");
 
 	if (org.sakaiproject.tool.cover.ToolManager.getCurrentPlacement() == null) {
-
 		try {
 			target = portalPath + "/tool/"
 					+ request.getParameter("placementId")

@@ -36,6 +36,7 @@
 
             //Check if user called this page with a popup dialog
 
+			// these request params are not validated here, but rather in processDfMsgGrdFromThread() called later on
             String messageId = request.getParameter("messageId");
             String topicId = request.getParameter("topicId");
             String forumId = request.getParameter("forumId");
@@ -72,10 +73,14 @@
             boolean hasAssociatedRubric = forumTool.hasAssociatedRubric();
             String entityId = forumTool.getRubricAssociationId();
 
-            if (userId == null) userId = forumTool.getUserId();
+            String rbcsEvaluationId = "";
+            String rbcsEvaluationOwnerId = "";
+            // No need to validate further - rubrics does its own validation
+            if (forumTool.isUserActiveInCurrentSite(userId)) {
+                rbcsEvaluationId = entityId + "." + userId;
+                rbcsEvaluationOwnerId = userId;
+            }
 
-            String rbcsEvaluationId = entityId + "." + userId;
-            String rbcsEvaluationOwnerId = userId;
             %>
 
             <script>

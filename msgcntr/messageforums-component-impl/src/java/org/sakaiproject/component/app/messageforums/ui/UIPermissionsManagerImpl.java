@@ -22,22 +22,28 @@ package org.sakaiproject.component.app.messageforums.ui;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import org.sakaiproject.api.app.messageforums.Area;
 import org.sakaiproject.api.app.messageforums.AreaManager;
 import org.sakaiproject.api.app.messageforums.DBMembershipItem;
 import org.sakaiproject.api.app.messageforums.DiscussionForum;
 import org.sakaiproject.api.app.messageforums.DiscussionTopic;
+import org.sakaiproject.api.app.messageforums.Message;
 import org.sakaiproject.api.app.messageforums.MessageForumsTypeManager;
 import org.sakaiproject.api.app.messageforums.PermissionLevelManager;
 import org.sakaiproject.api.app.messageforums.PermissionManager;
@@ -60,6 +66,7 @@ import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.user.api.User;
 import org.sakaiproject.user.api.UserDirectoryService;
+import org.sakaiproject.user.api.UserNotDefinedException;
 
 /**
  * @author <a href="mailto:rshastri@iupui.edu">Rashmi Shastri</a>
@@ -183,6 +190,7 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
   /**
    * @see org.sakaiproject.api.app.messageforums.ui.UIPermissionsManager#isNewForum()
    */
+  @Override
   public boolean isNewForum()
   {
     log.debug("isNewForum()");
@@ -217,22 +225,34 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
    */
   public boolean isChangeSettings(DiscussionForum forum)
   {
+	  return isChangeSettings(forum, forumManager.getSiteIdForForum(forum));
+  }
+
+  /**
+   * Determines if the current user is allowed to change forum settings.
+   * This method is private because it trusts the forum and siteid match, do not call this without first validating this is true
+   * @param forum the forum in question
+   * @param siteId the site the forum belongs to
+   * @return true if the user is admin/instructor/owner, or has change settings permission
+   */
+  private boolean isChangeSettings(DiscussionForum forum, String siteId)
+  {
 
     log.debug("isChangeSettings(DiscussionForum {})", forum);
     if (isSuperUser())
     {
       return true;
     }
-    if (securityService.unlock(siteService.SECURE_UPDATE_SITE, getContextSiteId())){
+    if (isInstructor(siteId)){
       if (!forum.getRestrictPermissionsForGroups()){
         return true;
       }
       //if restricted && belongs to group
-      if(isInstructorForAllowedGroup(forum.getId(), true)){
+      if(isInstructorForAllowedGroup(forum.getId(), siteId, true)){
         return true;
       }
     }
-    if (forumManager.isForumOwner(forum))
+    if (forumManager.isForumOwner(forum, getCurrentUserId(), siteId)) // this allows a brand new forum object that doesn't even have an id or area yet to pass this check
     {
       return true;
     }
@@ -257,9 +277,9 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
     return false;
   }
 
-  public boolean isInstructorForAllowedGroup(Long objectId, boolean isForum){
+  public boolean isInstructorForAllowedGroup(Long objectId, String siteId, boolean isForum){
 
-    if(objectId == null || !isInstructor()){
+    if(objectId == null || !isInstructor(siteId)){
         return false;
     }
 
@@ -271,7 +291,7 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
     }
     log.debug("Allowed group title {} for object {}", groupTitle, objectId);
     try {
-      Site site = siteService.getSite(toolManager.getCurrentPlacement().getContext());
+	  Site site = siteService.getSite(siteId);
       Set<String> groups = getGroupsWithMember(site, getCurrentUserId());
             return groups.stream().map(site::getGroup).anyMatch(g -> groupTitle.contains(g.getTitle()));
     } catch(Exception e){
@@ -285,13 +305,18 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
    */
   public boolean isNewTopic(DiscussionForum forum)
   {
+	  return isNewTopic(forum, forumManager.getSiteIdForForum(forum));
+  }
+
+  private boolean isNewTopic(DiscussionForum forum, String siteId)
+  {
     log.debug("isNewTopic(DiscussionForum {})", forum);
     if (isSuperUser())
     {
       return true;
     }
-    if (securityService.unlock(siteService.SECURE_UPDATE_SITE, getContextSiteId())){
-      if (forum.getRestrictPermissionsForGroups() && isInstructorForAllowedGroup(forum.getId(), true)){
+    if (isInstructor(siteId)){
+      if (forum.getRestrictPermissionsForGroups() && isInstructorForAllowedGroup(forum.getId(), siteId, true)){
         return true;
       }
     }
@@ -321,7 +346,7 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
    */
   public boolean isNewResponse(DiscussionTopic topic, DiscussionForum forum)
   {
-	  return isNewResponse(topic, forum, getCurrentUserId(), getContextId());
+	  return isNewResponse(topic, forum, getCurrentUserId(), forumManager.getSiteIdForForum(forum));
   }
   
   public boolean isNewResponse(DiscussionTopic topic, DiscussionForum forum, String userId, String contextId){
@@ -360,12 +385,13 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
    * @see org.sakaiproject.api.app.messageforums.ui.UIPermissionsManager#isNewResponseToResponse(org.sakaiproject.api.app.messageforums.DiscussionTopic,
    *      org.sakaiproject.api.app.messageforums.DiscussionForum)
    */
-  public boolean isNewResponseToResponse(DiscussionTopic topic,
-      DiscussionForum forum)
+  @Override
+  public boolean isNewResponseToResponse(DiscussionTopic topic, DiscussionForum forum)
   {
-	return isNewResponseToResponse(topic, forum, getCurrentUserId(), getContextId());
+	return isNewResponseToResponse(topic, forum, getCurrentUserId(), forumManager.getSiteIdForForum(forum));
   }
-  
+
+  @Override
   public boolean isNewResponseToResponse(DiscussionTopic topic, DiscussionForum forum, String userId, String contextId) {
     log.debug("isNewResponseToResponse(DiscussionTopic {}, DiscussionForum {})", topic, forum);
 
@@ -441,24 +467,40 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
    * @see org.sakaiproject.api.app.messageforums.ui.UIPermissionsManager#isChangeSettings(org.sakaiproject.api.app.messageforums.DiscussionTopic,
    *      org.sakaiproject.api.app.messageforums.DiscussionForum)
    */
+  @Override
   public boolean isChangeSettings(DiscussionTopic topic, DiscussionForum forum)
   {
 	  return isChangeSettings(topic, forum, getCurrentUserId());
   }
-  
+
+  @Override
   public boolean isChangeSettings(DiscussionTopic topic, DiscussionForum forum, String userId)
+  {
+	  return isChangeSettings(topic, forum, userId, forumManager.getSiteIdForForum(forum));
+  }
+
+  private boolean isChangeSettings(DiscussionTopic topic, DiscussionForum forum, String userId, String siteId)
   {
     log.debug("isChangeSettings(DiscussionTopic {}), DiscussionForum {}", topic, forum);
     if (isSuperUser(userId))
     {
       return true;
     }
-    if (securityService.unlock(userId, siteService.SECURE_UPDATE_SITE, getContextSiteId())){
+	// as a failsafe, make sure the topic belongs to the forum, as we likely used the forum to get the site id
+	// we will derive the forum from the topic to check it. this is overall not the most efficient, but we're playing it safe for now
+	// this could be eliminated if all paths are shown to have already validated the topic/forum connection
+	Optional<DiscussionForum> topicForum = forumManager.getDiscussionForumForTopic(topic);
+	if (!topicForum.isPresent() || !forum.getId().equals(topicForum.get().getId()))
+	{
+		log.error("Given topic {} does not belong to given forum {}", topic.getId(), forum.getId());
+		return false;
+	}
+    if (isInstructor(userId, siteId)){
       if (!forum.getRestrictPermissionsForGroups() && !topic.getRestrictPermissionsForGroups()){
         return true;
       }
       //if restricted && belongs to group
-      if ((forum.getRestrictPermissionsForGroups() && isInstructorForAllowedGroup(forum.getId(), true)) || (topic.getRestrictPermissionsForGroups() && isInstructorForAllowedGroup(topic.getId(), false))){
+      if ((forum.getRestrictPermissionsForGroups() && isInstructorForAllowedGroup(forum.getId(), siteId, true)) || (topic.getRestrictPermissionsForGroups() && isInstructorForAllowedGroup(topic.getId(), siteId, false))){
         return true;
       }
     }
@@ -502,15 +544,18 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
    * @see org.sakaiproject.api.app.messageforums.ui.UIPermissionsManager#isPostToGradebook(org.sakaiproject.api.app.messageforums.DiscussionTopic,
    *      org.sakaiproject.api.app.messageforums.DiscussionForum)
    */
+  @Override
   public boolean isPostToGradebook(DiscussionTopic topic, DiscussionForum forum){
 	  return isPostToGradebook(topic, forum, getCurrentUserId());
   }
-  
+
+  @Override
   public boolean isPostToGradebook(DiscussionTopic topic, DiscussionForum forum, String userId)
   {
-	  return isPostToGradebook(topic, forum, userId, getContextId());
+	  return isPostToGradebook(topic, forum, userId, forumManager.getSiteIdForForum(forum));
   }
-  
+
+  @Override
   public boolean isPostToGradebook(DiscussionTopic topic, DiscussionForum forum, String userId, String contextId)
   {
     log.debug("isPostToGradebook(DiscussionTopic {}, DiscussionForum {})", topic, forum);
@@ -546,35 +591,32 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
    * @see org.sakaiproject.api.app.messageforums.ui.UIPermissionsManager#isRead(org.sakaiproject.api.app.messageforums.DiscussionTopic,
    *      org.sakaiproject.api.app.messageforums.DiscussionForum)
    */
-  
+
+  @Override
   public boolean isRead(DiscussionTopic topic, DiscussionForum forum){
 	  return isRead(topic, forum, getCurrentUserId());
   }
-  
+
+  @Override
   public boolean isRead(DiscussionTopic topic, DiscussionForum forum, String userId){
-	  String contextId = null;
-	  try{
-		  //context could be null b/c of external queries... first check
-		  //since its faster than a DB lookup
-		  contextId = getContextId();
-	  }catch (Exception e) {
-		  contextId = forumManager.getContextForForumById(forum.getId());
-	}
+	  String contextId = forumManager.getSiteIdForForum(forum);
 	  return isRead(topic, forum, userId, contextId);
   }
   
+  @Override
   public boolean isRead(DiscussionTopic topic, DiscussionForum forum, String userId, String siteId)
   {
       log.debug("isRead(DiscussionTopic {}, DiscussionForum {})", topic, forum);
 	  return isRead(topic.getId(), topic.getDraft(), forum.getDraft(), userId, siteId);
   }
   
+  @Override
   public boolean isRead(Long topicId, Boolean isTopicDraft, Boolean isForumDraft, String userId, String siteId)
   {
     
     try
     {
-      if (checkBaseConditions(null, null, userId, "/site/" + siteId))
+      if (checkBaseConditions(null, null, userId, siteId))
       {
         return true;
       }
@@ -607,7 +649,7 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
    */
   public boolean isReviseAny(DiscussionTopic topic, DiscussionForum forum)
   {
-	  return isReviseAny(topic, forum, getCurrentUserId(), getContextId());
+	  return isReviseAny(topic, forum, getCurrentUserId(), forumManager.getSiteIdForForum(forum));
   }
   
   public boolean isReviseAny(DiscussionTopic topic, DiscussionForum forum, String userId, String contextId){
@@ -656,7 +698,7 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
    */
   public boolean isReviseOwn(DiscussionTopic topic, DiscussionForum forum)
   {
-	  return isReviseOwn(topic, forum, getCurrentUserId(), getContextId());	  
+	  return isReviseOwn(topic, forum, getCurrentUserId(), forumManager.getSiteIdForForum(forum));
   }
   
   public boolean isReviseOwn(DiscussionTopic topic, DiscussionForum forum, String userId, String contextId){
@@ -704,11 +746,13 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
    * @see org.sakaiproject.api.app.messageforums.ui.UIPermissionsManager#isDeleteAny(org.sakaiproject.api.app.messageforums.DiscussionTopic,
    *      org.sakaiproject.api.app.messageforums.DiscussionForum)
    */
+  @Override
   public boolean isDeleteAny(DiscussionTopic topic, DiscussionForum forum)
   {
-	return isDeleteAny(topic, forum, getCurrentUserId(), getContextId());
+	return isDeleteAny(topic, forum, getCurrentUserId(), forumManager.getSiteIdForForum(forum));
   }
   
+  @Override
   public boolean isDeleteAny(DiscussionTopic topic, DiscussionForum forum, String userId, String contextId){
     log.debug("isDeleteAny(DiscussionTopic {}, DiscussionForum {})", topic, forum);
     try
@@ -753,11 +797,13 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
    * @see org.sakaiproject.api.app.messageforums.ui.UIPermissionsManager#isDeleteOwn(org.sakaiproject.api.app.messageforums.DiscussionTopic,
    *      org.sakaiproject.api.app.messageforums.DiscussionForum)
    */
+  @Override
   public boolean isDeleteOwn(DiscussionTopic topic, DiscussionForum forum)
   {
-	  return isDeleteOwn(topic, forum, getCurrentUserId(), getContextId());
+	  return isDeleteOwn(topic, forum, getCurrentUserId(), forumManager.getSiteIdForForum(forum));
   }
   
+  @Override
   public boolean isDeleteOwn(DiscussionTopic topic, DiscussionForum forum, String userId, String contextId){
     log.debug("isDeleteOwn(DiscussionTopic {}, DiscussionForum {})", topic, forum);
     try
@@ -848,27 +894,31 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
    * @see org.sakaiproject.api.app.messageforums.ui.UIPermissionsManager#isModerate(org.sakaiproject.api.app.messageforums.DiscussionTopic,
    *      org.sakaiproject.api.app.messageforums.DiscussionForum)
    */
+  @Override
   public boolean isModeratePostings(DiscussionTopic topic, DiscussionForum forum){
 	  return isModeratePostings(topic, forum, getCurrentUserId());
   }
   
+  @Override
   public boolean isModeratePostings(DiscussionTopic topic, DiscussionForum forum, String userId)
   {
-	return isModeratePostings(topic, forum, userId, getContextId());
+	return isModeratePostings(topic, forum, userId, forumManager.getSiteIdForForum(forum));
   }
   
+  @Override
   public boolean isModeratePostings(DiscussionTopic topic, DiscussionForum forum, String userId, String siteId)
   {
 	  return isModeratePostings(topic.getId(), forum.getLocked(), forum.getDraft(), topic.getLocked(), topic.getDraft(), userId, siteId);
   }
   
+  @Override
   public boolean isModeratePostings(Long topicId, Boolean isForumLocked, Boolean isForumDraft, Boolean isTopicLocked, Boolean isTopicDraft, String userId, String siteId)
   {
     // NOTE: the forum or topic being locked should not affect a user's ability to moderate,
     // so logic related to the locked status was removed
     try
     {
-      if (checkBaseConditions(null, null, userId, "/site/" + siteId))
+      if (checkBaseConditions(null, null, userId, siteId))
       {
         return true;
       }
@@ -905,35 +955,31 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
     {
       return true;
     }
+	if (topic instanceof DiscussionTopic)
+	{
+		try
+		{
 
-    try
-    {
-      Iterator iter = getTopicItemsByUser(topic.getId(), currentUserId, getContextId());
-      while (iter.hasNext())
-      {
-        DBMembershipItem item = (DBMembershipItem) iter.next();
-        if (item.getPermissionLevel().getIdentifyAnonAuthors())
-        {
-          return true;
-        }
-      }
-    }
-    catch (Exception e)
-    {
-      log.error(e.getMessage(), e);
-    }
+		  Iterator iter = getTopicItemsByUser(topic.getId(), currentUserId, forumManager.getSiteIdForTopic((DiscussionTopic) topic));
+		  while (iter.hasNext())
+		  {
+			DBMembershipItem item = (DBMembershipItem) iter.next();
+			if (item.getPermissionLevel().getIdentifyAnonAuthors())
+			{
+			  return true;
+			}
+		  }
+		}
+		catch (Exception e)
+		{
+		  log.error(e.getMessage(), e);
+		}
+	}
 
     return false;
   }
   
-  /*
-   * (non-Javadoc)
-   * @see org.sakaiproject.api.app.messageforums.ui.UIPermissionsManager#getCurrentUserMemberships()
-   */
-  public List getCurrentUserMemberships() {
-	return getCurrentUserMemberships(getContextId());  
-  }
-  
+  @Override
   public List<String> getCurrentUserMemberships(String siteId)
   {
 	  List<String> userMemberships = new ArrayList<>();
@@ -944,7 +990,7 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
 	  }
 	  // now, add any groups the user is a member of
 	  try {
-		  Site site = siteService.getSite(toolManager.getCurrentPlacement().getContext());
+		  Site site = siteService.getSite(siteId);
 		  Set<String> groups = getGroupsWithMember(site, getCurrentUserId());
 		  groups.stream().map(site::getGroup).filter(Objects::nonNull).map(Group::getTitle).forEach(userMemberships::add);
 	  } catch (IdUnusedException iue) {
@@ -953,70 +999,26 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
 	  
 	  return userMemberships;
   }
-
-  
-  private Iterator<String> getGroupsByCurrentUser()
-  {
-    List<String> memberof = new ArrayList<>();
-    try
-    {
-      Site site = siteService.getSite(toolManager.getCurrentPlacement().getContext());
-	  memberof.addAll(getGroupsWithMember(site, getCurrentUserId()));
-    }
-    catch (IdUnusedException e)
-    {
-      log.debug("Group not found");
-    }
-    return memberof.iterator();
-  }
-  
-  /**
-   * Returns a list of names of the groups/sections
-   * the current user is a member of
-   * @return
-   */
-  private Iterator<String> getGroupNamesByCurrentUser(String siteId)
-  {
-    List<String> memberof = new ArrayList<>();
-    try
-    {
-    	Site site = siteService.getSite(siteId);
-    	getGroupsWithMember(site, getCurrentUserId()).stream()
-                .map(site::getGroup).map(Group::getTitle).forEach(memberof::add);
-    }
-    catch (IdUnusedException e)
-    {
-      log.debug("Group not found");
-    }
-    return memberof.iterator();
-  }
-
-  private DBMembershipItem getAreaItemByUserRole()
-  { 
-  	if (log.isDebugEnabled())
-    {
-      log.debug("getAreaItemByUserRole()");
-    }	 
-    Set membershipItems = forumManager.getDiscussionForumArea()
-      .getMembershipItemSet();
-    return forumManager.getDBMember(membershipItems, getCurrentUserRole(),
-      DBMembershipItem.TYPE_ROLE);
-  }
   
   private Iterator<DBMembershipItem> getAreaItemsByCurrentUser()
   { 
     log.debug("getAreaItemsByCurrentUser()");
 
   	List<DBMembershipItem> areaItems = new ArrayList<>();
+
+	// this method is called from isNewForum() which figures out if you can create forums in the site...
+	// this appears to be one situation where we don't have any site reference available from a forums object,
+	// so we have to rely on getCurrentPlacement() here
+	String siteId = toolManager.getCurrentPlacement().getContext();
   	
 		if (threadLocalManager.get("message_center_permission_set") == null || !((Boolean)threadLocalManager.get("message_center_permission_set")).booleanValue())
 		{
-			initMembershipForSite();
+			initMembershipForSite(siteId);
 		}
 
 	Set areaItemsInThread = (Set) threadLocalManager.get("message_center_membership_area");
-	DBMembershipItem item = forumManager.getDBMember(areaItemsInThread, getCurrentUserRole(),
-			DBMembershipItem.TYPE_ROLE);
+	DBMembershipItem item = forumManager.getDBMember(areaItemsInThread, getCurrentUserRole(siteId),
+			DBMembershipItem.TYPE_ROLE, toSiteRef(siteId));
     
     if (item != null){
         areaItems.add(item);
@@ -1024,11 +1026,11 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
     
     // for group awareness
     try {
-    	Site currentSite = siteService.getSite(getContextId());
+		Site currentSite = siteService.getSite(siteId);
     	Set<String> groups = getGroupsWithMember(currentSite, getCurrentUserId());
     	if (groups != null) {
     	    groups.stream().map(currentSite::getGroup)
-                    .map(g -> forumManager.getDBMember(areaItemsInThread, g.getTitle(), DBMembershipItem.TYPE_GROUP))
+                    .map(g -> forumManager.getDBMember(areaItemsInThread, g.getTitle(), DBMembershipItem.TYPE_GROUP, toSiteRef(siteId)))
                     .filter(Objects::nonNull)
                     .forEach(areaItems::add);
     	}
@@ -1044,7 +1046,7 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
   {
 		if (threadLocalManager.get("message_center_permission_set") == null || !((Boolean)threadLocalManager.get("message_center_permission_set")).booleanValue())
 		{
-			initMembershipForSite();
+			initMembershipForSite(area.getContextId());
 		}
 		Set allAreaSet = (Set) threadLocalManager.get("message_center_membership_area");
 		Set returnSet = new HashSet();
@@ -1069,10 +1071,11 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
     List<DBMembershipItem> forumItems = new ArrayList<>();
     //Set membershipItems = forum.getMembershipItemSet();
 
+	String siteId = forumManager.getSiteIdForForum(forum);
 
 		if (threadLocalManager.get("message_center_permission_set") == null || !((Boolean)threadLocalManager.get("message_center_permission_set")).booleanValue())
 		{
-			initMembershipForSite();
+			initMembershipForSite(siteId);
 		}
 
 		Set forumItemsInThread = (Set) threadLocalManager.get("message_center_membership_forum");
@@ -1086,7 +1089,7 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
 				thisForumItemSet.add((DBMembershipItem)thisItem);
 			}
 		}
-		if(thisForumItemSet.size()==0&&getAnonRole()==true&&".anon".equals(forum.getCreatedBy())&&forum.getTopicsSet()==null){
+		if(thisForumItemSet.size()==0&&getAnonRole(toSiteRef(siteId))==true&&".anon".equals(forum.getCreatedBy())&&forum.getTopicsSet()==null){
 			Set newForumMembershipset=forum.getMembershipItemSet();
 	        Iterator iterNewForum = newForumMembershipset.iterator();
 	        while (iterNewForum.hasNext())
@@ -1101,8 +1104,8 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
     
 //    DBMembershipItem item = forumManager.getDBMember(membershipItems, getCurrentUserRole(),
 //        DBMembershipItem.TYPE_ROLE);
-		DBMembershipItem item = forumManager.getDBMember(thisForumItemSet, getCurrentUserRole(),
-			DBMembershipItem.TYPE_ROLE);
+		DBMembershipItem item = forumManager.getDBMember(thisForumItemSet, getCurrentUserRole(siteId),
+			DBMembershipItem.TYPE_ROLE, toSiteRef(siteId));
     
     if (item != null){
       forumItems.add(item);
@@ -1110,12 +1113,12 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
     
 	//  for group awareness
     try {
-    	Site currentSite = siteService.getSite(getContextId());
+		Site currentSite = siteService.getSite(siteId);
     	Set<String> groups = getGroupsWithMember(currentSite, getCurrentUserId());
 
     	if(groups != null) {
             groups.stream().map(currentSite::getGroup)
-                    .map(g -> forumManager.getDBMember(thisForumItemSet, g.getTitle(), DBMembershipItem.TYPE_GROUP))
+                    .map(g -> forumManager.getDBMember(thisForumItemSet, g.getTitle(), DBMembershipItem.TYPE_GROUP, toSiteRef(siteId)))
                     .filter(Objects::nonNull)
                     .forEach(forumItems::add);
     	}
@@ -1147,7 +1150,9 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
   {
 		if (threadLocalManager.get("message_center_permission_set") == null || !((Boolean)threadLocalManager.get("message_center_permission_set")).booleanValue())
 		{
-			initMembershipForSite();
+			// special case handling when the forum is new, it has no id and we can't retrieve anything from it so must resort to using current placement.
+			String siteId = forum.getId() != null ? forumManager.getSiteIdForForum(forum) : toolManager.getCurrentPlacement().getContext();
+			initMembershipForSite(siteId);
 		}
 
 		Set allForumSet = (Set) threadLocalManager.get("message_center_membership_forum");
@@ -1170,7 +1175,7 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
   }
   
   private Iterator getTopicItemsByUser(DiscussionTopic topic, String userId){
-	  return getTopicItemsByUser(topic, userId, getContextId());
+	  return getTopicItemsByUser(topic, userId, forumManager.getSiteIdForTopic(topic));
   }
   
   private Iterator getTopicItemsByUser(DiscussionTopic topic, String userId, String siteId)
@@ -1245,7 +1250,10 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
   {
 		if (threadLocalManager.get("message_center_permission_set") == null || !((Boolean)threadLocalManager.get("message_center_permission_set")).booleanValue())
 		{
-			initMembershipForSite();
+			// when creating a topic this is called with a topic object that has not yet been persisted and therefore doesn't have
+			// a hierarchy yet, or even an id. We have to support this scenario by resorting to using the current placement.
+			String topicSiteId = topic.getId() == null ? toolManager.getCurrentPlacement().getContext() : forumManager.getSiteIdForTopic(topic);
+			initMembershipForSite(topicSiteId);
 		}
 
 		Set allTopicSet = (Set) threadLocalManager.get("message_center_membership_topic");
@@ -1262,14 +1270,54 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
 		
 		return returnSet;
   }
+
+  public boolean isUserDeniedByPostFirst(String userId, DiscussionTopic topic) {
+    if (topic == null) {
+        log.warn("topic null in isUserDeniedByPostFirst");
+        return true;
+    }
+    return !getUsersDeniedByPostFirst(Collections.singletonList(userId), topic, topic.getMessages()).isEmpty();
+  }
+
+  @Override
+  public List<String> getUsersDeniedByPostFirst(List<String> userIds, DiscussionTopic topic, List<Message> messages) {
+    if (topic == null || !topic.getPostFirst()) {
+        return Collections.emptyList();
+    }
+    Optional<DiscussionForum> forumOpt = forumManager.getDiscussionForumForTopic(topic);
+    if (!forumOpt.isPresent()) {
+      log.error("Unable to find the forum for topic {}. Forced to deny all users.", topic.getId());
+      return userIds;
+    }
+	DiscussionForum forum = forumOpt.get();
+    List<String> deniedUsers = new ArrayList<>();
+    boolean needToPost;
+    for (String userId : userIds) {
+      needToPost = true;
+      for (Message message : messages) {
+        if(message != null && message.getCreatedBy().equals(userId) && 
+            !message.getDraft() && 
+            ((message.getApproved() != null && message.getApproved()) || !topic.getModerated()) &&
+            !message.getDeleted()){
+          needToPost = false;
+          break;
+        }
+      }
+      if(needToPost && !(isChangeSettings(topic, forum, userId)
+           || isPostToGradebook(topic, forum, userId)
+           || isModeratePostings(topic, forum, userId))){
+        deniedUsers.add(userId);
+      }
+    }
+    return deniedUsers;
+  }
   
   /**
    * @see org.sakaiproject.api.app.messageforums.ui.DiscussionForumManager#isInstructor()
    */
-  public boolean isInstructor()
+  public boolean isInstructor(String siteId)
   {
-    log.debug("isInstructor()");
-    return isInstructor(userDirectoryService.getCurrentUser());
+	  return isInstructor(userDirectoryService.getCurrentUser(), siteId);
   }
 
   /**
@@ -1278,22 +1326,54 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
    * @param user
    * @return
    */
-  private boolean isInstructor(User user)
+  private boolean isInstructor(String userId, String siteId)
   {
-    log.debug("isInstructor(User {})", user);
-    if (user != null)
-      return securityService.unlock(user, "site.upd", getContextSiteId());
-    else
-      return false;
+	  try
+	  {
+		  return isInstructor(userDirectoryService.getUser(userId), siteId);
+	  }
+	  catch (UserNotDefinedException e)
+	  {
+		  return false;
+	  }
   }
 
-  /**
-   * @return siteId
-   */
-  private String getContextSiteId()
+  private boolean isInstructor(User user, String siteId)
   {
-    log.debug("getContextSiteId()");
-    return ("/site/" + toolManager.getCurrentPlacement().getContext());
+    log.debug("isInstructor(User {})", user);
+    if (user == null || StringUtils.isBlank(siteId))
+	{
+		return false;
+	}
+
+    return securityService.unlock(user, SiteService.SECURE_UPDATE_SITE, toSiteRef(siteId));
+  }
+
+  public boolean hasSiteVisit(String userId, String siteId)
+  {
+	  try
+	  {
+		  return hasSiteVisit(userDirectoryService.getUser(userId), siteId);
+	  }
+	  catch (UserNotDefinedException e)
+	  {
+		  return false;
+	  }
+  }
+
+  public boolean hasSiteVisit(User user, String siteId)
+  {
+	if (user == null || StringUtils.isBlank(siteId))
+	{
+		return false;
+	}
+
+	return securityService.unlock(user, SiteService.SITE_VISIT, toSiteRef(siteId));
+  }
+
+  private String toSiteRef(String siteId)
+  {
+	  return "/site/" + siteId;
   }
 
   public void setPermissionLevelManager(
@@ -1321,11 +1401,7 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
 
   /**
    * @return
-   */
-  private String getCurrentUserRole() {
-	  return getCurrentUserRole(getContextId());
-  }
-  
+   */  
   private String getCurrentUserRole(String siteId)
   {
 	  log.debug("getCurrentUserRole()");
@@ -1362,14 +1438,18 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
 	 return  forumManager.getAnonRole();	   
     }
    
-   public boolean  getAnonRole(String contextSiteId)
+   public boolean  getAnonRole(String contextSiteId) // this should be a site ref ie /site/id
    {
 	 return  forumManager.getAnonRole(contextSiteId);	   
    }
   /**
    * @return
    */
-  private String getContextId()
+   // this method is commented out because it is very dangerous to assume entities belong to the current site when checking permissions
+   // it can probably be removed but is left here for reference due to the odd usage of TestUtil. This is probably an obsolete class
+   // as the current tests still all pass, but leaving this here for now just in case. Also helps to document that this is a bad
+   // practice in case someone thinks of restoring it.
+  /*private String getContextId()
   {
     log.debug("getContextId()");
     if (TestUtil.isRunningTests())
@@ -1379,7 +1459,7 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
     Placement placement = toolManager.getCurrentPlacement();
     String presentSiteId = placement.getContext();
     return presentSiteId;
-  }
+  }*/
 
   /**
    * @return
@@ -1403,58 +1483,31 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
    * @param forum
    * @return
    */
-  private boolean checkBaseConditions(DiscussionTopic topic,
-	      DiscussionForum forum){
-	  return checkBaseConditions(topic, forum, getCurrentUserId(), getContextId());
+  private boolean checkBaseConditions(DiscussionTopic topic, DiscussionForum forum){
+	  return checkBaseConditions(topic, forum, getCurrentUserId(), forumManager.getSiteIdForForum(forum));
   }
-  
 
-  
-  private boolean checkBaseConditions(DiscussionTopic topic,
-		  DiscussionForum forum, String userId, String contextSiteId)
+  /**
+   * Checks the "base conditions" for access. Returns true if the user is an admin or, in the case where the given
+   * topic or forum is group restricted, the user is an instructor in an allowed group. If both topic/forum are null,
+   * this is just an admin check.
+   * @param topic the topic to check group restriction, may be null
+   * @param forum the forum to check group restriction, may be null
+   * @param userId the user
+   * @param siteId the site the topic/forum belong to (assumed to be accurate)
+   * @return true if the given user meets the conditions
+   */
+  private boolean checkBaseConditions(DiscussionTopic topic, DiscussionForum forum, String userId, String siteId)
   {
     log.debug("checkBaseConditions(DiscussionTopic {}, DiscussionForum {})", topic, forum);
     if (isSuperUser(userId))
     {
       return true;
     }
-    //if restricted && belongs to group
-    if ((forum != null && forum.getRestrictPermissionsForGroups() && isInstructorForAllowedGroup(forum.getId(), true)) || (topic != null && topic.getRestrictPermissionsForGroups() && isInstructorForAllowedGroup(topic.getId(), false))){
-        return true;
-    }
-    return false;
-  }
-  
-  private boolean isRoleMember(String roleId)
-  {
-    log.debug("isRoleMember(String {})", roleId);
-    if (getCurrentUserRole().equals(roleId))
-    {
-      return true;
-    }
-    return false;
-  }
 
-  private boolean isGroupMember(String groupId)
-  {
-    log.debug("setAuthzGroupService(AuthzGroupService {})", authzGroupService);
-    try
-    {
-      Site site = siteService.getSite(toolManager.getCurrentPlacement().getContext());
-      Set<String> groups = getGroupsWithMember(site, getCurrentUserId());
-      return groups.contains(groupId);
-    }
-    catch (IdUnusedException e)
-    {
-      log.debug("Group with id {} not found", groupId);
-      return false;
-    }
+    return (forum != null && forum.getRestrictPermissionsForGroups() && isInstructorForAllowedGroup(forum.getId(), siteId, true)) ||
+			(topic != null && topic.getRestrictPermissionsForGroups() && isInstructorForAllowedGroup(topic.getId(), siteId, false));
   }
-  
-  private void initMembershipForSite(){
-	  initMembershipForSite(getContextId());
-  }
-  
   
   private void initMembershipForSite(String contextSiteId){
 	  initMembershipForSite(contextSiteId, getCurrentUserId());
@@ -1519,4 +1572,192 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
 	public void setMemoryService(MemoryService memoryService) {
 		this.memoryService = memoryService;
 	}
+
+	@Override
+	public boolean hasAccessPrivileges(DiscussionForum forum)
+	{
+		String userId = getCurrentUserId();
+		String siteId = forumManager.getSiteIdForForum(forum);
+		// at this stage we can technically check if the user is even in the site, but
+		// 1. virtually all requests will be for a site the user has access to, so checking prematurely is wasteful
+		// 2. the final forum/topic permission checks (ie. isRead) should fail for anyone not in the site
+		
+		return isAdminOrInstructor(Optional.empty(), forum, userId, siteId) || hasNonInstructorAccessPrivileges(forum, userId, siteId);
+	}
+
+	private boolean hasNonInstructorAccessPrivileges(DiscussionForum forum, String userId, String siteId)
+	{
+		// can you change the settings for this forum? regardless of other forum settings and permissions, someone
+		// with this permission needs to be able to see the forum itself (seeing topics in the forum is separate)
+		if (isChangeSettings(forum, siteId))
+		{
+			return true;
+		}
+
+		// any user who would be able to see draft or unavailable forums has already been let in
+		if (forum.getDraft() || !forum.getAvailability()) 
+		{
+			return false;
+		}
+
+		// at this point we have a non-draft, available forum so any user with the ability to create topics needs access
+		if (isNewTopic(forum, siteId))
+		{
+			return true;
+		}
+
+		// if we made it this far we can access the forum itself based on its own settings, but topic settings also have to be considered
+		List<DiscussionTopic> topics = forum.getTopics() == null ? Collections.emptyList() : (List<DiscussionTopic>) forum.getTopics();
+		// users who can access at least one topic in the forum need access
+		// this also prevents access to forums with no topics, as only users with isNewTopic should be allowed, and this was checked earlier
+		return topics.stream().anyMatch(t -> hasNonInstructorAccessPrivileges(t, forum, userId, siteId));
+	}
+
+	private boolean isAdminOrInstructor(Optional<DiscussionTopic> topic, DiscussionForum forum, String userId, String siteId)
+	{
+		return checkBaseConditions(topic.orElse(null), forum, userId, siteId) || isInstructor(userId, siteId);
+	}
+
+	@Override
+	public boolean hasAccessPrivileges(DiscussionTopic topic)
+	{
+		Optional<DiscussionForum> forum = forumManager.getDiscussionForumForTopic(topic);
+		if (forum.isPresent())
+		{
+			return hasAccessPrivileges(topic, forum.get());
+		}
+
+		return false;
+	}
+
+	/**
+	 * Call this one if you already have the forum. This method assumes the topic belongs to the given forum.
+	 * @param topic the topic to check access to
+	 * @param forum the topic's forum
+	 * @return true if the current user has access to the topic and forum
+	 */
+	@Override
+	public boolean hasAccessPrivileges(DiscussionTopic topic, DiscussionForum forum)
+	{
+		String userId = getCurrentUserId();
+		String siteId = forumManager.getSiteIdForTopic(topic);
+		// at this stage we can technically check if the user is even in the site, but
+		// 1. virtually all requests will be for a site the user has access to, so checking prematurely is wasteful
+		// 2. the assumed final topic/message permission checks (ie. isRead) should fail for anyone not in the site
+
+		if (isAdminOrInstructor(Optional.of(topic), forum, userId, siteId))
+		{
+			return true;
+		}
+
+		if (!hasNonInstructorAccessPrivileges(forum, userId, siteId))
+		{
+			return false;
+		}
+		
+		return hasNonInstructorAccessPrivileges(topic, forum, userId, siteId); // possible optimization opportunity here because the call above may have already checked this topic's permissions (see impl)
+	}
+
+	private boolean hasNonInstructorAccessPrivileges(DiscussionTopic topic, DiscussionForum forum, String userId, String siteId)
+	{
+		// can you change the settings for this topic? regardless of other topic settings and permissions, someone
+		// with this permission needs to be able to see the topic itself (seeing messages in the topic is separate)
+		if (isChangeSettings(topic, forum, userId, siteId))
+		{
+			return true; // note the isChangeSettings() check covers topic owners and grants access for them always regardless of their current status in the site
+		}
+
+		// any user who would be able to see draft or unavailable topics has already been let in
+		if (topic.getDraft() || !topic.getAvailability())
+		{
+			return false;
+		}
+
+		// at this point we have a non-draft, available topic and a user who is not a maintainer
+		return isRead(topic, forum, userId, siteId) || isNewResponse(topic, forum, userId, siteId);
+	}
+
+	// this method will acquire the topic and forum from the message itself. use if you have no
+	// need of the topic/forum objects after making this call, otherwise prefer the other overload
+	// to avoid getting things twice.
+	@Override
+	public boolean hasAccessPrivileges(Message msg)
+	{
+
+		Optional<DiscussionTopic> topic = forumManager.getDiscussionTopicForMessage(msg);
+		if (!topic.isPresent())
+		{
+			log.error("Unable to find topic for message {}", msg.getId());
+			return false;
+		}
+
+		return hasAccessPrivileges(msg, topic.get());
+	}
+
+	// call this one if you already have the topic, this method assumes everything passed in matches up
+	@Override
+	public boolean hasAccessPrivileges(Message msg, DiscussionTopic topic)
+	{
+		return !hasAccessPrivileges(Collections.singletonList(msg), topic).isEmpty();
+	}
+
+	/**
+	 * Checks access on multiple messages at the same time, for efficiency as many checks actually rely on the topic rather
+	 * than individual messages. It is assumed that all passed in messages below to the given topic (this is NOT validated here).
+	 * @param messages the messages to check access to
+	 * @param topic the topic all of the messages belong to
+	 * @return the message ids from the messages that the current user has access to
+	 */
+	@Override
+	public List<Long> hasAccessPrivileges(List<Message> messages, DiscussionTopic topic)
+	{
+		String userId = getCurrentUserId();
+		Optional<DiscussionForum> forum = forumManager.getDiscussionForumForTopic(topic);
+		if (!forum.isPresent())
+		{
+			log.error("Can't find forum for topic {}", topic.getId());
+			return Collections.emptyList();
+		}
+		String siteId = forumManager.getSiteIdForForum(forum.get());
+
+		// check admin/instructor and let them in regardless of any other factors
+		if (isAdminOrInstructor(Optional.of(topic), forum.get(), userId, siteId))
+		{
+			return messages.stream().map(Message::getId).collect(Collectors.toList());
+		}
+
+		// check prerequisite forum/topic access perms
+		// this call is simple but inefficient for two reasons: it gets the userid/site id again, and it does the admin/instructor check again.
+		// Consider refactoring to avoid these duplicate checks but try not to make things overly complicated with tons of boolean params
+		if (!hasAccessPrivileges(topic, forum.get()))
+		{
+			return Collections.emptyList();
+		}
+
+		// has isRead in topic - this is a recheck but they may have other access to the topic so it is required as prerequiste to everything else
+		if (!isRead(topic, forum.get(), userId, siteId))
+		{
+			return Collections.emptyList();
+		}
+
+		if (isUserDeniedByPostFirst(userId, topic))
+		{
+			return Collections.emptyList();
+		}
+
+		// now that we know we have access to the forum and topic, check message-level stuff
+		List<Long> allowedMessages = new ArrayList<>(messages.size());
+		boolean isModerator = isModeratePostings(topic, forum.get(), userId, siteId);
+		for (Message msg : messages)
+		{
+			if (topic.getModerated() && !BooleanUtils.toBooleanDefaultIfNull(msg.getApproved(), false) && !isModerator && !userId.equals(msg.getAuthorId()))
+			{
+				continue; // skip pending or denied messages you can't moderate and didn't author
+			}
+			allowedMessages.add(msg.getId());
+		}
+
+		return allowedMessages;
+	}
+
 }

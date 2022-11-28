@@ -32,6 +32,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -46,6 +47,7 @@ import javax.faces.model.SelectItem;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 
 import org.sakaiproject.api.app.messageforums.AnonymousManager;
 import org.sakaiproject.api.app.messageforums.Attachment;
@@ -84,7 +86,10 @@ import org.sakaiproject.util.ResourceLoader;
 @ManagedBean(name="mfStatisticsBean")
 @SessionScoped
 public class MessageForumStatisticsBean {
-	
+
+	private static final String MAIN_PAGE = "main";
+	private static final String FORUMS_MAIN = "forumsMain";
+
 	/**
 	 * Used to store Statistic information on message forum per 
 	 * per user
@@ -2131,6 +2136,12 @@ public class MessageForumStatisticsBean {
 
 		return null;
 	}
+
+	private boolean isInstructorInCurrentSite() {
+		String currentUserId = getCurrentUserId();
+		String currentSiteId = toolManager.getCurrentPlacement().getContext();
+		return forumManager.isInstructor(currentUserId, "/site/" + currentSiteId);
+	}
 	
 	/**
 	 * Actions
@@ -2142,8 +2153,18 @@ public class MessageForumStatisticsBean {
 	public String processActionStatisticsUser()
 	{
 		log.debug("processActionStatisticsUser");
-		
-		selectedSiteUserId = getExternalParameterByKey(SITE_USER_ID);
+		if (!isInstructorInCurrentSite()) {
+			return FORUMS_MAIN;
+		}
+
+		String paramUserId = getExternalParameterByKey(SITE_USER_ID);
+
+		if (!canViewMemberStatistics(paramUserId)) {
+			return LIST_PAGE;
+		}
+
+		selectedSiteUserId = paramUserId;
+
 		//reset cache
 		userReadStatisticsCache = new HashMap<String, List>();
 		userAuthoredStatisticsCache = new HashMap<String, List>();
@@ -2151,7 +2172,27 @@ public class MessageForumStatisticsBean {
 		return processActionStatisticsUserHelper();
 	}
 	
+	public boolean canViewMemberStatistics(String userId) {
+		if (!isInstructorInCurrentSite()) {
+			return false;
+		}
+		try {
+			String currentSiteId = toolManager.getCurrentPlacement().getContext();
+			Site currentSite = siteService.getSite(currentSiteId);
+			if (currentSite.getMember(userId) == null) {
+				log.warn("User {} attempted to view stats for user who is not a member of the site: {}", getCurrentUserId(), userId);
+				return false;
+			}
+			return true;
+		} catch (IdUnusedException e) {
+			log.error("currentSiteId doesn't exist: {}", toolManager.getCurrentPlacement().getContext(), e);
+		}
+		return false;
+	}
 	public String processActionStatisticsUserHelper(){
+		if (!isInstructorInCurrentSite()) {
+			return FORUMS_MAIN;
+		}
 		Map<String, String> userIdName = getUserIdName();
 
 		if (!m_displayAnonIds)
@@ -2204,6 +2245,9 @@ public class MessageForumStatisticsBean {
 	}
 	
 	public String processActionBackToUser() {
+		if (!isInstructorInCurrentSite()) {
+			return FORUMS_MAIN;
+		}
 		return FORUM_STATISTICS_USER;
 	}
 	
@@ -2275,9 +2319,18 @@ public class MessageForumStatisticsBean {
 	
 	public String processActionDisplayMsgBody() {
 		log.debug("processActionDisplayMsgBody");
+		if (!isInstructorInCurrentSite()) {
+			return FORUMS_MAIN;
+		}
 
-		selectedMsgId = getExternalParameterByKey("msgId");
-		Message message =(Message) messageManager.getMessageById(Long.parseLong(selectedMsgId));
+		String externalMsgId = getExternalParameterByKey("msgId");
+		Message message =(Message) messageManager.getMessageById(Long.parseLong(externalMsgId));
+		if (!uiPermissionsManager.hasAccessPrivileges(message))
+		{
+			return FORUMS_MAIN;
+		}
+
+		selectedMsgId = externalMsgId;
 		selectedMsgSubject = message.getTitle();
 		
 		return FORUM_STATISTICS_MSG;
@@ -2366,6 +2419,9 @@ public class MessageForumStatisticsBean {
 	}
 	
 	public String processDisplayNextParticipant() {
+		if (!isInstructorInCurrentSite()) {
+			return FORUMS_MAIN;
+		}
 		isLastParticipant = false;
 		isFirstParticipant = false;
 		
@@ -2387,6 +2443,10 @@ public class MessageForumStatisticsBean {
 	}
 	
 	public String processDisplayPreviousParticipant() {		
+		if (!isInstructorInCurrentSite()) {
+			return FORUMS_MAIN;
+		}
+
 		isLastParticipant = false;
 		isFirstParticipant = false;
 		
@@ -2424,37 +2484,39 @@ public class MessageForumStatisticsBean {
 	}
 				
 	public String processActionStatisticsByAllTopics(){
+		if (!isInstructorInCurrentSite()) {
+			return FORUMS_MAIN;
+		}
+
 		return FORUM_STATISTICS_BY_ALL_TOPICS;
 	}
 	
 	public String processActionStatisticsByTopic()
 	{
+		if (!isInstructorInCurrentSite()) {
+			return FORUMS_MAIN;
+		}
+
 		log.debug("processActionStatisticsByTopic");
 		
 		//to save some speed, only update if the values have changed
-		boolean newTopic = !getExternalParameterByKey(TOPIC_ID).equals(selectedAllTopicsTopicId);
-		boolean newForum = !getExternalParameterByKey(FORUM_ID).equals(selectedAllTopicsForumId);
+		String externalTopicId = StringUtils.trimToEmpty(getExternalParameterByKey(TOPIC_ID));
+		boolean newTopic = !externalTopicId.equals(selectedAllTopicsTopicId);
 		
-		selectedAllTopicsTopicId = getExternalParameterByKey(TOPIC_ID);
-		selectedAllTopicsForumId = getExternalParameterByKey(FORUM_ID);
-		if(newForum){
-			if(selectedAllTopicsForumId != null && !"".equals(selectedAllTopicsForumId)){
-				try{
-					DiscussionForum df = forumManager.getForumById(Long.parseLong(selectedAllTopicsForumId));
-					selectedAllTopicsForumTitle = df.getTitle();
-				}catch (Exception e) {
-					log.warn("MessageForumStatisticsBean.processActionStatisticsByTopic: Wasn't able to find discussion forum for id: " + selectedAllTopicsForumId);
-				}
+		if (newTopic && !externalTopicId.isEmpty())
+		{
+			DiscussionTopic dt = forumManager.getTopicById(NumberUtils.toLong(externalTopicId, -1L));
+			Optional<DiscussionForum> forum = dt == null ? Optional.empty() : forumManager.getDiscussionForumForTopic(dt);
+			if (forum.isPresent() && uiPermissionsManager.hasAccessPrivileges(dt, forum.get()))
+			{
+				selectedAllTopicsTopicId = externalTopicId;
+				selectedAllTopicsTopicTitle = dt.getTitle();
+				selectedAllTopicsForumId = Long.toString(forum.get().getId());
+				selectedAllTopicsForumTitle = forum.get().getTitle();
 			}
-		}
-		if(newTopic){
-			if(selectedAllTopicsTopicId != null && !"".equals(selectedAllTopicsTopicId)){
-				try{
-					DiscussionTopic dt = forumManager.getTopicById(Long.parseLong(selectedAllTopicsTopicId));
-					selectedAllTopicsTopicTitle = dt.getTitle();
-				}catch (Exception e) {
-					log.warn("MessageForumStatisticsBean.processActionStatisticsByTopic: Wasn't able to find discussion topic for id: " + selectedAllTopicsForumId);
-				}
+			else
+			{
+				log.warn("MessageForumStatisticsBean.processActionStatisticsByTopic: Wasn't able to find discussion topic/forum for topic id {}, or user has no access.", externalTopicId);
 			}
 		}
 							
@@ -2588,6 +2650,10 @@ public class MessageForumStatisticsBean {
 
 	public String processGradeAssignChange(ValueChangeEvent vce) 
 	{ 
+		if (!isInstructorInCurrentSite()) {
+			return FORUMS_MAIN;
+		}
+
 		String changeAssign = (String) vce.getNewValue(); 
 		if (changeAssign == null) 
 		{ 
@@ -2608,6 +2674,10 @@ public class MessageForumStatisticsBean {
 	
 	public String processGroupChange(ValueChangeEvent vce) 
 	{ 
+		if (!isInstructorInCurrentSite()) {
+			return FORUMS_MAIN;
+		}
+
 		String changeAssign = (String) vce.getNewValue(); 
 		if (changeAssign == null) 
 		{ 
@@ -2635,6 +2705,11 @@ public class MessageForumStatisticsBean {
 	} 
 	
 	public void setDefaultSelectedAssign(){
+		String siteId = toolManager.getCurrentPlacement().getContext();
+		GradebookService gradebookService = getGradebookService();
+		if (gradebookService == null || !getGradebookService().currentUserHasGradeAllPerm(siteId)) {
+			return;
+		}
 		if (!gradebookItemChosen) {
 			String defaultAssignName;
 			if (StringUtils.isNotBlank(selectedAllTopicsTopicId)) {
@@ -2643,7 +2718,7 @@ public class MessageForumStatisticsBean {
 				defaultAssignName = forumManager.getForumById(Long.parseLong(selectedAllTopicsForumId)).getDefaultAssignName();
 			}
 			if (StringUtils.isNotBlank(defaultAssignName)) {
-				Assignment assignment = getGradebookService().getAssignmentByNameOrId(toolManager.getCurrentPlacement().getContext(), defaultAssignName);
+				Assignment assignment = getGradebookService().getAssignmentByNameOrId(siteId, defaultAssignName);
 				setDefaultSelectedAssign(assignment.getName());
 			}
 		}
