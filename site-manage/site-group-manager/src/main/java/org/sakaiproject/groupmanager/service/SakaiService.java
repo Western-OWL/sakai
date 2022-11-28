@@ -203,4 +203,14 @@ public class SakaiService  {
         
     }
 
+    public boolean allowUpdateGroupMembership(Group group) {
+        if (group == null) {
+            return false;
+        }
+        Site site = group.getContainingSite();
+        if (site == null || site.getId() == null) {
+            return false;
+        }
+        return siteService.allowUpdateGroupMembership(site.getId());
+    }
 }

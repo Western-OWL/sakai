@@ -126,6 +126,9 @@ public class GroupController {
                     log.error("The user {} is trying to modify the locked group {}, returning to main.", sakaiService.getCurrentUserId(), groupId);
                     return GroupManagerConstants.REDIRECT_MAIN_TEMPLATE;
                 }
+                if (!sakaiService.allowUpdateGroupMembership(group)) {
+                    return GroupManagerConstants.REDIRECT_MAIN_TEMPLATE;
+                }
 
                 // After finding the group, assign all the existing values to the form.
                 groupForm.setGroupId(groupId);
