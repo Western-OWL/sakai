@@ -42,6 +42,7 @@ import org.sakaiproject.api.app.messageforums.Area;
 import org.sakaiproject.api.app.messageforums.AreaControlPermission;
 import org.sakaiproject.api.app.messageforums.AreaManager;
 import org.sakaiproject.api.app.messageforums.Attachment;
+import org.sakaiproject.api.app.messageforums.BaseForum;
 import org.sakaiproject.api.app.messageforums.DBMembershipItem;
 import org.sakaiproject.api.app.messageforums.DiscussionForum;
 import org.sakaiproject.api.app.messageforums.DiscussionForumService;
@@ -56,6 +57,7 @@ import org.sakaiproject.api.app.messageforums.MessageForumsMessageManager;
 import org.sakaiproject.api.app.messageforums.MessageForumsTypeManager;
 import org.sakaiproject.api.app.messageforums.MessageForumsUser;
 import org.sakaiproject.api.app.messageforums.MessagePermissions;
+import org.sakaiproject.api.app.messageforums.OpenForum;
 import org.sakaiproject.api.app.messageforums.PermissionLevel;
 import org.sakaiproject.api.app.messageforums.PermissionLevelManager;
 import org.sakaiproject.api.app.messageforums.PermissionManager;
@@ -85,6 +87,7 @@ import org.sakaiproject.event.api.LearningResourceStoreService.LRS_Statement;
 import org.sakaiproject.event.api.LearningResourceStoreService.LRS_Verb.SAKAI_VERB;
 import org.sakaiproject.event.api.NotificationService;
 import org.sakaiproject.exception.IdUnusedException;
+import org.sakaiproject.hibernate.HibernateUtils;
 import org.sakaiproject.memory.api.Cache;
 import org.sakaiproject.memory.api.MemoryService;
 import org.sakaiproject.site.api.Group;
@@ -2587,6 +2590,11 @@ public class DiscussionForumManagerImpl extends HibernateDaoSupport implements
 		// OWLTODO: topic.getBaseForum() will return null if you have a DiscussionTopic...always?
 		return topic.getOpenForum().getArea().getContextId(); // see also getContextForForumById()
 		// OWLTODO: this should live in MessageForumsForumManager instead so it can be used in rest endpoints
+		// OWLTODO: in many cases (all?) the forum will also be required...this means if we get the forum now the caller may
+		// just end up getting it again later. This is not a big deal if only method chains are involved, but
+		// it if turns out we need to hit the db, reconsider this method. It may be better to only be able to get site ids
+		// from forum objects instead, which forces the caller to acquire the forum themselves first. This is why we are
+		// chosing NOT to create getSiteIdForMessage() at this time.
 	}
 
 	// OWLTODO: again these impls above and below should probably live in MessageForumsForumManager so they can be used in rest endpoints
@@ -2609,9 +2617,15 @@ public class DiscussionForumManagerImpl extends HibernateDaoSupport implements
 	  // unproxying needs to happen. We want to minimize cases where this can't find a forum, because
 	  // that will probably result in db querying to find the forum instead. Before finalizing this fix,
 	  // switch to instanceof checks to avoid classcastexceptions in production.
+	  // OWLTODO: update: the approach necessitated by messagemanager not doing any unproxying suggests that rather than
+	  // chasing down all the queries that return proxies, it might be simpler to just unproxy here. it seems to work
+	  // well for the message, so we'll try it out. We may want to combine with instanceof checks as well, not sure
+	  // what the cost of unnecessary unproxying would be
+	  
 	  DiscussionForum forum = (DiscussionForum) topic.getOpenForum();
 	  if (forum == null) // try the base forum
 	  {
+		  topic.setBaseForum((BaseForum) HibernateUtils.unproxy(topic.getBaseForum()));
 		  forum = (DiscussionForum) topic.getBaseForum();
 	  }
 
@@ -2644,6 +2658,24 @@ public class DiscussionForumManagerImpl extends HibernateDaoSupport implements
 		// though getBaseForum may not be populated as a DiscussionForum, if we can still get the id we can do a query. This kind of fallback
 		// is used elsewhere, so something to consider.
 		throw new RuntimeException("Bad topic -> forum hierarchy!");
+	}
+
+	// this is a stub naive impl for now, see the notes in similar methods above
+	@Override
+	public Optional<DiscussionTopic> getDiscussionTopicForMessage(Message msg)
+	{
+		if (msg == null)
+		{
+			return Optional.empty();
+		}
+
+		// OWLTODO: attempt an unproxy here - messagemanager, which supplies the message in some cases, has
+		// no history of unproxying so to be cautious we're not introducing it there
+		// later this will be done a layer lower in messageforumsforummanager where unproxying is fairly common
+		msg.setTopic((Topic) HibernateUtils.unproxy(msg.getTopic()));
+		DiscussionTopic topic = (DiscussionTopic) msg.getTopic();
+		topic.setOpenForum((OpenForum) HibernateUtils.unproxy(topic.getOpenForum()));
+		return Optional.ofNullable(topic);
 	}
 
 }

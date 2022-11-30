@@ -674,4 +674,7 @@ public interface DiscussionForumManager
   // OWLTODO: these methods may be collapsed into one, or one public/one private
   public Optional<DiscussionForum> getDiscussionForumFromTopic(DiscussionTopic topic);
   public Optional<DiscussionForum> getDiscussionForumForTopic(DiscussionTopic topic);
+
+  // OWLTODO: just stubs for now, will need robust impls later
+  public Optional<DiscussionTopic> getDiscussionTopicForMessage(Message msg);
 }

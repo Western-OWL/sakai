@@ -27,6 +27,7 @@ import java.util.Set;
 import org.sakaiproject.api.app.messageforums.DiscussionForum;
 import org.sakaiproject.api.app.messageforums.DiscussionTopic;
 import org.sakaiproject.api.app.messageforums.Area;
+import org.sakaiproject.api.app.messageforums.Message;
 import org.sakaiproject.api.app.messageforums.Topic;
 
 /**
@@ -235,4 +236,8 @@ public interface UIPermissionsManager
   // only that they have the permission to see the topic itself, perhaps only to change its settings or create a new message
   public boolean hasAccessPrivileges(DiscussionTopic topic);
   public boolean hasAccessPrivileges(DiscussionTopic topic, DiscussionForum forum);
+
+  // Having access to the parent forum and topic is a requirement that is automatically also checked by these methods
+  public boolean hasAccessPrivileges(Message msg);
+  public boolean hasAccessPrivileges(Message msg, DiscussionTopic topic, DiscussionForum forum);
 }

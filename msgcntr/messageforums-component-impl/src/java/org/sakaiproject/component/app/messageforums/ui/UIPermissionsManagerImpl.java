@@ -42,6 +42,7 @@ import org.sakaiproject.api.app.messageforums.AreaManager;
 import org.sakaiproject.api.app.messageforums.DBMembershipItem;
 import org.sakaiproject.api.app.messageforums.DiscussionForum;
 import org.sakaiproject.api.app.messageforums.DiscussionTopic;
+import org.sakaiproject.api.app.messageforums.Message;
 import org.sakaiproject.api.app.messageforums.MessageForumsTypeManager;
 import org.sakaiproject.api.app.messageforums.PermissionLevelManager;
 import org.sakaiproject.api.app.messageforums.PermissionManager;
@@ -1625,5 +1626,68 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
 
 		// at this point we have a non-draft, available topic and a user who is not a maintainer
 		return isRead(topic, forum, userId, siteId) || isNewResponse(topic, forum, userId, siteId);
+	}
+
+	// this method will acquire the topic and forum from the message itself. use if you have no
+	// need of the topic/forum objects after making this call, otherwise prefer the other overload
+	@Override
+	public boolean hasAccessPrivileges(Message msg)
+	{
+		// OWLTODO: get the topic/forum and pass it
+		//Optional<DiscussionTopic> topic = forumManager.getDiscussionTopicForMessage(msg);
+		return hasAccessPrivileges(msg, null, null);
+	}
+
+	// call this one if you already have the topic and forum, this method assumes everything passed in matches up
+	@Override
+	public boolean hasAccessPrivileges(Message msg, DiscussionTopic topic, DiscussionForum forum)
+	{
+		String userId = getCurrentUserId();
+		String siteId = forumManager.getSiteIdForTopic(topic);
+
+		// check admin/instructor and let them in regardless of any other factors
+		if (isAdminOrInstructor(Optional.of(topic), forum, userId, siteId))
+		{
+			return true;
+		}
+
+		// check prerequisite forum/topic access perms
+		// OWLTODO: this call is simple but inefficient for two reasons: it gets the userid/site id again, and it does the admin/instructor check again.
+		// Consider refactoring to avoid these duplicate checks but try not to make things overly complicated with tons of boolean params
+		if (!hasAccessPrivileges(topic, forum))
+		{
+			return false;
+		}
+
+		// now that we know we have access to the forum and topic, check message-level stuff like
+		// 1. has isRead in topic  - this is a recheck but they may have other access to the topic so it is required as prerequiste to everything else
+		if (!isRead(topic, forum, userId, siteId))
+		{
+			return false;
+		}
+		// 2. is message author? let them in regardless of other checks below
+		if (userId.equals(msg.getAuthorId())) // OWLTODO: verify this is anon-safe and always returns the real user uuid
+		{
+			return true;
+		}
+		// 3. others:
+		// - message is pending - is there a case where a non-instructor would be able to see a pending message they didn't author?
+		// - OWLTODO: message is deleted - this is tricky because the UI wants to handle this...i think we can't include this in the check and just have to let the UI/REST layers address it
+		// however i don't think there is a case where any user can see deleted message content, so perhaps we can have the service that returns the deleted message sanitize it first
+		// - topic is need to post first and user has/hasn't posted (see ForumTool.needToPostFirst perhaps)
+		// - OWLTODO : thread has moved...how does this work? do services still return the full message details in this scenario? need to investigate this further. see ForumTool.threadMoved perhaps...
+		// - other considerations??? TBD, we'll start with what we have so far and see what else shakes out
+		// OWLTODO: for everything that we leave up to the UI to handle, we also have to make sure REST handles it
+		if (topic.getModerated() && !msg.getApproved())  // OWLTODO: consider that non-instructors can have moderator permissions on a topic(?) and should see this message?
+		{
+			return false; // OWLTODO: should we even do this? Is the UI expecting to handle it instead?
+		}
+		if (topic.getPostFirst()) // OWLTODO: figure out the rest of this conditional to determine if the user should see the message or not. ForumTool.needToPostFirst might have the answer
+		{
+			return false; // OWLTODO: should we actually do this? will the UI get mad that it can't display a "you must post first" message?
+			// OWLTODO: do we need separate consideration for thread head vs a child message?
+		}
+
+		return true; // OWLTODO: once finalized, clean up whatever conditionals we can by combining them to make this method shorter and end on a return <conditional> statement
 	}
 }
