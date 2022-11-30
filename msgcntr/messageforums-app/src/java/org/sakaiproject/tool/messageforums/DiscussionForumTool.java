@@ -45,6 +45,7 @@ import java.util.SortedSet;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
@@ -2390,15 +2391,7 @@ public class DiscussionForumTool {
   }
     
   public boolean getNeedToPostFirst(){
-	  String currentUserId = getUserId();
-	  List<String> currentUser = new ArrayList<String>();
-	  currentUser.add(currentUserId);
-	  if (selectedTopic == null) {
-	      log.warn("selectedTopic null in getNeedToPostFirst");
-	      return true;
-	  } else {
-	      return getNeedToPostFirst(currentUser, selectedTopic.getTopic(), selectedTopic.getMessages()).contains(currentUserId);
-	  }
+      return uiPermissionsManager.isUserDeniedByPostFirst(getUserId(), selectedTopic.getTopic());
   }
 
   /**
@@ -2407,36 +2400,11 @@ public class DiscussionForumTool {
    * @return
    */
   private List<String> getNeedToPostFirst(List<String> userIds, DiscussionTopic topic, List messages){
-	  List returnList = new ArrayList<String>();
-	  if(topic != null && topic.getPostFirst()){
-		  for(String userId : userIds){
-			  boolean needToPost = true;
-			  //make sure the user has posted before they can view all messages
-			  //only need to force this for users who do not have "ChangeSettings" permission
-			  for (Object messageObj : messages) {
-				  Message message = null;
-				  if(messageObj instanceof DiscussionMessageBean){
-					  message = ((DiscussionMessageBean) messageObj).getMessage();
-				  }else if(messageObj instanceof Message){
-					  message = (Message) messageObj;
-				  }
-				  if(message != null && message.getCreatedBy().equals(userId) && 
-						  !message.getDraft() && 
-						  ((message.getApproved() != null && message.getApproved()) || !topic.getModerated()) &&
-						  !message.getDeleted()){
-					  needToPost = false;
-					  break;
-				  }
-			  }
-			  if(needToPost && !(uiPermissionsManager.isChangeSettings(topic, (DiscussionForum) topic.getBaseForum(), userId)
-					   || uiPermissionsManager.isPostToGradebook(topic, (DiscussionForum) topic.getBaseForum(), userId)
-					   || uiPermissionsManager.isModeratePostings(topic, (DiscussionForum) topic.getBaseForum(), userId))){
-				  returnList.add(userId);
-			  }
-		  }
-	  }
-	  
-	  return returnList;
+      List<Message> castedMessages = new ArrayList<>(messages.size());
+      for (Object m : messages) {
+          castedMessages.add(m instanceof DiscussionMessageBean ? ((DiscussionMessageBean) m).getMessage() : (Message) m);
+      }
+      return uiPermissionsManager.getUsersDeniedByPostFirst(userIds, topic, castedMessages);
   }
   
   public String processActionGetDisplayThread()

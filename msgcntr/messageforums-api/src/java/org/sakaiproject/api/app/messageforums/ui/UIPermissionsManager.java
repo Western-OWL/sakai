@@ -229,6 +229,23 @@ public interface UIPermissionsManager
   
   public Set getTopicItemsSet(DiscussionTopic topic);
 
+  /**
+   * Returns whether this user cannot view messages specifically because the topic is 'post first' and they have not yet posted.
+   * @param userId
+   * @param topic the result will be false unless this topic is 'post first'.
+   * @return users who cannot view messages if they have not posted and this topic is 'post first'
+   */
+  public boolean isUserDeniedByPostFirst(String userId, DiscussionTopic topic);
+
+  /**
+   * Given a list of users, a topic, and its messages, returns the list of users who cannot view messages messages specifically because the topic is 'post first' and they have not yet posted.
+   * @param userIds return value will be a subset of this list.
+   * @param topic the result will be empty unless this topic is 'post first'.
+   * @param messages all messages within this topic.
+   * @return users who cannot view messages if they have not posted and this topic is 'post first'
+   */
+  public List<String> getUsersDeniedByPostFirst(List<String> userIds, DiscussionTopic topic, List<Message> messages);
+
   public boolean hasAccessPrivileges(DiscussionForum forum);
 
   // Having access to the parent forum is a requirement that is automatically also checked by these methods

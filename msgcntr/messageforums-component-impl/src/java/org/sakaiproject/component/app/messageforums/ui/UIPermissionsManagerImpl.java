@@ -202,7 +202,16 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
     {
 		// OWLTODO: sometimes this can be called in a scenario where we can derive the correct site id, such
 		// as when duplicating a forum. if we get the forum's area can we replace the getAreaItems call?
-      Iterator iter = getAreaItemsByCurrentUser(); // OWLTODO: what is an area item exactly?
+      Iterator iter = getAreaItemsByCurrentUser(); // OWLTODO: what is an area item exactly? Answered!:
+      /*
+       * It's a DBMembershipItem (mfr_membership_item_t).
+       *     -These are essentially the roles and groups that show under 'Permissions' when editing stuff.
+       *     -They can be associated with topics (t_surrogateKey), forums (of_surrogateKey), or areas (a_surrogateKey).
+       *     -They link via (PERMISSION_LEVEL) to a mfr_permission_level_t - these 'Author', 'Contributor', etc., and every 'Custom' combination.
+       *
+       * But what's an *area* item?: It's from 'Template Settings'. Evidence: as an instructor, turn off 'New Forum' from your own Instructor permissions; notice the 'New Forum' tab goes away on reset.
+       * Of course, you can just turn that permission back on for yourself.
+       */
       while (iter.hasNext())
       {
         DBMembershipItem item = (DBMembershipItem) iter.next();
@@ -524,6 +533,7 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
       if (forumManager.isTopicOwner(topic, userId))
       {
         return true; // OWLTODO: this is questionable, a user can create a topic and be demoted to a role that can't, however it might be required for new topics to pass this check
+        // OWLTODO: I would tend to agree, but I'd argue in Forums it's too easy for a person to demote their own role. If we changed this, then nobody could fix the issue except an admin = helpdesk ticket. -Brian
       }
       Iterator iter = getTopicItemsByUser(topic, userId);
       while (iter.hasNext())
@@ -1294,6 +1304,41 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
 		
 		return returnSet;
   }
+
+  public boolean isUserDeniedByPostFirst(String userId, DiscussionTopic topic) {
+    if (topic == null) {
+        log.warn("topic null in isUserDeniedByPostFirst");
+        return true;
+    }
+    return getUsersDeniedByPostFirst(Collections.singletonList(userId), topic, topic.getMessages()).contains(userId);
+  }
+
+  public List<String> getUsersDeniedByPostFirst(List<String> userIds, DiscussionTopic topic, List<Message> messages) {
+    List<String> deniedUsers = new ArrayList<>();
+    if (topic == null || !topic.getPostFirst()) {
+        return deniedUsers;
+    }
+    boolean needToPost;
+    for (String userId : userIds) {
+      needToPost = true;
+      for (Message message : messages) {
+        if(message != null && message.getCreatedBy().equals(userId) && 
+            !message.getDraft() && 
+            ((message.getApproved() != null && message.getApproved()) || !topic.getModerated()) &&
+            !message.getDeleted()){
+          needToPost = false;
+          break;
+        }
+      }
+      // OWLTODO: topic.getBaseForum() is returning null, triggering NPEs down the chain.
+      if(needToPost && !(isChangeSettings(topic, (DiscussionForum) topic.getBaseForum(), userId)
+           || isPostToGradebook(topic, (DiscussionForum) topic.getBaseForum(), userId)
+           || isModeratePostings(topic, (DiscussionForum) topic.getBaseForum(), userId))){
+        deniedUsers.add(userId);
+      }
+    }
+    return deniedUsers;
+  }
   
   /**
    * @see org.sakaiproject.api.app.messageforums.ui.DiscussionForumManager#isInstructor()
@@ -1684,7 +1729,7 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
 		}
 		if (topic.getPostFirst()) // OWLTODO: figure out the rest of this conditional to determine if the user should see the message or not. ForumTool.needToPostFirst might have the answer
 		{
-			return false; // OWLTODO: should we actually do this? will the UI get mad that it can't display a "you must post first" message?
+			return !isUserDeniedByPostFirst(userId, topic); // OWLTODO: should we actually do this? will the UI get mad that it can't display a "you must post first" message?
 			// OWLTODO: do we need separate consideration for thread head vs a child message?
 		}
 
