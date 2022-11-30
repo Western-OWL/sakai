@@ -84,7 +84,9 @@ import org.sakaiproject.util.ResourceLoader;
 @ManagedBean(name="mfStatisticsBean")
 @SessionScoped
 public class MessageForumStatisticsBean {
-	
+
+	private static final String MAIN_PAGE = "main";
+
 	/**
 	 * Used to store Statistic information on message forum per 
 	 * per user
@@ -2131,6 +2133,12 @@ public class MessageForumStatisticsBean {
 
 		return null;
 	}
+
+	private boolean isInstructorInCurrentSite() {
+		String currentUserId = getCurrentUserId();
+		String currentSiteId = toolManager.getCurrentPlacement().getContext();
+		return forumManager.isInstructor(currentUserId, currentSiteId);
+	}
 	
 	/**
 	 * Actions
@@ -2142,8 +2150,26 @@ public class MessageForumStatisticsBean {
 	public String processActionStatisticsUser()
 	{
 		log.debug("processActionStatisticsUser");
+		if (!isInstructorInCurrentSite()) {
+			return MAIN_PAGE;
+		}
 		
-		selectedSiteUserId = getExternalParameterByKey(SITE_USER_ID);  // OWLTODO: is this safe?
+		// selectedSiteUserId = getExternalParameterByKey(SITE_USER_ID);  // OWLTODO: validated
+
+		String paramUserId = getExternalParameterByKey(SITE_USER_ID);
+
+		try {
+			String currentSiteId = toolManager.getCurrentPlacement().getContext();
+			Site currentSite = siteService.getSite(currentSiteId);
+			if (currentSite.getMember(paramUserId) == null) {
+				log.warn("User {} attempted to view stats for user who is not a member of the site: {}", getCurrentUserId(), paramUserId);
+				return LIST_PAGE;
+			}
+			selectedSiteUserId = paramUserId;
+		} catch (IdUnusedException e) {
+			log.error(e.getMessage());
+			return LIST_PAGE;
+		}
 		//reset cache
 		userReadStatisticsCache = new HashMap<String, List>();
 		userAuthoredStatisticsCache = new HashMap<String, List>();
@@ -2152,6 +2178,9 @@ public class MessageForumStatisticsBean {
 	}
 	
 	public String processActionStatisticsUserHelper(){
+		if (!isInstructorInCurrentSite()) {
+			return MAIN_PAGE;
+		}
 		Map<String, String> userIdName = getUserIdName();
 
 		if (!m_displayAnonIds)
@@ -2204,6 +2233,9 @@ public class MessageForumStatisticsBean {
 	}
 	
 	public String processActionBackToUser() {
+		if (!isInstructorInCurrentSite()) {
+			return MAIN_PAGE;
+		}
 		return FORUM_STATISTICS_USER;
 	}
 	
@@ -2275,6 +2307,9 @@ public class MessageForumStatisticsBean {
 	
 	public String processActionDisplayMsgBody() {
 		log.debug("processActionDisplayMsgBody");
+		if (!isInstructorInCurrentSite()) {
+			return MAIN_PAGE;
+		}
 
 		selectedMsgId = getExternalParameterByKey("msgId");  // OWLTODO: needs validation
 		Message message =(Message) messageManager.getMessageById(Long.parseLong(selectedMsgId));
@@ -2366,6 +2401,9 @@ public class MessageForumStatisticsBean {
 	}
 	
 	public String processDisplayNextParticipant() {
+		if (!isInstructorInCurrentSite()) {
+			return MAIN_PAGE;
+		}
 		isLastParticipant = false;
 		isFirstParticipant = false;
 		
@@ -2387,6 +2425,10 @@ public class MessageForumStatisticsBean {
 	}
 	
 	public String processDisplayPreviousParticipant() {		
+		if (!isInstructorInCurrentSite()) {
+			return MAIN_PAGE;
+		}
+
 		isLastParticipant = false;
 		isFirstParticipant = false;
 		
@@ -2424,11 +2466,19 @@ public class MessageForumStatisticsBean {
 	}
 				
 	public String processActionStatisticsByAllTopics(){
+		if (!isInstructorInCurrentSite()) {
+			return MAIN_PAGE;
+		}
+
 		return FORUM_STATISTICS_BY_ALL_TOPICS;
 	}
 	
 	public String processActionStatisticsByTopic()
 	{
+		if (!isInstructorInCurrentSite()) {
+			return MAIN_PAGE;
+		}
+
 		log.debug("processActionStatisticsByTopic");
 		
 		//to save some speed, only update if the values have changed
@@ -2588,6 +2638,10 @@ public class MessageForumStatisticsBean {
 
 	public String processGradeAssignChange(ValueChangeEvent vce) 
 	{ 
+		if (!isInstructorInCurrentSite()) {
+			return MAIN_PAGE;
+		}
+
 		String changeAssign = (String) vce.getNewValue(); 
 		if (changeAssign == null) 
 		{ 
@@ -2608,6 +2662,10 @@ public class MessageForumStatisticsBean {
 	
 	public String processGroupChange(ValueChangeEvent vce) 
 	{ 
+		if (!isInstructorInCurrentSite()) {
+			return MAIN_PAGE;
+		}
+
 		String changeAssign = (String) vce.getNewValue(); 
 		if (changeAssign == null) 
 		{ 
