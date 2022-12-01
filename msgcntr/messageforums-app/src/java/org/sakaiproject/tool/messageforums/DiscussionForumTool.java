@@ -2532,16 +2532,10 @@ public class DiscussionForumTool {
 	    selectedMessageCount ++;
 
 	    threadAnchorMessageId = null;
-	    String threadId = getExternalParameterByKey(MESSAGE_ID);  // OWLTODO: needs validation
-	    String topicId = getExternalParameterByKey(TOPIC_ID); // OWLTODO: needs validation
+	    String threadId = getExternalParameterByKey(MESSAGE_ID);  // OWLTODO: validated!
 	    if ("".equals(threadId) || null == threadId || "null".equals(threadId))
 	    {
 	      setErrorMessage(getResourceBundleString(MESSAGE_REFERENCE_NOT_FOUND));
-	      return gotoMain();
-	    }
-	    if ("".equals(topicId) || null == topicId || "null".equals(topicId))
-	    {
-	      setErrorMessage(getResourceBundleString(TOPC_REFERENCE_NOT_FOUND));
 	      return gotoMain();
 	    }
 	    Message threadMessage = messageManager.getMessageByIdWithAttachments(Long.valueOf(threadId));
@@ -2550,48 +2544,31 @@ public class DiscussionForumTool {
 	      setErrorMessage(getResourceBundleString(MESSAGE_WITH_ID) + threadId + getResourceBundleString(NOT_FOUND_WITH_QUOTE));
 	      return gotoMain();
 	    }
-		/*if (!uiPermissionsManager.hasAccessPrivileges(threadMessage, null, null)) // OWLTODO: fill in the nulls if we need the topic/forum later on in this method, otherwise switch to the single param version
+		Optional<DiscussionTopic> topic = forumManager.getDiscussionTopicForMessage(threadMessage);
+		if (!topic.isPresent())
 		{
-			// OWLTODO: better error message or combine this with the check above if it doesn't really matter (gotoMain() generally will not result in any UI messages appearing)
+			return gotoMain();
+		}
+		Optional<DiscussionForum> forum = forumManager.getDiscussionForumForTopic(topic.get());
+		if (!forum.isPresent())
+		{
+			return gotoMain();
+		}
+		if (!uiPermissionsManager.hasAccessPrivileges(threadMessage, topic.get(), forum.get()))
+		{
+			// OWLTODO: better error message or combine this with the checks above if it doesn't really matter (gotoMain() generally will not result in any UI messages appearing)
 			setErrorMessage(getResourceBundleString(MESSAGE_WITH_ID) + threadId + getResourceBundleString(NOT_FOUND_WITH_QUOTE));
 			return gotoMain();
-		}*/
-		// OWLTODO: do we have to also validate this thread head message? is it possible a user could have access to one of the messsage but not the other?
-		// OR did we just validate too early since what we're really displaying is the thread head? Should we have done the simpler processActionDisplayMessage() first?
-		// OWLTODO: we'll come back and finish this method after we establish the simpler(?) pattern in processActionDisplayMessage()
+		}
+
+		// the thread head is not validated separately, but not aware of any situations where validating the child message access is not enough
 	    selectedThreadHead = getThreadHeadForMessage(threadMessage);
 	    threadMessage = selectedThreadHead.getMessage();
 
-	    DiscussionTopic topic=forumManager.getTopicById(Long.valueOf(topicId));
 	    selectedMessage = selectedThreadHead;
-	    setSelectedForumForCurrentTopic(topic);
-	    selectedTopic = new DiscussionTopicBean(topic, selectedForum.getForum(),
-	        uiPermissionsManager, forumManager);
-	    if(topic == null || selectedTopic == null)
-	    {
-	    	log.debug("topic or selectedTopic is null in processActionDisplayThread.");
-	    	return gotoMain();
-	    }
-	    if("true".equalsIgnoreCase(ServerConfigurationService.getString("mc.defaultLongDescription")))
-	    {
-	    	selectedTopic.setReadFullDesciption(true);
-	    }
-	    setTopicBeanAssign();
-	    String currentForumId = getExternalParameterByKey(FORUM_ID); // OWLTODO: the forum id is validated below, but what about recovery if the selected* vars are set but the forum id fails validation? reset them?
-	    if (currentForumId != null && (!"".equals(currentForumId.trim()))
-	        && (!"null".equals(currentForumId.trim())))
-	    {
-	      DiscussionForum forum = forumManager.getForumById(Long.valueOf(currentForumId));
-		  if (!uiPermissionsManager.hasAccessPrivileges(forum))
-		  {
-			  log.error("Attempt to access forum {}, user does not have permission.", currentForumId);
-			  return gotoMain();
-		  }
+	    setSelectedForumAfterValidation(forum.get());
+		topic.get().setBaseForum(forum.get()); // prefer getOpenForum() but some code will still use getBaseForum()
 
-	      selectedForum = new DiscussionForumBean(forum, uiPermissionsManager, forumManager);
-	      setForumBeanAssign();
-	      selectedTopic.getTopic().setBaseForum(forum);
-	    }
 	    // don't need this here b/c done in processActionGetDisplayThread();
 	    // selectedTopic = getDecoratedTopic(topic);
 	    LRS_Statement statement = forumManager.getStatementForUserReadViewed(threadMessage.getTitle(), "thread").orElse(null);
@@ -2620,7 +2597,7 @@ public class DiscussionForumTool {
     
    selectedMessageCount ++;
 
-    String messageId = getExternalParameterByKey(MESSAGE_ID); // OWLTODO: may need extra validation
+    String messageId = getExternalParameterByKey(MESSAGE_ID); // OWLTODO: validated!
     if (messageId == null || "".equals(messageId))
     {
       setErrorMessage(getResourceBundleString(MESSAGE_REFERENCE_NOT_FOUND));
@@ -2652,6 +2629,7 @@ public class DiscussionForumTool {
     selectedMessage = new DiscussionMessageBean(message, messageManager);
 	selectedMessage.setRead(true);
     setSelectedForumAfterValidation(forum.get());
+	topic.get().setBaseForum(forum.get()); // prefer getOpenForum() but some code will still use getBaseForum()
     selectedTopic = getDecoratedTopic(topic.get());
     setTopicBeanAssign();
     getSelectedTopic();
@@ -2681,6 +2659,11 @@ public class DiscussionForumTool {
 		// message directly, it sets the thread head to a message they actually can't see, and then through
 		// subsequent navigation they land on a page that displays selectedThreadHead, therefore bypassing
 		// any validation. Should we play it safe and add validation here, or is it not really a concern?
+		// OWLTODO: it appears that moderation is not an issue because pending/denied messages cannot be replied to,
+		// and once an approved message is applied to, it cannot later be denied. However, I'm leaving this
+		// comment here for now. Give it one last consideration to see if there are other cases where this
+		// concern is valid before deleting these comments. If we do address something here, see also
+		// processActionDisplayThread()
 	    selectedThreadHead = new DiscussionMessageBean(mes, messageManager);
 		selectedThreadHead.setRead(messageManager.isMessageReadForUser(mes.getTopic().getId(), mes.getId()));
 

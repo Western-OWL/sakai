@@ -1310,14 +1310,21 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
         log.warn("topic null in isUserDeniedByPostFirst");
         return true;
     }
-    return getUsersDeniedByPostFirst(Collections.singletonList(userId), topic, topic.getMessages()).contains(userId);
+    return !getUsersDeniedByPostFirst(Collections.singletonList(userId), topic, topic.getMessages()).isEmpty();
   }
 
+  @Override
   public List<String> getUsersDeniedByPostFirst(List<String> userIds, DiscussionTopic topic, List<Message> messages) {
-    List<String> deniedUsers = new ArrayList<>();
     if (topic == null || !topic.getPostFirst()) {
-        return deniedUsers;
+        return Collections.emptyList();
     }
+    Optional<DiscussionForum> forumOpt = forumManager.getDiscussionForumForTopic(topic);
+    if (!forumOpt.isPresent()) {
+      log.error("Unable to find the forum for topic {}. Forced to deny all users.", topic.getId());
+      return userIds;
+    }
+	DiscussionForum forum = forumOpt.get();
+    List<String> deniedUsers = new ArrayList<>();
     boolean needToPost;
     for (String userId : userIds) {
       needToPost = true;
@@ -1330,10 +1337,9 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
           break;
         }
       }
-      // OWLTODO: topic.getBaseForum() is returning null, triggering NPEs down the chain.
-      if(needToPost && !(isChangeSettings(topic, (DiscussionForum) topic.getBaseForum(), userId)
-           || isPostToGradebook(topic, (DiscussionForum) topic.getBaseForum(), userId)
-           || isModeratePostings(topic, (DiscussionForum) topic.getBaseForum(), userId))){
+      if(needToPost && !(isChangeSettings(topic, forum, userId)
+           || isPostToGradebook(topic, forum, userId)
+           || isModeratePostings(topic, forum, userId))){
         deniedUsers.add(userId);
       }
     }

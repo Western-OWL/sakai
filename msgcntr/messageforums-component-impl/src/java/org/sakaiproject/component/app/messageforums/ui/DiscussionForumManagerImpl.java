@@ -2675,7 +2675,7 @@ public class DiscussionForumManagerImpl extends HibernateDaoSupport implements
 		msg.setTopic((Topic) HibernateUtils.unproxy(msg.getTopic()));
 		DiscussionTopic topic = (DiscussionTopic) msg.getTopic();
 		topic.setOpenForum((OpenForum) HibernateUtils.unproxy(topic.getOpenForum()));
-		return Optional.ofNullable(topic);
+		return Optional.ofNullable(topic); // OWLTODO: this needs a null check instead, would have blown up already on line above
 	}
 
 }
