@@ -110,16 +110,21 @@ public class RosterEntityProvider extends AbstractEntityProvider implements
 					"siteId must be set in order to get the roster for a site, via the URL /roster/site/siteId");
 		}
 
+		boolean permitted;
+
 		// get site
-		Site site;
+		Site site = null;
 		try {
 			site = siteService.getSiteVisit(siteId);
+			permitted = siteService.allowUpdateSite(siteId);
 		} catch (IdUnusedException e) {
-			throw new EntityNotFoundException("Invalid siteId: " + siteId,
-					siteId);
+			permitted = false;
 		} catch (PermissionException e) {
-			throw new EntityNotFoundException("No access to site: " + siteId,
-					siteId);
+			permitted = false;
+		}
+
+		if (!permitted) {
+			throw new EntityNotFoundException("Invalid siteId: " + siteId, siteId);
 		}
 
 		String paramValue = (String) params.get(OFFICIAL_IMAGES_PARAM);
@@ -147,16 +152,21 @@ public class RosterEntityProvider extends AbstractEntityProvider implements
 					"siteId and groupId must be set in order to get the roster, via the URL /roster/group/{siteId}/{groupId/groupName}");
 		}
 
+		boolean permitted;
+
 		// get site
-		Site site;
+		Site site = null;
 		try {
 			site = siteService.getSiteVisit(siteId);
+			permitted = siteService.allowUpdateSite(siteId);
 		} catch (IdUnusedException e) {
-			throw new EntityNotFoundException("Invalid siteId: " + siteId,
-					siteId);
+			permitted = false;
 		} catch (PermissionException e) {
-			throw new EntityNotFoundException("No access to site: " + siteId,
-					siteId);
+			permitted = false;
+		}
+
+		if (!permitted) {
+			throw new EntityNotFoundException("Invalid siteId: " + siteId, siteId);
 		}
 
 		String paramValue = (String) params.get(OFFICIAL_IMAGES_PARAM);
