@@ -2584,7 +2584,10 @@ public class DiscussionForumTool {
   public String processActionDisplayThreadAnchor()
   {
 	  String returnString = processActionDisplayThread();
-	  threadAnchorMessageId = getExternalParameterByKey(MESSAGE_ID); // OWLTODO: needs validation (check returnString, if gotoMain, don't set this)
+	  if (!gotoMain().equals(returnString))
+	  {
+		  threadAnchorMessageId = getExternalParameterByKey(MESSAGE_ID); // OWLTODO: validated!
+	  }
 	  return returnString;
   }
 
@@ -4014,31 +4017,26 @@ public class DiscussionForumTool {
   /**
    * @return
    */
+  @Deprecated // seems this method is unused?
   public String processDfMsgMarkMsgAsRead()
   {
-	    String messageId = getExternalParameterByKey(MESSAGE_ID); // OWLTODO: may need extra validation
-	    String topicId = getExternalParameterByKey(TOPIC_ID); // OWLTODO: needs validation, see comments below
+	    String messageId = getExternalParameterByKey(MESSAGE_ID); // OWLTODO: validated!
 	    if (messageId == null)
 	    {
 	      setErrorMessage(getResourceBundleString(MESSAGE_REFERENCE_NOT_FOUND));
 	      return gotoMain();
 	    }
-	    if (topicId == null)
-	    {
-	      setErrorMessage(getResourceBundleString(TOPC_REFERENCE_NOT_FOUND));
-	      return gotoMain();
-	    }
-	    // Message message=forumManager.getMessageById(Long.valueOf(messageId));
-	    Message message = messageManager.getMessageByIdWithAttachments(Long.valueOf(
-	        messageId));
-	    messageManager.markMessageReadForUser(Long.valueOf(topicId),
-	        Long.valueOf(messageId), true);
-	    if (message == null) // OWLTODO: is this sufficient to validate message access?
+	    Message message = messageManager.getMessageByIdWithAttachments(Long.valueOf(messageId));
+		Optional<DiscussionTopic> topic = forumManager.getDiscussionTopicForMessage(message);
+	    if (message == null || !topic.isPresent())
 	    {
 	      setErrorMessage(getResourceBundleString(MESSAGE_WITH_ID) + messageId + getResourceBundleString(NOT_FOUND_WITH_QUOTE));
 	      return gotoMain();
 	    }
-	    if(resetTopicById(TOPIC_ID)){ // reconstruct topic again; // OWLTODO: this validates the topic/forum now, it is enough?
+		// marking a message as read applies only to the current user, so it is relatively harmless and doesn't really need validation
+		// resetTopicById provides validation on the topic access
+		messageManager.markMessageReadForUser(topic.get().getId(), message.getId(), true);
+	    if(resetTopicById(TOPIC_ID)){ // reconstruct topic again;
 	    	return null;
 	    } else {
 	    	return gotoMain();
@@ -4048,30 +4046,25 @@ public class DiscussionForumTool {
   /**
    * @return
    */
+  @Deprecated // seems this method is unused?
   public String processDfMsgMarkMsgAsReadFromThread()
   {
-	    String messageId = getExternalParameterByKey(MESSAGE_ID); // OWLTODO: may need additional validation, see comments below
-	    String topicId = getExternalParameterByKey(TOPIC_ID); // OWLTODO: maybe needs extra validation, although its not used for anything really important independently of the message id
+	    String messageId = getExternalParameterByKey(MESSAGE_ID); // OWLTODO: validated!
 	    if (messageId == null)
 	    {
 	      setErrorMessage(getResourceBundleString(MESSAGE_REFERENCE_NOT_FOUND));
 	      return gotoMain();
 	    }
-	    if (topicId == null)
-	    {
-	      setErrorMessage(getResourceBundleString(TOPC_REFERENCE_NOT_FOUND));
-	      return gotoMain();
-	    }
-	    // Message message=forumManager.getMessageById(Long.valueOf(messageId));
-	    Message message = messageManager.getMessageByIdWithAttachments(Long.valueOf(
-	        messageId));
-	    messageManager.markMessageReadForUser(Long.valueOf(topicId),
-	        Long.valueOf(messageId), true);
-	    if (message == null) // OWLTODO: is this sufficient to validate access?
+
+	    Message message = messageManager.getMessageByIdWithAttachments(Long.valueOf(messageId));
+		Optional<DiscussionTopic> topic = forumManager.getDiscussionTopicForMessage(message);
+	    if (message == null || !topic.isPresent())
 	    {
 	      setErrorMessage(getResourceBundleString(MESSAGE_WITH_ID) + messageId + getResourceBundleString(NOT_FOUND_WITH_QUOTE));
 	      return gotoMain();
 	    }
+		// marking a message as read applies only to the current user, so it is relatively harmless and doesn't really need validation
+		messageManager.markMessageReadForUser(topic.get().getId(), message.getId(), true);
 	    return processActionGetDisplayThread(); // reconstruct thread again;
   }
   

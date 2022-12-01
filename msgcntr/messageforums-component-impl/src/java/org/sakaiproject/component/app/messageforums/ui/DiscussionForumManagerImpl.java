@@ -2618,10 +2618,11 @@ public class DiscussionForumManagerImpl extends HibernateDaoSupport implements
 	  // that will probably result in db querying to find the forum instead. Before finalizing this fix,
 	  // switch to instanceof checks to avoid classcastexceptions in production.
 	  // OWLTODO: update: the approach necessitated by messagemanager not doing any unproxying suggests that rather than
-	  // chasing down all the queries that return proxies, it might be simpler to just unproxy here. it seems to work
+	  // chasing down all the queries that return proxies, it might be simpler to just unproxy here. The downside is that
+	  // we're not helping any other parts of the code avoid proxy issues. But, it seems to work
 	  // well for the message, so we'll try it out. We may want to combine with instanceof checks as well, not sure
 	  // what the cost of unnecessary unproxying would be
-	  
+	  topic.setOpenForum(((OpenForum) HibernateUtils.unproxy(topic.getOpenForum())));
 	  DiscussionForum forum = (DiscussionForum) topic.getOpenForum();
 	  if (forum == null) // try the base forum
 	  {
