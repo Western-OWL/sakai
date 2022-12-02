@@ -4368,36 +4368,39 @@ public class DiscussionForumTool {
   
   public String processDfMsgRvsFromThread()
   {
-	  String messageId = getExternalParameterByKey(MESSAGE_ID); // OWLTODO: needs validation
-	    String topicId = getExternalParameterByKey(TOPIC_ID); // OWLTODO: validated!
-	    if (messageId == null)
-	    {
-	      setErrorMessage(getResourceBundleString(MESSAGE_REFERENCE_NOT_FOUND));
-	      return gotoMain();
-	    }
-	    if (topicId == null)
-	    {
-	      setErrorMessage(getResourceBundleString(TOPC_REFERENCE_NOT_FOUND));
-	      return gotoMain();
-	    }
-	    // Message message=forumManager.getMessageById(Long.valueOf(messageId));
-	    Message message = messageManager.getMessageByIdWithAttachments(Long.valueOf(messageId));
-	    if (message == null)
-	    {
-	      setErrorMessage(getResourceBundleString(MESSAGE_WITH_ID) + messageId + getResourceBundleString(NOT_FOUND_WITH_QUOTE));
-	      return gotoMain();
-	    }
-	    message = messageManager.getMessageByIdWithAttachments(message.getId());
-	    selectedMessage = new DiscussionMessageBean(message, messageManager);
-		if (message.getTopic() != null && message.getTopic().getId() != null)
-		{
-			selectedMessage.setRead(messageManager.isMessageReadForUser(message.getTopic().getId(), message.getId()));
-		}
-	  return processDfMsgRvs();
+	String messageId = getExternalParameterByKey(MESSAGE_ID); // OWLTODO: validated!
+	if (messageId == null)
+	{
+	  setErrorMessage(getResourceBundleString(MESSAGE_REFERENCE_NOT_FOUND));
+	  return gotoMain();
+	}
+	Message message = messageManager.getMessageByIdWithAttachments(Long.valueOf(messageId));
+	if (message == null)
+	{
+	  setErrorMessage(getResourceBundleString(MESSAGE_WITH_ID) + messageId + getResourceBundleString(NOT_FOUND_WITH_QUOTE));
+	  return gotoMain();
+	}
+	Optional<DiscussionTopic> topic = forumManager.getDiscussionTopicForMessage(message);
+	Optional<DiscussionForum> forum = topic.isPresent() ? forumManager.getDiscussionForumForTopic(topic.get()) : Optional.empty();
+	if (!topic.isPresent() || !forum.isPresent() || !uiPermissionsManager.hasAccessPrivileges(message, topic.get(), forum.get()))
+	{
+		return gotoMain();
+	}
+
+	selectedMessage = new DiscussionMessageBean(message, messageManager);
+	selectedMessage.setRead(messageManager.isMessageReadForUser(topic.get().getId(), message.getId()));
+	return processDfMsgRvs();
   }
 
   public String processDfMsgRvs()
   {
+	// make sure the current user is allowed to revise this message
+	if (!canRevise(selectedMessage.getMessage()))
+	{
+		selectedMessage = null; // something is up, clear this to be safe
+		return gotoMain();
+	}
+
 	selectedMessageCount = 0;
 	
     attachments.clear();
@@ -4416,6 +4419,20 @@ public class DiscussionForumTool {
 
     setFromMainOrForumOrTopic();
     return "dfMsgRevise";
+  }
+
+  private boolean canRevise(Message message)
+  {
+	  Optional<DiscussionTopic> topic = forumManager.getDiscussionTopicForMessage(message);
+	  Optional<DiscussionForum> forum = topic.isPresent() ? forumManager.getDiscussionForumForTopic(topic.get()) : Optional.empty();
+	  if (!topic.isPresent() || !forum.isPresent())
+	  {
+		  log.error("Cannot find topic/forum for message {}.", message.getId());
+		  return false;
+	  }
+
+	  boolean isOwn = message.getCreatedBy().equals(getUserId());
+	  return uiPermissionsManager.isReviseAny(topic.get(), forum.get()) || (isOwn && uiPermissionsManager.isReviseOwn(topic.get(), forum.get()));
   }
 
   public String processDfMsgMove()
