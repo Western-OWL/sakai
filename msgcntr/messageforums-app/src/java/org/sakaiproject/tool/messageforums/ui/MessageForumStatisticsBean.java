@@ -86,6 +86,7 @@ import org.sakaiproject.util.ResourceLoader;
 public class MessageForumStatisticsBean {
 
 	private static final String MAIN_PAGE = "main";
+	private static final String FORUMS_MAIN = "forumsMain";
 
 	/**
 	 * Used to store Statistic information on message forum per 
@@ -2137,7 +2138,7 @@ public class MessageForumStatisticsBean {
 	private boolean isInstructorInCurrentSite() {
 		String currentUserId = getCurrentUserId();
 		String currentSiteId = toolManager.getCurrentPlacement().getContext();
-		return forumManager.isInstructor(currentUserId, currentSiteId);
+		return forumManager.isInstructor(currentUserId, "/site/" + currentSiteId);
 	}
 	
 	/**
@@ -2151,7 +2152,7 @@ public class MessageForumStatisticsBean {
 	{
 		log.debug("processActionStatisticsUser");
 		if (!isInstructorInCurrentSite()) {
-			return MAIN_PAGE;
+			return FORUMS_MAIN;
 		}
 		
 		// selectedSiteUserId = getExternalParameterByKey(SITE_USER_ID);  // OWLTODO: validated
@@ -2179,7 +2180,7 @@ public class MessageForumStatisticsBean {
 	
 	public String processActionStatisticsUserHelper(){
 		if (!isInstructorInCurrentSite()) {
-			return MAIN_PAGE;
+			return FORUMS_MAIN;
 		}
 		Map<String, String> userIdName = getUserIdName();
 
@@ -2234,7 +2235,7 @@ public class MessageForumStatisticsBean {
 	
 	public String processActionBackToUser() {
 		if (!isInstructorInCurrentSite()) {
-			return MAIN_PAGE;
+			return FORUMS_MAIN;
 		}
 		return FORUM_STATISTICS_USER;
 	}
@@ -2308,7 +2309,7 @@ public class MessageForumStatisticsBean {
 	public String processActionDisplayMsgBody() {
 		log.debug("processActionDisplayMsgBody");
 		if (!isInstructorInCurrentSite()) {
-			return MAIN_PAGE;
+			return FORUMS_MAIN;
 		}
 
 		selectedMsgId = getExternalParameterByKey("msgId");  // OWLTODO: needs validation
@@ -2402,7 +2403,7 @@ public class MessageForumStatisticsBean {
 	
 	public String processDisplayNextParticipant() {
 		if (!isInstructorInCurrentSite()) {
-			return MAIN_PAGE;
+			return FORUMS_MAIN;
 		}
 		isLastParticipant = false;
 		isFirstParticipant = false;
@@ -2426,7 +2427,7 @@ public class MessageForumStatisticsBean {
 	
 	public String processDisplayPreviousParticipant() {		
 		if (!isInstructorInCurrentSite()) {
-			return MAIN_PAGE;
+			return FORUMS_MAIN;
 		}
 
 		isLastParticipant = false;
@@ -2467,7 +2468,7 @@ public class MessageForumStatisticsBean {
 				
 	public String processActionStatisticsByAllTopics(){
 		if (!isInstructorInCurrentSite()) {
-			return MAIN_PAGE;
+			return FORUMS_MAIN;
 		}
 
 		return FORUM_STATISTICS_BY_ALL_TOPICS;
@@ -2476,7 +2477,7 @@ public class MessageForumStatisticsBean {
 	public String processActionStatisticsByTopic()
 	{
 		if (!isInstructorInCurrentSite()) {
-			return MAIN_PAGE;
+			return FORUMS_MAIN;
 		}
 
 		log.debug("processActionStatisticsByTopic");
@@ -2639,7 +2640,7 @@ public class MessageForumStatisticsBean {
 	public String processGradeAssignChange(ValueChangeEvent vce) 
 	{ 
 		if (!isInstructorInCurrentSite()) {
-			return MAIN_PAGE;
+			return FORUMS_MAIN;
 		}
 
 		String changeAssign = (String) vce.getNewValue(); 
@@ -2663,7 +2664,7 @@ public class MessageForumStatisticsBean {
 	public String processGroupChange(ValueChangeEvent vce) 
 	{ 
 		if (!isInstructorInCurrentSite()) {
-			return MAIN_PAGE;
+			return FORUMS_MAIN;
 		}
 
 		String changeAssign = (String) vce.getNewValue(); 
