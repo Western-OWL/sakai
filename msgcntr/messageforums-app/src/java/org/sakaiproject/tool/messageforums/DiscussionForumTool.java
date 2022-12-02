@@ -8428,6 +8428,7 @@ public class DiscussionForumTool {
 							// do nothing, skip locked topics. do not show them in move thread dialog
 						} else if (!uiPermissionsManager.hasAccessPrivileges(topic, tmpforum)) {
 							// do nothing, user can't see this topic.
+							// OWLTODO: different configurations should be tested, like 'moderated', etc.
 						} else {
 							parseTopics(topic, topicMap, tmpforum);
 						}
@@ -8531,10 +8532,11 @@ public class DiscussionForumTool {
 		}
 
 		/*
-		 * OWLTODO: validated!
+		 * OWLTODO: needs validation: we're getting there, but needs to be tested with different configurations like 'post first' and 'moderated', etc.
+		 *
 		 * The topics available in the UI are sent over with JSON;
 		 * The JSON is populated in getMoveThreadJSON().
-		 * Use its criteria for a topics' inclusion to validate desttopicId here.
+		 * Used its criteria for a topics' inclusion to validate desttopicId here.
 		 *     Criteria: They are queried from this.getSiteId().
 		 *     They are then filtered to include only Boolean.FALSE.equals(tmpForum.getLocked()) && Boolean.FALSE.equals(topic.getLocked(). The parseTopics() method does no filtering.
 		 *     Nothing currently filters out topics the user can't access.
@@ -8544,6 +8546,7 @@ public class DiscussionForumTool {
 		if (!destforum.isPresent() ||
 				!Boolean.FALSE.equals(desttopic.getLocked()) ||
 				!Boolean.FALSE.equals(destforum.get().getLocked()) ||
+				!forumManager.getSiteIdForForum(sourceForum.get()).equals(forumManager.getSiteIdForForum(destforum.get())) ||
 				!uiPermissionsManager.hasAccessPrivileges(desttopic, destforum.get())) {
 			return gotoMain();
 		}
