@@ -1733,7 +1733,7 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
 		{
 			return false; // OWLTODO: should we even do this? Is the UI expecting to handle it instead?
 		}
-		if (topic.getPostFirst()) // OWLTODO: figure out the rest of this conditional to determine if the user should see the message or not. ForumTool.needToPostFirst might have the answer
+		if (topic.getPostFirst())
 		{
 			return !isUserDeniedByPostFirst(userId, topic); // OWLTODO: should we actually do this? will the UI get mad that it can't display a "you must post first" message?
 			// OWLTODO: do we need separate consideration for thread head vs a child message?

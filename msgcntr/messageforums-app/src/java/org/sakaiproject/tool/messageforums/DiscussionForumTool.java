@@ -8426,6 +8426,8 @@ public class DiscussionForumTool {
 							// do nothing. Skip forums that are locked. topics in locked forums should not show in the dialog
 						} else if (topic.getLocked() == null || topic.getLocked().equals(Boolean.TRUE)) {
 							// do nothing, skip locked topics. do not show them in move thread dialog
+						} else if (!uiPermissionsManager.hasAccessPrivileges(topic, tmpforum)) {
+							// do nothing, user can't see this topic.
 						} else {
 							parseTopics(topic, topicMap, tmpforum);
 						}
@@ -8487,7 +8489,7 @@ public class DiscussionForumTool {
 		Long sourceTopicId = this.selectedTopic.getTopic().getId();
 		if (log.isDebugEnabled()) log.debug("Calling processMoveThread source topic is " + sourceTopicId);
 		List checkedThreads = getRequestParamArray("moveCheckbox");
-		List destTopicList = getRequestParamArray("selectedTopicid"); // OWLTODO: this is another way to get a request param, probably needs validation
+		List destTopicList = getRequestParamArray("selectedTopicid"); // OWLTODO: validated!
 
 		String desttopicIdstr = null;
 
@@ -8516,7 +8518,36 @@ public class DiscussionForumTool {
 		if (log.isDebugEnabled()) log.debug("Calling processMoveThread checkReminder is " + checkReminder);
 
 		Long desttopicId = Long.parseLong(desttopicIdstr);
+
+		/*
+		 * OWLTODO: validated!
+		 * May be possible to craft "Move Conversation(s)" call while the selected topic doesn't have isMoveThread permission.
+		 * Verify that we in fact have isMovePostings permission:
+		 */
+		DiscussionTopic sourceTopic = selectedTopic.getTopic();
+		Optional<DiscussionForum> sourceForum = forumManager.getDiscussionForumForTopic(sourceTopic);
+		if (!sourceForum.isPresent() || !uiPermissionsManager.isMovePostings(sourceTopic, sourceForum.get())) {
+			return gotoMain();
+		}
+
+		/*
+		 * OWLTODO: validated!
+		 * The topics available in the UI are sent over with JSON;
+		 * The JSON is populated in getMoveThreadJSON().
+		 * Use its criteria for a topics' inclusion to validate desttopicId here.
+		 *     Criteria: They are queried from this.getSiteId().
+		 *     They are then filtered to include only Boolean.FALSE.equals(tmpForum.getLocked()) && Boolean.FALSE.equals(topic.getLocked(). The parseTopics() method does no filtering.
+		 *     Nothing currently filters out topics the user can't access.
+		 */
 		DiscussionTopic desttopic = forumManager.getTopicById(desttopicId);
+		Optional<DiscussionForum> destforum = forumManager.getDiscussionForumForTopic(desttopic);
+		if (!destforum.isPresent() ||
+				!Boolean.FALSE.equals(desttopic.getLocked()) ||
+				!Boolean.FALSE.equals(destforum.get().getLocked()) ||
+				!uiPermissionsManager.hasAccessPrivileges(desttopic, destforum.get())) {
+			return gotoMain();
+		}
+
 		// now update topic id in mfr_message_t table, including all childrens (direct and indirect),
 		// For each move, also add a row to the mfr_move_history_t table.
 
