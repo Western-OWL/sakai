@@ -4070,19 +4070,13 @@ public class DiscussionForumTool {
   
   public String processDfMsgReplyMsgFromEntire()
   {
-	  	String messageIdStr = getExternalParameterByKey(MESSAGE_ID);  // OWLTODO: may need extra validation, see comments below
-	    String topicIdStr = getExternalParameterByKey(TOPIC_ID); // OWLTODO: perhaps needs validation, but only used to mark message as read for current user, so maybe not
+	  	String messageIdStr = getExternalParameterByKey(MESSAGE_ID);  // OWLTODO: validated!
 	    if (messageIdStr == null || "".equals(messageIdStr))
 	    {
 	      setErrorMessage(getResourceBundleString(MESSAGE_REFERENCE_NOT_FOUND));
 	      return gotoMain();
 	    }
-	    if (topicIdStr == null || "".equals(topicIdStr))
-	    {
-	      setErrorMessage(getResourceBundleString(TOPC_REFERENCE_NOT_FOUND));
-	      return gotoMain();
-	    }
-	    long messageId, topicId;
+	    long messageId;
 	    try{
 	    	messageId = Long.valueOf(messageIdStr);
 	    }catch (NumberFormatException e) {
@@ -4090,23 +4084,20 @@ public class DiscussionForumTool {
 	    	setErrorMessage(getResourceBundleString(MESSAGE_REFERENCE_NOT_FOUND));
 	    	return gotoMain();
 		}
-	    try{
-	    	topicId = Long.valueOf(topicIdStr);
-	    }catch (NumberFormatException e) {
-	    	log.error(e.getMessage());
-	    	setErrorMessage(getResourceBundleString(TOPC_REFERENCE_NOT_FOUND));
-	    	return gotoMain();
-		}
 	    
-	    // Message message=forumManager.getMessageById(Long.valueOf(messageId));
-	    messageManager.markMessageReadForUser(topicId, messageId, true);
 	    Message message = messageManager.getMessageByIdWithAttachments(messageId);
-	    if (message == null) // OWLTODO: is this sufficient validation?
+		Optional<DiscussionTopic> topic = forumManager.getDiscussionTopicForMessage(message);
+		Optional<DiscussionForum> forum = forumManager.getDiscussionForumForTopic(topic.orElse(null));
+	    if (message == null || !topic.isPresent() || !forum.isPresent())
 	    {
 	      setErrorMessage(getResourceBundleString(MESSAGE_WITH_ID) + messageId + getResourceBundleString(NOT_FOUND_WITH_QUOTE));
 	      return gotoMain();
 	    }
-
+		if (!uiPermissionsManager.isNewResponseToResponse(topic.get(), forum.get()) || !uiPermissionsManager.hasAccessPrivileges(message, topic.get(), forum.get()))
+		{
+			return gotoMain();
+		}
+		messageManager.markMessageReadForUser(topic.get().getId(), messageId, true);
 	    selectedMessage = new DiscussionMessageBean(message, messageManager);
 		selectedMessage.setRead(true);
 	    
@@ -4166,10 +4157,11 @@ public class DiscussionForumTool {
   
   public String processDfMsgGrdFromThread()
   {
-	  String messageId = getExternalParameterByKey(MESSAGE_ID); // OWLTODO: needs validation
-	    String topicId = getExternalParameterByKey(TOPIC_ID); // OWLTODO: needs validation
-	    String forumId = getExternalParameterByKey(FORUM_ID); // OWLTODO: make sure these are are validated before use.. can't here though because nothing retrieves objects yet
-	    String userId = getExternalParameterByKey(USER_ID); // OWLTODO: needs validation...as with all the above, we can't validate here though, see method below
+	  // this is believed to be dead code
+	  String messageId = getExternalParameterByKey(MESSAGE_ID); // OWLTODO: validated!
+	    String topicId = getExternalParameterByKey(TOPIC_ID); // OWLTODO: validated!
+	    String forumId = getExternalParameterByKey(FORUM_ID); // OWLTODO: validated!
+	    String userId = getExternalParameterByKey(USER_ID); // OWLTODO: validated!
 	    if (topicId == null)
 	    {
 	      setErrorMessage(getResourceBundleString(TOPC_REFERENCE_NOT_FOUND));
@@ -4184,14 +4176,36 @@ public class DiscussionForumTool {
   
   public String processDfMsgGrdFromThread(String messageId, String topicId, String forumId, String userId){
 
-	  // OWLTODO: we have to do validation in this method instead, the code that reads the params is above (not used) and in a JSP, so we can't trust the args for this method
+	  // we have to do validation in this method, the code that reads the params is above (not used) and in a JSP,
+	  // so we can't trust the args for this method.
+	  // this method is tricky because it allows null/empty ids. seems like this is due to the strange way grading is done in forums.
+	  // to keep the same logic, instead of deriving the topic/forum from the message and ignoring those params, we have to instead validate all three separately
+
+	  if (StringUtils.isNotBlank(userId))
+	  {
+		  // make sure userId at least belongs to someone in the current site before we set the selectedGradedUserId,
+		  // to be on the safe side. There appear to be some grading permission checks later in processDfMsgGrdHelper().
+		  try
+		  {
+			  String currentSiteId = toolManager.getCurrentPlacement().getContext();
+			  Site s = siteService.getSite(currentSiteId);
+			  if (s.getMember(userId) == null)
+			  {
+				  log.error("Attempt to grade user {} in site {}, to which they do not belong", userId, currentSiteId);
+				  return gotoMain();
+			  }
+		  }
+		  catch (IdUnusedException e)
+		  {
+			  log.error("Cannot determine current site, aborting grading attempt of user {}", userId);
+			  return gotoMain();
+		  }
+	  }
 	  selectedGradedUserId = userId;
   
-	  // Message message=forumManager.getMessageById(Long.valueOf(messageId));
 	  if(messageId != null && !"".equals(messageId)){
-		  Message message = messageManager.getMessageByIdWithAttachments(Long.valueOf(
-				  messageId));
-		  if (message == null)
+		  Message message = messageManager.getMessageByIdWithAttachments(NumberUtils.toLong(messageId, -1L));
+		  if (message == null || !uiPermissionsManager.hasAccessPrivileges(message))
 		  {
 			  setErrorMessage(getResourceBundleString(MESSAGE_WITH_ID) + messageId + getResourceBundleString(NOT_FOUND_WITH_QUOTE));
 			  return gotoMain();
@@ -4205,10 +4219,9 @@ public class DiscussionForumTool {
 	  }
 
 	  if(selectedForum == null || (forumId != null && !selectedForum.getForum().getId().toString().equals(forumId))){
-		  DiscussionForum forum = forumManager.getForumById(Long.parseLong(forumId));
-		  if (!uiPermissionsManager.hasAccessPrivileges(forum))
+		  DiscussionForum forum = forumManager.getForumById(NumberUtils.toLong(forumId, -1L));
+		  if (forum == null || !uiPermissionsManager.hasAccessPrivileges(forum))
 		  {
-			  log.error("Attempt to access forum {}, user does not have permission.", forumId);
 			  return gotoMain();
 		  }
 		  selectedForum = new DiscussionForumBean(forum, uiPermissionsManager, forumManager);
@@ -4217,9 +4230,13 @@ public class DiscussionForumTool {
 	  if(topicId == null || "".equals(topicId)){
 		  selectedTopic = null;
 	  }else if(selectedTopic == null || !selectedTopic.getTopic().getId().toString().equals(topicId)){
-		  DiscussionTopic topic = forumManager.getTopicById(Long.parseLong(topicId));
+		  DiscussionTopic topic = forumManager.getTopicById(NumberUtils.toLong(topicId, -1L));
+		  if (topic == null || !uiPermissionsManager.hasAccessPrivileges(topic))
+		  {
+			  return gotoMain();
+		  }
 		  selectedTopic = getDecoratedTopic(topic);
-	  }    
+	  }
 	    
 	  if(selectedMessage != null){
 		  return processDfMsgGrd();
@@ -4248,7 +4265,7 @@ public class DiscussionForumTool {
 		  return null; 
 	  } 
   }
-  
+
   private String processDfMsgGrdHelper(String userId, String msgAssignmentName) {
 
     selectedMessageCount = 0;

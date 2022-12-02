@@ -13,7 +13,8 @@
     String portalPath = ServerConfigurationService.getString("portalPath");
 
 	if (org.sakaiproject.tool.cover.ToolManager.getCurrentPlacement() == null) {
-
+		// OWLTODO: all the request params in this JSP probably need validation. Trace how
+		// they are used and validate as required.
 		try {
 			target = portalPath + "/tool/"
 					+ request.getParameter("placementId")
@@ -41,7 +42,7 @@
 		}
 		return;
 
-	}else if(forumTool.getHasTopicAccessPrivileges(request.getParameter("topicId"))){
+	}else if(forumTool.getHasTopicAccessPrivileges(request.getParameter("topicId"))){ // OWLTODO: this is nice but uiPermsMan.hasAccessPrivileges() might be better
 		String placementId = null;
 		String siteId = null;
 		try {

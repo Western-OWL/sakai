@@ -1681,12 +1681,20 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
 
 	// this method will acquire the topic and forum from the message itself. use if you have no
 	// need of the topic/forum objects after making this call, otherwise prefer the other overload
+	// to avoid getting things twice.
 	@Override
 	public boolean hasAccessPrivileges(Message msg)
 	{
-		// OWLTODO: get the topic/forum and pass it
-		//Optional<DiscussionTopic> topic = forumManager.getDiscussionTopicForMessage(msg);
-		return hasAccessPrivileges(msg, null, null);
+
+		Optional<DiscussionTopic> topic = forumManager.getDiscussionTopicForMessage(msg);
+		Optional<DiscussionForum> forum = topic.isPresent() ? forumManager.getDiscussionForumForTopic(topic.get()) : Optional.empty();
+		if (!topic.isPresent() || !forum.isPresent())
+		{
+			log.error("Unable to find topic/forum for message {}", msg.getId());
+			return false;
+		}
+
+		return hasAccessPrivileges(msg, topic.get(), forum.get());
 	}
 
 	// call this one if you already have the topic and forum, this method assumes everything passed in matches up

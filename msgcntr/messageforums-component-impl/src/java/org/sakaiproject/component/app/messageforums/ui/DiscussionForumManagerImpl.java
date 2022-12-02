@@ -2590,7 +2590,7 @@ public class DiscussionForumManagerImpl extends HibernateDaoSupport implements
 		// OWLTODO: topic.getBaseForum() will return null if you have a DiscussionTopic...always?
 		return topic.getOpenForum().getArea().getContextId(); // see also getContextForForumById()
 		// OWLTODO: this should live in MessageForumsForumManager instead so it can be used in rest endpoints
-		// OWLTODO: in many cases (all?) the forum will also be required...this means if we get the forum now the caller may
+		// OWLTODO: in many cases (most?) the forum will also be required...this means if we get the forum now the caller may
 		// just end up getting it again later. This is not a big deal if only method chains are involved, but
 		// it if turns out we need to hit the db, reconsider this method. It may be better to only be able to get site ids
 		// from forum objects instead, which forces the caller to acquire the forum themselves first. This is why we are
