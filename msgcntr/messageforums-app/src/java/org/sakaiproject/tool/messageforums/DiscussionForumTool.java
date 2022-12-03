@@ -4461,7 +4461,12 @@ public class DiscussionForumTool {
   {
 	selectedMessageCount = 0;
 	  // if coming from thread view, need to set message info
-  	fromPage = getExternalParameterByKey(FROMPAGE); // OWLTODO: is this safe?
+	fromPage = getExternalParameterByKey(FROMPAGE);
+	/*
+	 * OWLTODO: Q: is this safe?
+	 * A: yes - 'fromPage' impacts a number of states, but the common theme is that you're navigated away from an action if it's not the page you're supposed to be on to process that action.
+	 * processReturnToOriginatingPage is a little suspicious, but validation preventing the assignment of 'selectedTopic' / 'selectedForum' should handle any abuse of the fromPage param.
+	 */
     if (fromPage != null) {
     	processActionDisplayMessage();
     }
@@ -4967,7 +4972,11 @@ public class DiscussionForumTool {
   public boolean isDisplayPendingMsgQueue()
   {
 	  if (displayPendingMsgQueue == null){
-		  List membershipList = uiPermissionsManager.getCurrentUserMemberships(getSiteId()); // OWLTODO: probably safe to get site id like this, but check
+		  List membershipList = uiPermissionsManager.getCurrentUserMemberships(getSiteId());
+		  /*
+		  OWLTODO: Q: probably safe to get site id like this, but check
+		  A: Safe! See answer in refreshPendingMessage() --bbailla2
+		  */
 		  int numModTopicWithPerm = forumManager.getNumModTopicsWithModPermissionByPermissionLevel(membershipList);
 		  
 		  if (numModTopicWithPerm < 1)
@@ -5002,7 +5011,11 @@ public class DiscussionForumTool {
   private void refreshPendingMessages()
   {
 	  pendingMsgs = new ArrayList();
-	  numPendingMessages = 0;  // OWLTODO: below: probably safe to get site id like this, but check
+	  numPendingMessages = 0;
+	  /*
+	  OWLTODO: Q: below: probably safe to get site id like this, but check.
+	  A: Safe! It's used only by getPendingMessages, and isDisplayPendingMsgQueue; these are referred to by jsp files to render the Pending Message buttons / the pending message table within the tool; so sourcing the data from within the current site makes sense. --bbailla2
+	  */
 	  List messages = forumManager.getPendingMsgsInSiteByMembership(uiPermissionsManager.getCurrentUserMemberships(getSiteId()));
 	  
 	  if (messages != null && !messages.isEmpty())
@@ -7405,30 +7418,39 @@ public class DiscussionForumTool {
 	 
 	 public String processActionDisplayInThread() {
 
-		 String forumId = getExternalParameterByKey("forumId"); // OWLTODO: validated!
-		 String topicId = getExternalParameterByKey("topicId"); // OWLTODO: needs validation
-		 selectedMsgId = getExternalParameterByKey("msgId"); // OWLTODO: validate this before setting it
-		 // OWLTODO: ignore these params other than msgId, derive forum/topic from the message
-		 DiscussionForum forum = forumManager.getForumById(Long.valueOf(forumId));
-		 DiscussionTopic topic = forumManager.getTopicById(Long.valueOf(topicId));
-		 if (!uiPermissionsManager.hasAccessPrivileges(forum))
-		  {
-			  log.error("Attempt to access forum {}, user does not have permission.", forumId);
-			  return gotoMain();
-		  }
+		 //String forumId = getExternalParameterByKey("forumId"); // OWLTODO: validated! (param ignored)
+		 //String topicId = getExternalParameterByKey("topicId"); // OWLTODO: validated! (param ignored)
+		 String paramMsgId = getExternalParameterByKey("msgId"); // OWLTODO: validated!
+		 Message paramMsg = messageManager.getMessageByIdWithAttachments(Long.valueOf(paramMsgId));
+		 if (paramMsg == null) {
+			setErrorMessage(getResourceBundleString(MESSAGE_WITH_ID) + paramMsgId + getResourceBundleString(NOT_FOUND_WITH_QUOTE));
+			return gotoMain();
+		 }
+		 Optional<DiscussionTopic> topic = forumManager.getDiscussionTopicForMessage(paramMsg);
+		 if (!topic.isPresent()) {
+			return gotoMain();
+		 }
+		 Optional<DiscussionForum> forum = forumManager.getDiscussionForumForTopic(topic.get());
+		 if (!forum.isPresent()) {
+			return gotoMain();
+		 }
+		 if (!uiPermissionsManager.hasAccessPrivileges(paramMsg, topic.get(), forum.get())) {
+			// OWLTODO: better error message or combine this with the checks above if it doesn't really matter (gotoMain() generally will not result in any UI messages appearing)
+			setErrorMessage(getResourceBundleString(MESSAGE_WITH_ID) + paramMsgId + getResourceBundleString(NOT_FOUND_WITH_QUOTE));
+			return gotoMain();
+		 }
 
-		 // OWLTODO: before setting these we need to validate access, there is a pattern for this now, but it hasn't yet been used with the full msg - topic - forum chain
-		 setSelectedForumForCurrentTopic(topic); // OWLTODO: Q: why do we need to call this and then just overwrite it 2 lines later? A: it calls setForumBeanAssign()
-		 selectedTopic = getDecoratedTopic(topic);
-		 selectedForum = getDecoratedForum(forum);
+		 selectedMsgId = paramMsgId;
 
-		 if (uiPermissionsManager.isRead((DiscussionTopic)topic, forum)) {
-			 List messageList = messageManager.findMessagesByTopicId(topic.getId());
-			 Iterator messageIter = messageList.iterator();
-			 while(messageIter.hasNext()){
-				 Message mes = (Message) messageIter.next();					
-				 messageManager.markMessageReadForUser(topic.getId(), mes.getId(), true, getUserId());
-			 }
+		 setSelectedForumForCurrentTopic(topic.get()); // OWLTODO: Q: why do we need to call this and then just overwrite it 2 lines later? A: it calls setForumBeanAssign()
+		 selectedTopic = getDecoratedTopic(topic.get());
+		 selectedForum = getDecoratedForum(forum.get());
+
+		 List messageList = messageManager.findMessagesByTopicId(topic.get().getId());
+		 Iterator messageIter = messageList.iterator();
+		 while(messageIter.hasNext()){
+			 Message mes = (Message) messageIter.next();
+			 messageManager.markMessageReadForUser(topic.get().getId(), mes.getId(), true, getUserId());
 		 }
 
 		 return "dfStatisticsDisplayInThread";
@@ -8462,7 +8484,6 @@ public class DiscussionForumTool {
 							// do nothing, skip locked topics. do not show them in move thread dialog
 						} else if (!uiPermissionsManager.hasAccessPrivileges(topic, tmpforum)) {
 							// do nothing, user can't see this topic.
-							// OWLTODO: different configurations should be tested, like 'moderated', etc.
 						} else {
 							parseTopics(topic, topicMap, tmpforum);
 						}
@@ -8566,7 +8587,7 @@ public class DiscussionForumTool {
 		}
 
 		/*
-		 * OWLTODO: needs validation: we're getting there, but needs to be tested with different configurations like 'post first' and 'moderated', etc.
+		 * OWLTODO: validated!
 		 *
 		 * The topics available in the UI are sent over with JSON;
 		 * The JSON is populated in getMoveThreadJSON().
@@ -8574,6 +8595,7 @@ public class DiscussionForumTool {
 		 *     Criteria: They are queried from this.getSiteId().
 		 *     They are then filtered to include only Boolean.FALSE.equals(tmpForum.getLocked()) && Boolean.FALSE.equals(topic.getLocked(). The parseTopics() method does no filtering.
 		 *     Nothing currently filters out topics the user can't access.
+		 * There's bugs - moderated topics are automatically marked as approved; this is out of scope.
 		 */
 		DiscussionTopic desttopic = forumManager.getTopicById(desttopicId);
 		Optional<DiscussionForum> destforum = forumManager.getDiscussionForumForTopic(desttopic);
