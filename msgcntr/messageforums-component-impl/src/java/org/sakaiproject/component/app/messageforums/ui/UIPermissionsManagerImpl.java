@@ -268,7 +268,7 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
         return true;
       }
     }
-    if (forumManager.isForumOwner(forum)) // this allows a brand new forum object that doesn't even have an id or area yet to pass this check
+    if (forumManager.isForumOwner(forum, getCurrentUserId(), siteId)) // this allows a brand new forum object that doesn't even have an id or area yet to pass this check
     {
       return true;
     }

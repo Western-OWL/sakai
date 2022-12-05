@@ -1717,12 +1717,12 @@ public class DiscussionForumManagerImpl extends HibernateDaoSupport implements
   
   public boolean isForumOwner(DiscussionForum forum, String userId)
   {
-	return isForumOwner(forum, userId, getContextSiteId());
+	return isForumOwner(forum, userId, getSiteIdForForum(forum));
   }
   
   public boolean isForumOwner(DiscussionForum forum, String userId, String siteId)
   {
-	  return isForumOwner(forum.getId(), forum.getCreatedBy(), userId, siteId);
+	  return isForumOwner(forum.getId(), forum.getCreatedBy(), userId, "/site/" + siteId);
   }
   
   public boolean isForumOwner(Long forumId, String forumCreatedBy, String userId, String siteId)
@@ -1750,12 +1750,12 @@ public class DiscussionForumManagerImpl extends HibernateDaoSupport implements
   
   public boolean isTopicOwner(DiscussionTopic topic, String userId)
   {
-	  return isTopicOwner(topic, userId, getContextSiteId());
+	  return isTopicOwner(topic, userId, getSiteIdForTopic(topic));
   }
   
   public boolean isTopicOwner(DiscussionTopic topic, String userId, String siteId)
   {
-	  return isTopicOwner(topic.getId(), topic.getCreatedBy(), userId, siteId);
+	  return isTopicOwner(topic.getId(), topic.getCreatedBy(), userId, "/site/" + siteId);
   }
   
   public boolean isTopicOwner(Long topicId, String topicCreatedBy, String userId, String siteId)
