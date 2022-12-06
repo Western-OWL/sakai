@@ -2150,10 +2150,11 @@ public class DiscussionForumTool {
     return TOPIC_SETTING_REVISE;
   }
 
+  @Deprecated
   public String processActionToggleDisplayForumExtendedDescription()
   {
     log.debug("processActionToggleDisplayForumExtendedDescription()");
-    String redirectTo = getExternalParameterByKey(REDIRECT_PROCESS_ACTION); // OWLTODO: is this safe?
+    String redirectTo = getExternalParameterByKey(REDIRECT_PROCESS_ACTION); // OWLTODO: Q is this safe? A: Yes
     if (redirectTo == null)
     {
       setErrorMessage(getResourceBundleString(NOT_FOUND_REDIRECT_PAGE));
@@ -2182,10 +2183,11 @@ public class DiscussionForumTool {
   /**
    * @return
    */
+  @Deprecated
   public String processActionToggleDisplayExtendedDescription()
   {
     log.debug("processActionToggleDisplayExtendedDescription()");
-    String redirectTo = getExternalParameterByKey(REDIRECT_PROCESS_ACTION); // OWLTODO: is this safe?
+    String redirectTo = getExternalParameterByKey(REDIRECT_PROCESS_ACTION); // OWLTODO: is this safe? A: Yes - this method is unused
     if (redirectTo == null)
     {
       setErrorMessage(getResourceBundleString(NOT_FOUND_REDIRECT_PAGE));
@@ -2244,6 +2246,7 @@ public class DiscussionForumTool {
       {
         selectedTopic.setReadFullDesciption(true);
       }
+      // OWLTODO: a little scary, but this method is unused.
       return GRADE_MESSAGE;
     }
 
@@ -3015,6 +3018,7 @@ public class DiscussionForumTool {
   /**
    * @return
    */
+  @Deprecated
   private String displayHomeWithExtendedForumDescription()
   {
     log.debug("displayHomeWithExtendedForumDescription()");
@@ -3028,25 +3032,25 @@ public class DiscussionForumTool {
         if (decoForumBean != null)
         {
           // if this forum is selected to display full desciption
-              if (getExternalParameterByKey("forumId_displayExtended") != null // OWLTODO: is this safe?
-                  && getExternalParameterByKey("forumId_displayExtended") // OWLTODO: is this safe?
+              if (getExternalParameterByKey("forumId_displayExtended") != null // OWLTODO: Q: is this safe? A: Yes (to all param checks in this method)
+                  && getExternalParameterByKey("forumId_displayExtended")
                       .trim().length() > 0
                   && decoForumBean
                       .getForum()
                       .getId()
                       .equals(
                           Long.valueOf(
-                              getExternalParameterByKey("forumId_displayExtended")))) // OWLTODO: is this safe?
+                              getExternalParameterByKey("forumId_displayExtended"))))
               {
                 decoForumBean.setReadFullDesciption(true);
               }
               // if this topic is selected to display hide extended desciption
-              if (getExternalParameterByKey("forumId_hideExtended") != null // OWLTODO: is this safe?
-                  && getExternalParameterByKey("forumId_hideExtended").trim() // OWLTODO: is this safe? pro tip: numberutils is a thing...
+              if (getExternalParameterByKey("forumId_hideExtended") != null
+                  && getExternalParameterByKey("forumId_hideExtended").trim()
                       .length() > 0
                   && decoForumBean.getForum().getId().equals(
                       Long.valueOf(
-                          getExternalParameterByKey("forumId_hideExtended")))) // OWLTODO: is this safe?
+                          getExternalParameterByKey("forumId_hideExtended"))))
               {
                 decoForumBean.setReadFullDesciption(false);
               }
@@ -3083,25 +3087,25 @@ public class DiscussionForumTool {
             if (decoTopicBean != null)
             {
               // if this topic is selected to display full desciption
-              if (getExternalParameterByKey("topicId_displayExtended") != null // OWLTODO: is this safe?
-                  && getExternalParameterByKey("topicId_displayExtended") // OWLTODO: is this safe?
+              if (getExternalParameterByKey("topicId_displayExtended") != null // OWLTODO: Q: is this safe? A: Yes to all in this method.
+                  && getExternalParameterByKey("topicId_displayExtended")
                       .trim().length() > 0
                   && decoTopicBean
                       .getTopic()
                       .getId()
                       .equals(
                           Long.valueOf(
-                              getExternalParameterByKey("topicId_displayExtended")))) // OWLTODO: is this safe? pro tip: numeric conversion will do this all in one check...
+                              getExternalParameterByKey("topicId_displayExtended"))))
               {
                 decoTopicBean.setReadFullDesciption(true);
               }
               // if this topic is selected to display hide extended desciption
-              if (getExternalParameterByKey("topicId_hideExtended") != null // OWLTODO: is this safe?
-                  && getExternalParameterByKey("topicId_hideExtended").trim() // OWLTODO: is this safe?
+              if (getExternalParameterByKey("topicId_hideExtended") != null
+                  && getExternalParameterByKey("topicId_hideExtended").trim()
                       .length() > 0
                   && decoTopicBean.getTopic().getId().equals(
                       Long.valueOf(
-                          getExternalParameterByKey("topicId_hideExtended")))) // OWLTODO: is this safe?
+                          getExternalParameterByKey("topicId_hideExtended"))))
               {
                 decoTopicBean.setReadFullDesciption(false);
               }
@@ -3953,8 +3957,8 @@ public class DiscussionForumTool {
 
   public String processDfComposeToggle()
   {
-    String redirectTo = getExternalParameterByKey(REDIRECT_PROCESS_ACTION); // OWLTODO: is this safe?
-    String expand = getExternalParameterByKey("composeExpand"); // OWLTODO: is this safe?
+    String redirectTo = getExternalParameterByKey(REDIRECT_PROCESS_ACTION); // OWLTODO: Q: is this safe? A: Yes
+    String expand = getExternalParameterByKey("composeExpand"); // OWLTODO: Q: is this safe? A: Yes
 
     if (redirectTo == null || selectedTopic == null)
     {
@@ -8453,6 +8457,7 @@ public class DiscussionForumTool {
 	}
 	
 	// MSGCNTR-241 move threads
+	@Deprecated
 	public String processMoveMessage() {
 		return MESSAGE_MOVE_THREADS;
 	}
