@@ -47,10 +47,10 @@ public class SparseMessage{
 	@Getter @Setter
 	private List<SparseMessage> replies = new ArrayList<SparseMessage>();
 	
-	@Getter
+	@Getter @Setter
 	private String authoredBy;
 	
-	@Getter
+	@Getter @Setter
 	private String authorId;
 	
 	@Getter @Setter

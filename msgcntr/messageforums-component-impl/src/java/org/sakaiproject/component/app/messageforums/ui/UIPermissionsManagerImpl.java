@@ -35,6 +35,7 @@ import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import org.sakaiproject.api.app.messageforums.Area;
@@ -1115,7 +1116,7 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
 				thisForumItemSet.add((DBMembershipItem)thisItem);
 			}
 		}
-		if(thisForumItemSet.size()==0&&getAnonRole()==true&&".anon".equals(forum.getCreatedBy())&&forum.getTopicsSet()==null){
+		if(thisForumItemSet.size()==0&&getAnonRole(toSiteRef(siteId))==true&&".anon".equals(forum.getCreatedBy())&&forum.getTopicsSet()==null){
 			Set newForumMembershipset=forum.getMembershipItemSet();
 	        Iterator iterNewForum = newForumMembershipset.iterator();
 	        while (iterNewForum.hasNext())
@@ -1131,7 +1132,7 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
 //    DBMembershipItem item = forumManager.getDBMember(membershipItems, getCurrentUserRole(),
 //        DBMembershipItem.TYPE_ROLE);
 		DBMembershipItem item = forumManager.getDBMember(thisForumItemSet, getCurrentUserRole(siteId),
-			DBMembershipItem.TYPE_ROLE);
+			DBMembershipItem.TYPE_ROLE, toSiteRef(siteId));
     
     if (item != null){
       forumItems.add(item);
@@ -1144,7 +1145,7 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
 
     	if(groups != null) {
             groups.stream().map(currentSite::getGroup)
-                    .map(g -> forumManager.getDBMember(thisForumItemSet, g.getTitle(), DBMembershipItem.TYPE_GROUP))
+                    .map(g -> forumManager.getDBMember(thisForumItemSet, g.getTitle(), DBMembershipItem.TYPE_GROUP, toSiteRef(siteId)))
                     .filter(Objects::nonNull)
                     .forEach(forumItems::add);
     	}
@@ -1450,7 +1451,7 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
 	 return  forumManager.getAnonRole();	   
     }
    
-   public boolean  getAnonRole(String contextSiteId)
+   public boolean  getAnonRole(String contextSiteId) // this should be a site ref ie /site/id
    {
 	 return  forumManager.getAnonRole(contextSiteId);	   
    }
@@ -1737,16 +1738,74 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
 		// - OWLTODO : thread has moved...how does this work? do services still return the full message details in this scenario? need to investigate this further. see ForumTool.threadMoved perhaps...
 		// - other considerations??? TBD, we'll start with what we have so far and see what else shakes out
 		// OWLTODO: for everything that we leave up to the UI to handle, we also have to make sure REST handles it
-		if (topic.getModerated() && !msg.getApproved())  // OWLTODO: consider that non-instructors can have moderator permissions on a topic(?) and should see this message?
+		if (topic.getModerated() && !BooleanUtils.toBooleanDefaultIfNull(msg.getApproved(), false))  // OWLTODO: consider that non-instructors can have moderator permissions on a topic(?) and should see this message?
 		{
 			return false; // OWLTODO: should we even do this? Is the UI expecting to handle it instead?
 		}
 		if (topic.getPostFirst())
 		{
-			return !isUserDeniedByPostFirst(userId, topic); // OWLTODO: should we actually do this? will the UI get mad that it can't display a "you must post first" message?
-			// OWLTODO: do we need separate consideration for thread head vs a child message?
+			return !isUserDeniedByPostFirst(userId, topic);
 		}
 
 		return true; // OWLTODO: once finalized, clean up whatever conditionals we can by combining them to make this method shorter and end on a return <conditional> statement
 	}
+
+	// OWLTODO: refactor the above to use this method here with singletonList so we're not duplicating logic. Be sure to address
+	// those OWLTODOs in the method above first though! This is just a copy of the code above where some checks are done in a different order.
+	/**
+	 * Checks access on multiple messages at the same time, for efficiency as many checks actually rely on the topic rather
+	 * than individual messages. It is assumed that all passed in messages below to the given topic (this is NOT validated here).
+	 * @param messages the messages to check access to
+	 * @param topic the topic all of the messages belong to
+	 * @return the message ids from the messages that the current user has access to
+	 */
+	@Override
+	public List<Long> hasAccessPrivileges(List<Message> messages, DiscussionTopic topic)
+	{
+		String userId = getCurrentUserId();
+		Optional<DiscussionForum> forum = forumManager.getDiscussionForumForTopic(topic);
+		if (!forum.isPresent())
+		{
+			log.error("Can't find forum for topic {}", topic.getId());
+			return Collections.emptyList();
+		}
+		String siteId = forumManager.getSiteIdForForum(forum.get());
+
+		// check admin/instructor and let them in regardless of any other factors
+		if (isAdminOrInstructor(Optional.of(topic), forum.get(), userId, siteId))
+		{
+			return messages.stream().map(Message::getId).collect(Collectors.toList());
+		}
+
+		// check prerequisite forum/topic access perms
+		if (!hasAccessPrivileges(topic, forum.get()))
+		{
+			return Collections.emptyList();
+		}
+
+		// has isRead in topic - this is a recheck but they may have other access to the topic so it is required as prerequiste to everything else
+		if (!isRead(topic, forum.get(), userId, siteId))
+		{
+			return Collections.emptyList();
+		}
+
+		if (isUserDeniedByPostFirst(userId, topic))
+		{
+			return Collections.emptyList();
+		}
+
+		// now that we know we have access to the forum and topic, check message-level stuff
+		List<Long> allowedMessages = new ArrayList<>(messages.size());
+		for (Message msg : messages)
+		{
+			if (topic.getModerated() && !BooleanUtils.toBooleanDefaultIfNull(msg.getApproved(), false) && !userId.equals(msg.getAuthorId()))
+			{
+				continue; // skip pending or denied messages you didn't author
+			}
+			allowedMessages.add(msg.getId());
+		}
+
+		return allowedMessages;
+	}
+
 }

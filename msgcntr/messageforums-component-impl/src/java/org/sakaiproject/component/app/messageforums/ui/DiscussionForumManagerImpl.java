@@ -2191,7 +2191,7 @@ public class DiscussionForumManagerImpl extends HibernateDaoSupport implements
   
   public DBMembershipItem getDBMember(Set originalSet, String name,
 			Integer type) {
-	  return getDBMember(originalSet, name, type, getContextSiteId());  // OWLTODO: yikes?! is getting current site id safe for this?
+	  return getDBMember(originalSet, name, type, getContextSiteId());  // OWLTODO: yikes?! is getting current site id safe for this? It is not, it NPEs when used in endpoints, at minimum (UIPerms indirectly calls this)
 	}
 
   public DBMembershipItem getDBMember(Set originalSet, String name,

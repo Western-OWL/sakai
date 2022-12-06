@@ -11,6 +11,7 @@
 		<property name="toolManager" ref="org.sakaiproject.tool.api.ToolManager" />
 		<property name="uiPermissionsManager" ref="org.sakaiproject.api.app.messageforums.ui.UIPermissionsManager" />
 		<property name="userDirectoryService" ref="org.sakaiproject.user.api.UserDirectoryService"/>
+		<property name="anonymousManager" ref="org.sakaiproject.api.app.messageforums.AnonymousManager" />
     </bean>
     
 </beans>
