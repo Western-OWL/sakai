@@ -9247,99 +9247,63 @@ public class DiscussionForumTool {
     		DiscussionForumBean tmpSelectedForum = selectedForum;
     		DiscussionMessageBean tmpSelectedThreadHead = selectedThreadHead;
     		String forumContextId = getSiteId();
-    		//Check Message input field
     		if(checkCurrentMessageId){
-    			try{	
-    				String msgIdStr = getExternalParameterByKey(CURRENT_MESSAGE_ID); // OWLTODO: assume this needs validation, but this method is tricky...
-    				long msgId = Long.parseLong(msgIdStr);
-    				if(tmpSelectedMessage == null || tmpSelectedMessage.getMessage() == null 
-    						|| (!tmpSelectedMessage.getMessage().getId().equals(msgId))){
-    					Message threadMessage = messageManager.getMessageByIdWithAttachments(msgId);
-    					tmpSelectedMessage = new DiscussionMessageBean(threadMessage, messageManager);
-    					//selected message has changed, make sure we set the selected thread head
-    					tmpSelectedThreadHead = new DiscussionMessageBean(tmpSelectedMessage.getMessage(), messageManager);
-    				    //make sure we have the thread head of depth 0
-    				    while(tmpSelectedThreadHead.getMessage().getInReplyTo() != null){
-    				    	threadMessage = messageManager.getMessageByIdWithAttachments(tmpSelectedThreadHead.getMessage().getInReplyTo().getId());
-    				    	tmpSelectedThreadHead = new DiscussionMessageBean(threadMessage, messageManager);
-    				    }
-    				}
-    			}catch(Exception e){
-    				log.error(e.getMessage(), e);
-    			}
-    		}
-    		//Check Forum input field
-    		try{
-    			String forumIdStr = getExternalParameterByKey(CURRENT_FORUM_ID); // OWLTODO: assume this needs validation, but this method is tricky...
-    			long forumId = Long.parseLong(forumIdStr);
-    			if(tmpSelectedForum == null || tmpSelectedForum.getForum() == null 
-    					|| (!tmpSelectedForum.getForum().getId().equals(forumId))){
-    				DiscussionForum forum = forumManager.getForumById(forumId);
-    				tmpSelectedForum = getDecoratedForum(forum);
-    				//forum changed, so make sure you use that forum's site id:
-    				forumContextId = forumManager.getContextForForumById(forum.getId());  // OWLTODO: is this a problem? what if validation fails?
-    			}
-    		}catch(Exception e){
-    			log.error(e.getMessage(), e);
-    		}
+    			//Check Message input field
+    			String msgIdStr = getExternalParameterByKey(CURRENT_MESSAGE_ID); // OWLTODO: validated!
+    			long msgId = Long.parseLong(msgIdStr);
+    			if(tmpSelectedMessage == null || tmpSelectedMessage.getMessage() == null
+    					|| (!tmpSelectedMessage.getMessage().getId().equals(msgId))){
+    				//selected message has changed, make sure we set the selected thread head
+    				Message threadMessage = messageManager.getMessageByIdWithAttachments(msgId);
 
-    		//Check Topic: input field
-    		try{
-    			String topicIdStr = getExternalParameterByKey(CURRENT_TOPIC_ID); // OWLTODO: assume this needs validation, but this method is tricky...
+    				// Build hierarchy and confirm access:
+    				if (threadMessage == null) {
+    					return false;
+    				}
+    				Optional<DiscussionTopic> topic = forumManager.getDiscussionTopicForMessage(threadMessage);
+    				if (!topic.isPresent()) {
+    					return false;
+    				}
+    				Optional<DiscussionForum> forum = forumManager.getDiscussionForumForTopic(topic.get());
+    				if (!forum.isPresent()) {
+    					return false;
+    				}
+    				if (!uiPermissionsManager.hasAccessPrivileges(threadMessage, topic.get(), forum.get())) {
+    					return false;
+    				}
+    				tmpSelectedMessage = new DiscussionMessageBean(threadMessage, messageManager);
+    				tmpSelectedTopic = getDecoratedTopic(topic.get());
+    				tmpSelectedForum = getDecoratedForum(forum.get());
+
+    				tmpSelectedThreadHead = new DiscussionMessageBean(tmpSelectedMessage.getMessage(), messageManager);
+    				//make sure we have the thread head of depth 0
+    				while(tmpSelectedThreadHead.getMessage().getInReplyTo() != null){
+    					threadMessage = messageManager.getMessageByIdWithAttachments(tmpSelectedThreadHead.getMessage().getInReplyTo().getId());
+    					tmpSelectedThreadHead = new DiscussionMessageBean(threadMessage, messageManager);
+    				}
+    			}
+    		} else {
+    			// Message param is ignored; user must be authorized only against the topic
+    			String topicIdStr = getExternalParameterByKey(CURRENT_TOPIC_ID); // OWLTODO: validated!
     			long topicId = Long.parseLong(topicIdStr);
     			if(tmpSelectedTopic == null || tmpSelectedTopic.getTopic() == null 
-    					|| (!tmpSelectedTopic.getTopic().getId().equals(topicId))){
-    				//selected message doesn't match the current message input,
-    				//verify user has access to parameter message and use that one
-
+    					|| (!tmpSelectedTopic.getTopic().getId().equals(topicId))) {
     				DiscussionTopic topicWithMsgs = (DiscussionTopic) forumManager.getTopicByIdWithMessages(topicId);
-    				tmpSelectedTopic = getDecoratedTopic(topicWithMsgs);    			
+    				if (topicWithMsgs == null) {
+    					return false;
+    				}
+    				Optional<DiscussionForum> forum = forumManager.getDiscussionForumForTopic(topicWithMsgs);
+    				if (!forum.isPresent()) {
+    					return false;
+    				}
+    				if (!uiPermissionsManager.hasAccessPrivileges(topicWithMsgs, forum.get())) {
+    					return false;
+    				}
+    				tmpSelectedTopic = getDecoratedTopic(topicWithMsgs);
+    				tmpSelectedForum = getDecoratedForum(forum.get());
     			}
-    		}catch(Exception e){
-    			log.error(e.getMessage(), e);
     		}
-    		//verify everything is set properly
-    		//Obviously this could be done in one huge if statement, but it's not as easy to ready and understand the logic,
-    		//so I left it broken out
 
-    		//is message set
-    		if(checkCurrentMessageId && (tmpSelectedMessage == null || tmpSelectedMessage.getMessage() == null)){
-    			log.info(methodCalled + ": can not check permissions against a null message. user: " + getUserId());
-    			return false;
-    		}
-    		//is forum set
-    		if(tmpSelectedForum == null || tmpSelectedForum.getForum() == null){
-    			log.info(methodCalled + ": can not check permissions against a null forum. user: " + getUserId());
-    			return false;
-    		}
-    		//is topic set
-    		if(tmpSelectedTopic == null || tmpSelectedTopic.getTopic() == null){
-    			log.info(methodCalled + ": can not check permissions against a null topic. user: " + getUserId());
-    			return false;
-    		}
-    		//check topic belongs to the forum
-    		if(!tmpSelectedForum.getForum().getId().equals(tmpSelectedTopic.getTopic().getBaseForum().getId())){
-    			log.info(methodCalled + ": topic: " + tmpSelectedTopic.getTopic().getId() + " does not belong to the forum: " + tmpSelectedForum.getForum().getId() + ". user: " + getUserId());
-    			return false;    				
-    		}
-    		//check message belongs to the topic
-    		if(checkCurrentMessageId && !tmpSelectedMessage.getMessage().getTopic().getId().equals(tmpSelectedTopic.getTopic().getId())){
-    			log.info(methodCalled + ": message: " + tmpSelectedMessage.getMessage().getId() + " does not belong to the topic: " + tmpSelectedTopic.getTopic().getId() + ".  user: " + getUserId());
-    			return false;
-    		}
-    		//is topic locked?
-    		if(tmpSelectedTopic.getTopic().getLocked()){
-    			setErrorMessage(getResourceBundleString(TOPIC_LOCKED, new Object[]{tmpSelectedTopic.getTopic().getTitle()}));
-    			log.info(methodCalled + ": Topic is locked: " + tmpSelectedTopic.getTopic().getTitle() + ".  user: " + getUserId());
-    			return false;
-    		}
-    		//is forum locked?
-    		if(tmpSelectedForum != null && tmpSelectedForum.getForum().getLocked()){
-    			setErrorMessage(getResourceBundleString(FORUM_LOCKED, new Object[]{tmpSelectedForum.getForum().getTitle()}));
-    			log.info(methodCalled + ": Forum is locked: " + tmpSelectedForum.getForum().getTitle() + ".  user: " + getUserId());
-    			return false;
-    		}
-    		
     		//can the user reply to only existing messages (Check this first)
     		if (tmpSelectedMessage != null && (canReply && !uiPermissionsManager.isNewResponseToResponse(tmpSelectedTopic.getTopic(), tmpSelectedForum.getForum(), getUserId(), forumContextId))) {
     			setErrorMessage(getResourceBundleString(INSUFFICIENT_PRIVILEAGES_TO_POST_THREAD, new Object[]{tmpSelectedTopic.getTopic().getTitle()}));
@@ -9369,7 +9333,7 @@ public class DiscussionForumTool {
     			return false;
     		}
 
-    		//ok Everything matched, so set the current values in case they changed:
+    		// action is authorized, so set the current values in case they changed:
     		selectedMessage = tmpSelectedMessage;
     		selectedThreadHead = tmpSelectedThreadHead;
     		selectedTopic = tmpSelectedTopic;
