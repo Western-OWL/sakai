@@ -2557,7 +2557,7 @@ public class DiscussionForumTool {
 		{
 			return gotoMain();
 		}
-		if (!uiPermissionsManager.hasAccessPrivileges(threadMessage, topic.get(), forum.get()))
+		if (!uiPermissionsManager.hasAccessPrivileges(threadMessage, topic.get()))
 		{
 			// OWLTODO: better error message or combine this with the checks above if it doesn't really matter (gotoMain() generally will not result in any UI messages appearing)
 			setErrorMessage(getResourceBundleString(MESSAGE_WITH_ID) + threadId + getResourceBundleString(NOT_FOUND_WITH_QUOTE));
@@ -2625,7 +2625,7 @@ public class DiscussionForumTool {
 	{
 		return gotoMain();
 	}
-	if (!uiPermissionsManager.hasAccessPrivileges(message, topic.get(), forum.get()))
+	if (!uiPermissionsManager.hasAccessPrivileges(message, topic.get()))
 	{
 		// error message doesn't really matter (gotoMain() generally will not result in any UI messages appearing)
 		setErrorMessage(getResourceBundleString(MESSAGE_WITH_ID) + messageId + getResourceBundleString(NOT_FOUND_WITH_QUOTE));
@@ -4097,7 +4097,7 @@ public class DiscussionForumTool {
 	      setErrorMessage(getResourceBundleString(MESSAGE_WITH_ID) + messageId + getResourceBundleString(NOT_FOUND_WITH_QUOTE));
 	      return gotoMain();
 	    }
-		if (!uiPermissionsManager.isNewResponseToResponse(topic.get(), forum.get()) || !uiPermissionsManager.hasAccessPrivileges(message, topic.get(), forum.get()))
+		if (!uiPermissionsManager.isNewResponseToResponse(topic.get(), forum.get()) || !uiPermissionsManager.hasAccessPrivileges(message, topic.get()))
 		{
 			return gotoMain();
 		}
@@ -4385,8 +4385,7 @@ public class DiscussionForumTool {
 	  return gotoMain();
 	}
 	Optional<DiscussionTopic> topic = forumManager.getDiscussionTopicForMessage(message);
-	Optional<DiscussionForum> forum = topic.isPresent() ? forumManager.getDiscussionForumForTopic(topic.get()) : Optional.empty();
-	if (!topic.isPresent() || !forum.isPresent() || !uiPermissionsManager.hasAccessPrivileges(message, topic.get(), forum.get()))
+	if (!topic.isPresent() || !uiPermissionsManager.hasAccessPrivileges(message, topic.get()))
 	{
 		return gotoMain();
 	}
@@ -7438,7 +7437,7 @@ public class DiscussionForumTool {
 		 if (!forum.isPresent()) {
 			return gotoMain();
 		 }
-		 if (!uiPermissionsManager.hasAccessPrivileges(paramMsg, topic.get(), forum.get())) {
+		 if (!uiPermissionsManager.hasAccessPrivileges(paramMsg, topic.get())) {
 			// OWLTODO: better error message or combine this with the checks above if it doesn't really matter (gotoMain() generally will not result in any UI messages appearing)
 			setErrorMessage(getResourceBundleString(MESSAGE_WITH_ID) + paramMsgId + getResourceBundleString(NOT_FOUND_WITH_QUOTE));
 			return gotoMain();
@@ -9268,7 +9267,7 @@ public class DiscussionForumTool {
     				if (!forum.isPresent()) {
     					return false;
     				}
-    				if (!uiPermissionsManager.hasAccessPrivileges(threadMessage, topic.get(), forum.get())) {
+    				if (!uiPermissionsManager.hasAccessPrivileges(threadMessage, topic.get())) {
     					return false;
     				}
     				tmpSelectedMessage = new DiscussionMessageBean(threadMessage, messageManager);

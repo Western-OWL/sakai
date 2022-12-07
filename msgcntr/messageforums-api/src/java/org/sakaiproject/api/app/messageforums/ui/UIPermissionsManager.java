@@ -257,7 +257,7 @@ public interface UIPermissionsManager
 
   // Having access to the parent forum and topic is a requirement that is automatically also checked by these methods
   public boolean hasAccessPrivileges(Message msg);
-  public boolean hasAccessPrivileges(Message msg, DiscussionTopic topic, DiscussionForum forum);
+  public boolean hasAccessPrivileges(Message msg, DiscussionTopic topic);
   public List<Long> hasAccessPrivileges(List<Message> messages, DiscussionTopic topic);
 
   public boolean hasSiteVisit(String userId, String siteId);
