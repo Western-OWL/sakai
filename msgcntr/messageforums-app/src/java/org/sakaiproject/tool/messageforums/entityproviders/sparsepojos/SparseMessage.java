@@ -109,7 +109,6 @@ public class SparseMessage{
 		this.read = readStatus;
 		
 		if(addAttachments && fatMessage.getHasAttachments()) {
-			List<SparseAttachment> sparseAttachments = new ArrayList<SparseAttachment>();
 			for(Attachment fatAttachment : (List<Attachment>)fatMessage.getAttachments()) {
 				String url = serverUrl + "/access/content" + fatAttachment.getAttachmentId();
 				attachments.add(new SparseAttachment(fatAttachment.getAttachmentName(),url));
