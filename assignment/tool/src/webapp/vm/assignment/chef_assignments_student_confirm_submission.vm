@@ -151,7 +151,7 @@
 	#end
 
     <form id="addSubmissionForm" name="addSubmissionForm" action="#toolForm("AssignmentAction")" method="post" onsubmit="return true;">
-       #if ($plagiarismNote)
+       #if ($plagiarismNote && $assignment.ContentReview)
             <div class="sak-banner-info">
                 <p>$plagiarismNote</p>
                 #if ($plagiarismFileTypes || $plagiarismFileSize)

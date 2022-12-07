@@ -476,7 +476,7 @@ $(document).ready(function(){
 								#end
 							#end
 							</p>
-							#if ($plagiarismNote)
+							#if ($plagiarismNote && $assignment.ContentReview)
 								<div class="sak-banner-info">
 									<p>$plagiarismNote</p>
 									#if ($plagiarismFileTypes || $plagiarismFileSize)
@@ -570,7 +570,7 @@ $(document).ready(function(){
 					</p>
 				#end	
 				#if (($submissionType == 2) || ($submissionType == 5))
-					#if ($plagiarismNote)
+					#if ($plagiarismNote && $assignment.ContentReview)
 						<p>
 							<img alt="$reviewIndicator" title="$reviewIndicator" src="/library/image/silk/rosette.png" class="assignmentRosette"/>
 							<em>
