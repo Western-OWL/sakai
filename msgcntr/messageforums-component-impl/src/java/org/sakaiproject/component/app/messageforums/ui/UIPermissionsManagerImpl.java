@@ -1384,6 +1384,28 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
     return securityService.unlock(user, SiteService.SECURE_UPDATE_SITE, toSiteRef(siteId));
   }
 
+  public boolean hasSiteVisit(String userId, String siteId)
+  {
+	  try
+	  {
+		  return hasSiteVisit(userDirectoryService.getUser(userId), siteId);
+	  }
+	  catch (UserNotDefinedException e)
+	  {
+		  return false;
+	  }
+  }
+
+  public boolean hasSiteVisit(User user, String siteId)
+  {
+	if (user == null || StringUtils.isBlank(siteId))
+	{
+		return false;
+	}
+
+	return securityService.unlock(user, SiteService.SITE_VISIT, toSiteRef(siteId));
+  }
+
   private String toSiteRef(String siteId)
   {
 	  return "/site/" + siteId;

@@ -29,6 +29,7 @@ import org.sakaiproject.api.app.messageforums.DiscussionTopic;
 import org.sakaiproject.api.app.messageforums.Area;
 import org.sakaiproject.api.app.messageforums.Message;
 import org.sakaiproject.api.app.messageforums.Topic;
+import org.sakaiproject.user.api.User;
 
 /**
  * @author <a href="mailto:rshastri@iupui.edu">Rashmi Shastri</a>
@@ -258,4 +259,7 @@ public interface UIPermissionsManager
   public boolean hasAccessPrivileges(Message msg);
   public boolean hasAccessPrivileges(Message msg, DiscussionTopic topic, DiscussionForum forum);
   public List<Long> hasAccessPrivileges(List<Message> messages, DiscussionTopic topic);
+
+  public boolean hasSiteVisit(String userId, String siteId);
+  public boolean hasSiteVisit(User user, String siteId);
 }
