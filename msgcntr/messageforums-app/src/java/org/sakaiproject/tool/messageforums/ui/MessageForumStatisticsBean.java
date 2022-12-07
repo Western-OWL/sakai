@@ -32,6 +32,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -46,6 +47,7 @@ import javax.faces.model.SelectItem;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 
 import org.sakaiproject.api.app.messageforums.AnonymousManager;
 import org.sakaiproject.api.app.messageforums.Attachment;
@@ -2312,8 +2314,14 @@ public class MessageForumStatisticsBean {
 			return FORUMS_MAIN;
 		}
 
-		selectedMsgId = getExternalParameterByKey("msgId");  // OWLTODO: needs validation
-		Message message =(Message) messageManager.getMessageById(Long.parseLong(selectedMsgId));
+		String externalMsgId = getExternalParameterByKey("msgId"); // OWLTODO: validated!
+		Message message =(Message) messageManager.getMessageById(Long.parseLong(externalMsgId));
+		if (!uiPermissionsManager.hasAccessPrivileges(message))
+		{
+			return FORUMS_MAIN;
+		}
+
+		selectedMsgId = externalMsgId;
 		selectedMsgSubject = message.getTitle();
 		
 		return FORUM_STATISTICS_MSG;
@@ -2483,29 +2491,23 @@ public class MessageForumStatisticsBean {
 		log.debug("processActionStatisticsByTopic");
 		
 		//to save some speed, only update if the values have changed
-		boolean newTopic = !getExternalParameterByKey(TOPIC_ID).equals(selectedAllTopicsTopicId); // OWLTODO: needs validation, but not here
-		boolean newForum = !getExternalParameterByKey(FORUM_ID).equals(selectedAllTopicsForumId);  // OWLTODO: needs validation, but not here
+		String externalTopicId = StringUtils.trimToEmpty(getExternalParameterByKey(TOPIC_ID)); // OWLTODO: validated!
+		boolean newTopic = !externalTopicId.equals(selectedAllTopicsTopicId);
 		
-		selectedAllTopicsTopicId = getExternalParameterByKey(TOPIC_ID); // OWLTODO: needs validation
-		selectedAllTopicsForumId = getExternalParameterByKey(FORUM_ID); // OWLTODO: needs validation
-		if(newForum){
-			if(selectedAllTopicsForumId != null && !"".equals(selectedAllTopicsForumId)){
-				try{
-					DiscussionForum df = forumManager.getForumById(Long.parseLong(selectedAllTopicsForumId));
-					selectedAllTopicsForumTitle = df.getTitle();
-				}catch (Exception e) {
-					log.warn("MessageForumStatisticsBean.processActionStatisticsByTopic: Wasn't able to find discussion forum for id: " + selectedAllTopicsForumId);
-				}
+		if (newTopic && !externalTopicId.isEmpty())
+		{
+			DiscussionTopic dt = forumManager.getTopicById(NumberUtils.toLong(externalTopicId, -1L));
+			Optional<DiscussionForum> forum = dt == null ? Optional.empty() : forumManager.getDiscussionForumForTopic(dt);
+			if (forum.isPresent() && uiPermissionsManager.hasAccessPrivileges(dt, forum.get()))
+			{
+				selectedAllTopicsTopicId = externalTopicId;
+				selectedAllTopicsTopicTitle = dt.getTitle();
+				selectedAllTopicsForumId = Long.toString(forum.get().getId());
+				selectedAllTopicsForumTitle = forum.get().getTitle();
 			}
-		}
-		if(newTopic){
-			if(selectedAllTopicsTopicId != null && !"".equals(selectedAllTopicsTopicId)){
-				try{
-					DiscussionTopic dt = forumManager.getTopicById(Long.parseLong(selectedAllTopicsTopicId));
-					selectedAllTopicsTopicTitle = dt.getTitle();
-				}catch (Exception e) {
-					log.warn("MessageForumStatisticsBean.processActionStatisticsByTopic: Wasn't able to find discussion topic for id: " + selectedAllTopicsForumId);
-				}
+			else
+			{
+				log.warn("MessageForumStatisticsBean.processActionStatisticsByTopic: Wasn't able to find discussion topic/forum for topic id {}, or user has no access.", externalTopicId);
 			}
 		}
 							
