@@ -26,12 +26,12 @@
 
 	//Check if user called this page with a popup dialog
 	
-	String selectedUserId = request.getParameter("siteUserId"); // OWLTODO: needs validation?
+	String selectedUserId = request.getParameter("siteUserId"); // OWLTODO: validated!
 	String frameId = request.getParameter("frameId");
 	String dialogDivId = request.getParameter("dialogDivId");
 	boolean isDialogBox = false;
 
-	if(selectedUserId != null && !"".equals(selectedUserId)){
+	if(selectedUserId != null && !"".equals(selectedUserId) && statsBean.canViewMemberStatistics(selectedUserId)){
 		isDialogBox = true;
 		statsBean.selectedSiteUserId = selectedUserId;
 		//set up default settings:

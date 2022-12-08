@@ -2161,18 +2161,12 @@ public class MessageForumStatisticsBean {
 
 		String paramUserId = getExternalParameterByKey(SITE_USER_ID);
 
-		try {
-			String currentSiteId = toolManager.getCurrentPlacement().getContext();
-			Site currentSite = siteService.getSite(currentSiteId);
-			if (currentSite.getMember(paramUserId) == null) {
-				log.warn("User {} attempted to view stats for user who is not a member of the site: {}", getCurrentUserId(), paramUserId);
-				return LIST_PAGE;
-			}
-			selectedSiteUserId = paramUserId;
-		} catch (IdUnusedException e) {
-			log.error(e.getMessage());
+		if (!canViewMemberStatistics(paramUserId)) {
 			return LIST_PAGE;
 		}
+
+		selectedSiteUserId = paramUserId;
+
 		//reset cache
 		userReadStatisticsCache = new HashMap<String, List>();
 		userAuthoredStatisticsCache = new HashMap<String, List>();
@@ -2180,6 +2174,23 @@ public class MessageForumStatisticsBean {
 		return processActionStatisticsUserHelper();
 	}
 	
+	public boolean canViewMemberStatistics(String userId) {
+		if (!isInstructorInCurrentSite()) {
+			return false;
+		}
+		try {
+			String currentSiteId = toolManager.getCurrentPlacement().getContext();
+			Site currentSite = siteService.getSite(currentSiteId);
+			if (currentSite.getMember(userId) == null) {
+				log.warn("User {} attempted to view stats for user who is not a member of the site: {}", getCurrentUserId(), userId);
+				return false;
+			}
+			return true;
+		} catch (IdUnusedException e) {
+			log.error("currentSiteId doesn't exist: {}", toolManager.getCurrentPlacement().getContext(), e);
+		}
+		return false;
+	}
 	public String processActionStatisticsUserHelper(){
 		if (!isInstructorInCurrentSite()) {
 			return FORUMS_MAIN;

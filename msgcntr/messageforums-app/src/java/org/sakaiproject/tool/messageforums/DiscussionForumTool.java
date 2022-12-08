@@ -2394,6 +2394,10 @@ public class DiscussionForumTool {
   }
     
   public boolean getNeedToPostFirst(){
+      if (selectedTopic == null) {
+          log.warn("selectedTopic null in getNeedToPostFirst");
+          return true;
+      }
       return uiPermissionsManager.isUserDeniedByPostFirst(getUserId(), selectedTopic.getTopic());
   }
 

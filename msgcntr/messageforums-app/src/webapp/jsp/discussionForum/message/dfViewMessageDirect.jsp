@@ -12,9 +12,9 @@
 	String target = "";
     String portalPath = ServerConfigurationService.getString("portalPath");
 
+	// OWLTODO: Q: all the request params in this JSP probably need validation. Trace how
+	// they are used and validate as required. A: params are validated in the forumTool.processActionDisplay* invocations.
 	if (org.sakaiproject.tool.cover.ToolManager.getCurrentPlacement() == null) {
-		// OWLTODO: all the request params in this JSP probably need validation. Trace how
-		// they are used and validate as required.
 		try {
 			target = portalPath + "/tool/"
 					+ request.getParameter("placementId")
@@ -42,7 +42,7 @@
 		}
 		return;
 
-	}else if(forumTool.getHasTopicAccessPrivileges(request.getParameter("topicId"))){ // OWLTODO: this is nice but uiPermsMan.hasAccessPrivileges() might be better
+	}else if(forumTool.getHasTopicAccessPrivileges(request.getParameter("topicId"))){ // OWLTODO: Q: this is nice but uiPermsMan.hasAccessPrivileges() might be better A: doesn't matter: forumTool.processActionDisplay* calls do the validation
 		String placementId = null;
 		String siteId = null;
 		try {
