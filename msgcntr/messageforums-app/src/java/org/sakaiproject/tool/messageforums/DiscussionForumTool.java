@@ -4193,19 +4193,8 @@ public class DiscussionForumTool {
 	  {
 		  // make sure userId at least belongs to someone in the current site before we set the selectedGradedUserId,
 		  // to be on the safe side. There appear to be some grading permission checks later in processDfMsgGrdHelper().
-		  try
-		  {
-			  String currentSiteId = toolManager.getCurrentPlacement().getContext();
-			  Site s = siteService.getSite(currentSiteId);
-			  if (s.getMember(userId) == null)
-			  {
-				  log.error("Attempt to grade user {} in site {}, to which they do not belong", userId, currentSiteId);
-				  return gotoMain();
-			  }
-		  }
-		  catch (IdUnusedException e)
-		  {
-			  log.error("Cannot determine current site, aborting grading attempt of user {}", userId);
+		  if (!isUserActiveInCurrentSite(userId)) {
+			  log.error("Attempt to grade user {} in site {}", userId, toolManager.getCurrentPlacement().getContext());
 			  return gotoMain();
 		  }
 	  }
@@ -4253,6 +4242,18 @@ public class DiscussionForumTool {
 	  }
   }
   
+	public boolean isUserActiveInCurrentSite(String userId) {
+		String currentSiteId = toolManager.getCurrentPlacement().getContext();
+		try {
+			Site s = siteService.getSite(currentSiteId);
+			Member member = s.getMember(userId);
+			return member != null && member.isActive();
+		} catch (IdUnusedException e) {
+			log.error("Cannot determine current site, can't determine if user {} is an active site member", userId);
+		}
+		return false;
+	}
+
   public String processDfMsgGrd()
   {
 	  try

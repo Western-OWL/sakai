@@ -40,7 +40,7 @@
             String messageId = request.getParameter("messageId"); // OWLTODO: validated!
             String topicId = request.getParameter("topicId"); // OWLTODO: validated!
             String forumId = request.getParameter("forumId"); // OWLTODO: validated!
-            String userId = request.getParameter("userId"); // OWLTODO: may need more validation, see Rubrics stuff further down the page
+            String userId = request.getParameter("userId"); // OWLTODO: validated!
             String frameId = request.getParameter("frameId");
             String dialogDivId = request.getParameter("dialogDivId");
             String gradesSavedDiv = request.getParameter("gradesSavedDiv");
@@ -73,10 +73,14 @@
             boolean hasAssociatedRubric = forumTool.hasAssociatedRubric();
             String entityId = forumTool.getRubricAssociationId();
 
-            if (userId == null) userId = forumTool.getUserId(); // OWLTODO: if userId != null, it is not being validated, could be an issue. if null, probably a bug because forumTool.getUserId() is the current user, not the student.
+            String rbcsEvaluationId = "";
+            String rbcsEvaluationOwnerId = "";
+            // No need to validate further - rubrics does its own validation
+            if (forumTool.isUserActiveInCurrentSite(userId)) {
+                rbcsEvaluationId = entityId + "." + userId;
+                rbcsEvaluationOwnerId = userId;
+            }
 
-            String rbcsEvaluationId = entityId + "." + userId;
-            String rbcsEvaluationOwnerId = userId;
             %>
 
             <script>
