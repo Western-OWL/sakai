@@ -2157,7 +2157,7 @@ public class MessageForumStatisticsBean {
 			return FORUMS_MAIN;
 		}
 		
-		// selectedSiteUserId = getExternalParameterByKey(SITE_USER_ID);  // OWLTODO: validated
+		// selectedSiteUserId = getExternalParameterByKey(SITE_USER_ID);  // OWLTODO: validated!
 
 		String paramUserId = getExternalParameterByKey(SITE_USER_ID);
 
@@ -2526,7 +2526,7 @@ public class MessageForumStatisticsBean {
 		// The default gradebook assignment must be known before we get the statistics, since grades will be included
 		setDefaultSelectedAssign();
 		getTopicStatistics();
-		return FORUM_STATISTICS_BY_TOPIC;  // OWLTODO: what about users that don't have grade perms? Having the link implies they do, and we can stop cross-site issues, but what about crafting the link?
+		return FORUM_STATISTICS_BY_TOPIC;  // OWLTODO: Q: what about users that don't have grade perms? Having the link implies they do, and we can stop cross-site issues, but what about crafting the link? A: For roles with site.upd, but no gradebook perms: from the topic view they formerly got NPEs; I fixed that immediate NPE so that I could determine if there were any holes beyond that. They now have a "grade" link, which shows a dialog in which no gradebook items are selectable; any attempt to hack this to view or submit grades is successfully blocked by GradebookService authz.
 	}
 
 	public String getSelectedAllTopicsTopicTitle() {
@@ -2707,6 +2707,11 @@ public class MessageForumStatisticsBean {
 	} 
 	
 	public void setDefaultSelectedAssign(){
+		String siteId = toolManager.getCurrentPlacement().getContext();
+		GradebookService gradebookService = getGradebookService();
+		if (gradebookService == null || !getGradebookService().currentUserHasGradeAllPerm(siteId)) {
+			return;
+		}
 		if (!gradebookItemChosen) {
 			String defaultAssignName;
 			if (StringUtils.isNotBlank(selectedAllTopicsTopicId)) {
@@ -2715,7 +2720,7 @@ public class MessageForumStatisticsBean {
 				defaultAssignName = forumManager.getForumById(Long.parseLong(selectedAllTopicsForumId)).getDefaultAssignName();
 			}
 			if (StringUtils.isNotBlank(defaultAssignName)) {
-				Assignment assignment = getGradebookService().getAssignmentByNameOrId(toolManager.getCurrentPlacement().getContext(), defaultAssignName);
+				Assignment assignment = getGradebookService().getAssignmentByNameOrId(siteId, defaultAssignName);
 				setDefaultSelectedAssign(assignment.getName());
 			}
 		}
