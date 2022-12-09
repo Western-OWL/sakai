@@ -60,20 +60,21 @@ public interface UIPermissionsManager
   public boolean isNewResponse(DiscussionTopic topic, DiscussionForum forum);
   
   /**
-   * 
+   * NB: Passing in getCurrentSite() is unsafe: use this method only for performance if the contextId is derived from the forum.
    * @param topic
    * @param forum
    * @param userId
    * @param contextId
    * @return
    */
-  // OWLTODO: find callers of this and other methods here that accept a siteid
+  /* OWLTODO: Q: find callers of this and other methods here that accept a siteid
   // if not all callers are deriving site id from the forum,
   // check the method implementation and if it is blindly trusting the siteid, we should
   // either validate (wasteful because we need to derive site id from forum and also string compare)
   // or remove the method from the public api to force use of overloads that derive the siteid
   // leave the method in place but private, because passing the siteid is still good for performance reasons,
   // as a scenario where deriving siteid requires a db lookup will be expensive
+   * A: Confirmed all the callers. Can't change to private, it's used outside of UIPermissionsManager. Added a warning to the javadoc. */
   public boolean isNewResponse(DiscussionTopic topic, DiscussionForum forum, String userId, String contextId);
 
   /**

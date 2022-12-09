@@ -201,8 +201,9 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
     
     try
     {
-		// OWLTODO: sometimes this can be called in a scenario where we can derive the correct site id, such
-		// as when duplicating a forum. if we get the forum's area can we replace the getAreaItems call?
+		/* OWLTODO: Q: sometimes this can be called in a scenario where we can derive the correct site id,
+		 * such as when duplicating a forum. if we get the forum's area can we replace the getAreaItems call?
+		 * A: No need, isAccessPrivileges is checked against the target for such cases.*/
       Iterator iter = getAreaItemsByCurrentUser(); // OWLTODO: what is an area item exactly? Answered!:
       /*
        * It's a DBMembershipItem (mfr_membership_item_t).
