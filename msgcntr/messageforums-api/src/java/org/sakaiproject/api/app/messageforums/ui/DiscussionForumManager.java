@@ -497,6 +497,8 @@ public interface DiscussionForumManager
   public void setCourseMemberMapToNull();
 
   public DBMembershipItem getAreaDBMember(Set originalSet, String name, Integer type);
+  public DBMembershipItem getAreaDBMember(Set originalSet, String name, Integer type, String contextSiteId);
+
 
   public DBMembershipItem getDBMember(Set originalSet, String name, Integer type);
   public DBMembershipItem getDBMember(Set originalSet, String name, Integer type, String contextSiteId);

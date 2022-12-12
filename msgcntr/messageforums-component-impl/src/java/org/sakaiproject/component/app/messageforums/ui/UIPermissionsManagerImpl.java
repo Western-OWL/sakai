@@ -1043,7 +1043,7 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
 
 	Set areaItemsInThread = (Set) threadLocalManager.get("message_center_membership_area");
 	DBMembershipItem item = forumManager.getDBMember(areaItemsInThread, getCurrentUserRole(siteId),
-			DBMembershipItem.TYPE_ROLE);
+			DBMembershipItem.TYPE_ROLE, toSiteRef(siteId));
     
     if (item != null){
         areaItems.add(item);
@@ -1058,7 +1058,7 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
     	Set<String> groups = getGroupsWithMember(currentSite, getCurrentUserId());
     	if (groups != null) {
     	    groups.stream().map(currentSite::getGroup)
-                    .map(g -> forumManager.getDBMember(areaItemsInThread, g.getTitle(), DBMembershipItem.TYPE_GROUP))
+                    .map(g -> forumManager.getDBMember(areaItemsInThread, g.getTitle(), DBMembershipItem.TYPE_GROUP, toSiteRef(siteId)))
                     .filter(Objects::nonNull)
                     .forEach(areaItems::add);
     	}

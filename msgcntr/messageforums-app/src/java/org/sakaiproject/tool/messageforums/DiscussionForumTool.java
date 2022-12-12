@@ -6587,7 +6587,7 @@ public class DiscussionForumTool {
               selectedRole = role.getId();
               i=1;
             }
-            DBMembershipItem item = forumManager.getAreaDBMember(membershipItems, role.getId(), DBMembershipItem.TYPE_ROLE);
+            DBMembershipItem item = forumManager.getAreaDBMember(membershipItems, role.getId(), DBMembershipItem.TYPE_ROLE, getContextSiteId());
             String level = item.getPermissionLevelName();
             siteMembers.add(new SelectItem(role.getId(), role.getId() + " (" + getResourceBundleString("perm_level_" + level.replaceAll(" ", "_").toLowerCase()) + ")"));
             permissions.add(new PermissionBean(item, permissionLevelManager));
@@ -6606,7 +6606,7 @@ public class DiscussionForumTool {
     	  for (Iterator groupIterator = groups.iterator(); groupIterator.hasNext();)
     	  {
     		  Group currentGroup = (Group) groupIterator.next();  
-    		  DBMembershipItem item = forumManager.getAreaDBMember(membershipItems,currentGroup.getTitle(), DBMembershipItem.TYPE_GROUP);
+    		  DBMembershipItem item = forumManager.getAreaDBMember(membershipItems,currentGroup.getTitle(), DBMembershipItem.TYPE_GROUP, getContextSiteId());
     		  String level = item.getPermissionLevelName();
     		  siteMembers.add(new SelectItem(currentGroup.getTitle(), currentGroup.getTitle() + " (" + getResourceBundleString("perm_level_" + level.replaceAll(" ", "_").toLowerCase()) + ")"));
     		  permissions.add(new PermissionBean(item, permissionLevelManager));

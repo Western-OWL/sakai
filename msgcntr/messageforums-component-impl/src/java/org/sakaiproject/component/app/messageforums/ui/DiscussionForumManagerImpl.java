@@ -2196,10 +2196,16 @@ public class DiscussionForumManagerImpl extends HibernateDaoSupport implements
     DBMembershipItem newItem = getDBMember(originalSet, name, type);
     return newItem;
   }
+
+  public DBMembershipItem getAreaDBMember(Set originalSet, String name, Integer type, String contextSiteId)
+  {
+    DBMembershipItem newItem = getDBMember(originalSet, name, type, contextSiteId);
+    return newItem;
+  }
   
   public DBMembershipItem getDBMember(Set originalSet, String name,
 			Integer type) {
-	  return getDBMember(originalSet, name, type, getContextSiteId());  // OWLTODO: yikes?! is getting current site id safe for this? It is not, it NPEs when used in endpoints, at minimum (UIPerms indirectly calls this)
+	  return getDBMember(originalSet, name, type, getContextSiteId());  // OWLTODO: this is been refactored and is effectively dead code, so it is safe
 	}
 
   public DBMembershipItem getDBMember(Set originalSet, String name,
@@ -2470,7 +2476,7 @@ public class DiscussionForumManagerImpl extends HibernateDaoSupport implements
   	  // we need to get the membership items for the roles separately b/c of default permissions
   	  if (rolesInSite != null) {
   		  for (Role role : rolesInSite) {
-  			  DBMembershipItem roleItem = getDBMember(topicItems, role.getId(), DBMembershipItem.TYPE_ROLE);
+  			  DBMembershipItem roleItem = getDBMember(topicItems, role.getId(), DBMembershipItem.TYPE_ROLE, "/site/" + siteId);
   			  if (roleItem != null) {
   				  revisedMembershipItemSet.add(roleItem);
   			  }
@@ -2478,7 +2484,7 @@ public class DiscussionForumManagerImpl extends HibernateDaoSupport implements
   	  }
   	  // now add in the group perms
   	  for (Group group : groupsInSite) {
-  		  DBMembershipItem groupItem = getDBMember(topicItems, group.getTitle(), DBMembershipItem.TYPE_GROUP);
+  		  DBMembershipItem groupItem = getDBMember(topicItems, group.getTitle(), DBMembershipItem.TYPE_GROUP, "/site/" + siteId);
   		  if (groupItem != null) {
   			  revisedMembershipItemSet.add(groupItem);
   		  }
