@@ -415,7 +415,13 @@ public class DiscussionForumManagerImpl extends HibernateDaoSupport implements
    */
   public Area getDiscussionForumArea()
   {
-	return getDiscussionForumArea(toolManager.getCurrentPlacement().getContext());  // OWLTODO: yikes! is this safe, getting the current site id? what calls this?
+	return getDiscussionForumArea(toolManager.getCurrentPlacement().getContext());
+	// OWLTODO: Q: yikes! is this safe, getting the current site id? what calls this?
+	// A: generally this is going to be called in places where we need to get all the forums
+	// in the current site (area is the top level of the forums hierarchy and is basically equivalent to a site).
+	// At a high level like this we have to rely on currentplacement to provide the site id, which should be relatively safe.
+	// The concern would be using currentplacement in conjuction with client-supplied values, which doesn't seem to
+	// be happening at these higher levels.
   }
   
   public Area getDiscussionForumArea(String siteId)
@@ -618,7 +624,9 @@ public class DiscussionForumManagerImpl extends HibernateDaoSupport implements
    * 
    * @see org.sakaiproject.api.app.messageforums.ui.DiscussionForumManager#getDiscussionForums()
    */
-  public List getDiscussionForums() // OWLTODO: this probably gets current site, see about removing it in favour of the one below that takes a site id, if necessary
+  // OWLTODO: this gets current site, but appears to only be called from the synoptic tool on the site's overview page, which is already just using currentplacement.
+  // Synoptic tool seems to only show an unread message count and a generic link to the forums tool. Count may not be entirely accurate, but should be safe enough.
+  public List getDiscussionForums() 
   {
     log.debug("getDiscussionForums()");
     if (usingHelper)
@@ -2576,7 +2584,7 @@ public class DiscussionForumManagerImpl extends HibernateDaoSupport implements
 
 		// OWLTODO: leave this naive until the end to get an idea of how stable the hierarchy is through the power of NPE
 		return forum.getArea().getContextId(); // see also getContextForForumById()
-		// OWLTODO: this actual impl should live in MessageForumsForumManager instead so it can be used in rest endpoints
+		// OWLTODO: this actual impl should live in MessageForumsForumManager instead so it can be used in rest endpoints? Maybe not, I did the endpoints and didn't run into issues.
 		// OWLTODO: add logging so we can measure how often the chain fails and db lookup is required
 		// OWLTODO: if it appears that the hierarchy is unstable and db lookups are common, consider adding a cache
 		// to map forums/topics to their siteid. I think this is unlikely to be necessary however. But this method is a called a massive amount of times!
@@ -2589,7 +2597,7 @@ public class DiscussionForumManagerImpl extends HibernateDaoSupport implements
 		// OWLTODO: leave this naive until the end to get an idea of how stable the hierarchy is through the power of NPE
 		// OWLTODO: topic.getBaseForum() will return null if you have a DiscussionTopic...always?
 		return topic.getOpenForum().getArea().getContextId(); // see also getContextForForumById()
-		// OWLTODO: this should live in MessageForumsForumManager instead so it can be used in rest endpoints
+		// OWLTODO: this should live in MessageForumsForumManager instead so it can be used in rest endpoints? Probably not, I did the endpoints and didn't run into issues.
 		// OWLTODO: in many cases (most?) the forum will also be required...this means if we get the forum now the caller may
 		// just end up getting it again later. This is not a big deal if only method chains are involved, but
 		// it if turns out we need to hit the db, reconsider this method. It may be better to only be able to get site ids
@@ -2597,7 +2605,7 @@ public class DiscussionForumManagerImpl extends HibernateDaoSupport implements
 		// chosing NOT to create getSiteIdForMessage() at this time.
 	}
 
-	// OWLTODO: again these impls above and below should probably live in MessageForumsForumManager so they can be used in rest endpoints
+	// OWLTODO: again these impls above and below should probably live in MessageForumsForumManager so they can be used in rest endpoints? Maybe not, I did the endpoints already.
 
 	/**
    * Attempts to navigate Hibernate query minefields to return an actual DiscussionForum object for the given topic.
