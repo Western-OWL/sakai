@@ -962,24 +962,26 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
     {
       return true;
     }
+	if (topic instanceof DiscussionTopic)
+	{
+		try
+		{
 
-    try
-    {
-		// OWLTODO: is this always DiscussionTopic? should the getSiteId method take just a Topic instead? We wrote this method so perhaps Topic is unnecessarily broad, usually DiscussionTopic is used in this class
-      Iterator iter = getTopicItemsByUser(topic.getId(), currentUserId, forumManager.getSiteIdForTopic((DiscussionTopic) topic));
-      while (iter.hasNext())
-      {
-        DBMembershipItem item = (DBMembershipItem) iter.next();
-        if (item.getPermissionLevel().getIdentifyAnonAuthors())
-        {
-          return true;
-        }
-      }
-    }
-    catch (Exception e)
-    {
-      log.error(e.getMessage(), e);
-    }
+		  Iterator iter = getTopicItemsByUser(topic.getId(), currentUserId, forumManager.getSiteIdForTopic((DiscussionTopic) topic));
+		  while (iter.hasNext())
+		  {
+			DBMembershipItem item = (DBMembershipItem) iter.next();
+			if (item.getPermissionLevel().getIdentifyAnonAuthors())
+			{
+			  return true;
+			}
+		  }
+		}
+		catch (Exception e)
+		{
+		  log.error(e.getMessage(), e);
+		}
+	}
 
     return false;
   }
@@ -1491,10 +1493,17 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
   private boolean checkBaseConditions(DiscussionTopic topic, DiscussionForum forum){
 	  return checkBaseConditions(topic, forum, getCurrentUserId(), forumManager.getSiteIdForForum(forum));
   }
-  
 
-  // OWLTODO: it is assumed that the forum belongs to the given site, add comments outlining this assumption
-  // this needs javadocs in general, topic or forum can be null and it will still work as intended...
+  /**
+   * Checks the "base conditions" for access. Returns true if the user is an admin or, in the case where the given
+   * topic or forum is group restricted, the user is an instructor in an allowed group. If both topic/forum are null,
+   * this is just an admin check.
+   * @param topic the topic to check group restriction, may be null
+   * @param forum the forum to check group restriction, may be null
+   * @param userId the user
+   * @param siteId the site the topic/forum belong to (assumed to be accurate)
+   * @return true if the given user meets the conditions
+   */
   private boolean checkBaseConditions(DiscussionTopic topic, DiscussionForum forum, String userId, String siteId)
   {
     log.debug("checkBaseConditions(DiscussionTopic {}, DiscussionForum {})", topic, forum);
@@ -1748,9 +1757,6 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
 		boolean isModerator = isModeratePostings(topic, forum.get(), userId, siteId);
 		for (Message msg : messages)
 		{
-			// OWLTODO : thread has moved...how does this work? do services still return the full message details in this scenario? need to investigate this further. see ForumTool.threadMoved perhaps...
-			// What if the message was moved to a thread you don't have access to? Does this matter for the main UI vs REST endpoints?
-
 			if (topic.getModerated() && !BooleanUtils.toBooleanDefaultIfNull(msg.getApproved(), false) && !isModerator && !userId.equals(msg.getAuthorId()))
 			{
 				continue; // skip pending or denied messages you can't moderate and didn't author
@@ -1760,7 +1766,5 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
 
 		return allowedMessages;
 	}
-
-
 
 }
