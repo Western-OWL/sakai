@@ -6661,7 +6661,7 @@ public class DiscussionForumTool {
   /**
    * @return siteId
    */
-  private String getContextSiteId() // OWLTODO: is this okay to leave here? what is still using it?
+  private String getContextSiteId() // OWLTODO: Q: is this okay to leave here? what is still using it? A: logging, event refs, and getPermissions/Members/Roles methods apparently used to build the permissions ui. Should be safe as these methods don't appear to be doing any permission checks.
   {
     log.debug("getContextSiteId()");
     return ("/site/" + toolManager.getCurrentPlacement().getContext());
@@ -7220,7 +7220,7 @@ public class DiscussionForumTool {
 
    private void setFromMainOrForumOrTopic()
    {
-	   String originatingPage = getExternalParameterByKey(FROM_PAGE); // OWLTODO: is this safe?
+	   String originatingPage = getExternalParameterByKey(FROM_PAGE); // OWLTODO: Q: is this safe? A: based on previous comments about this fromPage param, it seems pretty safe. These are all views any user can access.
 	   if(originatingPage != null && (MAIN.equals(originatingPage) || ALL_MESSAGES.equals(originatingPage) || FORUM_DETAILS.equals(originatingPage)
 			   	|| THREAD_VIEW.equals(originatingPage) || FLAT_VIEW.equals(originatingPage)))
 	   {

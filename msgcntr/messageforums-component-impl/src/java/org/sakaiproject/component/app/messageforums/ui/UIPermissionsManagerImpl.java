@@ -643,7 +643,7 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
     
     try
     {
-      if (checkBaseConditions(null, null, userId, "/site/" + siteId)) // OWLTODO: this looks wrong, doesn't take a site ref, just a site id
+      if (checkBaseConditions(null, null, userId, siteId))
       {
         return true;
       }
@@ -1178,11 +1178,8 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
   {
 		if (threadLocalManager.get("message_center_permission_set") == null || !((Boolean)threadLocalManager.get("message_center_permission_set")).booleanValue())
 		{
-			// OWLTODO: special case handling when the forum is new, it has no id and we can't retrieve anything from it
-			// resort to current placement. If we end up having to do this in many places, consider a method for it
+			// special case handling when the forum is new, it has no id and we can't retrieve anything from it so must resort to using current placement.
 			String siteId = forum.getId() != null ? forumManager.getSiteIdForForum(forum) : toolManager.getCurrentPlacement().getContext();
-			// OWLTODO: is this strictly necessary? it was done to avoid NPE but now getSiteIdForForum() returns empty string in this case
-			// determine if empty string for siteId here will cause any real issues and avoid current placement if possible
 			initMembershipForSite(siteId);
 		}
 
@@ -1281,13 +1278,8 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
   {
 		if (threadLocalManager.get("message_center_permission_set") == null || !((Boolean)threadLocalManager.get("message_center_permission_set")).booleanValue())
 		{
-			// OWLTODO: when creating a topic this is called with a topic that has not yet been persisted and therefore doesn't have
-			// a hierarchy yet, or even an id. We have to support this scenario by using the current placement...
-			// for the create topic workflow we have to permission check early, and we might need an overload for this method
-			// need to check usages, there may be other workflows that involve topics that are not yet persisted
-			// I suspect there is "create" code that works with unpersisted objects and regular code that call the same methods
-			// and in the past relied on the current placement to get site ids...this might be tricky to untangle...
-			// perhaps in the create topic scenario this method doesn't actually do anything? need to confirm...
+			// when creating a topic this is called with a topic object that has not yet been persisted and therefore doesn't have
+			// a hierarchy yet, or even an id. We have to support this scenario by resorting to using the current placement.
 			String topicSiteId = topic.getId() == null ? toolManager.getCurrentPlacement().getContext() : forumManager.getSiteIdForTopic(topic);
 			initMembershipForSite(topicSiteId);
 		}
@@ -1481,11 +1473,14 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
   /**
    * @return
    */
-   // OWLTODO: this was commented out and broke a lot of things, they should be fixed now and this method should be deleted, but see comment below about tests first
+   // this method is commented out because it is very dangerous to assume entities belong to the current site when checking permissions
+   // it can probably be removed but is left here for reference due to the odd usage of TestUtil. This is probably an obsolete class
+   // as the current tests still all pass, but leaving this here for now just in case. Also helps to document that this is a bad
+   // practice in case someone thinks of restoring it.
   /*private String getContextId()
   {
     log.debug("getContextId()");
-    if (TestUtil.isRunningTests())  // OWLTODO: what does this even do? is it safe to remove this method or do we have to keep it for tests? So far it looks like tests still run fine...
+    if (TestUtil.isRunningTests())
     {
       return "test-context";
     }
@@ -1604,7 +1599,7 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
 	{
 		String userId = getCurrentUserId();
 		String siteId = forumManager.getSiteIdForForum(forum);
-		// OWLTODO: at this stage we can technically check if the user is even in the site, but
+		// at this stage we can technically check if the user is even in the site, but
 		// 1. virtually all requests will be for a site the user has access to, so checking prematurely is wasteful
 		// 2. the final forum/topic permission checks (ie. isRead) should fail for anyone not in the site
 		
@@ -1633,7 +1628,7 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
 		}
 
 		// if we made it this far we can access the forum itself based on its own settings, but topic settings also have to be considered
-		List<DiscussionTopic> topics = (List<DiscussionTopic>) forum.getTopics(); // OWLTODO: can this be trusted? better eventually add null check at least...but what to do if null? assume no topics, or assume bug?
+		List<DiscussionTopic> topics = forum.getTopics() == null ? Collections.emptyList() : (List<DiscussionTopic>) forum.getTopics();
 		// users who can access at least one topic in the forum need access
 		// this also prevents access to forums with no topics, as only users with isNewTopic should be allowed, and this was checked earlier
 		return topics.stream().anyMatch(t -> hasNonInstructorAccessPrivileges(t, forum, userId, siteId));
@@ -1667,7 +1662,7 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
 	{
 		String userId = getCurrentUserId();
 		String siteId = forumManager.getSiteIdForTopic(topic);
-		// OWLTODO: at this stage we can technically check if the user is even in the site, but
+		// at this stage we can technically check if the user is even in the site, but
 		// 1. virtually all requests will be for a site the user has access to, so checking prematurely is wasteful
 		// 2. the assumed final topic/message permission checks (ie. isRead) should fail for anyone not in the site
 
@@ -1681,7 +1676,7 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
 			return false;
 		}
 		
-		return hasNonInstructorAccessPrivileges(topic, forum, userId, siteId); // OWLTODO: possible optimization opportunity here because the call above may have already checked this topic's permissions (see impl)
+		return hasNonInstructorAccessPrivileges(topic, forum, userId, siteId); // possible optimization opportunity here because the call above may have already checked this topic's permissions (see impl)
 	}
 
 	private boolean hasNonInstructorAccessPrivileges(DiscussionTopic topic, DiscussionForum forum, String userId, String siteId)
@@ -1753,7 +1748,7 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
 		}
 
 		// check prerequisite forum/topic access perms
-		// OWLTODO: this call is simple but inefficient for two reasons: it gets the userid/site id again, and it does the admin/instructor check again.
+		// this call is simple but inefficient for two reasons: it gets the userid/site id again, and it does the admin/instructor check again.
 		// Consider refactoring to avoid these duplicate checks but try not to make things overly complicated with tons of boolean params
 		if (!hasAccessPrivileges(topic, forum.get()))
 		{

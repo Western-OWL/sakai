@@ -2675,7 +2675,6 @@ public class DiscussionForumManagerImpl extends HibernateDaoSupport implements
 		throw new RuntimeException("Bad topic -> forum hierarchy!");
 	}
 
-	// this is a stub naive impl for now, see the notes in similar methods above
 	@Override
 	public Optional<DiscussionTopic> getDiscussionTopicForMessage(Message msg)
 	{
@@ -2683,14 +2682,20 @@ public class DiscussionForumManagerImpl extends HibernateDaoSupport implements
 		{
 			return Optional.empty();
 		}
-
-		// OWLTODO: attempt an unproxy here - messagemanager, which supplies the message in some cases, has
-		// no history of unproxying so to be cautious we're not introducing it there
-		// later this will be done a layer lower in messageforumsforummanager where unproxying is fairly common
+		if (msg.getTopic() == null)
+		{
+			log.error("Message {} has no topic attached.", msg.getId());
+			return Optional.empty();
+		}
 		msg.setTopic((Topic) HibernateUtils.unproxy(msg.getTopic()));
-		DiscussionTopic topic = (DiscussionTopic) msg.getTopic();
-		topic.setOpenForum((OpenForum) HibernateUtils.unproxy(topic.getOpenForum()));
-		return Optional.ofNullable(topic); // OWLTODO: this needs a null check instead, would have blown up already on line above
-	}
+		if (msg.getTopic() instanceof DiscussionTopic)
+		{
+			DiscussionTopic topic = (DiscussionTopic) msg.getTopic();
+			topic.setOpenForum((OpenForum) HibernateUtils.unproxy(topic.getOpenForum()));
+			return Optional.of(topic);
+		}
 
+		log.error("Topic {} for message {} is not a DiscussionTopic", msg.getTopic().getId(), msg.getId());
+		return Optional.empty();
+	}
 }

@@ -677,6 +677,5 @@ public interface DiscussionForumManager
   public Optional<DiscussionForum> getDiscussionForumFromTopic(DiscussionTopic topic);
   public Optional<DiscussionForum> getDiscussionForumForTopic(DiscussionTopic topic);
 
-  // OWLTODO: just stubs for now, will need robust impls later
   public Optional<DiscussionTopic> getDiscussionTopicForMessage(Message msg);
 }
