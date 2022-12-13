@@ -2674,6 +2674,7 @@ public class DiscussionForumTool {
 		// comment here for now. Give it one last consideration to see if there are other cases where this
 		// concern is valid before deleting these comments. If we do address something here, see also
 		// processActionDisplayThread()
+		// The only restrictions on messages I'm aware of are postFirst, moderated, availability dates, and permissions. Given a user has access to a message, none of these can restrict access to the thread head, so I think this is safe --bbailla2
 	    selectedThreadHead = new DiscussionMessageBean(mes, messageManager);
 		selectedThreadHead.setRead(messageManager.isMessageReadForUser(mes.getTopic().getId(), mes.getId()));
 

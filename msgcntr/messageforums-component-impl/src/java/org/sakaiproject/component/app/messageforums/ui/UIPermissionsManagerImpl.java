@@ -599,14 +599,7 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
 
   @Override
   public boolean isRead(DiscussionTopic topic, DiscussionForum forum, String userId){
-	  String contextId = null;
-	  try{
-		  //context could be null b/c of external queries... first check
-		  //since its faster than a DB lookup
-		  contextId = forumManager.getSiteIdForForum(forum);
-	  }catch (Exception e) {
-		  contextId = forumManager.getContextForForumById(forum.getId()); // OWLTODO: getSiteIdForForum will do this as a fallback eventually, so remove it later when it becomes redundant?
-	}
+	  String contextId = forumManager.getSiteIdForForum(forum);
 	  return isRead(topic, forum, userId, contextId);
   }
   

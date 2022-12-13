@@ -496,10 +496,11 @@ public interface DiscussionForumManager
    */
   public void setCourseMemberMapToNull();
 
+  @Deprecated
   public DBMembershipItem getAreaDBMember(Set originalSet, String name, Integer type);
   public DBMembershipItem getAreaDBMember(Set originalSet, String name, Integer type, String contextSiteId);
 
-
+  @Deprecated
   public DBMembershipItem getDBMember(Set originalSet, String name, Integer type);
   public DBMembershipItem getDBMember(Set originalSet, String name, Integer type, String contextSiteId);
   

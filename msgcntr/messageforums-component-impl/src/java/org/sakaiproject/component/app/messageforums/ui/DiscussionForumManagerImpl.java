@@ -624,7 +624,7 @@ public class DiscussionForumManagerImpl extends HibernateDaoSupport implements
    * 
    * @see org.sakaiproject.api.app.messageforums.ui.DiscussionForumManager#getDiscussionForums()
    */
-  // OWLTODO: this gets current site, but appears to only be called from the synoptic tool on the site's overview page, which is already just using currentplacement.
+  // OWLTODO: this gets current site, but is called only from the synoptic tool on the site's overview page, which is already just using currentplacement.
   // Synoptic tool seems to only show an unread message count and a generic link to the forums tool. Count may not be entirely accurate, but should be safe enough.
   public List getDiscussionForums() 
   {
@@ -2190,6 +2190,7 @@ public class DiscussionForumManagerImpl extends HibernateDaoSupport implements
     return getContributorAccessorList(iterator);
   }
 
+  @Deprecated
   public DBMembershipItem getAreaDBMember(Set originalSet, String name,
       Integer type)
   {
@@ -2203,6 +2204,7 @@ public class DiscussionForumManagerImpl extends HibernateDaoSupport implements
     return newItem;
   }
   
+  @Deprecated
   public DBMembershipItem getDBMember(Set originalSet, String name,
 			Integer type) {
 	  return getDBMember(originalSet, name, type, getContextSiteId());  // OWLTODO: this is been refactored and is effectively dead code, so it is safe
@@ -2578,40 +2580,53 @@ public class DiscussionForumManagerImpl extends HibernateDaoSupport implements
 		return LRSDelegate.getStatementForGrade(learningResourceStoreService, userDirectoryService, studentUid, forumTitle, score);
 	}
 
-	// OWLTODO: just a stub method for now
 	@Override
 	public String getSiteIdForForum(DiscussionForum forum)
 	{
 		// if the forum object is brand new and has not yet been persisted, there is nothing we can do with it, just return empty string
-		if (forum.getId() == null)
+		if (forum == null || forum.getId() == null)
 		{
 			return "";
 		}
 
-		// OWLTODO: leave this naive until the end to get an idea of how stable the hierarchy is through the power of NPE
-		return forum.getArea().getContextId(); // see also getContextForForumById()
-		// OWLTODO: this actual impl should live in MessageForumsForumManager instead so it can be used in rest endpoints? Maybe not, I did the endpoints and didn't run into issues.
-		// OWLTODO: add logging so we can measure how often the chain fails and db lookup is required
-		// OWLTODO: if it appears that the hierarchy is unstable and db lookups are common, consider adding a cache
-		// to map forums/topics to their siteid. I think this is unlikely to be necessary however. But this method is a called a massive amount of times!
+		Area area = forum.getArea();
+		if (area == null) {
+			log.info("getSiteIdForForum: area is null for forum: {}; going to the database. Implement a cache if this is common", forum.getId());
+			return getContextForForumById(forum.getId());
+		}
+		
+		return area.getContextId();
 	}
 
-	// OWLTODO: just a stub method for now
 	@Override
 	public String getSiteIdForTopic(DiscussionTopic topic)
 	{
-		// OWLTODO: leave this naive until the end to get an idea of how stable the hierarchy is through the power of NPE
-		// OWLTODO: topic.getBaseForum() will return null if you have a DiscussionTopic...always?
-		return topic.getOpenForum().getArea().getContextId(); // see also getContextForForumById()
-		// OWLTODO: this should live in MessageForumsForumManager instead so it can be used in rest endpoints? Probably not, I did the endpoints and didn't run into issues.
-		// OWLTODO: in many cases (most?) the forum will also be required...this means if we get the forum now the caller may
-		// just end up getting it again later. This is not a big deal if only method chains are involved, but
-		// it if turns out we need to hit the db, reconsider this method. It may be better to only be able to get site ids
-		// from forum objects instead, which forces the caller to acquire the forum themselves first. This is why we are
-		// chosing NOT to create getSiteIdForMessage() at this time.
-	}
+		if (topic == null) {
+			return "";
+		}
 
-	// OWLTODO: again these impls above and below should probably live in MessageForumsForumManager so they can be used in rest endpoints? Maybe not, I did the endpoints already.
+		OpenForum openForum = topic.getOpenForum();
+		if (openForum != null) {
+			Area area = openForum.getArea();
+			if (area == null) {
+				log.info("getSiteIdForTopic: area is null for topic: {}, open forum: {}; going to the database. Implement a cache if this is common", topic.getId(), openForum.getId());
+				return getContextForForumById(openForum.getId());
+			}
+			return area.getContextId();
+		}
+
+		BaseForum baseForum = topic.getBaseForum();
+		if (baseForum != null) {
+			Area area = baseForum.getArea();
+			if (area == null) {
+				log.info("getSiteIdForTopic: area is null for topic: {}, base forum: {}; going to the database. Implement a cache if this is common", topic.getId(), baseForum.getId());
+				return getContextForForumById(baseForum.getId());
+			}
+			return area.getContextId();
+		}
+
+		return "";
+	}
 
 	@Override
 	public Optional<DiscussionForum> getDiscussionForumForTopic(DiscussionTopic topic)
