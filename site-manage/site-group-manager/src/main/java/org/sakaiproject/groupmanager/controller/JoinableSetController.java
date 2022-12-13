@@ -63,6 +63,10 @@ public class JoinableSetController {
 
         Site site = siteOptional.get();
 
+        if (!sakaiService.allowUpdateGroupMembershipInSite(site.getId())) {
+            return "redirect:" + site.getUrl();
+        }
+
         // Variable definition
         JoinableSetForm joinableSetForm = new JoinableSetForm();
         List<Group> joinableSetGroups = new ArrayList<Group>();
@@ -116,6 +120,10 @@ public class JoinableSetController {
         }
 
         Site site = siteOptional.get();
+
+        if (!sakaiService.allowUpdateGroupMembershipInSite(site.getId())) {
+            return "redirect:" + site.getUrl();
+        }
 
         // Variable definition
         Locale userLocale = sakaiService.getCurrentUserLocale();
@@ -204,6 +212,10 @@ public class JoinableSetController {
         }
 
         Site site = siteOptional.get();
+
+        if (!sakaiService.allowUpdateGroupMembershipInSite(site.getId())) {
+            return "redirect:" + site.getUrl();
+        }
 
         if (StringUtils.isBlank(joinableSetId)) {
             log.error("Trying to delete a joinable set with empty Id.");

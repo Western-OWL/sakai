@@ -75,6 +75,10 @@ public class GroupController {
 
         Site site = siteOptional.get();
 
+        if (!sakaiService.allowUpdateGroupMembershipInSite(site.getId())) {
+            return "redirect:" + site.getUrl();
+        }
+
         // The form values which are optional.
         GroupForm groupForm = new GroupForm();
         groupForm.setGroupTitle(StringUtils.isNotBlank(currentTitle) ? currentTitle : StringUtils.EMPTY);
@@ -210,6 +214,10 @@ public class GroupController {
         }
 
         Site site = siteOptional.get();
+
+        if (!sakaiService.allowUpdateGroupMembershipInSite(site.getId())) {
+            return "redirect:" + site.getUrl();
+        }
 
         // Variable definition
         Locale userLocale = sakaiService.getCurrentUserLocale();

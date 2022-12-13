@@ -211,6 +211,10 @@ public class SakaiService  {
         if (site == null || site.getId() == null) {
             return false;
         }
-        return siteService.allowUpdateGroupMembership(site.getId());
+        return allowUpdateGroupMembershipInSite(site.getId());
+    }
+
+    public boolean allowUpdateGroupMembershipInSite(String siteId) {
+        return siteService.allowUpdateGroupMembership(siteId);
     }
 }
