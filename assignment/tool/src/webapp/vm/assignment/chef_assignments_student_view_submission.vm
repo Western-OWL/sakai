@@ -494,7 +494,7 @@ $(document).ready(function(){
 									#end
 								</div>
 							#end
-							#if ($plagiarismEULALink)
+							#if ($plagiarismEULALink && $assignment.ContentReview)
 								<p class="checkbox highlightPanel form-required">
 									<label for="$name_plagiarism_eula_agreement">
 										#if ($value_plagiarism_eula_agreement.equals("true"))
