@@ -673,8 +673,6 @@ public interface DiscussionForumManager
   public String getSiteIdForForum(DiscussionForum forum);
   public String getSiteIdForTopic(DiscussionTopic topic);
 
-  // OWLTODO: these methods may be collapsed into one, or one public/one private
-  public Optional<DiscussionForum> getDiscussionForumFromTopic(DiscussionTopic topic);
   public Optional<DiscussionForum> getDiscussionForumForTopic(DiscussionTopic topic);
 
   public Optional<DiscussionTopic> getDiscussionTopicForMessage(Message msg);

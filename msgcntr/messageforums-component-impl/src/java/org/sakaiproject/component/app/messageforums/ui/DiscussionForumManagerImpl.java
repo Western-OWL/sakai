@@ -2613,66 +2613,48 @@ public class DiscussionForumManagerImpl extends HibernateDaoSupport implements
 
 	// OWLTODO: again these impls above and below should probably live in MessageForumsForumManager so they can be used in rest endpoints? Maybe not, I did the endpoints already.
 
-	/**
-   * Attempts to navigate Hibernate query minefields to return an actual DiscussionForum object for the given topic.
-   * This is necessary because depending on the source of the topic, getOpenForum or getBaseForum will contain the topic,
-   * which may or may not be an actual DiscussionTopic
-   * @param topic the topic to retrieve the forum for
-   * @return a DiscussionForum object, if one can be sourced from the given topic object
-   */
 	@Override
-	public Optional<DiscussionForum> getDiscussionForumFromTopic(DiscussionTopic topic)
+	public Optional<DiscussionForum> getDiscussionForumForTopic(DiscussionTopic topic)
 	{
 	  if (topic == null)
 	  {
 		  return Optional.empty();
 	  }
-	  // OWLTODO: during development, we're doing simple casting without instanceof checks here to identify scenarios where
-	  // unproxying needs to happen. We want to minimize cases where this can't find a forum, because
-	  // that will probably result in db querying to find the forum instead. Before finalizing this fix,
-	  // switch to instanceof checks to avoid classcastexceptions in production.
-	  // OWLTODO: update: the approach necessitated by messagemanager not doing any unproxying suggests that rather than
-	  // chasing down all the queries that return proxies, it might be simpler to just unproxy here. The downside is that
-	  // we're not helping any other parts of the code avoid proxy issues. But, it seems to work
-	  // well for the message, so we'll try it out. We may want to combine with instanceof checks as well, not sure
-	  // what the cost of unnecessary unproxying would be
-	  topic.setOpenForum(((OpenForum) HibernateUtils.unproxy(topic.getOpenForum())));
-	  DiscussionForum forum = (DiscussionForum) topic.getOpenForum();
-	  if (forum == null) // try the base forum
-	  {
-		  topic.setBaseForum((BaseForum) HibernateUtils.unproxy(topic.getBaseForum()));
-		  forum = (DiscussionForum) topic.getBaseForum();
+
+	  Long forumId = null;
+
+	  OpenForum openForum = topic.getOpenForum();
+	  if (openForum != null) {
+		  openForum = (OpenForum)HibernateUtils.unproxy(openForum);
+		  topic.setOpenForum(openForum);
+		  forumId = openForum.getId();
+		  if (openForum instanceof DiscussionForum) {
+			  return Optional.of((DiscussionForum)openForum);
+		  }
+	  }
+	  // try the base forum
+	  BaseForum baseForum = topic.getBaseForum();
+	  if (baseForum != null) {
+		  baseForum = (BaseForum)HibernateUtils.unproxy(baseForum);
+		  topic.setBaseForum(baseForum);
+		  forumId = forumId == null ? baseForum.getId() : forumId;
+		  if (baseForum instanceof DiscussionForum) {
+			  return Optional.of((DiscussionForum)baseForum);
+		  }
 	  }
 
+	  if (forumId == null) {
+		  return Optional.empty();
+	  }
+
+	  log.info("getDiscussionForumForTopic - neither topic.getOpenForum() nor topic.getBaseForum() could be unproxied to a DiscussionForum instance; will hit the DB. TopicID: {}", topic.getId());
+	  DiscussionForum forum = getForumById(forumId);
+	  if (forum == null) {
+		  return Optional.empty();
+	  }
+
+	  topic.setOpenForum(forum);
 	  return Optional.ofNullable(forum);
-	}
-
-	@Override
-	public Optional<DiscussionForum> getDiscussionForumForTopic(DiscussionTopic topic)
-	{
-		// first we try to get a usable forum from the topic object
-		Optional<DiscussionForum> forumOpt = getDiscussionForumFromTopic(topic);
-		if (forumOpt.isPresent())
-		{
-		  return forumOpt;
-		}
-
-		// otherwise, resort to db lookup if we have an available forum id param
-		// OWLTODO: should we just reject this option? if the topic object doesn't have a proper forum attached, why should we trust the params at all? to let Hibernate be lazy?
-		// maybe we force an access check if that happens?
-		/*Long forumId = NumberUtils.toLong(getExternalParameterByKey(FORUM_ID), -1L);
-		if (forumId > 0L)
-		{
-		  return Optional.ofNullable(forumManager.getForumById(forumId)); // OWLTODO: we shouldn't really hit this often, but if we do, note the workflow
-		}
-		return Optional.empty();*/
-		// OWLTODO: the above db retrieval from a request param should not be necessary, but throwing an exception here will allow us to
-		// identify cases where it still may be required. This exception should be removed before going to production.
-		// Ideally this method will just be a call to getDiscussionForumFromTopic(), in other words, an unnecessary wrapper we can throw away
-		// Another possibility is that we can accomplish something like topic.getBase/OpenForum.getId() and then do a db lookup from that, even
-		// though getBaseForum may not be populated as a DiscussionForum, if we can still get the id we can do a query. This kind of fallback
-		// is used elsewhere, so something to consider.
-		throw new RuntimeException("Bad topic -> forum hierarchy!");
 	}
 
 	@Override
