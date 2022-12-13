@@ -26,7 +26,7 @@
 
 	//Check if user called this page with a popup dialog
 	
-	String selectedUserId = request.getParameter("siteUserId"); // OWLTODO: validated!
+	String selectedUserId = request.getParameter("siteUserId");
 	String frameId = request.getParameter("frameId");
 	String dialogDivId = request.getParameter("dialogDivId");
 	boolean isDialogBox = false;

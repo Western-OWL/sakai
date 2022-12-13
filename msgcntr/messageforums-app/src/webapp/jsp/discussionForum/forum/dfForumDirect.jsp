@@ -18,7 +18,7 @@
     try {
       target = portalPath + "/tool/" + request.getParameter("placementId")
              + "/discussionForum/forum/dfForumDirect.jsf?forumId="
-      	     + request.getParameter("forumId"); // OWLTODO: validated! (in processActionDisplayForum() below)
+      	     + request.getParameter("forumId");
       response.sendRedirect(target);
       return;
     }
@@ -28,7 +28,7 @@
   }
 
   target = "/jsp/discussionForum/forum/dfForumDetail.jsp?forumId="
-  	       + request.getParameter("forumId"); // OWLTODO: validated! (in processActionDisplayForum() below)
+  	       + request.getParameter("forumId");
   forumTool.processActionDisplayForum();
 
   // dispatch to the target

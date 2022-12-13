@@ -40,7 +40,7 @@ public interface UIPermissionsManager
   /**
    * @return
    */
-  public boolean isNewForum();  // OWLTODO: probably safe, but double check it once everything else is fixed, it assumes current placement
+  public boolean isNewForum();
   
   /**
    * @return
@@ -67,14 +67,6 @@ public interface UIPermissionsManager
    * @param contextId
    * @return
    */
-  /* OWLTODO: Q: find callers of this and other methods here that accept a siteid
-  // if not all callers are deriving site id from the forum,
-  // check the method implementation and if it is blindly trusting the siteid, we should
-  // either validate (wasteful because we need to derive site id from forum and also string compare)
-  // or remove the method from the public api to force use of overloads that derive the siteid
-  // leave the method in place but private, because passing the siteid is still good for performance reasons,
-  // as a scenario where deriving siteid requires a db lookup will be expensive
-   * A: Confirmed all the callers. Can't change to private, it's used outside of UIPermissionsManager. Added a warning to the javadoc. */
   public boolean isNewResponse(DiscussionTopic topic, DiscussionForum forum, String userId, String contextId);
 
   /**
@@ -222,7 +214,6 @@ public interface UIPermissionsManager
    * (role + groups/sections) 
    * @return
    */
-  //public List getCurrentUserMemberships(); // OWLTODO: remove
   public List getCurrentUserMemberships(String siteId);
   
   public Set getAreaItemsSet(Area area);

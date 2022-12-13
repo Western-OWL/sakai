@@ -17,9 +17,9 @@
 
     String portalPath = ServerConfigurationService.getString("portalPath");
     try {
-      target = portalPath + "/tool/" + request.getParameter("placementId") // OWLTODO: validated! this just redirects back here setting a placement first. topic access still gets validated later
+      target = portalPath + "/tool/" + request.getParameter("placementId")
              + "/discussionForum/message/dfAllMessagesDirect.jsf?topicId="
-      	     + request.getParameter("topicId"); // OWLTODO: validated! just redirects back here and is validated later
+      	     + request.getParameter("topicId");
       response.sendRedirect(target);
       return;
     }
@@ -30,7 +30,7 @@
 
 if(forumTool.getHasTopicAccessPrivileges(request.getParameter("topicId"))){
   target = "/jsp/discussionForum/message/dfAllMessages.jsp?topicId="
-  	       + request.getParameter("topicId"); // OWLTODO: validated! (in processActionDisplayTopic() below)
+  	       + request.getParameter("topicId");
 
   forumTool.processActionDisplayTopic();
 
@@ -48,7 +48,7 @@ if(forumTool.getHasTopicAccessPrivileges(request.getParameter("topicId"))){
 		// If we're in here it means we have lost topicId. We should direct
 		// them to the topic's parent forum which will then render the topic.
 		target = "/jsp/discussionForum/message/dfAllMessages.jsp?forumId="
-  	       		+ request.getParameter("forumId"); // OWLTODO: validated! (in processActionDisplayForum() below)
+  	       		+ request.getParameter("forumId");
 
 		  forumTool.processActionDisplayForum();
 

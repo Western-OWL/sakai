@@ -36,11 +36,11 @@
 
             //Check if user called this page with a popup dialog
 
-			// these requests are not validated here, but rather in processDfMsgGrdFromThread() called later on
-            String messageId = request.getParameter("messageId"); // OWLTODO: validated!
-            String topicId = request.getParameter("topicId"); // OWLTODO: validated!
-            String forumId = request.getParameter("forumId"); // OWLTODO: validated!
-            String userId = request.getParameter("userId"); // OWLTODO: validated!
+			// these request params are not validated here, but rather in processDfMsgGrdFromThread() called later on
+            String messageId = request.getParameter("messageId");
+            String topicId = request.getParameter("topicId");
+            String forumId = request.getParameter("forumId");
+            String userId = request.getParameter("userId");
             String frameId = request.getParameter("frameId");
             String dialogDivId = request.getParameter("dialogDivId");
             String gradesSavedDiv = request.getParameter("gradesSavedDiv");

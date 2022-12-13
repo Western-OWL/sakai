@@ -2156,8 +2156,6 @@ public class MessageForumStatisticsBean {
 		if (!isInstructorInCurrentSite()) {
 			return FORUMS_MAIN;
 		}
-		
-		// selectedSiteUserId = getExternalParameterByKey(SITE_USER_ID);  // OWLTODO: validated!
 
 		String paramUserId = getExternalParameterByKey(SITE_USER_ID);
 
@@ -2325,7 +2323,7 @@ public class MessageForumStatisticsBean {
 			return FORUMS_MAIN;
 		}
 
-		String externalMsgId = getExternalParameterByKey("msgId"); // OWLTODO: validated!
+		String externalMsgId = getExternalParameterByKey("msgId");
 		Message message =(Message) messageManager.getMessageById(Long.parseLong(externalMsgId));
 		if (!uiPermissionsManager.hasAccessPrivileges(message))
 		{
@@ -2502,7 +2500,7 @@ public class MessageForumStatisticsBean {
 		log.debug("processActionStatisticsByTopic");
 		
 		//to save some speed, only update if the values have changed
-		String externalTopicId = StringUtils.trimToEmpty(getExternalParameterByKey(TOPIC_ID)); // OWLTODO: validated!
+		String externalTopicId = StringUtils.trimToEmpty(getExternalParameterByKey(TOPIC_ID));
 		boolean newTopic = !externalTopicId.equals(selectedAllTopicsTopicId);
 		
 		if (newTopic && !externalTopicId.isEmpty())
@@ -2526,7 +2524,7 @@ public class MessageForumStatisticsBean {
 		// The default gradebook assignment must be known before we get the statistics, since grades will be included
 		setDefaultSelectedAssign();
 		getTopicStatistics();
-		return FORUM_STATISTICS_BY_TOPIC;  // OWLTODO: Q: what about users that don't have grade perms? Having the link implies they do, and we can stop cross-site issues, but what about crafting the link? A: For roles with site.upd, but no gradebook perms: from the topic view they formerly got NPEs; I fixed that immediate NPE so that I could determine if there were any holes beyond that. They now have a "grade" link, which shows a dialog in which no gradebook items are selectable; any attempt to hack this to view or submit grades is successfully blocked by GradebookService authz.
+		return FORUM_STATISTICS_BY_TOPIC;
 	}
 
 	public String getSelectedAllTopicsTopicTitle() {
