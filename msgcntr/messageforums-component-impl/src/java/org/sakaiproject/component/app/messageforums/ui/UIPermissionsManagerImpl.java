@@ -201,19 +201,7 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
     
     try
     {
-		/* OWLTODO: Q: sometimes this can be called in a scenario where we can derive the correct site id,
-		 * such as when duplicating a forum. if we get the forum's area can we replace the getAreaItems call?
-		 * A: No need, isAccessPrivileges is checked against the target for such cases.*/
-      Iterator iter = getAreaItemsByCurrentUser(); // OWLTODO: what is an area item exactly? Answered!:
-      /*
-       * It's a DBMembershipItem (mfr_membership_item_t).
-       *     -These are essentially the roles and groups that show under 'Permissions' when editing stuff.
-       *     -They can be associated with topics (t_surrogateKey), forums (of_surrogateKey), or areas (a_surrogateKey).
-       *     -They link via (PERMISSION_LEVEL) to a mfr_permission_level_t - these 'Author', 'Contributor', etc., and every 'Custom' combination.
-       *
-       * But what's an *area* item?: It's from 'Template Settings'. Evidence: as an instructor, turn off 'New Forum' from your own Instructor permissions; notice the 'New Forum' tab goes away on reset.
-       * Of course, you can just turn that permission back on for yourself.
-       */
+      Iterator iter = getAreaItemsByCurrentUser();
       while (iter.hasNext())
       {
         DBMembershipItem item = (DBMembershipItem) iter.next();
@@ -242,13 +230,7 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
 
   /**
    * Determines if the current user is allowed to change forum settings.
-   * This method is private because it trusts the forum and siteid match.
-   * OWLTODO: This method exists to eliminate the chance that deriving
-   * a siteId from the forum will hit the db. If this turns out to be highly
-   * unlikely due to hierarchy stability or caching, all these methods that
-   * take a siteId explicitly can and probably should be eliminated.
-   * However, there seems to be a problem with newly created forums vs existing
-   * forums and we may need to keep this method around to work around the issue.
+   * This method is private because it trusts the forum and siteid match, do not call this without first validating this is true
    * @param forum the forum in question
    * @param siteId the site the forum belongs to
    * @return true if the user is admin/instructor/owner, or has change settings permission
@@ -504,12 +486,11 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
     {
       return true;
     }
-	// make sure the topic belongs to the forum, as we use the forum to get the site id
-	// OWLTODO: null checks here, getBaseForum can return null, perhaps getOpenForum can as well
-	// what to do in the case there topic's forum is null? reject?
-	// OWLTODO: probably should have similar validation in other methods that take topic and forum, extract
-	// validation logic to method?
-	if (!forum.getId().equals(topic.getOpenForum().getId()))
+	// as a failsafe, make sure the topic belongs to the forum, as we likely used the forum to get the site id
+	// we will derive the forum from the topic to check it. this is overall not the most efficient, but we're playing it safe for now
+	// this could be eliminated if all paths are shown to have already validated the topic/forum connection
+	Optional<DiscussionForum> topicForum = forumManager.getDiscussionForumForTopic(topic);
+	if (!topicForum.isPresent() || !forum.getId().equals(topicForum.get().getId()))
 	{
 		log.error("Given topic {} does not belong to given forum {}", topic.getId(), forum.getId());
 		return false;
@@ -534,8 +515,7 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
       // if owner then allow change of settings on the topic or on forum.
       if (forumManager.isTopicOwner(topic, userId))
       {
-        return true; // OWLTODO: this is questionable, a user can create a topic and be demoted to a role that can't, however it might be required for new topics to pass this check
-        // OWLTODO: I would tend to agree, but I'd argue in Forums it's too easy for a person to demote their own role. If we changed this, then nobody could fix the issue except an admin = helpdesk ticket. -Brian
+        return true;
       }
       Iterator iter = getTopicItemsByUser(topic, userId);
       while (iter.hasNext())
@@ -1031,14 +1011,14 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
 
   	List<DBMembershipItem> areaItems = new ArrayList<>();
 
+	// this method is called from isNewForum() which figures out if you can create forums in the site...
+	// this appears to be one situation where we don't have any site reference available from a forums object,
+	// so we have to rely on getCurrentPlacement() here
 	String siteId = toolManager.getCurrentPlacement().getContext();
   	
 		if (threadLocalManager.get("message_center_permission_set") == null || !((Boolean)threadLocalManager.get("message_center_permission_set")).booleanValue())
 		{
 			initMembershipForSite(siteId);
-			// OWLTODO: this appears to be one situation where we don't have any site reference available
-			// from a forums object, so we likely have to rely on getCurrentPlacement() here
-			// come back after all the holes are plugged and make sure this is not exploitable
 		}
 
 	Set areaItemsInThread = (Set) threadLocalManager.get("message_center_membership_area");
@@ -1051,9 +1031,6 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
     
     // for group awareness
     try {
-		// OWLTODO: this method is called from isNewForum() which figures out if you can create forums in the site...
-		// it has nothing to reference (I think) so it has to use the current placement (see above)
-    	//Site currentSite = siteService.getSite(getContextId());
 		Site currentSite = siteService.getSite(siteId);
     	Set<String> groups = getGroupsWithMember(currentSite, getCurrentUserId());
     	if (groups != null) {
