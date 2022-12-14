@@ -2583,15 +2583,14 @@ public class DiscussionForumManagerImpl extends HibernateDaoSupport implements
 	@Override
 	public String getSiteIdForForum(DiscussionForum forum)
 	{
-		// if the forum object is brand new and has not yet been persisted, there is nothing we can do with it, just return empty string
-		if (forum == null || forum.getId() == null)
+		if (forum == null)
 		{
 			return "";
 		}
 
 		Area area = forum.getArea();
-		if (area == null) {
-			log.info("getSiteIdForForum: area is null for forum: {}; going to the database. Implement a cache if this is common", forum.getId());
+		if (area == null && forum.getId() != null) {
+			log.warn("getSiteIdForForum: area is null for forum: {}; going to the database. Implement a cache if this is common", forum.getId());
 			return getContextForForumById(forum.getId());
 		}
 		
@@ -2609,7 +2608,7 @@ public class DiscussionForumManagerImpl extends HibernateDaoSupport implements
 		if (openForum != null) {
 			Area area = openForum.getArea();
 			if (area == null) {
-				log.info("getSiteIdForTopic: area is null for topic: {}, open forum: {}; going to the database. Implement a cache if this is common", topic.getId(), openForum.getId());
+				log.warn("getSiteIdForTopic: area is null for topic: {}, open forum: {}; going to the database. Implement a cache if this is common", topic.getId(), openForum.getId());
 				return getContextForForumById(openForum.getId());
 			}
 			return area.getContextId();
@@ -2619,12 +2618,16 @@ public class DiscussionForumManagerImpl extends HibernateDaoSupport implements
 		if (baseForum != null) {
 			Area area = baseForum.getArea();
 			if (area == null) {
-				log.info("getSiteIdForTopic: area is null for topic: {}, base forum: {}; going to the database. Implement a cache if this is common", topic.getId(), baseForum.getId());
+				log.warn("getSiteIdForTopic: area is null for topic: {}, base forum: {}; going to the database. Implement a cache if this is common", topic.getId(), baseForum.getId());
 				return getContextForForumById(baseForum.getId());
 			}
 			return area.getContextId();
 		}
 
+		if (topic.getId() != null) {
+			log.error("Topic {} has neither an openforum nor a baseforum object attached, going to the database.", topic.getId());
+			return getContextForTopicById(topic.getId());
+		}
 		return "";
 	}
 
@@ -2662,14 +2665,14 @@ public class DiscussionForumManagerImpl extends HibernateDaoSupport implements
 		  return Optional.empty();
 	  }
 
-	  log.info("getDiscussionForumForTopic - neither topic.getOpenForum() nor topic.getBaseForum() could be unproxied to a DiscussionForum instance; will hit the DB. TopicID: {}", topic.getId());
+	  log.warn("getDiscussionForumForTopic - neither topic.getOpenForum() nor topic.getBaseForum() could be unproxied to a DiscussionForum instance; will hit the DB. TopicID: {} ForumID: {}", topic.getId(), forumId);
 	  DiscussionForum forum = getForumById(forumId);
 	  if (forum == null) {
 		  return Optional.empty();
 	  }
 
 	  topic.setOpenForum(forum);
-	  return Optional.ofNullable(forum);
+	  return Optional.of(forum);
 	}
 
 	@Override
@@ -2684,15 +2687,25 @@ public class DiscussionForumManagerImpl extends HibernateDaoSupport implements
 			log.error("Message {} has no topic attached.", msg.getId());
 			return Optional.empty();
 		}
-		msg.setTopic((Topic) HibernateUtils.unproxy(msg.getTopic()));
-		if (msg.getTopic() instanceof DiscussionTopic)
+		Topic msgTopic = (Topic) HibernateUtils.unproxy(msg.getTopic());
+		msg.setTopic(msgTopic);
+		if (msgTopic instanceof DiscussionTopic)
 		{
 			DiscussionTopic topic = (DiscussionTopic) msg.getTopic();
 			topic.setOpenForum((OpenForum) HibernateUtils.unproxy(topic.getOpenForum()));
 			return Optional.of(topic);
 		}
 
-		log.error("Topic {} for message {} is not a DiscussionTopic", msg.getTopic().getId(), msg.getId());
-		return Optional.empty();
+		log.warn("getDiscussionTopicForMessage - message.getTopic() could not be be unproxied to a DiscussionTopic instance; will hit the DB. MsgID: {} TopicID: {}", msg.getId(), msgTopic.getId());
+		DiscussionTopic dbTopic = getTopicById(msgTopic.getId());
+		if (dbTopic == null)
+		{
+			log.error("Topic {} for message {} is not a DiscussionTopic", msg.getTopic().getId(), msg.getId());
+			return Optional.empty();
+		}
+
+		dbTopic.setOpenForum((OpenForum) HibernateUtils.unproxy(dbTopic.getOpenForum()));
+		msg.setTopic(dbTopic);
+		return Optional.of(dbTopic);
 	}
 }
