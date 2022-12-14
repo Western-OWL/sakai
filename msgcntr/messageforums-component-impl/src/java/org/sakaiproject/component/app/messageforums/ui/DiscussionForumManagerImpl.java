@@ -2581,9 +2581,12 @@ public class DiscussionForumManagerImpl extends HibernateDaoSupport implements
 		}
 
 		Area area = forum.getArea();
-		if (area == null && forum.getId() != null) {
-			log.warn("getSiteIdForForum: area is null for forum: {}; going to the database. Implement a cache if this is common", forum.getId());
-			return getContextForForumById(forum.getId());
+		if (area == null) {
+			if (forum.getId() != null) {
+				log.warn("getSiteIdForForum: area is null for forum: {}; going to the database. Implement a cache if this is common", forum.getId());
+				return getContextForForumById(forum.getId());
+			}
+			return ""; // likely a brand new forum object that has not been persisted yet, no way to get a site from it
 		}
 		
 		return area.getContextId();
