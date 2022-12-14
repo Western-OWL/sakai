@@ -670,7 +670,6 @@ public interface DiscussionForumManager
    */
   public Optional<LRS_Statement> getStatementForGrade(String studentUid, String forumTitle, double score);
 
-  // OWLTODO: just stub methods for now, will need robust impls later
   public String getSiteIdForForum(DiscussionForum forum);
   public String getSiteIdForTopic(DiscussionTopic topic);
 

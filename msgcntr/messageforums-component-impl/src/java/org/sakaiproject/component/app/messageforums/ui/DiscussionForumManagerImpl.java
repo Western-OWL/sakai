@@ -416,12 +416,6 @@ public class DiscussionForumManagerImpl extends HibernateDaoSupport implements
   public Area getDiscussionForumArea()
   {
 	return getDiscussionForumArea(toolManager.getCurrentPlacement().getContext());
-	// OWLTODO: Q: yikes! is this safe, getting the current site id? what calls this?
-	// A: generally this is going to be called in places where we need to get all the forums
-	// in the current site (area is the top level of the forums hierarchy and is basically equivalent to a site).
-	// At a high level like this we have to rely on currentplacement to provide the site id, which should be relatively safe.
-	// The concern would be using currentplacement in conjuction with client-supplied values, which doesn't seem to
-	// be happening at these higher levels.
   }
   
   public Area getDiscussionForumArea(String siteId)
@@ -624,8 +618,6 @@ public class DiscussionForumManagerImpl extends HibernateDaoSupport implements
    * 
    * @see org.sakaiproject.api.app.messageforums.ui.DiscussionForumManager#getDiscussionForums()
    */
-  // OWLTODO: this gets current site, but is called only from the synoptic tool on the site's overview page, which is already just using currentplacement.
-  // Synoptic tool seems to only show an unread message count and a generic link to the forums tool. Count may not be entirely accurate, but should be safe enough.
   public List getDiscussionForums() 
   {
     log.debug("getDiscussionForums()");
@@ -2207,7 +2199,7 @@ public class DiscussionForumManagerImpl extends HibernateDaoSupport implements
   @Deprecated
   public DBMembershipItem getDBMember(Set originalSet, String name,
 			Integer type) {
-	  return getDBMember(originalSet, name, type, getContextSiteId());  // OWLTODO: this is been refactored and is effectively dead code, so it is safe
+	  return getDBMember(originalSet, name, type, getContextSiteId());
 	}
 
   public DBMembershipItem getDBMember(Set originalSet, String name,

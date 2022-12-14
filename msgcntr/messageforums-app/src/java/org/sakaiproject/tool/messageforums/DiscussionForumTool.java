@@ -1035,7 +1035,7 @@ public class DiscussionForumTool {
   {
 	  log.debug("processForumMainConfirm()");
 
-	  String forumId = getExternalParameterByKey(FORUM_ID); // OWLTODO: validated!
+	  String forumId = getExternalParameterByKey(FORUM_ID);
 	  DiscussionForum forum = forumManager.getForumById(Long.valueOf(forumId));
 	  if (forum == null || !uiPermissionsManager.isChangeSettings(forum))
 	  {
@@ -1189,7 +1189,7 @@ public class DiscussionForumTool {
     setEditMode(true);
     setPermissionMode(PERMISSION_MODE_FORUM);
     
-    String forumId = getExternalParameterByKey(FORUM_ID); // OWLTODO: validated!
+    String forumId = getExternalParameterByKey(FORUM_ID);
     if (StringUtils.isBlank(forumId) || "null".equals(forumId))
     {
       setErrorMessage(getResourceBundleString(INVALID_SELECTED_FORUM));
@@ -1670,11 +1670,11 @@ public class DiscussionForumTool {
 
     if (topic == null)
     {
-      topic = forumManager.getTopicById(Long.valueOf(getExternalParameterByKey(TOPIC_ID))); // OWLTODO: validated!
+      topic = forumManager.getTopicById(Long.valueOf(getExternalParameterByKey(TOPIC_ID)));
     }
     if (topic == null)
     {
-      setErrorMessage(getResourceBundleString(TOPIC_WITH_ID) + getExternalParameterByKey(TOPIC_ID) // OWLTODO: validated!
+      setErrorMessage(getResourceBundleString(TOPIC_WITH_ID) + getExternalParameterByKey(TOPIC_ID)
           + getResourceBundleString(NOT_FOUND_WITH_QUOTE));
       return gotoMain();
     }
@@ -2010,7 +2010,7 @@ public class DiscussionForumTool {
 	log.debug("processActionTopicSettings()");
 
 	DiscussionTopic topic = null;
-	String topicId = getExternalParameterByKey(TOPIC_ID); // OWLTODO: validated!
+	String topicId = getExternalParameterByKey(TOPIC_ID);
 
 	if(StringUtils.isNotBlank(topicId) && !"null".equals(topicId) ){
 	  topic = (DiscussionTopic) forumManager.getTopicByIdWithAttachments(Long.valueOf(topicId));
@@ -2112,7 +2112,7 @@ public class DiscussionForumTool {
     permissions=null;
     
     DiscussionTopic topic = null;
-    String topicId = getExternalParameterByKey(TOPIC_ID); // OWLTODO: validated!
+    String topicId = getExternalParameterByKey(TOPIC_ID);
     if(StringUtils.isNotBlank(topicId) && !"null".equals(topicId)){
 	    topic = (DiscussionTopic) forumManager.getTopicByIdWithAttachments(Long.valueOf(topicId));
     } else if(selectedTopic != null) {
@@ -2122,7 +2122,7 @@ public class DiscussionForumTool {
     {
       return gotoMain();
     }
-	// OWLTODO: this core code could probably be shared with other methods doing this same isChangeSettings check
+
 	Optional<DiscussionForum> forum = forumManager.getDiscussionForumForTopic(topic);
 	if(!forum.isPresent() || !uiPermissionsManager.isChangeSettings(topic, forum.get()) || !uiPermissionsManager.hasAccessPrivileges(forum.get()))
 	{
@@ -2154,7 +2154,7 @@ public class DiscussionForumTool {
   public String processActionToggleDisplayForumExtendedDescription()
   {
     log.debug("processActionToggleDisplayForumExtendedDescription()");
-    String redirectTo = getExternalParameterByKey(REDIRECT_PROCESS_ACTION); // OWLTODO: Q is this safe? A: Yes
+    String redirectTo = getExternalParameterByKey(REDIRECT_PROCESS_ACTION);
     if (redirectTo == null)
     {
       setErrorMessage(getResourceBundleString(NOT_FOUND_REDIRECT_PAGE));
@@ -2187,7 +2187,7 @@ public class DiscussionForumTool {
   public String processActionToggleDisplayExtendedDescription()
   {
     log.debug("processActionToggleDisplayExtendedDescription()");
-    String redirectTo = getExternalParameterByKey(REDIRECT_PROCESS_ACTION); // OWLTODO: is this safe? A: Yes - this method is unused
+    String redirectTo = getExternalParameterByKey(REDIRECT_PROCESS_ACTION);
     if (redirectTo == null)
     {
       setErrorMessage(getResourceBundleString(NOT_FOUND_REDIRECT_PAGE));
@@ -2246,7 +2246,7 @@ public class DiscussionForumTool {
       {
         selectedTopic.setReadFullDesciption(true);
       }
-      // OWLTODO: a little scary, but this method is unused.
+
       return GRADE_MESSAGE;
     }
 
@@ -2283,7 +2283,7 @@ public class DiscussionForumTool {
 
   private String topicDest(String origDest)
   {
-	  if (ALL_MESSAGES.equals(origDest) && "true".equals(getExternalParameterByKey(FLAT_VIEW))) // OWLTODO: validated!
+	  if (ALL_MESSAGES.equals(origDest) && "true".equals(getExternalParameterByKey(FLAT_VIEW)))
 	  {
 		  return FLAT_VIEW;
 	  }
@@ -2539,7 +2539,7 @@ public class DiscussionForumTool {
 	    selectedMessageCount ++;
 
 	    threadAnchorMessageId = null;
-	    String threadId = getExternalParameterByKey(MESSAGE_ID);  // OWLTODO: validated!
+	    String threadId = getExternalParameterByKey(MESSAGE_ID);
 	    if ("".equals(threadId) || null == threadId || "null".equals(threadId))
 	    {
 	      setErrorMessage(getResourceBundleString(MESSAGE_REFERENCE_NOT_FOUND));
@@ -2563,7 +2563,6 @@ public class DiscussionForumTool {
 		}
 		if (!uiPermissionsManager.hasAccessPrivileges(threadMessage, topic.get()))
 		{
-			// OWLTODO: better error message or combine this with the checks above if it doesn't really matter (gotoMain() generally will not result in any UI messages appearing)
 			setErrorMessage(getResourceBundleString(MESSAGE_WITH_ID) + threadId + getResourceBundleString(NOT_FOUND_WITH_QUOTE));
 			return gotoMain();
 		}
@@ -2593,7 +2592,7 @@ public class DiscussionForumTool {
 	  String returnString = processActionDisplayThread();
 	  if (!gotoMain().equals(returnString))
 	  {
-		  threadAnchorMessageId = getExternalParameterByKey(MESSAGE_ID); // OWLTODO: validated!
+		  threadAnchorMessageId = getExternalParameterByKey(MESSAGE_ID);
 	  }
 	  return returnString;
   }
@@ -2607,7 +2606,7 @@ public class DiscussionForumTool {
     
    selectedMessageCount ++;
 
-    String messageId = getExternalParameterByKey(MESSAGE_ID); // OWLTODO: validated!
+    String messageId = getExternalParameterByKey(MESSAGE_ID);
     if (messageId == null || "".equals(messageId))
     {
       setErrorMessage(getResourceBundleString(MESSAGE_REFERENCE_NOT_FOUND));
@@ -2663,18 +2662,6 @@ public class DiscussionForumTool {
 	    while( mes.getInReplyTo() != null) {
 	    	mes = messageManager.getMessageById(mes.getInReplyTo().getId());
 	    }
-		// OWLTODO: this is possibly a concern because while selectedMessage may have been validated,
-		// it may not be the head. Would there be a case where a user would have access to a child message
-		// but not the parent? moderation comes to mind. The concern would be a user accessing the child
-		// message directly, it sets the thread head to a message they actually can't see, and then through
-		// subsequent navigation they land on a page that displays selectedThreadHead, therefore bypassing
-		// any validation. Should we play it safe and add validation here, or is it not really a concern?
-		// OWLTODO: it appears that moderation is not an issue because pending/denied messages cannot be replied to,
-		// and once an approved message is applied to, it cannot later be denied. However, I'm leaving this
-		// comment here for now. Give it one last consideration to see if there are other cases where this
-		// concern is valid before deleting these comments. If we do address something here, see also
-		// processActionDisplayThread()
-		// The only restrictions on messages I'm aware of are postFirst, moderated, availability dates, and permissions. Given a user has access to a message, none of these can restrict access to the thread head, so I think this is safe --bbailla2
 	    selectedThreadHead = new DiscussionMessageBean(mes, messageManager);
 		selectedThreadHead.setRead(messageManager.isMessageReadForUser(mes.getTopic().getId(), mes.getId()));
 
@@ -2990,7 +2977,7 @@ public class DiscussionForumTool {
   private DiscussionForumBean getDecoratedForum()
   {
     log.debug("decorateSelectedForum()");
-    String forumId = getExternalParameterByKey(FORUM_ID); // OWLTODO: validated!
+    String forumId = getExternalParameterByKey(FORUM_ID);
     if (StringUtils.isNotBlank(forumId) && !"null".equals(forumId))
     {
       DiscussionForum forum = forumManager.getForumById(Long.valueOf(forumId));
@@ -3009,7 +2996,7 @@ public class DiscussionForumTool {
 	  }
 	  else
 	  {
-		  // OWLTODO: maybe do something else like throw an exception that redirects to an error page. There could be
+		  // maybe do something else here like throw an exception that redirects to an error page. There could be
 		  // cases where the user is presented with a legitimate link that is not currently valid, like an entity link
 		  // to a forum that is currently date restricted.
 		  log.warn("Attempted access to forum {} but user {} does not have permission", forum.getId(), getUserId());
@@ -3037,7 +3024,7 @@ public class DiscussionForumTool {
         if (decoForumBean != null)
         {
           // if this forum is selected to display full desciption
-              if (getExternalParameterByKey("forumId_displayExtended") != null // OWLTODO: Q: is this safe? A: Yes (to all param checks in this method)
+              if (getExternalParameterByKey("forumId_displayExtended") != null
                   && getExternalParameterByKey("forumId_displayExtended")
                       .trim().length() > 0
                   && decoForumBean
@@ -3092,7 +3079,7 @@ public class DiscussionForumTool {
             if (decoTopicBean != null)
             {
               // if this topic is selected to display full desciption
-              if (getExternalParameterByKey("topicId_displayExtended") != null // OWLTODO: Q: is this safe? A: Yes to all in this method.
+              if (getExternalParameterByKey("topicId_displayExtended") != null
                   && getExternalParameterByKey("topicId_displayExtended")
                       .trim().length() > 0
                   && decoTopicBean
@@ -3415,7 +3402,7 @@ public class DiscussionForumTool {
 	    selectedTopic = null;
 	    try
 	    {
-	      String topicId = getExternalParameterByKey(externalTopicId); // OWLTODO: validated!
+	      String topicId = getExternalParameterByKey(externalTopicId);
 		  long id = NumberUtils.toLong(topicId, -1L);
 		  if (id < 0)
 		  {
@@ -3487,7 +3474,7 @@ public class DiscussionForumTool {
    */
   private DiscussionTopicBean createTopic()
   {
-    String forumId = getExternalParameterByKey(FORUM_ID); // OWLTODO: validated!
+    String forumId = getExternalParameterByKey(FORUM_ID);
     if (StringUtils.isBlank(forumId) || "null".equals(forumId))
     {
       setErrorMessage(getResourceBundleString(PARENT_TOPIC_NOT_FOUND));
@@ -3962,8 +3949,8 @@ public class DiscussionForumTool {
 
   public String processDfComposeToggle()
   {
-    String redirectTo = getExternalParameterByKey(REDIRECT_PROCESS_ACTION); // OWLTODO: Q: is this safe? A: Yes
-    String expand = getExternalParameterByKey("composeExpand"); // OWLTODO: Q: is this safe? A: Yes
+    String redirectTo = getExternalParameterByKey(REDIRECT_PROCESS_ACTION);
+    String expand = getExternalParameterByKey("composeExpand");
 
     if (redirectTo == null || selectedTopic == null)
     {
@@ -4029,7 +4016,7 @@ public class DiscussionForumTool {
   @Deprecated // seems this method is unused?
   public String processDfMsgMarkMsgAsRead()
   {
-	    String messageId = getExternalParameterByKey(MESSAGE_ID); // OWLTODO: validated!
+	    String messageId = getExternalParameterByKey(MESSAGE_ID);
 	    if (messageId == null)
 	    {
 	      setErrorMessage(getResourceBundleString(MESSAGE_REFERENCE_NOT_FOUND));
@@ -4058,7 +4045,7 @@ public class DiscussionForumTool {
   @Deprecated // seems this method is unused?
   public String processDfMsgMarkMsgAsReadFromThread()
   {
-	    String messageId = getExternalParameterByKey(MESSAGE_ID); // OWLTODO: validated!
+	    String messageId = getExternalParameterByKey(MESSAGE_ID);
 	    if (messageId == null)
 	    {
 	      setErrorMessage(getResourceBundleString(MESSAGE_REFERENCE_NOT_FOUND));
@@ -4079,7 +4066,7 @@ public class DiscussionForumTool {
   
   public String processDfMsgReplyMsgFromEntire()
   {
-	  	String messageIdStr = getExternalParameterByKey(MESSAGE_ID);  // OWLTODO: validated!
+	  	String messageIdStr = getExternalParameterByKey(MESSAGE_ID);
 	    if (messageIdStr == null || "".equals(messageIdStr))
 	    {
 	      setErrorMessage(getResourceBundleString(MESSAGE_REFERENCE_NOT_FOUND));
@@ -4167,10 +4154,10 @@ public class DiscussionForumTool {
   public String processDfMsgGrdFromThread()
   {
 	  // this is believed to be dead code
-	  String messageId = getExternalParameterByKey(MESSAGE_ID); // OWLTODO: validated!
-	    String topicId = getExternalParameterByKey(TOPIC_ID); // OWLTODO: validated!
-	    String forumId = getExternalParameterByKey(FORUM_ID); // OWLTODO: validated!
-	    String userId = getExternalParameterByKey(USER_ID); // OWLTODO: validated!
+	  String messageId = getExternalParameterByKey(MESSAGE_ID);
+	    String topicId = getExternalParameterByKey(TOPIC_ID);
+	    String forumId = getExternalParameterByKey(FORUM_ID);
+	    String userId = getExternalParameterByKey(USER_ID);
 	    if (topicId == null)
 	    {
 	      setErrorMessage(getResourceBundleString(TOPC_REFERENCE_NOT_FOUND));
@@ -4378,7 +4365,7 @@ public class DiscussionForumTool {
   
   public String processDfMsgRvsFromThread()
   {
-	String messageId = getExternalParameterByKey(MESSAGE_ID); // OWLTODO: validated!
+	String messageId = getExternalParameterByKey(MESSAGE_ID);
 	if (messageId == null)
 	{
 	  setErrorMessage(getResourceBundleString(MESSAGE_REFERENCE_NOT_FOUND));
@@ -4471,11 +4458,6 @@ public class DiscussionForumTool {
 	selectedMessageCount = 0;
 	  // if coming from thread view, need to set message info
 	fromPage = getExternalParameterByKey(FROMPAGE);
-	/*
-	 * OWLTODO: Q: is this safe?
-	 * A: yes - 'fromPage' impacts a number of states, but the common theme is that you're navigated away from an action if it's not the page you're supposed to be on to process that action.
-	 * processReturnToOriginatingPage is a little suspicious, but validation preventing the assignment of 'selectedTopic' / 'selectedForum' should handle any abuse of the fromPage param.
-	 */
     if (fromPage != null) {
     	processActionDisplayMessage();
     }
@@ -4982,10 +4964,7 @@ public class DiscussionForumTool {
   {
 	  if (displayPendingMsgQueue == null){
 		  List membershipList = uiPermissionsManager.getCurrentUserMemberships(getSiteId());
-		  /*
-		  OWLTODO: Q: probably safe to get site id like this, but check
-		  A: Safe! See answer in refreshPendingMessage() --bbailla2
-		  */
+
 		  int numModTopicWithPerm = forumManager.getNumModTopicsWithModPermissionByPermissionLevel(membershipList);
 		  
 		  if (numModTopicWithPerm < 1)
@@ -5021,10 +5000,7 @@ public class DiscussionForumTool {
   {
 	  pendingMsgs = new ArrayList();
 	  numPendingMessages = 0;
-	  /*
-	  OWLTODO: Q: below: probably safe to get site id like this, but check.
-	  A: Safe! It's used only by getPendingMessages, and isDisplayPendingMsgQueue; these are referred to by jsp files to render the Pending Message buttons / the pending message table within the tool; so sourcing the data from within the current site makes sense. --bbailla2
-	  */
+
 	  List messages = forumManager.getPendingMsgsInSiteByMembership(uiPermissionsManager.getCurrentUserMemberships(getSiteId()));
 	  
 	  if (messages != null && !messages.isEmpty())
@@ -6662,13 +6638,13 @@ public class DiscussionForumTool {
   /**
    * @return siteId
    */
-  private String getContextSiteId() // OWLTODO: Q: is this okay to leave here? what is still using it? A: logging, event refs, and getPermissions/Members/Roles methods apparently used to build the permissions ui. Should be safe as these methods don't appear to be doing any permission checks.
+  private String getContextSiteId()
   {
     log.debug("getContextSiteId()");
     return ("/site/" + toolManager.getCurrentPlacement().getContext());
   }
 
-  // OWLTODO: we may want to use this method to set the forum once it has been validated already, so we don't waste time looking it up twice, if we find that would be a db hit
+  // use this method to set the selected forum once it has been validated for access already, to avoid looking it up twice
   private void setSelectedForumAfterValidation(DiscussionForum forum)
   {
 	selectedForum = new DiscussionForumBean(forum, uiPermissionsManager, forumManager);
@@ -6685,14 +6661,10 @@ public class DiscussionForumTool {
    */
   private void setSelectedForumForCurrentTopic(DiscussionTopic topic)
   {  
-	// OWLTODO: this was refactored...this method is unfortunately called in a LOT of places...
-	// Ideally we don't want to change the call sites, but we also don't want to get the forum twice
-	// However, it looks like that might be the best course of action as long as getDiscussionForumForTopic() remains fast
-	// When we call this after validation, it will be a little wasteful but some call sites will be swtiching to setSelected*AfterValidation() anyway
 	Optional<DiscussionForum> forum = forumManager.getDiscussionForumForTopic(topic);
 	if (!forum.isPresent() || !uiPermissionsManager.hasAccessPrivileges(forum.get()))
 	{
-		return; // can't find a forum or don't have access to it, do nothing // OWLTODO: maybe log it?
+		return; // can't find a forum or don't have access to it, do nothing (maybe log it?)
 	}
 
 	setSelectedForumAfterValidation(forum.get());
@@ -7221,7 +7193,7 @@ public class DiscussionForumTool {
 
    private void setFromMainOrForumOrTopic()
    {
-	   String originatingPage = getExternalParameterByKey(FROM_PAGE); // OWLTODO: Q: is this safe? A: based on previous comments about this fromPage param, it seems pretty safe. These are all views any user can access.
+	   String originatingPage = getExternalParameterByKey(FROM_PAGE);
 	   if(originatingPage != null && (MAIN.equals(originatingPage) || ALL_MESSAGES.equals(originatingPage) || FORUM_DETAILS.equals(originatingPage)
 			   	|| THREAD_VIEW.equals(originatingPage) || FLAT_VIEW.equals(originatingPage)))
 	   {
@@ -7427,9 +7399,7 @@ public class DiscussionForumTool {
 	 
 	 public String processActionDisplayInThread() {
 
-		 //String forumId = getExternalParameterByKey("forumId"); // OWLTODO: validated! (param ignored)
-		 //String topicId = getExternalParameterByKey("topicId"); // OWLTODO: validated! (param ignored)
-		 String paramMsgId = getExternalParameterByKey("msgId"); // OWLTODO: validated!
+		 String paramMsgId = getExternalParameterByKey("msgId");
 		 Message paramMsg = messageManager.getMessageByIdWithAttachments(Long.valueOf(paramMsgId));
 		 if (paramMsg == null) {
 			setErrorMessage(getResourceBundleString(MESSAGE_WITH_ID) + paramMsgId + getResourceBundleString(NOT_FOUND_WITH_QUOTE));
@@ -7444,14 +7414,13 @@ public class DiscussionForumTool {
 			return gotoMain();
 		 }
 		 if (!uiPermissionsManager.hasAccessPrivileges(paramMsg, topic.get())) {
-			// OWLTODO: better error message or combine this with the checks above if it doesn't really matter (gotoMain() generally will not result in any UI messages appearing)
 			setErrorMessage(getResourceBundleString(MESSAGE_WITH_ID) + paramMsgId + getResourceBundleString(NOT_FOUND_WITH_QUOTE));
 			return gotoMain();
 		 }
 
 		 selectedMsgId = paramMsgId;
 
-		 setSelectedForumForCurrentTopic(topic.get()); // OWLTODO: Q: why do we need to call this and then just overwrite it 2 lines later? A: it calls setForumBeanAssign()
+		 setSelectedForumForCurrentTopic(topic.get());
 		 selectedTopic = getDecoratedTopic(topic.get());
 		 selectedForum = getDecoratedForum(forum.get());
 
@@ -7746,7 +7715,7 @@ public class DiscussionForumTool {
 
 	  log.debug("processActionDuplicateForumMainConfirm()");
 
-	  String forumId = getExternalParameterByKey(FORUM_ID); // OWLTODO: validated!
+	  String forumId = getExternalParameterByKey(FORUM_ID);
 	  DiscussionForum forum = forumManager.getForumById(Long.valueOf(forumId));
 
 	  // make sure the user has permission to duplicate forums and the forum to copy belongs to the current site
@@ -7829,7 +7798,7 @@ public class DiscussionForumTool {
 	log.debug("processActionDuplicateTopicMainConfirm()");
 
 	DiscussionTopic topic = null;
-	String topicId = getExternalParameterByKey(TOPIC_ID); // OWLTODO: validated!
+	String topicId = getExternalParameterByKey(TOPIC_ID);
 	if(StringUtils.isNotBlank(topicId) && !"null".equals(topicId)){
 	  topic = (DiscussionTopic) forumManager.getTopicByIdWithAttachments(Long.valueOf(topicId));
 	} else if(selectedTopic != null) {
@@ -8555,7 +8524,7 @@ public class DiscussionForumTool {
 		Long sourceTopicId = this.selectedTopic.getTopic().getId();
 		if (log.isDebugEnabled()) log.debug("Calling processMoveThread source topic is " + sourceTopicId);
 		List checkedThreads = getRequestParamArray("moveCheckbox");
-		List destTopicList = getRequestParamArray("selectedTopicid"); // OWLTODO: validated!
+		List destTopicList = getRequestParamArray("selectedTopicid");
 
 		String desttopicIdstr = null;
 
@@ -8586,7 +8555,6 @@ public class DiscussionForumTool {
 		Long desttopicId = Long.parseLong(desttopicIdstr);
 
 		/*
-		 * OWLTODO: validated!
 		 * May be possible to craft "Move Conversation(s)" call while the selected topic doesn't have isMoveThread permission.
 		 * Verify that we in fact have isMovePostings permission:
 		 */
@@ -8597,15 +8565,12 @@ public class DiscussionForumTool {
 		}
 
 		/*
-		 * OWLTODO: validated!
-		 *
 		 * The topics available in the UI are sent over with JSON;
 		 * The JSON is populated in getMoveThreadJSON().
 		 * Used its criteria for a topics' inclusion to validate desttopicId here.
 		 *     Criteria: They are queried from this.getSiteId().
 		 *     They are then filtered to include only Boolean.FALSE.equals(tmpForum.getLocked()) && Boolean.FALSE.equals(topic.getLocked(). The parseTopics() method does no filtering.
 		 *     Nothing currently filters out topics the user can't access.
-		 * There's bugs - moderated topics are automatically marked as approved; this is out of scope.
 		 */
 		DiscussionTopic desttopic = forumManager.getTopicById(desttopicId);
 		Optional<DiscussionForum> destforum = forumManager.getDiscussionForumForTopic(desttopic);
@@ -8921,7 +8886,7 @@ public class DiscussionForumTool {
 
 	public String processActionEditRank() {
 		if (log.isDebugEnabled()) log.debug("processActionEditRank()");
-		String rankId = getExternalParameterByKey("rankId"); // OWLTODO: is this safe? probably because we don't even use ranking
+		String rankId = getExternalParameterByKey("rankId");
 		Rank thisrank = rankManager.getRankById(new Long(rankId));
 		ForumRankBean rankBean = new ForumRankBean(thisrank);
 		this.setForumRankBean(rankBean);
@@ -8983,7 +8948,7 @@ public class DiscussionForumTool {
 	public String processActionSaveRank() {
 		if (log.isDebugEnabled()) log.debug("ForumTool.processActionSaveRank()");
 
-		String filename = getExternalParameterByKey("addRank:add_attach.uploadId"); // OWLTODO: is this safe? probably because we don't use ranking
+		String filename = getExternalParameterByKey("addRank:add_attach.uploadId");
         // if processUpdate sets imageTooLarge, then stop
 		if (imageTooLarge) {
 		    imageTooLarge = false;          // reset imageTooLarge for new Add 
@@ -9254,7 +9219,7 @@ public class DiscussionForumTool {
     		String forumContextId = getSiteId();
     		if(checkCurrentMessageId){
     			//Check Message input field
-    			String msgIdStr = getExternalParameterByKey(CURRENT_MESSAGE_ID); // OWLTODO: validated!
+    			String msgIdStr = getExternalParameterByKey(CURRENT_MESSAGE_ID);
     			long msgId = Long.parseLong(msgIdStr);
     			if(tmpSelectedMessage == null || tmpSelectedMessage.getMessage() == null
     					|| (!tmpSelectedMessage.getMessage().getId().equals(msgId))){
@@ -9289,7 +9254,7 @@ public class DiscussionForumTool {
     			}
     		} else {
     			// Message param is ignored; user must be authorized only against the topic
-    			String topicIdStr = getExternalParameterByKey(CURRENT_TOPIC_ID); // OWLTODO: validated!
+    			String topicIdStr = getExternalParameterByKey(CURRENT_TOPIC_ID);
     			long topicId = Long.parseLong(topicIdStr);
     			if(tmpSelectedTopic == null || tmpSelectedTopic.getTopic() == null 
     					|| (!tmpSelectedTopic.getTopic().getId().equals(topicId))) {
