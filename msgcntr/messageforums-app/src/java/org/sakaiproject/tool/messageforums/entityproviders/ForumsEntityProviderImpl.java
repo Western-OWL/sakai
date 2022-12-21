@@ -32,13 +32,11 @@ import org.sakaiproject.api.app.messageforums.BaseForum;
 import org.sakaiproject.api.app.messageforums.DiscussionForum;
 import org.sakaiproject.api.app.messageforums.DiscussionTopic;
 import org.sakaiproject.api.app.messageforums.Message;
-import org.sakaiproject.api.app.messageforums.OpenForum;
 import org.sakaiproject.api.app.messageforums.PrivateForum;
 import org.sakaiproject.api.app.messageforums.Topic;
 import org.sakaiproject.api.app.messageforums.ui.DiscussionForumManager;
 import org.sakaiproject.api.app.messageforums.ui.UIPermissionsManager;
 import org.sakaiproject.authz.api.SecurityService;
-import org.sakaiproject.entity.api.Entity;
 import org.sakaiproject.entitybroker.EntityView;
 import org.sakaiproject.entitybroker.entityprovider.annotations.EntityCustomAction;
 import org.sakaiproject.entitybroker.entityprovider.capabilities.*;
@@ -467,7 +465,7 @@ public class ForumsEntityProviderImpl extends AbstractEntityProvider implements 
 		List<Message> fatMessages = fatTopic.getMessages();
 		List<Long> allowedMessages = uiPermissionsManager.hasAccessPrivileges(fatMessages, fatTopic);
 		for(Message fm : fatMessages) {
-			if (allowedMessages.contains(fatMessage.getId()))
+			if (allowedMessages.contains(fm.getId()))
 			{
 				SparseMessage sm = new SparseMessage(fm,/* readStatus =*/ false,/* addAttachments =*/ true, developerHelperService.getServerURL());
 				sanitizeSparseMessage(sm, userId, isAnon, realSiteId, isInstructor, false);
