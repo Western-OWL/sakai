@@ -2500,23 +2500,47 @@ public class MessageForumStatisticsBean {
 		log.debug("processActionStatisticsByTopic");
 		
 		//to save some speed, only update if the values have changed
-		String externalTopicId = StringUtils.trimToEmpty(getExternalParameterByKey(TOPIC_ID));
-		boolean newTopic = !externalTopicId.equals(selectedAllTopicsTopicId);
-		
-		if (newTopic && !externalTopicId.isEmpty())
+		String externalTopicId = StringUtils.trimToEmpty(getExternalParameterByKey(TOPIC_ID)); // this may be null/empty if we're actually working at the forum level
+		String externalForumId = StringUtils.trimToEmpty(getExternalParameterByKey(FORUM_ID)); // this should always have a value
+		boolean newTopic = !externalTopicId.equals(StringUtils.trimToEmpty(selectedAllTopicsTopicId));
+		boolean newForum = !externalForumId.equals(StringUtils.trimToEmpty(selectedAllTopicsForumId));
+
+		if (newTopic)
 		{
-			DiscussionTopic dt = forumManager.getTopicById(NumberUtils.toLong(externalTopicId, -1L));
-			Optional<DiscussionForum> forum = dt == null ? Optional.empty() : forumManager.getDiscussionForumForTopic(dt);
-			if (forum.isPresent() && uiPermissionsManager.hasAccessPrivileges(dt, forum.get()))
+			if (externalTopicId.isEmpty())
 			{
-				selectedAllTopicsTopicId = externalTopicId;
-				selectedAllTopicsTopicTitle = dt.getTitle();
-				selectedAllTopicsForumId = Long.toString(forum.get().getId());
-				selectedAllTopicsForumTitle = forum.get().getTitle();
+				selectedAllTopicsTopicId = ""; // just clear the topic id, nothing more to do
 			}
 			else
 			{
-				log.warn("MessageForumStatisticsBean.processActionStatisticsByTopic: Wasn't able to find discussion topic/forum for topic id {}, or user has no access.", externalTopicId);
+				newForum = false; // we are handling the forum change here instead, based on the new topic, regardless of the external params
+				DiscussionTopic dt = forumManager.getTopicById(NumberUtils.toLong(externalTopicId, -1L));
+				Optional<DiscussionForum> forum = dt == null ? Optional.empty() : forumManager.getDiscussionForumForTopic(dt);
+				if (forum.isPresent() && uiPermissionsManager.hasAccessPrivileges(dt, forum.get()))
+				{
+					selectedAllTopicsTopicId = externalTopicId;
+					selectedAllTopicsTopicTitle = dt.getTitle();
+					selectedAllTopicsForumId = Long.toString(forum.get().getId());
+					selectedAllTopicsForumTitle = forum.get().getTitle();
+				}
+				else
+				{
+					log.warn("MessageForumStatisticsBean.processActionStatisticsByTopic: Wasn't able to find discussion topic/forum for topic id {}, or user has no access.", externalTopicId);
+				}
+			}
+		}
+
+		if (newForum && !externalForumId.isEmpty())
+		{
+			DiscussionForum df = forumManager.getForumById(NumberUtils.toLong(externalForumId, -1L));
+			if (df != null && uiPermissionsManager.hasAccessPrivileges(df))
+			{
+				selectedAllTopicsForumId = externalForumId;
+				selectedAllTopicsForumTitle = df.getTitle();
+			}
+			else
+			{
+				log.warn("MessageForumStatisticsBean.processActionStatisticsByTopic: Wasn't able to find discussion forum for forum id {}, or user has no access.", externalForumId);
 			}
 		}
 							
