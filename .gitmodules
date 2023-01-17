@@ -1,0 +1,20 @@
+[submodule "externals/certification"]
+	path = externals/certification
+	url = https://github.com/Western-OWL/certification
+	branch = 22.3-owl.x
+[submodule "externals/ezproxy"]
+	path = externals/ezproxy
+	url = https://github.com/Western-OWL/EZProxy
+	branch = 22.3-owl.x
+[submodule "externals/owl-quartz-jobs"]
+	path = externals/owl-quartz-jobs
+	url = https://github.com/Western-OWL/OWL-Quartz-Jobs
+	branch = 22.3-owl.x
+[submodule "externals/sakora-csv"]
+	path = externals/sakora-csv
+	url = https://github.com/Western-OWL/sakora-csv
+	branch = 22.3-owl.x
+[submodule "externals/scorm"]
+	path = externals/scorm
+	url = https://github.com/Western-OWL/SCORM.2004.3ED.RTE
+	branch = 22.3-owl.x
