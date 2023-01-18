@@ -4,8 +4,8 @@
 $.sakai.tools = [
   'Announcements',
   'Attachments',
-  'Discussions',
-  'Polls',
+  'Forums',
+  'Polls'
 ];
 
 })(jQuery);
