@@ -42,7 +42,6 @@ import javax.persistence.MapKeyColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -280,6 +279,17 @@ public class Assignment {
         SINGLE_ATTACHMENT_SUBMISSION,              // 5
         EXTERNAL_TOOL_SUBMISSION,                  // 6
         VIDEO_SUBMISSION                           // 7
+    }
+
+    // OWL-5288 - we do not want the video submission type
+    public enum SubmissionTypeOWL {
+        ASSIGNMENT_SUBMISSION_TYPE_NONE,           // 0
+        TEXT_ONLY_ASSIGNMENT_SUBMISSION,           // 1
+        ATTACHMENT_ONLY_ASSIGNMENT_SUBMISSION,     // 2
+        TEXT_AND_ATTACHMENT_ASSIGNMENT_SUBMISSION, // 3
+        NON_ELECTRONIC_ASSIGNMENT_SUBMISSION,      // 4
+        SINGLE_ATTACHMENT_SUBMISSION,              // 5
+        EXTERNAL_TOOL_SUBMISSION,                  // 6
     }
 
     public enum GradeType {
