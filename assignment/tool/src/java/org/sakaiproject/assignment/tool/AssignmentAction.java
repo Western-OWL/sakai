@@ -3144,7 +3144,7 @@ public class AssignmentAction extends PagedResourceActionII {
         // information related to gradebook categories
         putGradebookCategoryInfoIntoContext(state, context);
 
-        context.put("value_totalSubmissionTypes", Assignment.SubmissionType.values().length - 1);
+        context.put("value_totalSubmissionTypes", Assignment.SubmissionTypeOWL.values().length - 1);
 
         Integer scaleFactor;
         Boolean anonGrading;
@@ -7708,6 +7708,11 @@ public class AssignmentAction extends PagedResourceActionII {
             if ( contentId < 1 ) {
                 addAlert(state, rb.getString("pleaseselectlti"));
             }
+        }
+
+        // OWL-5288 - throw user facing error if they somehow selected video submission type
+        if ( assignmentType == null || assignmentType == 7 ) {
+            addAlert(state, rb.getString("invalidSubType"));
         }
 
         // allow resubmission numbers
