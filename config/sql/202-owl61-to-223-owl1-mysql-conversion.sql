@@ -176,7 +176,7 @@ CREATE INDEX MFR_UNREAD_STATUS_I1 ON MFR_UNREAD_STATUS_T(TOPIC_C);
 -- Polls
 ALTER TABLE POLL_OPTION MODIFY DELETED BIT(1) NOT NULL;
 ALTER TABLE POLL_OPTION ALTER DELETED SET DEFAULT 0;
--- OWLTODO: this line will fail because we have nulls in option_order, commenting out for now, pending further investigation --
+-- OWL: this line will fail because we have nulls in option_order, moving to step 2 --
 -- ALTER TABLE POLL_OPTION MODIFY OPTION_ORDER INT NOT NULL;
 ALTER TABLE POLL_OPTION ALTER OPTION_ORDER DROP DEFAULT;
 ALTER TABLE POLL_OPTION MODIFY OPTION_POLL_ID BIGINT NOT NULL;
