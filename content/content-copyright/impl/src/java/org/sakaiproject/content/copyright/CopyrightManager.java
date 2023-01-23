@@ -109,14 +109,22 @@ public class CopyrightManager implements org.sakaiproject.content.copyright.api.
 			copyrightInfo.add(buildCopyrightItem(key, language, baseURL, copyrightMap));
 		}
 
+		/*
+		 ****************************** OWL NOTE ******************************
+		 *
+		 * This block of code breaks OWL because of our historical data (custom copyright keys being stored in the resource's XML blob).
+		 * For the time being (and for OWL only) we comment out this block of code. After community contribution, commenting out this block
+		 * should be the only local customization we have to carry forward to new versions of Sakai, with regards to using custom copyright options.
+		 * See OWL-1752 for more details.
+		 */
 		// If the copyright options are greater than zero, and copyright require choice (sakai.property) is set, add the 'Please select...' option to the beginning of the list
-		if (!copyrightInfo.getItems().isEmpty()) {
-			boolean customCopyrightRequireChoice = m_serverConfigurationService.getBoolean(SAK_PROP_COPYRIGHT_REQ_CHOICE, SAK_PROP_COPYRIGHT_REQ_CHOICE_DEFAULT);
-			if (customCopyrightRequireChoice) {
-				copyrightMap.put(MSG_KEY_COPYRIGHT_REQ_CHOICE_KEY, rb.getString(MSG_KEY_COPYRIGHT_REQ_CHOICE_KEY));
-				copyrightInfo.addToBeginning(buildCopyrightItem(MSG_KEY_COPYRIGHT_REQ_CHOICE_KEY, language, baseURL, copyrightMap));
-			}
-		}
+//		if (!copyrightInfo.getItems().isEmpty()) {
+//			boolean customCopyrightRequireChoice = m_serverConfigurationService.getBoolean(SAK_PROP_COPYRIGHT_REQ_CHOICE, SAK_PROP_COPYRIGHT_REQ_CHOICE_DEFAULT);
+//			if (customCopyrightRequireChoice) {
+//				copyrightMap.put(MSG_KEY_COPYRIGHT_REQ_CHOICE_KEY, rb.getString(MSG_KEY_COPYRIGHT_REQ_CHOICE_KEY));
+//				copyrightInfo.addToBeginning(buildCopyrightItem(MSG_KEY_COPYRIGHT_REQ_CHOICE_KEY, language, baseURL, copyrightMap));
+//			}
+//		}
 
 		return copyrightInfo;
 	}
