@@ -921,7 +921,10 @@
 				else if(oldElement.type == "password")
 				{
 				}
-				
+				else if(oldElement.type === "url")
+				{
+					newElement.value = "https://";
+				}
 			}
 			else if(oldElement.nodeName.toLowerCase() == "select")
 			{
