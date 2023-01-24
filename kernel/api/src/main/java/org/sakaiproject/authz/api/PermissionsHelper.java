@@ -45,4 +45,7 @@ public interface PermissionsHelper
 	
 	/**	Set this tool state attribute for permission descriptions  **/
 	public static final String PERMISSION_DESCRIPTION = "permissionDescriptions";
+
+	/** Set this tool state attribute for permissions warning banner */
+	public static final String PERMISSION_WARNING = "permissionWarning";
 }
