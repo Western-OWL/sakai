@@ -93,25 +93,24 @@ public class RWikiEntityProvider extends AbstractEntityProvider implements AutoR
 			
 			// Construct the page name and get the content.
 			String defaultRealm = "/site/" + siteId;
-			if(objectService.exists(pageName,defaultRealm)) {
-				
-				RWikiObject page = objectService.getRWikiObject(pageName, defaultRealm);
-				if(!objectService.checkRead(page)) {
-					log.warn("User '" + userId + "' does not have read permissions for page '" + page.getName() + "'. This page will not be returned in the JSON.");
-					throw new EntityException("Forbidden: You do not have permission to read this page","",HttpServletResponse.SC_FORBIDDEN);
+			try {
+				if (objectService.exists(pageName, defaultRealm)) {
+					RWikiObject page = objectService.getRWikiObject(pageName, defaultRealm);
+					if (objectService.checkRead(page)) {
+						SparsePage sparsePage = new SparsePage(pageName,siteId, format);
+						String localSpace = NameHelper.localizeSpace(page.getName(),defaultRealm);
+						DirectServletPageLinkRenderer plr = new DirectServletPageLinkRenderer(localSpace, defaultRealm, format);
+						String rendered = renderService.renderPage(page, localSpace, plr);
+						sparsePage.setHtml(rendered);
+						addComments(page,sparsePage);
+						return sparsePage;
+					}
 				}
-				SparsePage sparsePage = new SparsePage(pageName,siteId, format);
-				String localSpace = NameHelper.localizeSpace(page.getName(),defaultRealm);
-				DirectServletPageLinkRenderer plr = new DirectServletPageLinkRenderer(localSpace, defaultRealm, format);
-				String rendered = renderService.renderPage(page, localSpace, plr);
-				sparsePage.setHtml(rendered);
-				addComments(page,sparsePage);
-				return sparsePage;
-			} else {
-				log.warn("Bad request '" + view.getOriginalEntityUrl() + "'");
-				throw new EntityException("Bad request: You must supply a valid page name"
-        									,"",HttpServletResponse.SC_BAD_REQUEST);
+			} catch (Exception e) {
+				// Handled below
 			}
+			log.warn("User '" + userId + "' does not have read permissions for page '" + pageName + "' or it does not exist. This page will not be returned in the JSON.");
+			throw new EntityException("Forbidden: You do not have permission to read this page or this page does not exist","",HttpServletResponse.SC_FORBIDDEN);
 		} else {
 			log.warn("Bad request '" + view.getOriginalEntityUrl() + "'");
 			throw new EntityException("Bad request: To get the pages in a site you need a url like " +
