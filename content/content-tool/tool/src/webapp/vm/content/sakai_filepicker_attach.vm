@@ -136,7 +136,7 @@ includeLatestJQuery('sakai_filepicker_attach.vm');
 						<td headers="item">
 								<span class="$att_item.iconClass" aria-hidden="true"></span>
 								<span class="sr-only">$!att_item.hoverText</span>
-								<a href="$att_item.accessUrl" target="_blank" title="$tlang.getString('gen.type'): $att_item.hoverText   [$tlang.getString('gen.newwin')]">$formattedText.escapeHtml($att_item.displayName)</a>	
+								<a href="$att_item.accessUrl" target="_blank" rel="noreferrer" title="$tlang.getString('gen.type'): $att_item.hoverText   [$tlang.getString('gen.newwin')]">$formattedText.escapeHtml($att_item.displayName)</a>
 						</td>
 						<td headers="action">
 							<div class="itemAction">

@@ -61,8 +61,9 @@
 					#else
 					<li><img src = "#imageLink($contentTypeImageService.getContentTypeImage($props.getProperty($props.NamePropContentType)))" border="0"  alt ="$props.getProperty($props.NamePropContentType)" />
 					#end
-					<a href="$attachment.Url" target="_blank" title="$tlang.getString("gen.newwindow")">
-					  $formattedText.escapeHtml($attachment.Properties.getPropertyFormatted("DAV:displayname"))</a>
+					<a href="$attachment.Url" target="_blank" rel="noreferrer" title="$tlang.getString("gen.newwindow")">
+						$formattedText.escapeHtml($attachment.Properties.getPropertyFormatted("DAV:displayname"))
+					</a>
 					#if (!$props.getBooleanProperty($props.NamePropIsCollection) && $props.getProperty("DAV:getcontenttype") != "text/url")
 					  ($props.getPropertyFormatted($props.NamePropContentLength))
 					#end
