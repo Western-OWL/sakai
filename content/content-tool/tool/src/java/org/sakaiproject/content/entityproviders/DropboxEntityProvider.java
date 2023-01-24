@@ -99,6 +99,7 @@ public class DropboxEntityProvider extends AbstractEntityProvider implements Ent
 			throw new EntityNotFoundException("No access to tool in site: " + siteId, siteId);
 		}
 		
+		boolean isAllowed = true;
 		//get Id for user based on supplied eid
 		String userId = null;
 		try {
@@ -107,11 +108,11 @@ public class DropboxEntityProvider extends AbstractEntityProvider implements Ent
 				userId = u.getId();
 			}
 		} catch (UserNotDefinedException e) {
-			throw new EntityNotFoundException("Invalid user: " + userEid, userEid);
+			isAllowed = false;
 		}
 				
 		//check user has permission to this dropbox in this site
-		boolean isAllowed = canAccessDropbox(siteId, userId);
+		isAllowed = isAllowed && canAccessDropbox(siteId, userId);
 		
 		if(!isAllowed) {
 			throw new SecurityException("No access to site: " + siteId + " and dropbox: " + userEid);
