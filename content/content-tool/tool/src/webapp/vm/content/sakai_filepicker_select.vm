@@ -137,7 +137,7 @@ $(document).ready(function() {
 								<h4>
 									<span class="$att_item.iconClass" aria-hidden="true"></span>
 									<span class="sr-only">$!att_item.hoverText</span>
-									<a href="$att_item.accessUrl" target="_blank" title="$tlang.getString('gen.type'): $att_item.hoverText  [$tlang.getString('gen.newwin')]">$att_item.displayName</a>
+									<a href="$att_item.accessUrl" target="_blank" rel="noreferrer" title="$tlang.getString('gen.type'): $att_item.hoverText  [$tlang.getString('gen.newwin')]">$att_item.displayName</a>
 								</h4>	
 							</td>
 							<td  headers="action">
