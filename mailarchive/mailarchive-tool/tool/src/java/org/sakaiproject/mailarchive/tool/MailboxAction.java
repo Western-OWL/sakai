@@ -66,6 +66,7 @@ import org.sakaiproject.util.Validator;
 import org.sakaiproject.util.api.FormattedText;
 
 import lombok.extern.slf4j.Slf4j;
+import org.sakaiproject.authz.api.SecurityService;
 
 /**
  * <p>
@@ -150,10 +151,12 @@ public class MailboxAction extends PagedResourceActionII
 	private final int MESSAGE_THRESHOLD_DEFAULT = 2500;
 
 	private AliasService aliasService;
+    private final SecurityService securityService;
 
 	public MailboxAction() {
 		super();
 		aliasService = ComponentManager.get(AliasService.class);
+		securityService = ComponentManager.get(SecurityService.class);
 	}
 
 	/*
@@ -1115,7 +1118,9 @@ public class MailboxAction extends PagedResourceActionII
 			default:
 		}
 		bar.add(list);
-		if(allowedToOptions()) {
+
+		// OWL-4843 - tool retirement, disable access to "options" tab for non-admins
+		if(securityService.isSuperUser()) {
 			bar.add(options);
 		}
 		bar.add(permissions);
