@@ -5486,8 +5486,8 @@ public class SimplePageBean {
 			    contentHostingService.checkResource(id);
 			    return true;
 			} catch (Exception e) {
-			    // I think we should hide the item no matter what the error is
-			    return false;
+				// Authorized only if it's in the Lessons collection
+				return isLessonsUpload(id);
 			}
 		    }
 		}
@@ -5562,7 +5562,36 @@ public class SimplePageBean {
 
 		return false;
 	}
-		
+
+	/**
+	 * Given an item's sakaiId, determines if the item is uploaded via lessons.
+	 * Content uploaded through lessons goes into the site's Lessons folder, which  is hidden.
+	 * We need to differentiate between this content and other hidden resources to prevent users
+	 * from using lessons to expose content that shouldn't be visible.
+	 */
+	public boolean isLessonsUpload(String sakaiId)
+	{
+		if (sakaiId.startsWith(getCollectionId(false, false)))
+		{
+			return true;
+		}
+		// Legacy lessons used to upload content to /user/<user_id>/stuff4/<page_name>/<file_name>
+		Pattern userIdPattern = Pattern.compile("^/user/([\\d[a-f]-]{36})/stuff4/");
+		Matcher matcher = userIdPattern.matcher(sakaiId);
+		if (matcher.find())
+		{
+			String userId = matcher.group(1);
+
+			Site currentSite = getCurrentSite();
+			if (currentSite != null && currentSite.getMember(userId) != null)
+			{
+				// File is in the legacy upload location
+				return true;
+			}
+		}
+		return false;
+	}
+
     private boolean arePageItemsComplete(long pageId) {
 
         int sequence = 0;
@@ -6405,9 +6434,17 @@ public class SimplePageBean {
 
 	}
 
+	public String getCollectionId(boolean urls) {
+		return getCollectionId(urls, true);
+	}
 
 // for group-owned student pages, put it in the worksite of the current user
-	public String getCollectionId(boolean urls) {
+	/**
+	 * Gets a Lessons collection associated with this page from resources.
+	 * @param urls
+	 * @param checkHidden when false, bypasses ContentHostingService authz. Passing 'false' is needed for students to see embedded content if the Lessons collection is hidden in Resources
+	 */
+	public String getCollectionId(boolean urls, boolean checkHidden) {
 		String siteId = getCurrentPage().getSiteId();
 		String baseDir = ServerConfigurationService.getString("lessonbuilder.basefolder", null);
 		boolean hiddenDir = ServerConfigurationService.getBoolean("lessonbuilder.folder.hidden",false);
@@ -6496,7 +6533,10 @@ public class SimplePageBean {
 
 	    // OK?
 		try {
-			contentHostingService.checkCollection(folder);
+			if (checkHidden)
+			{
+				contentHostingService.checkCollection(folder);
+			}
 			// OK, let's use it
 			return folder;
 		} catch (Exception ignore) {};
