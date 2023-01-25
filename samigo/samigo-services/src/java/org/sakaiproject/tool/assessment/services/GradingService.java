@@ -2949,7 +2949,15 @@ Here are the definition and 12 cases I came up with (lydia, 01/2006):
 	  if ((bdx.abs().compareTo(DEFAULT_MAX_THRESHOLD) >= 0 || bdx.abs().compareTo(DEFAULT_MIN_THRESHOLD) <= 0
         || numberStr.contains("e") || numberStr.contains("E") ) 
 	    && bdx.doubleValue() != 0) {
-		  formatter = new DecimalFormat(FORMAT_MASK);
+		  /* Remove localization if possible to prevent inconsistent results.
+		   * E.g. 1000 in en_US: 10E2; in en_CA: 10e2
+		   * en_CA risks interpretation as 10*e*2 */
+		  formatter = NumberFormat.getInstance(new Locale(Locale.ENGLISH.getLanguage(), Locale.US.getCountry()));
+		  if (formatter instanceof DecimalFormat) {
+			  ((DecimalFormat)formatter).applyPattern(FORMAT_MASK);
+		  } else {
+			  formatter = new DecimalFormat(FORMAT_MASK);
+		  }
 	  } else {
 		  formatter = new DecimalFormat("0");
 	  }	  
