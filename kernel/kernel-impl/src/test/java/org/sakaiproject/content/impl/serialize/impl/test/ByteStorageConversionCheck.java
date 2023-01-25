@@ -60,7 +60,7 @@ public class ByteStorageConversionCheck
 		{
 			sb.append("   Byte "+bin[i]+": Stored as int["+(int)cin[i]+"]  char["+cin[i]+"]\n");
 		}
-		log.info(sb.toString());
+		//log.info(sb.toString());
 		
 		for ( int i = 0; i < bin.length; i++ ) {
 			Assert.assertEquals("Internal Byte conversion failed at "+bin[i]+"=>"+(int)cin[i]+"=>"+bout[i],bin[i],bout[i]);
