@@ -357,6 +357,9 @@
 			border: $lessons-column-border;
 			border-color: var(--lessons-column-border-color);
 		}
+		.coltrans.column {
+			border: none;
+		}
 		.mainList {
 			div:hover {
 				&.canEdit {
