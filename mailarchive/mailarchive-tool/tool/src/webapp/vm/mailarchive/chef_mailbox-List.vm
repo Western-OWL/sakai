@@ -6,53 +6,12 @@
 #end
 <div class="portletBody">
 	#if($menu)#toolbar($menu)#end
-	<form name="toolbar" action="#toolForm("$action")" method="post">
-		<div class="navPanel">
-			<div class="page-header">
-				<h1>$mailarchive_title</h1>
-			</div>
-			<div class="viewNav" style="width:50%">
-			#if ($validFrom)
-				<div class="instruction">
-					#if ($!validFrom.length() == 0)
-						$tlang.getString("lis.noemail")<br />
-					#else
-						$tlang.getString("lis.youare")#if($validFrom != "*") $tlang.getString("gen.fro2") $validFrom#else.#end<br />
-					#end
-					#if ($optSendTo)
-						$tlang.getString("lis.emasen")
-					#else
-						$tlang.getString("lis.emasen2")
-					#end
-				</div>
-
-				<ul  class="attachList indnt3">
-					#foreach ($alias in $aliases)
-						<li><a href="mailto:${alias.getId()}@${serverName}" title="$tlang.getString("lis.sendmailto") ${alias.getId()}@${serverName}">${alias.getId()}@${serverName}</a></li>
-					#end
-					#if(${nonAlias})
-						<li><a href="mailto:${nonAlias}@${serverName}" title="$tlang.getString("lis.sendmailto") ${nonAlias}@${serverName}">${nonAlias}@${serverName}</a></li>
-					#end
-				</ul>
-			#else
-				<p class="instruction"> $tlang.getString("lis.youarenot")</p>
-			#end
+	<div class="navPanel">
+		<div class="page-header">
+			<h1>$mailarchive_title</h1>
 		</div>
-			#if (${allow-search})
-			<div class="searchNav">
-				<label for="search" class="skip">$tlang.getString('lis.search')</label>
-				<input size="15" value="$formattedText.escapeHtml($!search)" name="search" id="search" type="text" class="searchField"  />
-				<input type="hidden" name="eventSubmit_doSearch" id="eventSubmit_doSearch" value="Search for emails" />
-				<a href="#" title="$tlang.getString('lis.search')" onclick="location = '#toolLink("$action" "doSearch")'+buildQueryString('toolbar');document.getElementById('submitnotifwrap').style.visibility='visible';return false;" style="text-decoration:none !important" class="act"><input type="button" class="active" value="$tlang.getString('lis.search')" /></a>
-				#if (($!search) && (!$search.equals("")))
-					<a href="#" title="$tlang.getString('lis.clear')" onclick="location = '#toolLink("$action" "doSearch_clear")';return false;" style="text-decoration:none !important" ><input type="button" value="$tlang.getString('lis.clear')" /></a>
-				#end
-				<div id="submitnotifwrap" style="padding:6px 0;visibility:hidden"><span id="submitnotif">$tlang.getString("lis.searchnotif")</span></div>
-			</div>
-			#end
-		</div>
-		<input type="hidden" name="sakai_csrf_token" value="$sakai_csrf_token" />
-	</form>
+		<div class="sak-banner-info">$tlang.getString("toolRetired")</div>
+	</div>
 
 	#if ($alertMessage)<div class="alertMessage">$tlang.getString("gen.alert") $formattedText.escapeHtml($alertMessage)</div><div class="clear"></div>#end
 	#if ($sort-order)
@@ -62,74 +21,38 @@
 		#set ($sort-img = "sakai/sortdescending.gif")
 		#set ($sort-dir = "descending")
 	#end
-	#if($!allMsgNumberInt && $allMsgNumberInt > 0)
-			<div class="listNav">
-				<div class="instruction">$tlang.getString("list.viewing") $topMsgPos - $btmMsgPos $tlang.getString("list.of") $allMsgNumber</div>
-				#if ($pagesize != 0)
-					#if ($goPPButton == "true")
-						<form name="firstpageForm" class="inlineForm" method="post" action="#toolForm("$action")">
-							<fieldset><legend>$tlang.getString("list.first")</legend><input type="submit" name="eventSubmit_doList_first" value="|&lt;" title="$tlang.getString("list.first")" /></fieldset>
-							<input type="hidden" name="sakai_csrf_token" value="$sakai_csrf_token" />
-						</form>
-					#else
-						<form name="firstpageForm" class="inlineForm" method="post" action="#toolForm("$action")">
-							<input type="submit" name="eventSubmit_doList_first" value="|&lt;" disabled="disabled" />
-							<input type="hidden" name="sakai_csrf_token" value="$sakai_csrf_token" />
-						</form>
-					#end
-					#if ($goPPButton == "true")
-						<form name="nextpageForm" class="inlineForm" method="post" action="#toolForm("$action")">
-							<fieldset><legend>$tlang.getString("list.prev") $pagesize</legend><input type="submit" name="eventSubmit_doList_prev" value="&lt;" title="$tlang.getString("list.prev") $pagesize"  accesskey="p" /></fieldset>
-							<input type="hidden" name="sakai_csrf_token" value="$sakai_csrf_token" />
-						</form>
-					#else
-						<form name="nextpageForm" class="inlineForm" method="post" action="#toolForm("$action")">
-							<input type="submit" name="eventSubmit_doList_prev" value="&lt;" disabled="disabled" />
-							<input type="hidden" name="sakai_csrf_token" value="$sakai_csrf_token" />
-						</form>
-					#end
-				#end
-				<form name="pagesizeForm" class="inlineForm" method="post" action="#toolForm("$action")">
-					<input type="hidden" name="eventSubmit_doChange_pagesize" value="changepagesize" />
-					<span class="skip">$tlang.getString("lis.select")</span>
-					<select name="selectPageSize" onchange="document.pagesizeForm.submit();">
-					<option value="5" #if($pagesize == 5) selected="selected" #end>$tlang.getString("lis.show5")</option>
-						<option value="10" #if($pagesize == 10) selected="selected" #end>$tlang.getString("lis.show10")</option>
-						<option value="20" #if($pagesize == 20) selected="selected" #end>$tlang.getString("lis.show20")</option>
-						<option value="50" #if($pagesize == 50) selected="selected" #end>$tlang.getString("lis.show50")</option>
-						<option value="100" #if($pagesize == 100) selected="selected" #end>$tlang.getString("lis.show100")</option>
-						<option value="200" #if($pagesize == 200) selected="selected" #end>$tlang.getString("lis.show200")</option>
-					</select>
+	<div class="sakai-table-toolBar">
+		#if (${allow-search})
+		<div class="sakai-table-filterContainer">
+			<form name="toolbar" action="#toolForm("$action")" method="post">
+				<div class="sakai-table-searchFilter">
+					<label for="search">$tlang.getString('lis.search')</label>
+					<div class="sakai-table-searchFilterControls">
+						<input size="15" value="$formattedText.escapeHtml($!search)" name="search" id="search" type="text" class="sakai-table-searchFilter-searchField" />
+						<a href="#" title="$tlang.getString('lis.search')" onclick="location = '#toolLink("$action" "doSearch")'+buildQueryString('toolbar');document.getElementById('submitnotifwrap').style.display='block';return false;">
+							<input type="button" value="$tlang.getString('lis.search')" />
+						</a>
+						#if (($!search) && (!$search.equals("")))
+							<a href="#" title="$tlang.getString('lis.clear')" onclick="location = '#toolLink("$action" "doSearch_clear")';return false;">
+								<input type="button" value="$tlang.getString('lis.clear')" style="margin-left:4px;" />
+							</a>
+						#end
+						<div id="submitnotifwrap" style="padding:7px;display:none;"><span id="submitnotif">$tlang.getString("lis.searchnotif")</span></div>
+					</div>
+					<input type="hidden" name="eventSubmit_doSearch" id="eventSubmit_doSearch" value="$tlang.getString('lis.search')" />
 					<input type="hidden" name="sakai_csrf_token" value="$sakai_csrf_token" />
-				</form>
-				#if ($pagesize != 0)
-					#if ($goNPButton == "true")
-						<form name="nextpageForm" class="inlineForm" method="post" action="#toolForm("$action")">
-							<fieldset><legend>$tlang.getString("list.next") $pagesize</legend><input type="submit" name="eventSubmit_doList_next" value="&gt;" title="$tlang.getString("list.next") $pagesize"  accesskey="n" /></fieldset>
-							<input type="hidden" name="sakai_csrf_token" value="$sakai_csrf_token" />
-						</form>
-					#else
-						<form name="nextpageForm" class="inlineForm" method="post" action="#toolForm("$action")">
-							<input type="submit" name="eventSubmit_doList_next" value="&gt;" disabled="disabled" />
-							<input type="hidden" name="sakai_csrf_token" value="$sakai_csrf_token" />
-						</form>
-					#end
-					#if ($goNPButton == "true")
-						<form name="lastpageForm" class="inlineForm" method="post" action="#toolForm("$action")">
-							<fieldset><legend>$tlang.getString("list.last")</legend><input type="submit" name="eventSubmit_doList_last" value="&gt;|" title="$tlang.getString("list.last")" /></fieldset>
-							<input type="hidden" name="sakai_csrf_token" value="$sakai_csrf_token" />
-						</form>
-					#else
-						<form name="lastpageForm" class="inlineForm" method="post" action="#toolForm("$action")">
-							<input type="submit" name="eventSubmit_doList_last" value="&gt;|" disabled="disabled" />
-							<input type="hidden" name="sakai_csrf_token" value="$sakai_csrf_token" />
-						</form>
-
-					#end
-				#end
-
+				</div>
+			</form>
+		</div>
+		#end
+		#if($!allMsgNumberInt && $allMsgNumberInt > 0)
+			<div class="sakai-table-pagerContainer">
+				#pagerPanel("pager1")
 			</div>
+		#end
+	</div>
 
+	#if($!allMsgNumberInt && $allMsgNumberInt > 0)
 		<table class ="listHier lines nolines specialLink" cellspacing="0" summary ="$tlang.getString("lis.summary")">
 			<tr>
 				<th id="from">
