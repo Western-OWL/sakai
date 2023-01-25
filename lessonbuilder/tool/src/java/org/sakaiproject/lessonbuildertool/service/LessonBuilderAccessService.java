@@ -547,6 +547,7 @@ public class LessonBuilderAccessService {
 					    // The assumption is that only one of those people can put content in the
 					    // page, and then only if the can see it.
 
+					    boolean isCHSReadAuthorized = true;
 					    if (owner != null && usersite != null && authzGroupService.getUserRole(usersite, group) != null) {
 						// OK
 					    } else if (owner != null && group == null && id.startsWith("/user/" + owner)) {
@@ -565,8 +566,7 @@ public class LessonBuilderAccessService {
 						// use this to bypass release control
 						if (owner == null && !allowGetResource(id, currentSiteId) ||
 						    owner != null && !contentHostingService.allowGetResource(id)) {
-						    throw new EntityPermissionException(sessionManager.getCurrentSessionUserId(), 
-							      ContentHostingService.AUTH_RESOURCE_READ, ref.getReference());
+							isCHSReadAuthorized = false;
 						}
 
 						securityService.pushAdvisor(allowReadAdvisor);
@@ -609,6 +609,11 @@ public class LessonBuilderAccessService {
 
 						if (!simplePageBean.isItemAvailable(item, item.getPageId())) {
 							throw new EntityPermissionException(null, null, null);
+						}
+						else if (!isCHSReadAuthorized && !simplePageBean.isLessonsUpload(id))
+						{
+							throw new EntityPermissionException(sessionManager.getCurrentSessionUserId(),
+								ContentHostingService.AUTH_RESOURCE_READ, ref.getReference());
 						}
 						}
 						accessCache.put(accessKey, "true");
