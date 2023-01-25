@@ -154,63 +154,55 @@
 .featherlight .featherlight-close {
     right: 5px;
     top: 5px;
+    margin-right: 0;
 }
 
 .popup-container-footer {
-  display: block;
-  padding: 8px 0;
-  line-height: 25px;
-  text-align: right;
-  font-size: 18px !important;
-
-  margin-top: 2em;
+    display: block;
+    padding: 0;
+    text-align: right;
+    margin-top: 25px;
 }
 
 
 .popup-dismiss-button {
     display: inline-block !important;
-    margin-right: 4px !important;
+    margin-right: 4px;
     margin-bottom: 4px !important;
-    padding: 3px 8px !important;
-
-    text-decoration: none;
+    padding: 10px !important;
+    text-decoration: none !important;
     cursor: pointer;
 }
 
 .popup-dismiss-button.permanent {
-    border: 1px solid #DBDCDE !important;
-    background: #E7E7EB !important;
-    color: #444 !important;
+    border: 1px solid #ddd !important;
+    background: #f9f9f9 !important;
+    color: #333 !important;
 }
 
 .popup-dismiss-button.temporary {
-    background: #3698DB !important;
+    background: #4f2683 !important;
     color: #FFF !important;
-    border: 1px solid #3698DB !important;
+    border: 1px solid #4f2683 !important;
+    margin-right: 0;
 }
 
 .popup-dismiss-button:hover,
 .popup-dismiss-button:focus {
-    -webkit-transition: background-color 0.2s, color 0.2s, border-color 0.2s;
-    -moz-transition: background-color 0.2s, color 0.2s, border-color 0.2s;
-    -ms-transition: background-color 0.2s, color 0.2s, border-color 0.2s;
-    -o-transition: background-color 0.2s, color 0.2s, border-color 0.2s;
-    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
-
     background: #FFF !important;
-    color: #3698DB !important;
-    border-color: #3698DB !important;
+    color: #4f2683 !important;
+    border-color: #4f2683 !important;
 }
 
 .popup-container-header {
-  background: #57068c;
+  background: #4f2683;
   padding: 10px 20px;
   color: #FFF;
   text-align: center;
   font-size: 2em;
-  padding-right: 50px;
   position: relative;
   display: block;
+  margin-bottom: 10px;
 }
 
 .pasystem-body .alert li {
