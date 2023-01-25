@@ -20,7 +20,6 @@ import java.util.List;
 
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
-import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
@@ -30,6 +29,7 @@ import org.quartz.TriggerKey;
 import org.sakaiproject.api.app.scheduler.events.TriggerEvent;
 import org.sakaiproject.api.app.scheduler.events.TriggerEvent.TRIGGER_EVENT_TYPE;
 import org.sakaiproject.api.app.scheduler.events.TriggerEventManager;
+import static org.sakaiproject.component.app.scheduler.ScheduledInvocationManagerImpl.GROUP_NAME;
 import org.sakaiproject.scheduler.events.hibernate.TriggerEventHibernateImpl;
 import org.springframework.orm.hibernate5.support.HibernateDaoSupport;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,11 +55,16 @@ public class TriggerEventManagerHibernateImpl extends HibernateDaoSupport implem
         TriggerEventHibernateImpl event = new TriggerEventHibernateImpl();
 
         event.setEventType(type);
-        event.setJobName(jobKey.getName());
         event.setTriggerName(triggerKey.getName());
         event.setTime(time);
         event.setMessage(message);
         event.setServerId(serverId);
+
+        if (GROUP_NAME.equals(jobKey.getGroup())) {
+            event.setJobName("Scheduled Invocation: " + jobKey.getName());
+        } else {
+            event.setJobName(jobKey.getName());
+        }
 
         try {
             getSessionFactory().getCurrentSession().save(event);
