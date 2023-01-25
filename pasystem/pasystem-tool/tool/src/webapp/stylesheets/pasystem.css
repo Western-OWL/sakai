@@ -22,7 +22,7 @@
   width: 92%;
 }
 
-.pasystem-banner-alert:before {
+.pasystem-banner-alert::before {
   font-family: 'pasystem-icons';
   float: left;
   margin: 0 10px;
@@ -34,8 +34,8 @@
   background-color: var(--warnBanner-bgcolor);
   color: var(--warnBanner-color);
 }
-.pasystem-banner-alert:before,
-.pasystem-banner-alert.pasystem-banner-medium:before {
+.pasystem-banner-alert::before,
+.pasystem-banner-alert.pasystem-banner-medium::before {
   content: '\f071';
   color: var(--warnBanner-color);
 }
@@ -43,7 +43,7 @@
   background-color: var(--errorBanner-bgcolor);
   color: var(--errorBanner-color); 
 }
-.pasystem-banner-alert.pasystem-banner-high:before {
+.pasystem-banner-alert.pasystem-banner-high::before {
   content: '\f06a';
   color: var(--errorBanner-color);
 }
@@ -52,8 +52,8 @@
   background-color: var(--infoBanner-bgcolor);
   color: var(--infoBanner-color);
 }
-.pasystem-banner-alert.pasystem-banner-timezone:before,
-.pasystem-banner-alert.pasystem-banner-low:before {
+.pasystem-banner-alert.pasystem-banner-timezone::before,
+.pasystem-banner-alert.pasystem-banner-low::before {
   content: '\f05a';
   color: var(--infoBanner-color);
 }
@@ -68,56 +68,32 @@
   font-family: 'pasystem-icons';
   content: '\f00d';
 }
-.pasystem-banner-alert-toggle {
-  -webkit-transition: background-color 0.2s, color 0.2s;
-  -moz-transition: background-color 0.2s, color 0.2s;
-  -ms-transition: background-color 0.2s, color 0.2s;
-  -o-transition: background-color 0.2s, color 0.2s;
-  transition: background-color 0.2s, color 0.2s;
-
-  background-color: #f7e084;
-  color: #000 !important;
-  text-align: center;
-  padding: 6px 8px;
-  border-radius: 3px;
-  text-decoration: none;
-}
 .pasystem-banner-alert-toggle-list-item {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  top: 13px;
-  border: 1px solid #E0E0E0;
-  z-index: 1000;
   display: inline-block;
-
-  -webkit-transition: background-color 0.2s, color 0.2s;
-  -moz-transition: background-color 0.2s, color 0.2s;
-  -ms-transition: background-color 0.2s, color 0.2s;
-  -o-transition: background-color 0.2s, color 0.2s;
-  transition: background-color 0.2s, color 0.2s;
-
-  background-color: #f7e084;
-  color: #000 !important;
   text-align: center;
-  padding: 6px 8px;
-  border-radius: 3px;
+}
+a.pasystem-banner-alert-toggle {
+  text-align: center;
   text-decoration: none;
 }
-.pasystem-banner-alert-toggle:before {
+.pasystem-banner-alert-toggle::before {
   font-family: 'pasystem-icons';
   content: '\f071';
+  margin-right: 4px;
+  color: #f7e084;
 }
-.pasystem-banner-alert-toggle:hover {
-  -webkit-transition: background-color 0.2s, color 0.2s;
-  -moz-transition: background-color 0.2s, color 0.2s;
-  -ms-transition: background-color 0.2s, color 0.2s;
-  -o-transition: background-color 0.2s, color 0.2s;
-  transition: background-color 0.2s, color 0.2s;
+a.pasystem-banner-alert-toggle:hover {
+    color: #fff;
+    text-decoration: none;
+}
+a.pasystem-banner-alert-toggle:hover span {
+    text-decoration: underline;
+}
+a.pasystem-banner-alert-toggle:hover::before {
+    text-decoration: none;
+    text-shadow: 0 0 5px rgba(165, 165, 165, 0.95);
+}
 
-  background-color: #F7DB4D;
-  text-decoration: none;
-}
 @media only screen and (max-width: 800px) {
   .pasystem-banner-alerts {
     display: none; /* Not working correctly on mobile yet */
@@ -207,4 +183,8 @@
 
 .pasystem-body .alert li {
   list-style: none;
+}
+
+a.btn-danger.btn-danger {
+  color: #fff;
 }

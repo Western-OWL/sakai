@@ -32,8 +32,8 @@
         <td>{{show-time this this.startTime}}</td>
         <td>{{show-time this this.endTime}}</td>    
         <td class="actions">
-            <a href="{{{actionURL this 'banners' this.uuid "edit"}}}" class="btn btn-primary btn-xs">{{{t this "Edit"}}}</a>
-            <a href="{{{actionURL this 'banners' this.uuid "delete"}}}" class="btn btn-danger btn-xs pasystem-delete-btn" data-record-type="banner"><span class="glyphicon glyphicon-trash"></span></a>
+            <a href="{{{actionURL this 'banners' this.uuid "edit"}}}" class="btn btn-default">{{{t this "Edit"}}}</a>
+            <a href="{{{actionURL this 'banners' this.uuid "delete"}}}" class="btn btn-danger pasystem-delete-btn" data-record-type="banner"><span class="glyphicon glyphicon-trash"></span></a>
         </td>
       </tr>
       {{/each}}
@@ -46,7 +46,7 @@
     <h3>{{{t this "Popups"}}}</h3>
 
     <div class="btn-toolbar">
-        <a href="{{{newURL this 'popups' 'new'}}}" class="btn btn-primary btn-sm pull-right">{{{t this "Create Popup"}}}</a>
+        <a href="{{{newURL this 'popups' 'new'}}}" class="btn btn-primary pull-right">{{{t this "Create Popup"}}}</a>
         <a title="{{{t this "Download ToolTip"}}}" href="/pasystem-tool/pasystem-samples.zip" class="btn btn-default btn-sm pull-right">{{{t this "Download Templates"}}}</a>
     </div>
   </header>
@@ -69,9 +69,9 @@
         <td>{{show-time this this.startTime}}</td>
         <td>{{show-time this this.endTime}}</td>    
         <td class="actions">
-            <a href="{{{actionURL this 'popups' this.uuid "preview"}}}" class="btn btn-default btn-xs preview-btn">{{{t this "Preview"}}}</a>
-            <a href="{{{actionURL this 'popups' this.uuid "edit"}}}" class="btn btn-primary btn-xs">{{{t this "Edit"}}}</a>
-            <a href="{{{actionURL this 'popups' this.uuid "delete"}}}" class="btn btn-danger btn-xs pasystem-delete-btn" data-record-type="popup"><span class="glyphicon glyphicon-trash"></span></a>
+            <a href="{{{actionURL this 'popups' this.uuid "preview"}}}" class="btn btn-default preview-btn">{{{t this "Preview"}}}</a>
+            <a href="{{{actionURL this 'popups' this.uuid "edit"}}}" class="btn btn-default">{{{t this "Edit"}}}</a>
+            <a href="{{{actionURL this 'popups' this.uuid "delete"}}}" class="btn btn-danger pasystem-delete-btn" data-record-type="popup"><span class="glyphicon glyphicon-trash"></span></a>
         </td>
       </tr>
       {{/each}}

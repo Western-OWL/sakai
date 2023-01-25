@@ -1,8 +1,11 @@
 #quickLinks.#{$namespace}quickLinksNav {
     padding: 0;
 }
-.#{$namespace}quickLinksNav__popup {
+.#{$namespace}quickLinksNav {
   @extend .view-all-sites-btn;
+}
+
+.#{$namespace}quickLinksNav__popup {
   @include display-flex;
   @include align-items(center);
   height: 100%;

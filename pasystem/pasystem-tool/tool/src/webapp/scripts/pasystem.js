@@ -27,7 +27,7 @@ PASystemBannerAlerts.prototype.handleBannerAlertClose = function($alert) {
 
   var alertId = $alert.attr("id");
 
-  $alert.slideUp(function() {
+  $alert.slideUp(200, function() {
     if (alertId == "tz") {
       // dismiss for the duration of the user's session
       document.cookie = "pasystem_timezone_warning_dismissed=true; path=/;";
@@ -60,7 +60,9 @@ PASystemBannerAlerts.prototype.renderBannerAlerts = function(forceShowAllBanners
     $alert.hide();
     self.$container.append($alert);
 
-    if (forceShowAllBanners || !self.hasAlertBeenDismissed(alert)) {
+    if (forceShowAllBanners) {
+      $alert.slideDown(200);
+    } else if (!self.hasAlertBeenDismissed(alert)) {
       $alert.show();
     } else {
       self.$toggle.show();
@@ -121,20 +123,14 @@ PASystemBannerAlerts.prototype.setupAlertBannerToggle = function() {
   var self = this;
 
   self.$toggle = $($("#pasystemBannerAlertsToggleTemplate").html().trim());
-
-  if ($('.Mrphs-siteHierarchy:visible').length > 0) {
-    // Place the notification in the breadcrumbs bar where it's out of the way
-    self.$toggle.css('top', ($('.Mrphs-siteHierarchy').offset().top) + 'px');
-  }
-
   self.$toggle.hide();
-  $("#loginLinks").prepend(self.$toggle);
+  $("#mastLogin").prepend(self.$toggle);
 
   self.$toggle.on("click", function(event) {
     event.preventDefault();
 
     self.showAllAlerts();
-    self.$toggle.slideUp();
+    self.$toggle.hide();
 
     return false;
   });
