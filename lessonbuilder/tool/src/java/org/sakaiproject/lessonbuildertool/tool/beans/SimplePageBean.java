@@ -5105,8 +5105,8 @@ public class SimplePageBean {
 		this.order = order;
 	}
 
-	public void fixorder() {
-	    List<SimplePageItem> items = getItemsOnPage(getCurrentPageId());
+	public void fixorder(long pageId) {
+	    List<SimplePageItem> items = getItemsOnPage(pageId);
 		items.sort(Comparator.comparing(SimplePageItem::getSequence));
 
 		// remove items where sequence is <= 0
@@ -5137,7 +5137,7 @@ public class SimplePageBean {
 
 		simplePageToolDao.setRefreshMode();
 
-		fixorder(); // order has to be contiguous or things will break
+		fixorder(getCurrentPageId()); // order has to be contiguous or things will break
 
 		order = order.trim();
 
@@ -5215,7 +5215,7 @@ public class SimplePageBean {
 
 		itemsCache.remove(getCurrentPage().getPageId());
 		// removals left gaps in order. fix it.
-		fixorder();
+		fixorder(getCurrentPage().getPageId());
 		itemsCache.remove(getCurrentPage().getPageId());
 
 		return "success";
