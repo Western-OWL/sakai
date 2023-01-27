@@ -1230,7 +1230,7 @@ public class SimplePageToolDaoImpl extends HibernateDaoSupport implements Simple
 		item.setDescription(old.getDescription());
 		item.setHeight(old.getHeight());
 		item.setWidth(old.getWidth());
-		item.setAlt(old.getAlt());
+		item.setAlt(Objects.toString(old.getAlt(), ""));
 		item.setNextPage(old.getNextPage());
 		item.setFormat(old.getFormat());
 		item.setRequired(old.isRequired());
