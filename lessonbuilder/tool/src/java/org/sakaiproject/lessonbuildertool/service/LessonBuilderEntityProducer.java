@@ -470,7 +470,7 @@ public class LessonBuilderEntityProducer extends AbstractEntityProvider
 		addAttr(doc, itemElement, "description", item.getDescription());
 		addAttr(doc, itemElement, "height", item.getHeight());
 		addAttr(doc, itemElement, "width", item.getWidth());
-		addAttr(doc, itemElement, "alt", item.getAlt());
+		addAttr(doc, itemElement, "alt", Objects.toString(item.getAlt(), ""));
 		addAttr(doc, itemElement, "required", item.isRequired() ? "true" : "false");
 		addAttr(doc, itemElement, "prerequisite", item.isPrerequisite() ? "true" : "false");
 		addAttr(doc, itemElement, "subrequirement", item.getSubrequirement() ? "true" : "false");
@@ -1581,7 +1581,7 @@ public class LessonBuilderEntityProducer extends AbstractEntityProvider
 		if (item != null) {
 		    String oldSakaiId = Objects.toString(item.getSakaiId(), "");
 		    if (oldSakaiId.equals(SimplePageItem.DUMMY)) {
-			mapGroups.put(item.getAlt(), sakaiid);
+			mapGroups.put(Objects.toString(item.getAlt(), ""), sakaiid);
 		    } else if (!oldSakaiId.equals(sakaiid)) {
 			mapGroups.put(oldSakaiId, sakaiid);
 		    }
