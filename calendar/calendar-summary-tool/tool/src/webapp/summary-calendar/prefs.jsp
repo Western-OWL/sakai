@@ -17,7 +17,7 @@
 	
 	<h:outputText value="#{PrefsBean.initValues}"/>
 	
-	<h3><h:outputText value="#{msgs.menu_prefs}"/></h3>
+	<div class="page-header"><h1><h:outputText value="#{msgs.menu_prefs}"/></h1></div>
 	<sakai:instruction_message value="#{msgs.instructions_preferences}" />
 		
 	<f:subview id="msg" rendered="#{PrefsBean.messageToBeDisplayed}">
@@ -27,8 +27,8 @@
 	<h:form id="prefsForm">
 	
 		<%/* Calendar display */%>
-		<h4><h:outputText value="#{msgs.prefs_section_display}"/></h4>
-		<p><h:outputText value="#{msgs.instructions_display}" /></p>
+		<h2><h:outputText value="#{msgs.prefs_section_display}"/></h2>
+		<sakai:instruction_message value="#{msgs.instructions_display}" />
 		<div class="form-group row">
 			<h:outputLabel for="selectViewMode" value="#{msgs.prefs_view_mode}: " styleClass="form-group-label col-xs-3"/>
 			<div class="col-xs-8">
@@ -43,11 +43,11 @@
 		
 		
 		<%/* Event priorities */%>
-		<h4><h:outputText value="#{msgs.prefs_section_priority}"/></h4>
-		<h:outputText value="#{msgs.instructions_priority}" />
+		<h2><h:outputText value="#{msgs.prefs_section_priority}"/></h2>
+		<sakai:instruction_message value="#{msgs.instructions_priority}" />
 		
 		<%/* Event priorities: event types */%>
-		<h5><h:outputText value="#{msgs.prefs_section_priority_eventypes}" styleClass="indnt1"/></h5>
+		<h3><h:outputText value="#{msgs.prefs_section_priority_eventypes}"/></h3>
 		
 		<%/* High Priority */%>
 		<div class="form-group row">
@@ -104,7 +104,7 @@
 		</div>
 		
 		<%/* Event priorities: colors */%>
-		<h5><h:outputText value="#{msgs.prefs_section_priority_color}" styleClass="indnt1"/></h5>
+		<h3><h:outputText value="#{msgs.prefs_section_priority_color}"/></h3>
 		<div class="form-group row">
 			<h:outputLabel for="highPriorityColor" value="#{msgs.prefs_high_priority}: " styleClass="col-xs-3"/>
 			<div class="col-xs-8">

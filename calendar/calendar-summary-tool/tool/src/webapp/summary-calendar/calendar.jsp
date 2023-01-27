@@ -30,7 +30,7 @@
 	<f:verbatim><div style="width:100%" id="div100"></f:verbatim>
 		<h:panelGrid styleClass="sectionContainerNav" style="width:100%" columns="2" columnClasses="calLeft,calRight" id="panelgrid_top"> 		
 			<f:subview id="title">
-				<f:verbatim><h3 style="text-align: left; white-space: nowrap;"></f:verbatim><h:outputText value="#{CalBean.caption}"/><f:verbatim></h3></f:verbatim>
+				<f:verbatim><h1></f:verbatim><h:outputText value="#{CalBean.caption}"/><f:verbatim></h1></f:verbatim>
 			</f:subview>
 
 	        <h:panelGroup>
