@@ -16,6 +16,7 @@
 package org.sakaiproject.lessonbuildertool.ccexport;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
@@ -63,7 +64,7 @@ public class LessonsExport {
         }
 
         for (SimplePageItem item : items) {
-            String sakaiId;
+            String sakaiId = Objects.toString(item.getSakaiId(), "");
             CCResourceItem res = null;
             String itemString = null;
             String urlTitle = null;
@@ -121,7 +122,6 @@ public class LessonsExport {
                     res = ccConfig.getFileMap().get(item.getSakaiId());
                     break;
                 case SimplePageItem.ASSIGNMENT:
-                    sakaiId = item.getSakaiId();
                     if (sakaiId.indexOf("/", 1) < 0) {
                         sakaiId = "assignment/" + sakaiId;
                     } else {
@@ -130,7 +130,6 @@ public class LessonsExport {
                     res = ccConfig.getAssignmentMap().get(sakaiId);
                     break;
                 case SimplePageItem.ASSESSMENT:
-                    sakaiId = item.getSakaiId();
                     if (sakaiId.indexOf("/", 1) < 0) {
                         sakaiId = "sam_pub/" + sakaiId;
                     } else {

@@ -27,6 +27,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -567,8 +568,8 @@ public class LessonsEntityProvider extends AbstractEntityProvider implements Ent
 			super(item);
 			if(item != null)
 			{
-				this.sakaiId = item.getSakaiId();
-				this.html = item.getHtml();
+				this.sakaiId = Objects.toString(item.getSakaiId(), "");
+				this.html = Objects.toString(item.getHtml(), "");
 				this.url = item.getURL();
 			}
 		}

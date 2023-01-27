@@ -24,6 +24,7 @@ package org.sakaiproject.lessonbuildertool.tool.producers;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
@@ -426,17 +427,18 @@ public class ShowItemProducer implements ViewComponentProducer, NavigationCaseRe
 		    LessonEntity lessonEntity = null;
 		    switch (item.getType()) {
 		    case SimplePageItem.ASSIGNMENT:
-			    lessonEntity = assignmentEntity.getEntity(item.getSakaiId());
+			    lessonEntity = assignmentEntity.getEntity(Objects.toString(item.getSakaiId(), ""));
 			    break;
 		    case SimplePageItem.ASSESSMENT:
-			    lessonEntity = quizEntity.getEntity(item.getSakaiId(),simplePageBean);
+			    lessonEntity = quizEntity.getEntity(Objects.toString(item.getSakaiId(), ""),simplePageBean);
 			    break;
 		    case SimplePageItem.FORUM:
-			    lessonEntity = forumEntity.getEntity(item.getSakaiId());
+			    lessonEntity = forumEntity.getEntity(Objects.toString(item.getSakaiId(), ""));
 			    break;
 		    case SimplePageItem.BLTI:
 			if (bltiEntity != null)
-			    lessonEntity = bltiEntity.getEntity(item.getSakaiId()); break;
+			    lessonEntity = bltiEntity.getEntity(Objects.toString(item.getSakaiId(), ""));
+				break;
 		    }
 		    if ("EDIT".equals(source))
 			source = (lessonEntity==null)?"dummy":lessonEntity.editItemUrl(simplePageBean);

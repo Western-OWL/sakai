@@ -1254,15 +1254,15 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 			boolean forceButtonColor = false;
 			String color = null;
 			for (SimplePageItem i : itemList) {
+				String sakaiId = Objects.toString(i.getSakaiId(), "");
 
 				// If the content is MULTIMEDIA (type 7) and the sakaiId is populated, then this is
 				// a Sakai content reference. We can then check if it's available to the current user
-				if (i.getType() == SimplePageItem.MULTIMEDIA && StringUtils.isNotBlank(i.getSakaiId())) {
-				    if (!contentHostingService.isAvailable(String.valueOf(i.getSakaiId()))) {
+				if (i.getType() == SimplePageItem.MULTIMEDIA && StringUtils.isNotBlank(sakaiId)) {
+				    if (!contentHostingService.isAvailable(sakaiId)) {
 						// The Lessons folder can be hidden by default via sakai.properties (lessonbuilder.folder.hidden = true).
 						// If this hidden resource is not Lessons uploaded content, it should be skipped.
-						String resourceId = String.valueOf(i.getSakaiId());
-						if (resourceId == null || !simplePageBean.isLessonsUpload(resourceId))
+						if (!simplePageBean.isLessonsUpload(sakaiId))
 						{
 							continue;
 						}
@@ -1367,14 +1367,14 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 					continue;
 				}
 
-				if(httpServletRequest.getParameter("printall") != null && i.getSakaiId() != null && !"".equals(i.getSakaiId()) && StringUtils.isNumeric(i.getSakaiId())
-						&& !printedSubpages.contains(Long.valueOf(i.getSakaiId())))			
+				if(httpServletRequest.getParameter("printall") != null && StringUtils.isNumeric(sakaiId)
+						&& !printedSubpages.contains(Long.valueOf(sakaiId)))			
 				{
 					// is a subpage		
 															
-					printedSubpages.add(Long.valueOf(i.getSakaiId()));
+					printedSubpages.add(Long.valueOf(sakaiId));
 					
-					List<SimplePageItem> subitemList = (List<SimplePageItem>) simplePageBean.getItemsOnPage(Long.valueOf(i.getSakaiId()));
+					List<SimplePageItem> subitemList = (List<SimplePageItem>) simplePageBean.getItemsOnPage(Long.valueOf(sakaiId));
 					printSubpage(subitemList, first, sectionWrapper, sectionContainer, columnContainer, tableContainer, 
 							container, cols, colnum, canEditPage, currentPage, anyItemVisible, newItemId, showRefresh, canSeeAll, 
 							M_locale, ieVersion, showDownloads, iframeJavascriptDone, tofill, placement, params, postedCommentId,
@@ -1509,7 +1509,7 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 					    case SimplePageItem.BLTI:
 						String bltiIcon = "fa-globe";
                                                 if (bltiEntity != null && ((BltiInterface)bltiEntity).servicePresent()) {
-							LessonEntity lessonEntity = (bltiEntity == null ? null : bltiEntity.getEntity(i.getSakaiId()));
+							LessonEntity lessonEntity = (bltiEntity == null ? null : bltiEntity.getEntity(sakaiId));
 							String tmp = ((BltiInterface)lessonEntity).getIcon();
 							bltiIcon = (tmp == null) ? bltiIcon : tmp;
                                                 }
@@ -1558,7 +1558,7 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 					// explanation that the
 					// author is going to have to choose the item from the
 					// current site
-					if (i.getSakaiId().equals(SimplePageItem.DUMMY)) {
+					if (SimplePageItem.DUMMY.equals(sakaiId)) {
 						String code = null;
 						switch (i.getType()) {
 						case SimplePageItem.ASSIGNMENT:
@@ -1622,8 +1622,8 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 							// better anyway
 							int type = 4;
 							LessonEntity assignment = null;
-							if (!i.getSakaiId().equals(SimplePageItem.DUMMY)) {
-								assignment = assignmentEntity.getEntity(i.getSakaiId(), simplePageBean);
+							if (!SimplePageItem.DUMMY.equals(sakaiId)) {
+								assignment = assignmentEntity.getEntity(sakaiId, simplePageBean);
 								if (assignment != null) {
 									type = assignment.getTypeOfGrade();
 									String editUrl = assignment.editItemUrl(simplePageBean);
@@ -1651,7 +1651,7 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 							// so it is
 							// safe to dedicate to assessments
 							UIOutput.make(tableRow, "requirement-text", (i.getSubrequirement() ? i.getRequirementText() : "false"));
-							LessonEntity quiz = quizEntity.getEntity(i.getSakaiId(),simplePageBean);
+							LessonEntity quiz = quizEntity.getEntity(sakaiId, simplePageBean);
 							if (quiz != null) {
 								String editUrl = quiz.editItemUrl(simplePageBean);
 								if (editUrl != null) {
@@ -1667,10 +1667,10 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 								    entityDeleted = true;
 
 							} else
-							    notPublished = quizEntity.notPublished(i.getSakaiId());
+							    notPublished = quizEntity.notPublished(sakaiId);
 						} else if (i.getType() == SimplePageItem.BLTI) {
 						    UIOutput.make(tableRow, "type", "b");
-						    LessonEntity blti= (bltiEntity == null ? null : bltiEntity.getEntity(i.getSakaiId()));
+						    LessonEntity blti= (bltiEntity == null ? null : bltiEntity.getEntity(sakaiId));
 						    if (blti != null) {
 							String editUrl = blti.editItemUrl(simplePageBean);
 							if (editUrl != null)
@@ -1689,7 +1689,7 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 						} else if (i.getType() == SimplePageItem.FORUM) {
 							UIOutput.make(tableRow, "extra-info");
 							UIOutput.make(tableRow, "type", "8");
-							LessonEntity forum = forumEntity.getEntity(i.getSakaiId());
+							LessonEntity forum = forumEntity.getEntity(sakaiId);
 							if (forum != null) {
 								String editUrl = forum.editItemUrl(simplePageBean);
 								if (editUrl != null) {
@@ -1725,11 +1725,11 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 						UIOutput.make(tableRow, "type", "page");
 						UIOutput.make(tableRow, "page-next", Boolean.toString(i.getNextPage()));
 						UIOutput.make(tableRow, "page-button", Boolean.toString("button".equals(i.getFormat())));
-						SimplePage page = simplePageToolDao.getPage(Long.valueOf(i.getSakaiId()));
+						SimplePage page = simplePageToolDao.getPage(Long.valueOf(sakaiId));
 						UIOutput.make(tableRow, "page-hidden", Boolean.toString(page.isHidden()));
 						itemGroupString = simplePageBean.getItemGroupString(i, null, true);
 						UIOutput.make(tableRow, "item-groups", itemGroupString);
-						SimplePage sPage = simplePageBean.getPage(Long.parseLong(i.getSakaiId()));
+						SimplePage sPage = simplePageBean.getPage(Long.parseLong(sakaiId));
 						if (sPage != null) {
 							Date rDate = sPage.getReleaseDate();
 							String rDateString = "";
@@ -1742,11 +1742,11 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 					if (canSeeAll) {
 						// haven't set up itemgroupstring yet
 						if (!canEditPage) {
-						    if (!i.getSakaiId().equals(SimplePageItem.DUMMY)) {
+						    if (!SimplePageItem.DUMMY.equals(sakaiId)) {
 							LessonEntity lessonEntity = null;
 							switch (i.getType()) {
 							case SimplePageItem.ASSIGNMENT:
-							    lessonEntity = assignmentEntity.getEntity(i.getSakaiId(), simplePageBean);
+							    lessonEntity = assignmentEntity.getEntity(sakaiId, simplePageBean);
 							    if (lessonEntity != null)
 								itemGroupString = simplePageBean.getItemGroupString(i, lessonEntity, true);
 							    if (!lessonEntity.objectExists())
@@ -1755,16 +1755,16 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 								notPublished = true;
 							    break;
 							case SimplePageItem.ASSESSMENT:
-							    lessonEntity = quizEntity.getEntity(i.getSakaiId(),simplePageBean);
+							    lessonEntity = quizEntity.getEntity(sakaiId, simplePageBean);
 							    if (lessonEntity != null)
 								itemGroupString = simplePageBean.getItemGroupString(i, lessonEntity, true);
 							    else 
-								notPublished = quizEntity.notPublished(i.getSakaiId());
+								notPublished = quizEntity.notPublished(sakaiId);
 							    if (!lessonEntity.objectExists())
 								entityDeleted = true;
 							    break;
 							case SimplePageItem.FORUM:
-							    lessonEntity = forumEntity.getEntity(i.getSakaiId());
+							    lessonEntity = forumEntity.getEntity(sakaiId);
 							    if (lessonEntity != null)
 								itemGroupString = simplePageBean.getItemGroupString(i, lessonEntity, true);
 							    if (!lessonEntity.objectExists())
@@ -1774,7 +1774,7 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 							    break;
 							case SimplePageItem.BLTI:
 							    if (bltiEntity != null)
-								lessonEntity = bltiEntity.getEntity(i.getSakaiId());
+								lessonEntity = bltiEntity.getEntity(sakaiId);
 							    if (lessonEntity != null)
 								itemGroupString = simplePageBean.getItemGroupString(i, null, true);
 							    if (!lessonEntity.objectExists())
@@ -1825,7 +1825,7 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 							if (itemGroupString != null) {
 								String cssClasses = "item-group-titles";
 								if (i.getType() == SimplePageItem.PAGE) {
-									SimplePage sPage = simplePageBean.getPage(Long.parseLong(i.getSakaiId()));
+									SimplePage sPage = simplePageBean.getPage(Long.parseLong(sakaiId));
 									if (sPage != null) {
 										Date rDate = sPage.getReleaseDate();
 
@@ -1858,7 +1858,7 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 						if (itemGroupString != null) {
 							String cssClasses = "item-group-titles";
 							if (i.getType() == SimplePageItem.PAGE) {
-								SimplePage sPage = simplePageBean.getPage(Long.parseLong(i.getSakaiId()));
+								SimplePage sPage = simplePageBean.getPage(Long.parseLong(sakaiId));
 								if (sPage != null) {
 									Date rDate = sPage.getReleaseDate();
 
@@ -3733,8 +3733,9 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 		boolean usable = available || canEditPage;
 		boolean fake = !usable;  // by default, fake output if not available
 		String itemString = Long.toString(i.getId());
+		String sakaiId = Objects.toString(i.getSakaiId(), "");
 
-		if ((SimplePageItem.DUMMY).equals(i.getSakaiId())) {
+		if ((SimplePageItem.DUMMY).equals(sakaiId)) {
 		    fake = true; // dummy is fake, but still available
 		} else if (i.getType() == SimplePageItem.RESOURCE || i.getType() == SimplePageItem.URL) {
 			if (usable) {
@@ -3767,7 +3768,7 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 			}
 
 		} else if (i.getType() == SimplePageItem.PAGE) {
-			SimplePage p = simplePageToolDao.getPage(Long.valueOf(i.getSakaiId()));
+			SimplePage p = simplePageToolDao.getPage(Long.valueOf(sakaiId));
 
 			if(p != null) {
 				GeneralViewParameters eParams = new GeneralViewParameters(ShowPageProducer.VIEW_ID, p.getPageId());
@@ -3843,7 +3844,7 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 			if (usable && i.isPrerequisite()) {
 			    simplePageBean.checkItemPermissions(i, true);
 			}
-			LessonEntity lessonEntity = assignmentEntity.getEntity(i.getSakaiId(), simplePageBean);
+			LessonEntity lessonEntity = assignmentEntity.getEntity(sakaiId, simplePageBean);
 			if (usable && lessonEntity != null && (canEditPage || !lessonEntity.notPublished())) {
 
 				GeneralViewParameters params = new GeneralViewParameters(ShowItemProducer.VIEW_ID);
@@ -3864,8 +3865,8 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 			if (usable && i.isPrerequisite()) {
 			    simplePageBean.checkItemPermissions(i, true);
 			}
-			LessonEntity lessonEntity = quizEntity.getEntity(i.getSakaiId(),simplePageBean);
-			if (usable && lessonEntity != null && (canEditPage || !quizEntity.notPublished(i.getSakaiId()))) {
+			LessonEntity lessonEntity = quizEntity.getEntity(sakaiId, simplePageBean);
+			if (usable && lessonEntity != null && (canEditPage || !quizEntity.notPublished(sakaiId))) {
 				// we've hacked Samigo to look at a special lesson builder
 				// session
 				// attribute. otherwise at the end of the test, Samigo replaces
@@ -3891,7 +3892,7 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 			if (usable && i.isPrerequisite()) {
 			    simplePageBean.checkItemPermissions(i, true);
 			}
-			LessonEntity lessonEntity = forumEntity.getEntity(i.getSakaiId());
+			LessonEntity lessonEntity = forumEntity.getEntity(sakaiId);
 			if (usable && lessonEntity != null && (canEditPage || !lessonEntity.notPublished())) {
 				if (i.isPrerequisite()) {
 					simplePageBean.checkItemPermissions(i, true);
@@ -3928,7 +3929,7 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 				fake = true; // need to set this in case it's available for missing entity
 			}
 		} else if (i.getType() == SimplePageItem.BLTI) {
-		    LessonEntity lessonEntity = (bltiEntity == null ? null : bltiEntity.getEntity(i.getSakaiId()));
+		    LessonEntity lessonEntity = (bltiEntity == null ? null : bltiEntity.getEntity(sakaiId));
 		    if ("inline".equals(i.getFormat())) {
 			// no availability 
 			String height=null;
@@ -4005,7 +4006,7 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 			ID = ID + "-fake";
 			String linkText = i.getName();
 			if (i.getType() == SimplePageItem.ASSIGNMENT) {
-				linkText = getLinkText(linkText, i.getSakaiId());
+				linkText = getLinkText(linkText, sakaiId);
 			}
 			UIOutput link = UIOutput.make(container, ID, linkText);
 			link.decorate(new UIFreeAttributeDecorator("lessonbuilderitem", itemString));
@@ -4036,7 +4037,7 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 		} else {
 			String linkText = i.getName();
 			if (i.getType() == SimplePageItem.ASSIGNMENT) {
-				linkText = getLinkText(linkText, i.getSakaiId());
+				linkText = getLinkText(linkText, sakaiId);
 			}
 			UIOutput.make(container, ID + "-text", linkText).decorate
 				(new UIFreeAttributeDecorator("data-original-name", i.getName()));
@@ -5717,7 +5718,7 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 		String itemPath = "";
 		boolean isURL = false;
 		String pathId = i.getType() == SimplePageItem.MULTIMEDIA ? "path-url":"path-url";
-		String[] itemPathTokens = i.getSakaiId().split("/");
+		String[] itemPathTokens = Objects.toString(i.getSakaiId(), "").split("/");
 		for(int tokenIndex=3 ; tokenIndex < itemPathTokens.length ; tokenIndex++)
 		{
 			if(isURL)

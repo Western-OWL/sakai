@@ -24,6 +24,7 @@
 package org.sakaiproject.lessonbuildertool;
 
 import java.util.Map;
+import java.util.Objects;
 import org.sakaiproject.lessonbuildertool.model.SimplePageToolDao;
 
 /**
@@ -123,8 +124,6 @@ public class SimplePageItemImpl implements SimplePageItem  {
 	}
 
 	public SimplePageItemImpl(long id, long pageId, int sequence, int type, String sakaiId, String name) {
-		if (sakaiId == null)
-			sakaiId = "";
 		if (name == null)
 			name = "";
 		this.id = id;
@@ -150,8 +149,6 @@ public class SimplePageItemImpl implements SimplePageItem  {
 	}
 
 	public SimplePageItemImpl(long pageId, int sequence, int type, String sakaiId, String name) {
-		if (sakaiId == null)
-			sakaiId = "";
 		if (name == null)
 			name = "";
 		this.pageId = pageId;
@@ -371,10 +368,10 @@ public class SimplePageItemImpl implements SimplePageItem  {
 		if (type == RESOURCE || type == MULTIMEDIA) {
 			if (getAttribute("multimediaUrl") != null)
 			    return getAttribute("multimediaUrl");
-			return "/access/content" + getSakaiId();
+			return "/access/content" + Objects.toString(sakaiId, "");
 		} else if (type == URL) {
 		    // not used, apparently
-			return getSakaiId();
+			return Objects.toString(sakaiId, "");
 		} else {
 			return "";
 		}
@@ -394,11 +391,11 @@ public class SimplePageItemImpl implements SimplePageItem  {
 	        // hand them to Content
 		if (type == RESOURCE || type == MULTIMEDIA) {
 		    if (getAttribute("multimediaUrl") != null)
-			return getAttribute("multimediaUrl");
-		    return "/access/lessonbuilder/item/" + getId() + getSakaiId();
+				return getAttribute("multimediaUrl");
+		    return "/access/lessonbuilder/item/" + getId() + Objects.toString(sakaiId, "");
 		} else if (type == URL) {
 		    // not used, I'm pretty sure
-			return getSakaiId();
+			return Objects.toString(sakaiId, "");
 		} else {
 			return "";
 		}
