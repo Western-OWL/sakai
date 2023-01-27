@@ -16,6 +16,7 @@
 package org.sakaiproject.lessonbuildertool.ccexport;
 
 import java.net.URLDecoder;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
@@ -114,7 +115,7 @@ public class CCUtils {
                 if (numString.length() >= 1) {
                     Long itemId = new Long(numString);
                     SimplePageItem item = simplePageToolDao.findItem(itemId);
-                    sakaiId = item.getSakaiId();
+                    sakaiId = Objects.toString(item.getSakaiId(), "");
                     int itemType = item.getType();
                     if ((itemType == SimplePageItem.RESOURCE || itemType == SimplePageItem.MULTIMEDIA) &&
                             sakaiId.startsWith(sakaiIdBase)) {
@@ -219,7 +220,7 @@ public class CCUtils {
                 if (numString.length() >= 1) {
                     Long itemId = new Long(numString);
                     SimplePageItem item = simplePageToolDao.findItem(itemId);
-                    sakaiId = item.getSakaiId();
+                    sakaiId = Objects.toString(item.getSakaiId(), "");
                     int itemType = item.getType();
                     if ((itemType == SimplePageItem.RESOURCE || itemType == SimplePageItem.MULTIMEDIA) && sakaiId.startsWith(sakaiIdBase)) {
                         ret.append(text, index, start);

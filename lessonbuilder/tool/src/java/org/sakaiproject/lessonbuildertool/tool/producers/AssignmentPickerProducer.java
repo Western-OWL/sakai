@@ -121,7 +121,7 @@ public class AssignmentPickerProducer implements ViewComponentProducer, Navigati
 			// if itemid is null, we'll append to current page, so it's ok
 			if (itemId != null && itemId != -1) {
 			    SimplePageItem currentItem = simplePageToolDao.findItem(itemId);
-			    if (currentItem == null)
+			    if (currentItem == null || currentItem.getSakaiId() == null)
 				return;
 			    // trying to hack on item not on this page
 			    if (currentItem.getPageId() != page.getPageId())

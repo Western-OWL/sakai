@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.Vector;
@@ -490,7 +491,7 @@ public class LessonBuilderAccessService {
 					boolean useLb = false;
 
 					// I've seen sakai id's with //, not sure why. they work but will mess up the comparison
-					String itemResource = item.getSakaiId().replace("//","/");
+					String itemResource = Objects.toString(item.getSakaiId(), "").replace("//","/");
 
 					// only use lb security if the user has visited the page
 					// this handles the various page release issues, although

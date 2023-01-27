@@ -118,7 +118,7 @@ public class ForumPickerProducer implements ViewComponentProducer, NavigationCas
 			// if itemid is null, we'll append to current page, so it's ok
 			if (itemId != null && itemId != -1) {
 			    SimplePageItem i = simplePageToolDao.findItem(itemId);
-			    if (i == null)
+			    if (i == null || i.getSakaiId() == null)
 				return;
 			    // trying to hack on item not on this page
 			    if (i.getPageId() != page.getPageId())

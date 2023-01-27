@@ -1840,7 +1840,7 @@ public class SimplePageBean {
 			
 			// editing an existing item which might have customized properties
 			// retrieve the original resource and check for customizations
-			ResourceHelper resHelp = new ResourceHelper(getContentResource(i.getSakaiId()));
+			ResourceHelper resHelp = new ResourceHelper(getContentResource(Objects.toString(i.getSakaiId(), "")));
 			boolean hasCustomName = !isWebsite && resHelp.isNameCustom(i.getName());  // ignore website names for now
 			boolean hasCustomDesc = resHelp.isDescCustom(i.getDescription());
 			
@@ -3274,13 +3274,13 @@ public class SimplePageBean {
 			return;
 		}
 
-		String sakaiId = i.getSakaiId();
+		String sakaiId = Objects.toString(i.getSakaiId(), "");
 		// /sam_core/nnn isn't published. It can't have groups. When it is published
 		// we do a fixup which will call this again to create the real groups
-		if (sakaiId.equals(SimplePageItem.DUMMY) || sakaiId.startsWith("/sam_core/"))
+		if (SimplePageItem.DUMMY.equals(sakaiId) || sakaiId.startsWith("/sam_core/"))
 		    return;
 
-		SimplePageGroup group = simplePageToolDao.findGroup(i.getSakaiId());
+		SimplePageGroup group = simplePageToolDao.findGroup(sakaiId);
 		String ourGroupName;
 		try {
 		    // correct is the correct setting, i.e. if there is supposed to be
@@ -3291,11 +3291,14 @@ public class SimplePageBean {
 					LessonEntity lessonEntity = null;
 					switch (i.getType()) {
 					case SimplePageItem.ASSIGNMENT:
-					    lessonEntity = assignmentEntity.getEntity(i.getSakaiId()); break;
+					    lessonEntity = assignmentEntity.getEntity(sakaiId);
+						break;
 					case SimplePageItem.ASSESSMENT:
-					    lessonEntity = quizEntity.getEntity(i.getSakaiId(),this); break;
+					    lessonEntity = quizEntity.getEntity(sakaiId,this);
+						break;
 					case SimplePageItem.FORUM:
-					    lessonEntity = forumEntity.getEntity(i.getSakaiId()); break;
+					    lessonEntity = forumEntity.getEntity(sakaiId);
+						break;
 					}
 					if (lessonEntity != null) {
 					    String groups = getItemGroupString (i, lessonEntity, true);
@@ -3309,8 +3312,8 @@ public class SimplePageBean {
 						ourGroupName = utf8truncate(ourGroupName, 99);
 					    else if (ourGroupName.length() > 99) 
 						ourGroupName = ourGroupName.substring(0, 99);
-					    String groupId = GroupPermissionsService.makeGroup(getCurrentPage().getSiteId(), ourGroupName, oldGroupName, i.getSakaiId(), this);
-					    saveItem(simplePageToolDao.makeGroup(i.getSakaiId(), groupId, groups, getCurrentPage().getSiteId()));
+					    String groupId = GroupPermissionsService.makeGroup(getCurrentPage().getSiteId(), ourGroupName, oldGroupName, sakaiId, this);
+					    saveItem(simplePageToolDao.makeGroup(sakaiId, groupId, groups, getCurrentPage().getSiteId()));
 
 					    // update the tool access control to point to our access control group
 					    
@@ -3326,11 +3329,14 @@ public class SimplePageBean {
 				LessonEntity lessonEntity = null;
 				switch (i.getType()) {
 				case SimplePageItem.ASSIGNMENT:
-				    lessonEntity = assignmentEntity.getEntity(i.getSakaiId()); break;
+				    lessonEntity = assignmentEntity.getEntity(sakaiId);
+					break;
 				case SimplePageItem.ASSESSMENT:
-				    lessonEntity = quizEntity.getEntity(i.getSakaiId(),this); break;
+				    lessonEntity = quizEntity.getEntity(sakaiId,this);
+					break;
 				case SimplePageItem.FORUM:
-				    lessonEntity = forumEntity.getEntity(i.getSakaiId()); break;
+				    lessonEntity = forumEntity.getEntity(sakaiId);
+					break;
 				}
 				if (lessonEntity != null) {
 				    String groups = group.getGroups();
@@ -3447,7 +3453,7 @@ public class SimplePageBean {
 			    if (itemId != null && itemId != -1) {
 				i = findItem(itemId);
 				// if no change, don't worry
-				if (!i.getSakaiId().equals(selectedEntity)) {
+				if (!Objects.toString(i.getSakaiId(), "").equals(selectedEntity)) {
 				    // if access controlled, clear restriction from old assignment and add to new
 				    if (i.isPrerequisite()) {
 					i.setPrerequisite(false);
@@ -3509,7 +3515,7 @@ public class SimplePageBean {
 				i = findItem(itemId);
 
 				// if no change, don't worry
-				LessonEntity existing = assignmentEntity.getEntity(i.getSakaiId());
+				LessonEntity existing = assignmentEntity.getEntity(Objects.toString(i.getSakaiId(), ""));
 				String ref = null;
 				if (existing != null)
 				    ref = existing.getReference();
@@ -3583,7 +3589,7 @@ public class SimplePageBean {
 				i = findItem(itemId);
 
 				// if no change, don't worry
-				LessonEntity existing = bltiEntity.getEntity(i.getSakaiId());
+				LessonEntity existing = bltiEntity.getEntity(Objects.toString(i.getSakaiId(), ""));
 				String ref = null;
 				if (existing != null)
 				    ref = existing.getReference();
@@ -3770,6 +3776,8 @@ public class SimplePageBean {
 
 	    Collection<String> ret = new ArrayList<>();
 
+		String sakaiId = Objects.toString(i.getSakaiId(), "");
+
 	    if (!nocache && i.getType() != SimplePageItem.PAGE 
 		         && i.getType() != SimplePageItem.TEXT
 		         && i.getType() != SimplePageItem.CHECKLIST
@@ -3780,7 +3788,7 @@ public class SimplePageBean {
 			 && i.getType() != SimplePageItem.BREAK
 		         && i.getType() != SimplePageItem.STUDENT_CONTENT
 		         && i.getType() != SimplePageItem.CALENDAR) {
-	       Object cached = groupCache.get(i.getSakaiId());
+	       Object cached = groupCache.get(sakaiId);
 	       if (cached != null) {
 		   if (cached instanceof String)
 		       return null;
@@ -3791,11 +3799,14 @@ public class SimplePageBean {
 	   if (entity == null) {
 	       switch (i.getType()) {
 	       case SimplePageItem.ASSIGNMENT:
-		   entity = assignmentEntity.getEntity(i.getSakaiId()); break;
+		   entity = assignmentEntity.getEntity(sakaiId);
+		   break;
 	       case SimplePageItem.ASSESSMENT:
-		   entity = quizEntity.getEntity(i.getSakaiId(),this); break;
+		   entity = quizEntity.getEntity(sakaiId, this);
+		   break;
 	       case SimplePageItem.FORUM:
-		   entity = forumEntity.getEntity(i.getSakaiId()); break;
+		   entity = forumEntity.getEntity(sakaiId);
+		   break;
 	       case SimplePageItem.MULTIMEDIA:
 		   String displayType = i.getAttribute("multimediaDisplayType");
 		   if (StringUtils.equalsAny(displayType, "1", "3") || i.getAttribute("multimediaUrl") != null)
@@ -3850,12 +3861,13 @@ public class SimplePageBean {
 	   // this can be needed if the call to getEntity causes us to recognize
 	   // a recently published test and replace the /sam_core with a /sam_pub
 	   // in that case the entity is up to date but the sakaiid is not
-	   if (i.getSakaiId().startsWith("/sam_core") && entity != null) {
-	       i.setSakaiId(entity.getReference());
+	   if (sakaiId.startsWith("/sam_core") && entity != null) {
+	       sakaiId = entity.getReference();
+	       i.setSakaiId(sakaiId);
 	   }
 
 
-	   SimplePageGroup simplePageGroup = simplePageToolDao.findGroup(i.getSakaiId());
+	   SimplePageGroup simplePageGroup = simplePageToolDao.findGroup(sakaiId);
 	   if (simplePageGroup != null) {
 	       String groups = simplePageGroup.getGroups();
 	       if (StringUtils.isNotBlank(groups))
@@ -3872,9 +3884,9 @@ public class SimplePageBean {
 	   }
 
 	   if (ret == null)
-	       groupCache.put(i.getSakaiId(), "*");
+	       groupCache.put(sakaiId, "*");
 	   else
-	       groupCache.put(i.getSakaiId(), ret);
+	       groupCache.put(sakaiId, ret);
 
 	   return ret;
 
@@ -3890,13 +3902,15 @@ public class SimplePageBean {
 	    if (mimeType != null && (mimeType.startsWith("http")))
 		mimeType = null;
 
+		String sakaiId = Objects.toString(item.getSakaiId(), "");
+
 	    if (StringUtils.isBlank(mimeType)) {
 		String mmDisplayType = item.getAttribute("multimediaDisplayType");
 		// 2 is the generic "use old display" so treat it as null
 		// only do this for type 2, since that's where there's an actual file
 		if (StringUtils.isBlank(mmDisplayType) || "2".equals(mmDisplayType)) {
 		    try {
-			ContentResource res = contentHostingService.getResource(item.getSakaiId());
+			ContentResource res = contentHostingService.getResource(sakaiId);
 			mimeType = res.getContentType();
 		    } catch (Exception ignore) {
 		    }
@@ -3911,7 +3925,7 @@ public class SimplePageBean {
 	    }
 
 	    if (StringUtils.isBlank(mimeType)) {
-		String s = item.getSakaiId();
+		String s = sakaiId;
 		    if (s != null) {
 		        int j = s.lastIndexOf(".");
 		        if (j >= 0)
@@ -3940,10 +3954,10 @@ public class SimplePageBean {
 	   throws IdUnusedException{
     	   SecurityAdvisor advisor = null;
     	   try {
-	       
+	       String sakaiId = Objects.toString(i.getSakaiId(), "");
 	       // do this before getting privs. It is implemented by seeing whether anon can access,
 	       // so the advisor will cause the wrong answer
-	   	   boolean inheritingPubView =  contentHostingService.isInheritingPubView(i.getSakaiId());
+	   	   boolean inheritingPubView =  contentHostingService.isInheritingPubView(sakaiId);
 
 		   advisor = pushAdvisorAlways();
     	   
@@ -3951,7 +3965,7 @@ public class SimplePageBean {
 
     		   ContentResource resource = null;
     		   try {
-    			   resource = contentHostingService.getResource(i.getSakaiId());
+    			   resource = contentHostingService.getResource(sakaiId);
     		   } catch (Exception ignore) {
 		       throw new IdUnusedException(i.toString());
     		   }
@@ -3983,9 +3997,9 @@ public class SimplePageBean {
     		   
     		   if (!nocache) {
     			   if (ret == null)
-    				   groupCache.put(i.getSakaiId(), "*");
+    				   groupCache.put(sakaiId, "*");
     			   else
-    				   groupCache.put(i.getSakaiId(), ret);
+    				   groupCache.put(sakaiId, ret);
     		   }
     		   
     		   return ret;
@@ -4023,14 +4037,19 @@ public class SimplePageBean {
 	       groupCache.remove(i.getSakaiId());
 	   }
 
+		String sakaiId = Objects.toString(i.getSakaiId(), "");
+
 	   LessonEntity lessonEntity = null;
 	   switch (i.getType()) {
 	   case SimplePageItem.ASSIGNMENT:
-	       lessonEntity = assignmentEntity.getEntity(i.getSakaiId()); break;
+	       lessonEntity = assignmentEntity.getEntity(sakaiId);
+		   break;
 	   case SimplePageItem.ASSESSMENT:
-	       lessonEntity = quizEntity.getEntity(i.getSakaiId(),this); break;
+	       lessonEntity = quizEntity.getEntity(sakaiId, this);
+		   break;
 	   case SimplePageItem.FORUM:
-	       lessonEntity = forumEntity.getEntity(i.getSakaiId()); break;
+	       lessonEntity = forumEntity.getEntity(sakaiId);
+		   break;
 	   case SimplePageItem.MULTIMEDIA:
 	       String displayType = i.getAttribute("multimediaDisplayType");
 	       if (StringUtils.equalsAny(displayType, "1", "3") || i.getAttribute("multimediaUrl") != null)
@@ -4091,7 +4110,7 @@ public class SimplePageBean {
 			       groupString = groupString + "," + groupId;
 		       }
 
-		       SimplePageGroup simplePageGroup = simplePageToolDao.findGroup(i.getSakaiId());
+		       SimplePageGroup simplePageGroup = simplePageToolDao.findGroup(sakaiId);
 		       simplePageGroup.setGroups(groupString);
 		       update(simplePageGroup);
 		   } else
@@ -4110,7 +4129,7 @@ public class SimplePageBean {
 	   SecurityAdvisor pushedAdvisor = null;
 	   try {
 	       pushedAdvisor = pushAdvisor();
-	       resource = contentHostingService.editResource(i.getSakaiId());
+	       resource = contentHostingService.editResource(Objects.toString(i.getSakaiId(), ""));
 
 	       if (AccessMode.GROUPED.equals(resource.getInheritedAccess())) {
 		   Collection<String> oldGroups = resource.getInheritedGroups();
@@ -4268,7 +4287,7 @@ public class SimplePageBean {
 			    if (itemId != null && itemId != -1) {
 				i = findItem(itemId);
 				// do getEntity/getreference to normalize, in case sakaiid is old format
-				LessonEntity existing = quizEntity.getEntity(i.getSakaiId(),this);
+				LessonEntity existing = quizEntity.getEntity(Objects.toString(i.getSakaiId(), ""),this);
 				String ref = null;
 				if (existing != null)
 				    ref = existing.getReference();
@@ -5078,7 +5097,7 @@ public class SimplePageBean {
 		// getContentType already checked extensions. But we have our own idea of image types, which is site-configurable
 		// to check for them
 
-		String extension = getExtension(item.getSakaiId());
+		String extension = getExtension(Objects.toString(item.getSakaiId(), ""));
 
 		return imageTypes.contains(extension);
 	}
@@ -5095,7 +5114,7 @@ public class SimplePageBean {
 		// getContentType already checked extensions. But we have our own idea of html types, which is site-configurable
 		// to check for them
 
-		String extension = getExtension(item.getSakaiId());
+		String extension = getExtension(Objects.toString(item.getSakaiId(), ""));
 
 		return Arrays.binarySearch(htmlTypes, extension) >= 0;
 
@@ -5452,7 +5471,7 @@ public class SimplePageBean {
 		    // for student pages, we give people access to files in the owner's worksite
 		    // get data we need to check that
 
-		    String id = item.getSakaiId();
+		    String id = Objects.toString(item.getSakaiId(), "");
 		    String owner = page.getOwner();  // if student content
 		    String group = page.getGroup();  // if student content
 		    if (group != null)
@@ -5500,24 +5519,25 @@ public class SimplePageBean {
 		    boolean canSeeAll = canSeeAll();
 		    advisor = pushAdvisorAlways();
 		    if (!canSeeAll && !item.isRequired()) {
+			String sakaiId = Objects.toString(item.getSakaiId(), "");
 			switch (item.getType()) {
 			case SimplePageItem.ASSIGNMENT:
-			    entity = assignmentEntity.getEntity(item.getSakaiId());
+			    entity = assignmentEntity.getEntity(sakaiId);
 			    if (entity == null || entity.notPublished())
 				return false;
 			    break;
 			case SimplePageItem.ASSESSMENT:
-			    if (quizEntity.notPublished(item.getSakaiId()))
+			    if (quizEntity.notPublished(sakaiId))
 				return false;
 			    break;
 			case SimplePageItem.FORUM:
-			    entity = forumEntity.getEntity(item.getSakaiId());
+			    entity = forumEntity.getEntity(sakaiId);
 			    if (entity == null || entity.notPublished())
 				return false;
 			    break;
 			case SimplePageItem.BLTI:
 				if (bltiEntity != null) {
-					entity = bltiEntity.getEntity(item.getSakaiId());
+					entity = bltiEntity.getEntity(sakaiId);
 				}
 				if (entity == null || entity.notPublished()) {
 					return false;
@@ -5616,6 +5636,7 @@ public class SimplePageBean {
 			return true;
 		} 
 		Long itemId = item.getId();
+		String sakaiId = Objects.toString(item.getSakaiId(), "");
 		Boolean cached = completeCache.get(itemId);
 		if (cached != null)
 		    return (boolean)cached;
@@ -5637,17 +5658,17 @@ public class SimplePageBean {
 				completeCache.put(itemId, true);
 				return true;
 			} else {
-			        boolean apic = arePageItemsComplete(Long.parseLong(item.getSakaiId())); 
+			        boolean apic = arePageItemsComplete(Long.parseLong(sakaiId)); 
 				completeCache.put(itemId, apic);
 				return apic;
 			}
 		} else if (item.getType() == SimplePageItem.ASSIGNMENT) {
 			try {
-				if (item.getSakaiId().equals(SimplePageItem.DUMMY)) {
+				if (SimplePageItem.DUMMY.equals(sakaiId)) {
 				    completeCache.put(itemId, false);
 				    return false;
 				}
-				LessonEntity assignment = assignmentEntity.getEntity(item.getSakaiId());
+				LessonEntity assignment = assignmentEntity.getEntity(sakaiId);
 				if (assignment == null) {
 				    completeCache.put(itemId, false);
 				    return false;
@@ -5681,12 +5702,12 @@ public class SimplePageBean {
 			}
 		} else if (item.getType() == SimplePageItem.FORUM) {
 			try {
-				if (item.getSakaiId().equals(SimplePageItem.DUMMY)) {
+				if (SimplePageItem.DUMMY.equals(sakaiId)) {
 					completeCache.put(itemId, false);
 					return false;
 				}
 				User user = userDirectoryService.getUser(getCurrentUserId());
-				LessonEntity forum = forumEntity.getEntity(item.getSakaiId());
+				LessonEntity forum = forumEntity.getEntity(sakaiId);
 				if (forum == null)
 					return false;
 				// for the moment don't find grade. just see if they submitted
@@ -5703,11 +5724,11 @@ public class SimplePageBean {
 			    return false;
 			}
 		} else if (item.getType() == SimplePageItem.ASSESSMENT) {
-			if (item.getSakaiId().equals(SimplePageItem.DUMMY)) {
+			if (SimplePageItem.DUMMY.equals(sakaiId)) {
 			    completeCache.put(itemId, false);
 			    return false;
 			}
-			LessonEntity quiz = quizEntity.getEntity(item.getSakaiId(),this);
+			LessonEntity quiz = quizEntity.getEntity(sakaiId,this);
 			if (quiz == null) {
 			    completeCache.put(itemId, false);
 			    return false;
@@ -5985,7 +6006,7 @@ public class SimplePageBean {
 		final List<SimplePageItem> items = simplePageToolDao.getOrderedTopLevelPageItems(getCurrentSite().getId());
 
 		for (SimplePageItem i : items) {
-			if (i.getSakaiId().equals(currentPageId)) {
+			if (currentPageId.equals(i.getSakaiId())) {
 				return needed;	// reached current page. we're done
 			}
 			if (i.isRequired() && !isItemComplete(i) && isItemVisible(i)) {
@@ -6086,30 +6107,30 @@ public class SimplePageBean {
 	}
 
 	public String getNameOfSakaiItem(SimplePageItem i) {
-		String SakaiId = i.getSakaiId();
+		String sakaiId = Objects.toString(i.getSakaiId(), "");
 
-		if (SakaiId == null || SakaiId.equals(SimplePageItem.DUMMY))
+		if (sakaiId == null || SimplePageItem.DUMMY.equals(sakaiId))
 			return null;
 
 		if (i.getType() == SimplePageItem.ASSIGNMENT) {
-			LessonEntity assignment = assignmentEntity.getEntity(i.getSakaiId());
+			LessonEntity assignment = assignmentEntity.getEntity(sakaiId);
 			if (assignment == null)
 				return null;
 			return assignment.getTitle();
 		} else if (i.getType() == SimplePageItem.FORUM) {
-			LessonEntity forum = forumEntity.getEntity(i.getSakaiId());
+			LessonEntity forum = forumEntity.getEntity(sakaiId);
 			if (forum == null)
 				return null;
 			return forum.getTitle();
 		} else if (i.getType() == SimplePageItem.ASSESSMENT) {
-		LessonEntity quiz = quizEntity.getEntity(i.getSakaiId(),this);
+		LessonEntity quiz = quizEntity.getEntity(sakaiId,this);
 			if (quiz == null)
 				return null;
 			return quiz.getTitle();
 		} else if (i.getType() == SimplePageItem.BLTI) {
 		    if (bltiEntity == null)
 			return null;
-		    LessonEntity blti = bltiEntity.getEntity(i.getSakaiId());
+		    LessonEntity blti = bltiEntity.getEntity(sakaiId);
 		    if (blti == null)
 			return null;
 		    return blti.getTitle();
@@ -6162,7 +6183,7 @@ public class SimplePageBean {
      */
 
 	public String getYoutubeKey(SimplePageItem i) {
-		String sakaiId = i.getSakaiId();
+		String sakaiId = Objects.toString(i.getSakaiId(), "");
 		String URL;
 
 		URL = i.getAttribute("multimediaUrl");
@@ -6278,11 +6299,12 @@ public class SimplePageBean {
 			return;
 		}
 
-		SimplePageGroup group = simplePageToolDao.findGroup(item.getSakaiId());
+		String sakaiId = Objects.toString(item.getSakaiId(), "");
+		SimplePageGroup group = simplePageToolDao.findGroup(sakaiId);
 		if (group == null) {
 			// For some reason, the group doesn't exist. Let's re-add it.
 			checkControlGroup(item, true);
-			group = simplePageToolDao.findGroup(item.getSakaiId());
+			group = simplePageToolDao.findGroup(sakaiId);
 			if (group == null) {
 				return;
 			}
@@ -6621,7 +6643,7 @@ public class SimplePageBean {
 	}
 
 	public boolean isHtml(SimplePageItem i) {
-		StringTokenizer token = new StringTokenizer(i.getSakaiId(), ".");
+		StringTokenizer token = new StringTokenizer(Objects.toString(i.getSakaiId(), ""), ".");
 
 		String extension = "";
 					    
@@ -6741,7 +6763,7 @@ public class SimplePageBean {
 					if (itemId != -1 && replacefile) {
 					    // upload new version -- get existing file
 					    SimplePageItem item = findItem(itemId);
-					    String resId = item.getSakaiId();
+					    String resId = Objects.toString(item.getSakaiId(), "");
 					    res = contentHostingService.editResource(resId);
 					} else {
 					    // otherwise create a new file

@@ -152,7 +152,6 @@ public class BltiPickerProducer implements ViewComponentProducer, NavigationCase
 
 			SimplePage page = simplePageBean.getCurrentPage();
 
-			String currentItem = null; // default value, normally current
 			if (itemId != null && itemId != -1) {
 			    SimplePageItem i = simplePageToolDao.findItem(itemId);
 			    if (i == null)
@@ -160,7 +159,6 @@ public class BltiPickerProducer implements ViewComponentProducer, NavigationCase
 			    // trying to hack on item not on this page
 			    if (i.getPageId() != page.getPageId())
 				return;
-			    currentItem = i.getSakaiId();
 			}
 
 			List<UrlItem> createLinks = bltiEntity.createNewUrls(simplePageBean, bltiToolId, appStoresOnly);

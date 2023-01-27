@@ -118,7 +118,7 @@ public class QuizPickerProducer implements ViewComponentProducer, NavigationCase
 		        String currentItem = null; // default value, normally current
 			if (itemId != null && itemId != -1) {
 			    SimplePageItem i = simplePageToolDao.findItem(itemId);
-			    if (i == null)
+			    if (i == null || i.getSakaiId() == null)
 				return;
 			    // trying to hack on item not on this page
 			    if (i.getPageId() != page.getPageId())

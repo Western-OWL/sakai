@@ -59,6 +59,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 import java.util.Stack;
@@ -437,14 +438,15 @@ public class LessonBuilderEntityProducer extends AbstractEntityProvider
 
 	if (items != null) {
 	    for (SimplePageItem item: items) {
+		String sakaiId = Objects.toString(item.getSakaiId(), "");
 			 
 		Element itemElement = doc.createElement("item");
 		addAttr(doc, itemElement, "id", new Long(item.getId()).toString());
 		addAttr(doc, itemElement, "pageId", new Long(item.getPageId()).toString());
 		addAttr(doc, itemElement, "sequence", new Integer(item.getSequence()).toString());
 		addAttr(doc, itemElement, "type", new Integer(item.getType()).toString());
-		addAttr(doc, itemElement, "sakaiid", item.getSakaiId());
-		if (!(SimplePageItem.DUMMY).equals(item.getSakaiId())) {
+		addAttr(doc, itemElement, "sakaiid", sakaiId);
+		if (!SimplePageItem.DUMMY.equals(sakaiId)) {
 		    if (item.getType() == SimplePageItem.FORUM || item.getType() == SimplePageItem.ASSESSMENT || item.getType() == SimplePageItem.ASSIGNMENT) {
 			LessonEntity e = null;
 			if (item.getType() == SimplePageItem.FORUM)
@@ -453,7 +455,7 @@ public class LessonBuilderEntityProducer extends AbstractEntityProvider
 			    e = quizEntity;
 			else
 			    e = assignmentEntity;
-			e = e.getEntity(item.getSakaiId());
+			e = e.getEntity(sakaiId);
 			if (e != null) {
 			    String title = e.getTitle();
 			    if (title != null && !title.equals(""))
@@ -498,7 +500,7 @@ public class LessonBuilderEntityProducer extends AbstractEntityProvider
 			e = quizEntity;
 		    else
 			e = assignmentEntity;
-		    e = e.getEntity(item.getSakaiId());
+		    e = e.getEntity(sakaiId);
 		    if (e != null) {
 			String objectid = e.getObjectId();  // this is something like assignment/ID/TITLE. It's used to find the object in the new site if necessary
 			if (objectid!= null)
@@ -1577,7 +1579,7 @@ public class LessonBuilderEntityProducer extends AbstractEntityProvider
 		} catch (Exception ignore) {}
 		SimplePageItem item = simplePageToolDao.findItem(itemid);
 		if (item != null) {
-		    String oldSakaiId = item.getSakaiId();
+		    String oldSakaiId = Objects.toString(item.getSakaiId(), "");
 		    if (oldSakaiId.equals(SimplePageItem.DUMMY)) {
 			mapGroups.put(item.getAlt(), sakaiid);
 		    } else if (!oldSakaiId.equals(sakaiid)) {
@@ -1751,7 +1753,7 @@ public class LessonBuilderEntityProducer extends AbstractEntityProvider
 	  List<SimplePageItem> items = simplePageToolDao.findItemsBySakaiId(sakaiId);
 	  for (SimplePageItem item: items) {
 	      if (item.isPrerequisite()) {
-		  String sid = item.getSakaiId();
+		  String sid = Objects.toString(item.getSakaiId(), "");
 		  if (!sid.equals(SimplePageItem.DUMMY) && !sid.startsWith("/sam_core/"))
 		      simplePageBean.checkControlGroup(item, true);
 	      }
