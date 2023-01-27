@@ -52,6 +52,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -126,7 +127,6 @@ import org.sakaiproject.tool.api.Tool;
 import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.tool.api.ToolSession;
 import org.sakaiproject.util.RequestFilter;
-import org.sakaiproject.util.ResourceLoader;
 import org.sakaiproject.util.Xml;
 import org.springframework.context.MessageSource;
 import org.w3c.dom.Attr;
@@ -1846,6 +1846,7 @@ public class LessonBuilderEntityProducer extends AbstractEntityProvider
                     LessonBuilderEvents.ITEM_UPDATE,
                     LessonBuilderEvents.ITEM_DELETE,
                     LessonBuilderEvents.COMMENT_CREATE,
+                    LessonBuilderEvents.COMMENT_READ,
                     LessonBuilderEvents.COMMENT_UPDATE,
                     LessonBuilderEvents.COMMENT_DELETE};
 
@@ -1867,13 +1868,7 @@ public class LessonBuilderEntityProducer extends AbstractEntityProvider
      * @return the map of event key => event name (example: for a 'en' locale: {"message.new","A new message"}) OR null to use the event keys
      */
     public Map<String, String> getEventNames (Locale locale) {
-	Map<String, String> localeEventNames = new HashMap<String, String>(); 
-	ResourceLoader msgs = new ResourceLoader("Events");
-	msgs.setContextLocale(locale);
-	for(int i=0; i<EVENT_KEYS.length; i++) {
-	    localeEventNames.put(EVENT_KEYS[i], msgs.getString(EVENT_KEYS[i]));
-	}
-	return localeEventNames;
+        return Collections.emptyMap();
     }
 
     //
