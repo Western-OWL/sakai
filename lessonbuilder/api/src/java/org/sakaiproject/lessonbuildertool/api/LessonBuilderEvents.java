@@ -27,6 +27,7 @@ public class LessonBuilderEvents {
     public static final String ITEM_UPDATE = "lessonbuilder.item.update";
     public static final String ITEM_DELETE = "lessonbuilder.item.delete";
     public static final String COMMENT_CREATE = "lessonbuilder.comment.create";
+    public static final String COMMENT_READ = "lessonbuilder.comment.read";
     public static final String COMMENT_UPDATE = "lessonbuilder.comment.update";
     public static final String COMMENT_DELETE = "lessonbuilder.comment.delete";
 }
