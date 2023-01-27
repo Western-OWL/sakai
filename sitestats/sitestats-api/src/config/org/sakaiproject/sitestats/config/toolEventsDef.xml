@@ -148,7 +148,12 @@
 		<event eventId="lessonbuilder.comment.read" selected="true" resolvable="true"/>
 		<event eventId="lessonbuilder.comment.update" selected="true" resolvable="true"/>
 		<event eventId="lessonbuilder.comment.delete" selected="true" resolvable="true"/>
-		<!-- Format: /announcment/msg/<siteID>/<channelID>/<messageID> -->
+		<!-- legacy Lessons events (pre-20), included here to retain historical statistics -->
+		<event eventId="lessonbuilder.create" selected="true" resolvable="true"/>
+		<event eventId="lessonbuilder.delete" selected="true" resolvable="false"/>
+		<event eventId="lessonbuilder.read" selected="true" resolvable="true"/>
+		<event eventId="lessonbuilder.update" selected="true" resolvable="true"/>
+		<!-- Format: /lessonbuilder/<type>/<id> -->
 		<eventParserTip for="contextId" separator="/" index="1"/>
 		<eventParserTip for="subContextId" separator="/" index="2"/>
 		<eventParserTip for="entityId" separator="/" index="3"/>
