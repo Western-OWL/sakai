@@ -15,6 +15,7 @@
  */
 package org.sakaiproject.sitestats.api.event.detailed;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -65,4 +66,7 @@ public interface DetailedEventsManager
 	 * @return a List of user uuids from the site who can be tracked
 	 */
 	public List<String> getUsersForTracking(String siteID);
+
+	// OWL
+	public Instant getLegacyCutoverDate();
 }

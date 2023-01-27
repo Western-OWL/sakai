@@ -65,9 +65,20 @@ public class WikiReferenceResolver
             eventRef = eventRef.substring( 0, eventRef.length() - 1 );
         }
 
-        GenericEventRef ref = GenericRefParser.parse( eventRef, tips );
-        String siteID = ref.contextId;
-        String pageName = ref.entityId;
+        // OWL - legacy (pre-20) wiki.read event refs start with "/site/" instead of "/wiki/site/", handle these
+        String siteID, pageName;
+        if( eventRef.startsWith( "/site/" ) )
+        {
+            String[] tokens = eventRef.split( "/" );
+            siteID = tokens[2];
+            pageName = tokens[3];
+        }
+        else
+        {
+            GenericEventRef ref = GenericRefParser.parse( eventRef, tips );
+            siteID = ref.contextId;
+            pageName = ref.entityId;
+        }
         String url = "";
 
         // Build the URL to the page

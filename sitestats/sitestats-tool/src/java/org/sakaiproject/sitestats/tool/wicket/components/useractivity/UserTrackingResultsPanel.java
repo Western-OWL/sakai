@@ -17,6 +17,8 @@ package org.sakaiproject.sitestats.tool.wicket.components.useractivity;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
@@ -92,6 +94,26 @@ public class UserTrackingResultsPanel extends Panel
 			{
 				// Get the event date
 				DetailedEvent event = (DetailedEvent) rowModel.getObject();
+
+				// OWL: legacy support for pre-20 events
+				// On Oracle, our sakai_event dates are recorded in UTC. Prior to Sakai 20, SiteStats did not know about this and actually counted and stored them
+				// as Eastern time (ie. 4-5 hours in the future compared to when the event actually happened). To compensate for this, we subtracted the UTC
+				// offset from the date before displaying it to users. We'll do the same thing here if our event is before the cutoff date.
+				Instant cutover = Locator.getFacade().getDetailedEventsManager().getLegacyCutoverDate();
+				Date date = event.getEventDate();
+				if (date.toInstant().isBefore(cutover))
+				{
+					// apply the offset from UTC to local time zone so the dates are accurate
+					Calendar cal = Calendar.getInstance();
+					cal.setTime(date);
+					int offset = cal.getTimeZone().getOffset(date.getTime());
+					cal.add(Calendar.MILLISECOND, offset);
+					Date realDate = cal.getTime();
+
+					// Re-initialize the date in the model object with the new adjusted date
+					event.setEventDate(realDate);
+				}
+
 				Instant time = event.getEventDate().toInstant();
 				return Model.of(Locator.getFacade().getUserTimeService().shortPreciseLocalizedTimestamp(time, getSession().getLocale()));
 			}

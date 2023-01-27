@@ -15,6 +15,13 @@
  */
 package org.sakaiproject.sitestats.impl.event.detailed;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -45,6 +52,7 @@ import org.sakaiproject.authz.api.AuthzGroupService;
 import org.sakaiproject.authz.api.GroupNotDefinedException;
 import org.sakaiproject.authz.api.Member;
 import org.sakaiproject.calendar.api.CalendarService;
+import org.sakaiproject.component.cover.ServerConfigurationService;
 import org.sakaiproject.content.api.ContentHostingService;
 import org.sakaiproject.entitybroker.DeveloperHelperService;
 import org.sakaiproject.entitybroker.EntityBroker;
@@ -127,6 +135,8 @@ public class DetailedEventsManagerImpl extends HibernateDaoSupport implements De
 	private ItemService samItemServ;
 	private PublishedItemService samPubItemServ;
 
+	private static Instant legacyCutoverDate = Instant.MIN;  // OWL
+
 	public void init()
 	{
 		boolean testsEnabled = BooleanUtils.toBoolean(System.getProperty("sakai.tests.enabled"));
@@ -137,6 +147,27 @@ public class DetailedEventsManagerImpl extends HibernateDaoSupport implements De
 			samItemServ = new ItemService();
 			samPubItemServ = new PublishedItemService();
 		}
+
+		// OWL
+		// Get the legacy support cutover date from sakai.properties
+		String cutoverDateStr = ServerConfigurationService.getString("sitestats.legacyCutoverDate", "");
+		if (StringUtils.isNotBlank(cutoverDateStr))
+		{
+			try
+			{
+				LocalDate cutover = LocalDate.parse(cutoverDateStr);
+				legacyCutoverDate = ZonedDateTime.of(LocalDateTime.of(cutover, LocalTime.MIDNIGHT), ZoneId.systemDefault()).toInstant();
+			}
+			catch (DateTimeParseException e)
+			{
+				log.error("Unable to parse sitestats.legacyCutoverDate from sakai.properties", e);
+			}
+		}
+	}
+
+	public void destroy()
+	{
+		// empty
 	}
 
 	/* End Spring methods */
@@ -374,5 +405,12 @@ public class DetailedEventsManagerImpl extends HibernateDaoSupport implements De
 			log.warn("Unable to get group for realm, ID = " + realmID, ex);
 			return Collections.emptyList();
 		}
+	}
+
+	// OWL
+	@Override
+	public Instant getLegacyCutoverDate()
+	{
+		return legacyCutoverDate;
 	}
 }
