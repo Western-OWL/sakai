@@ -54,7 +54,6 @@ import org.sakaiproject.event.cover.UsageSessionService;
 import org.sakaiproject.exception.IdUnusedException;
 import org.sakaiproject.exception.PermissionException;
 import org.sakaiproject.exception.SakaiException;
-import org.sakaiproject.messaging.api.BullhornAlert;
 import org.sakaiproject.messaging.api.MessagingService;
 import org.sakaiproject.pasystem.api.PASystem;
 import org.sakaiproject.portal.api.Editor;
@@ -706,9 +705,20 @@ public class SkinnableCharonPortal extends HttpServlet implements Portal
 			}
 			else
 			{
-				if (helpDocId == null || helpDocId.length() == 0)
+				if (helpDocId == null || helpDocId.length() == 0 || "sakai.assignment".equals(helpDocId))
 				{
-					helpDocId = tool.getId();
+					// OWLTODO: put this identifier change behind a property
+					// helpDocId = tool.getId();
+					helpDocId = tool.getTitle().toLowerCase().replaceAll("\\W", "");
+					if (site != null && !securityService.unlock(SiteService.SECURE_UPDATE_SITE, site	.getReference()))
+					{
+						// no site.update permission, treat as student
+						helpDocId = ServerConfigurationService.getString("help.studentDocPrefix", "") + helpDocId;
+					}
+					else
+					{
+						helpDocId = ServerConfigurationService.getString("help.instructorDocPrefix", "") + helpDocId;
+					}
 				}
 				helpActionUrl = ServerConfigurationService.getHelpUrl(helpDocId);
 			}
