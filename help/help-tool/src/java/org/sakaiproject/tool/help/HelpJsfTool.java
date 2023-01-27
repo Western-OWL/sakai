@@ -45,6 +45,7 @@ public class HelpJsfTool extends JsfTool
 {
 
   private static String HELP_DOC_REGEXP = org.sakaiproject.api.app.help.HelpManager.HELP_DOC_REGEXP;
+  private static final String HELP_PATH_REGEXP = "^[/A-Za-z0-9._-]+$";
 
   private static final String TOC_PATH = "/TOCDisplay/main";
   private static final String SEARCH_PATH = "/search/main";
@@ -68,7 +69,7 @@ public class HelpJsfTool extends JsfTool
 	       String docId = req.getParameter("help");
 
 	       if (docId != null) {
-		       Pattern p = Pattern.compile(HELP_DOC_REGEXP);
+		       Pattern p = Pattern.compile(HELP_PATH_REGEXP); // OWL-3096 allow slash for external help
 		       Matcher m = p.matcher(docId);
 		       
 		       if (!m.matches()) {
@@ -78,7 +79,8 @@ public class HelpJsfTool extends JsfTool
 	       String extUrl = EXTERNAL_WEBAPP_URL;
 	       
 	       if (docId != null && !"".equals(docId)) {
-	    	   extUrl += "/tags?tag=" + docId; // format to use if EXTERNAL_WEBAPP_URL = associated ScreenSteps home
+	    	   //extUrl += "/tags?tag=" + docId; // format to use if EXTERNAL_WEBAPP_URL = associated ScreenSteps home
+			   extUrl += docId; // OWL-3644 - we don't use ScreenSteps, so getting rid of the "/tags?tag="
 	       }
 	    	
 	       res.sendRedirect(extUrl);
