@@ -12,7 +12,7 @@
 <f:view>
 <sakai:view title="#{msgs.tool_title}">
 	
-	<h3><h:outputText value="#{msgs.ical_opaqueurl_header}"/></h3>
+	<div class="page-header"><h1><h:outputText value="#{msgs.ical_opaqueurl_header}"/></h1></div>
 	<sakai:instruction_message rendered="#{!SubscribeBean.opaqueUrlExists}" 
 		value="#{msgs.ical_opaqueurl_explanation}" />
 	
