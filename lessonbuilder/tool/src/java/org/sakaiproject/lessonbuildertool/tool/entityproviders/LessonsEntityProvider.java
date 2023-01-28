@@ -549,7 +549,7 @@ public class LessonsEntityProvider extends AbstractEntityProvider implements Ent
 				this.pageId = item.getPageId();
 				this.prerequisite = item.isPrerequisite();
 				this.required = item.isRequired();
-				this.description = item.getDescription();
+				this.description = Objects.toString(item.getDescription(), "");
 			}
 		}
 	}
