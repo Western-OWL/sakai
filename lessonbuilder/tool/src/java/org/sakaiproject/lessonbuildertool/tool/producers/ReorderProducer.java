@@ -25,6 +25,7 @@ package org.sakaiproject.lessonbuildertool.tool.producers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.Map;
 
@@ -274,7 +275,7 @@ public class ReorderProducer implements ViewComponentProducer, NavigationCaseRep
 					String text = messageLocator.getMessage("simplepage.embedded.resources");
 					UIOutput.make(row, "text-snippet", text);
 				} else {
-					String description = i.getDescription();
+					String description = Objects.toString(i.getDescription(), "");
 					if (StringUtils.isNotBlank(description) && i.getType() != SimplePageItem.COMMENTS && i.getType() != SimplePageItem.STUDENT_CONTENT) {
 						description = " | " + description;
 						if (StringUtils.length(description) > 50) {

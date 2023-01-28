@@ -25,6 +25,7 @@ package org.sakaiproject.lessonbuildertool.tool.producers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -115,7 +116,7 @@ public class PreviewProducer implements ViewComponentProducer, NavigationCaseRep
 
 				UIContainer row = UIBranchContainer.make(tofill, "item:");
 				// UIOutput.make(row, "seq", String.valueOf(i.getSequence()));
-				UIOutput.make(row, "description", i.getDescription());
+				UIOutput.make(row, "description", Objects.toString(i.getDescription(), ""));
 				if (i.getType() == 5) {
 					if (i.getHtml().length() > 100) {
 						UIVerbatim.make(row, "boxed", i.getHtml().substring(0, 100) + "...");
