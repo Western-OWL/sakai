@@ -24,6 +24,7 @@ import java.io.Reader;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -162,7 +163,7 @@ public class LessonsEntityContentProducer implements EntityContentProducer
 		SimplePageItem item = simplePageToolDao.findItem(id);
 		if (item != null) {
 			StringBuilder sb = new StringBuilder();
-			for (HTMLParser hp = new HTMLParser(item.getHtml()); hp.hasNext();)
+			for (HTMLParser hp = new HTMLParser(Objects.toString(item.getHtml(), "")); hp.hasNext();)
 			{
 				SearchUtils.appendCleanString(hp.next(), sb);
 			}

@@ -117,11 +117,12 @@ public class PreviewProducer implements ViewComponentProducer, NavigationCaseRep
 				UIContainer row = UIBranchContainer.make(tofill, "item:");
 				// UIOutput.make(row, "seq", String.valueOf(i.getSequence()));
 				UIOutput.make(row, "description", Objects.toString(i.getDescription(), ""));
+				String html = Objects.toString(i.getHtml(), "");
 				if (i.getType() == 5) {
-					if (i.getHtml().length() > 100) {
-						UIVerbatim.make(row, "boxed", i.getHtml().substring(0, 100) + "...");
+					if (html.length() > 100) {
+						UIVerbatim.make(row, "boxed", html.substring(0, 100) + "...");
 					} else {
-						UIVerbatim.make(row, "boxed", i.getHtml());
+						UIVerbatim.make(row, "boxed", html);
 					}
 				} else {
 					UIOutput.make(row, "text", i.getName());
