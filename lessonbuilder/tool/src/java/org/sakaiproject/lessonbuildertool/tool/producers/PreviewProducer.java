@@ -125,7 +125,7 @@ public class PreviewProducer implements ViewComponentProducer, NavigationCaseRep
 						UIVerbatim.make(row, "boxed", html);
 					}
 				} else {
-					UIOutput.make(row, "text", i.getName());
+					UIOutput.make(row, "text", Objects.toString(i.getName(), ""));
 				}
 			    }
 			}

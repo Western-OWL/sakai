@@ -124,8 +124,6 @@ public class SimplePageItemImpl implements SimplePageItem  {
 	}
 
 	public SimplePageItemImpl(long id, long pageId, int sequence, int type, String sakaiId, String name) {
-		if (name == null)
-			name = "";
 		this.id = id;
 		this.pageId = pageId;
 		this.sequence = sequence;
@@ -149,8 +147,6 @@ public class SimplePageItemImpl implements SimplePageItem  {
 	}
 
 	public SimplePageItemImpl(long pageId, int sequence, int type, String sakaiId, String name) {
-		if (name == null)
-			name = "";
 		this.pageId = pageId;
 		this.sequence = sequence;
 		this.type = type;

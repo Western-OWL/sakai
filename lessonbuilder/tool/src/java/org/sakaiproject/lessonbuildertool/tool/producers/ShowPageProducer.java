@@ -670,7 +670,7 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 		String title;
 		String ownerName = null;
 		if(pageItem.getType() != SimplePageItem.STUDENT_CONTENT) {
-			title = pageItem.getName();
+			title = Objects.toString(pageItem.getName(), "");
 		}else {
 			title = buildStudentPageTitle(pageItem, currentPage.getTitle(), currentPage.getGroup(), currentPage.getOwner(), simplePageBean.isPageOwner(currentPage), canEditPage);
 		}
@@ -680,7 +680,7 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 		// If the path is "none", then we don't want to record this page as being viewed, or set a path
 		if(!params.getPath().equals("none")) {
 			newPath = simplePageBean.adjustPath(params.getPath(), currentPage.getPageId(), pageItem.getId(), title);
-			simplePageBean.adjustBackPath(params.getBackPath(), currentPage.getPageId(), pageItem.getId(), pageItem.getName());
+			simplePageBean.adjustBackPath(params.getBackPath(), currentPage.getPageId(), pageItem.getId(), Objects.toString(pageItem.getName(), ""));
 		}
 		
 		// put out link to index of pages
@@ -1255,6 +1255,7 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 			String color = null;
 			for (SimplePageItem i : itemList) {
 				String sakaiId = Objects.toString(i.getSakaiId(), "");
+				String itemName = Objects.toString(i.getName(), "");
 
 				// If the content is MULTIMEDIA (type 7) and the sakaiId is populated, then this is
 				// a Sakai content reference. We can then check if it's available to the current user
@@ -1283,8 +1284,8 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 
 					// only do this is there's an actual section break. Implicit ones don't have an item to hold the title
 					String headerText = "";
-					if ("section".equals(i.getFormat()) && i.getName() != null) {
-					    headerText = i.getName();
+					if ("section".equals(i.getFormat())) {
+					    headerText = itemName;
 					}
 					UIOutput.make(sectionWrapper, "sectionHeaderText", headerText);
 					UIOutput collapsedIcon = UIOutput.make(sectionWrapper, "sectionCollapsedIcon");
@@ -1545,8 +1546,8 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 					// done so the user never has to request a refresh.
 					//   FYI: this actually puts in an IFRAME for inline BLTI items
 					showRefresh = !makeLink(tableRow, "link", i, canSeeAll, currentPage, notDone, status, forceButtonColor, color) || showRefresh;
-					UILink.make(tableRow, "copylink", i.getName(), "http://lessonbuilder.sakaiproject.org/" + i.getId() + "/").
-					    decorate(new UIFreeAttributeDecorator("title", messageLocator.getMessage("simplepage.copylink2").replace("{}", i.getName())));
+					UILink.make(tableRow, "copylink", itemName, "http://lessonbuilder.sakaiproject.org/" + i.getId() + "/").
+					    decorate(new UIFreeAttributeDecorator("title", messageLocator.getMessage("simplepage.copylink2").replace("{}", itemName)));
 
 					// dummy is used when an assignment, quiz, or forum item is
 					// copied
@@ -1600,8 +1601,8 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 					boolean entityDeleted = false;
 					boolean notPublished = false;
 					if (canEditPage) {
-						UIOutput.make(tableRow, "edit-td").decorate(new UIFreeAttributeDecorator("title", messageLocator.getMessage("simplepage.edit-title.generic").replace("{}", i.getName())));
-						UILink.make(tableRow, "edit-link", (String)null, "").decorate(new UIFreeAttributeDecorator("title", messageLocator.getMessage("simplepage.edit-title.generic").replace("{}", i.getName())));
+						UIOutput.make(tableRow, "edit-td").decorate(new UIFreeAttributeDecorator("title", messageLocator.getMessage("simplepage.edit-title.generic").replace("{}", itemName)));
+						UILink.make(tableRow, "edit-link", (String)null, "").decorate(new UIFreeAttributeDecorator("title", messageLocator.getMessage("simplepage.edit-title.generic").replace("{}", itemName)));
 
 						// the following information is displayed using <INPUT
 						// type=hidden ...
@@ -2269,7 +2270,7 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 				if (!isMp4 && showDownloads) {
                                     UIOutput.make(tableRow, "noplugin-p", messageLocator.getMessage("simplepage.noplugin"));
                                     UIOutput.make(tableRow, "noplugin-br");
-                                    UILink.make(tableRow, "noplugin", i.getName(), movieUrl);
+                                    UILink.make(tableRow, "noplugin", itemName, movieUrl);
 				} 
                             }
 
@@ -2309,7 +2310,7 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 
 				    if (showDownloads) {
 					UIOutput.make(tableRow, "mp4-noplugin-p", messageLocator.getMessage("simplepage.noplugin"));
-					UILink.make(tableRow, "mp4-noplugin", i.getName(), i.getItemURL(simplePageBean.getCurrentSiteId(),currentPage.getOwner()));
+					UILink.make(tableRow, "mp4-noplugin", itemName, i.getItemURL(simplePageBean.getCurrentSiteId(),currentPage.getOwner()));
 				    } 
                                 }
                             }
@@ -3161,8 +3162,7 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 						}
 						if (canEditPage) {
 							UIOutput.make(tableRow, "calendar-item-groups", itemGroupString);
-							String name = i.getName()!= null ? i.getName() : "" ;
-							UIOutput.make(tableRow, "calendar-name", name);
+							UIOutput.make(tableRow, "calendar-name", itemName);
 							String description = i.getDescription()!= null ? i.getDescription() : "" ;
 							UIOutput.make(tableRow, "calendar-description", description);
 							String indentLevel = i.getAttribute("indentLevel") != null ? i.getAttribute("indentLevel") : "" ;
@@ -3388,11 +3388,11 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 
 					styleItem(tableRow, checklistItemContainer, checklistDiv, i, null, null);
 
-					UIOutput checklistTitle = UIOutput.make(tableRow, "checklistTitle", i.getName());
+					UIOutput checklistTitle = UIOutput.make(tableRow, "checklistTitle", itemName);
 
 					if(Boolean.valueOf(i.getAttribute(SimplePageItem.NAMEHIDDEN))) {
 						if(canEditPage) {
-							checklistTitle.setValue("( " + i.getName() + " )");
+							checklistTitle.setValue("( " + itemName + " )");
 							checklistTitle.decorate(new UIStyleDecorator("hiddenTitle"));
 						} else {
 							checklistTitle.decorate(new UIStyleDecorator("noDisplay"));
@@ -3510,19 +3510,19 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 
 						UIOutput.make(tableRow, "item-groups-titles-checklist", itemGroupTitles);
 
-						UIOutput.make(tableRow, "editchecklist-td").decorate(new UIFreeAttributeDecorator("title", messageLocator.getMessage("simplepage.edit-checklist").replace("{}", i.getName())));
+						UIOutput.make(tableRow, "editchecklist-td").decorate(new UIFreeAttributeDecorator("title", messageLocator.getMessage("simplepage.edit-checklist").replace("{}", itemName)));
 
 						GeneralViewParameters eParams = new GeneralViewParameters();
 						eParams.setSendingPage(currentPage.getPageId());
 						eParams.setItemId(i.getId());
 						eParams.viewID = ChecklistProducer.VIEW_ID;
-						UIInternalLink.make(tableRow, "edit-checklist", (String)null, eParams).decorate(new UIFreeAttributeDecorator("title", messageLocator.getMessage("simplepage.edit-checklist").replace("{}", i.getName())));
+						UIInternalLink.make(tableRow, "edit-checklist", (String)null, eParams).decorate(new UIFreeAttributeDecorator("title", messageLocator.getMessage("simplepage.edit-checklist").replace("{}", itemName)));
 
 						GeneralViewParameters gvp = new GeneralViewParameters();
 						gvp.setSendingPage(currentPage.getPageId());
 						gvp.setItemId(i.getId());
 						gvp.viewID = ChecklistProgressProducer.VIEW_ID;
-						UIInternalLink.make(tableRow, "edit-checklistProgress", (String)null, gvp).decorate(new UIFreeAttributeDecorator("title", messageLocator.getMessage("simplepage.view-checklist").replace("{}", i.getName())));
+						UIInternalLink.make(tableRow, "edit-checklistProgress", (String)null, gvp).decorate(new UIFreeAttributeDecorator("title", messageLocator.getMessage("simplepage.view-checklist").replace("{}", itemName)));
 					}
 
 					makeSaveChecklistForm(tofill);
@@ -3734,6 +3734,7 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 		boolean fake = !usable;  // by default, fake output if not available
 		String itemString = Long.toString(i.getId());
 		String sakaiId = Objects.toString(i.getSakaiId(), "");
+		String itemName = Objects.toString(i.getName(), "");
 
 		if ((SimplePageItem.DUMMY).equals(sakaiId)) {
 		    fake = true; // dummy is fake, but still available
@@ -3948,9 +3949,9 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 			    h = height;
 			
 			iframe.decorate(new UIFreeAttributeDecorator("height", h));
-			iframe.decorate(new UIFreeAttributeDecorator("title", i.getName()));
+			iframe.decorate(new UIFreeAttributeDecorator("title", itemName));
 			// normally we get the name from the link text, but there's no link text here
-			UIOutput.make(container, "item-name", i.getName());
+			UIOutput.make(container, "item-name", itemName);
 		    } else if (!"window".equals(i.getFormat())) {
 			// this is the default if format isn't valid or is missing
 			if (usable && lessonEntity != null) {
@@ -3979,7 +3980,7 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 			    }
 			    URL = lessonEntity.getUrl();
 			    // UIInternalLink link = LinkTrackerProducer.make(container, ID, i.getName(), URL, i.getId(), notDone);
-			    UILink link = UILink.make(container, ID, i.getName(), URL);
+			    UILink link = UILink.make(container, ID, itemName, URL);
 			    link.decorate(new UIFreeAttributeDecorator("lessonbuilderitem", itemString));
 			    link.decorate(new UIFreeAttributeDecorator("target", "_blank"));
 			    if (! available)
@@ -4004,7 +4005,7 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 
 		if (fake) {
 			ID = ID + "-fake";
-			String linkText = i.getName();
+			String linkText = itemName;
 			if (i.getType() == SimplePageItem.ASSIGNMENT) {
 				linkText = getLinkText(linkText, sakaiId);
 			}
@@ -4035,12 +4036,12 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 				link.decorate(new UITooltipDecorator(messageLocator.getMessage("simplepage.complete_required")));
 			}
 		} else {
-			String linkText = i.getName();
+			String linkText = itemName;
 			if (i.getType() == SimplePageItem.ASSIGNMENT) {
 				linkText = getLinkText(linkText, sakaiId);
 			}
 			UIOutput.make(container, ID + "-text", linkText).decorate
-				(new UIFreeAttributeDecorator("data-original-name", i.getName()));
+				(new UIFreeAttributeDecorator("data-original-name", itemName));
 		}
 
 		if (note != null) {

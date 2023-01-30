@@ -184,7 +184,7 @@ public class LessonsEntityContentProducer implements EntityContentProducer
 		SimplePageItem item = simplePageToolDao.findItem(id);
 		String ret = "";
 		if (item != null) { 
-			ret = SearchUtils.appendCleanString(item.getName(), null).toString();
+			ret = SearchUtils.appendCleanString(Objects.toString(item.getName(), ""), null).toString();
 		}
 		return ret;
 

@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 
 import org.json.simple.JSONObject;
@@ -277,7 +278,7 @@ public class BltiEntity implements LessonEntity, BltiInterface {
 		loadContent();
 		if ( content != null ) {
 			Long contentKey = getLong(id);
-			String item_name = item.getName();
+			String item_name = Objects.toString(item.getName(), "");
 			String item_description = item.getDescription();
 			String content_title = (String) content.get(LTIService.LTI_TITLE);
 			// SAK-43966 - Until the field is added description will always be null
@@ -288,12 +289,12 @@ public class BltiEntity implements LessonEntity, BltiInterface {
 			JSONObject content_json = BasicLTIUtil.parseJSONObject(content_settings);
 			String json_description = (String) content_json.get(LTIService.LTI_DESCRIPTION);
 
-			if ( (item_name != null && ! item_name.equals(content_title)) ||
+			if (!item_name.equals(content_title) ||
 				(item_description != null && ! item_description.equals(json_description)) || // Remove after SAK-43996
 				(item_description != null && ! item_description.equals(content_description)) ) {
 
 				Properties updates = new Properties();
-				if ( item_name != null ) updates.setProperty(LTIService.LTI_TITLE, item_name);
+				updates.setProperty(LTIService.LTI_TITLE, item_name);
 				// Post SAK-43996 - this should work (Sakai-21)
 				if ( item_description != null ) updates.setProperty(LTIService.LTI_DESCRIPTION, item_description);
 				if ( item_description != null ) { // Remove after SAK-43996

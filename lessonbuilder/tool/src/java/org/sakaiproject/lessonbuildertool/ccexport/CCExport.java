@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.zip.ZipEntry;
 
@@ -481,7 +482,7 @@ public class CCExport {
         List<SimplePageItem> sitePages = simplePageToolDao.findItemsInSite(ccConfig.getSiteId());
 
         sitePages.forEach(i -> ccConfig.getPagesDone().add(Long.valueOf(i.getSakaiId())));
-        sitePages.forEach(i -> lessonsExport.outputLessonPage(ccConfig, out, Long.valueOf(i.getSakaiId()), i.getName(), 6, true));
+        sitePages.forEach(i -> lessonsExport.outputLessonPage(ccConfig, out, Long.valueOf(i.getSakaiId()), Objects.toString(i.getName(), ""), 6, true));
         out.println("    </item>");
         out.println("  </organization>");
         return true;

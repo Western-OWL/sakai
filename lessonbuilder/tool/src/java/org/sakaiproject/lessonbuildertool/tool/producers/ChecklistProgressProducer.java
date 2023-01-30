@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import lombok.extern.slf4j.Slf4j;
@@ -118,17 +119,18 @@ public class ChecklistProgressProducer implements ViewComponentProducer, Navigat
 
             List<SimplePageItem> allChecklists = simplePageToolDao.findAllChecklistsInSite(siteId);
             if (allChecklists != null) {
-                allChecklists.sort( (SimplePageItem o1, SimplePageItem o2) -> o1.getName().compareToIgnoreCase(o2.getName()) );
+                allChecklists.sort( (SimplePageItem o1, SimplePageItem o2) -> Objects.toString(o1.getName(), "").compareToIgnoreCase(Objects.toString(o2.getName(), "")) );
                 for (SimplePageItem checklist : allChecklists) {
                     // Don't include the current checklist
                     if(checklist.getId() != simplePageBean.getItemId()) {
+                        String name = Objects.toString(checklist.getName(), "");
                         UIBranchContainer otherChecklistItems = UIBranchContainer.make(tofill, "other-checklists:");
                         GeneralViewParameters gvp = new GeneralViewParameters();
                         gvp.setSendingPage(gparams.getSendingPage());
                         gvp.setItemId(checklist.getId());
                         gvp.viewID = ChecklistProgressProducer.VIEW_ID;
-                        UIInternalLink.make(otherChecklistItems, "edit-checklistProgress", checklist.getName(), gvp).decorate(new UIFreeAttributeDecorator("title", messageLocator.getMessage("simplepage.view-checklist").replace("{}", checklist.getName())));
-                        UIOutput.make(otherChecklistItems, "otherChecklistName", checklist.getName());
+                        UIInternalLink.make(otherChecklistItems, "edit-checklistProgress", name, gvp).decorate(new UIFreeAttributeDecorator("title", messageLocator.getMessage("simplepage.view-checklist").replace("{}", name)));
+                        UIOutput.make(otherChecklistItems, "otherChecklistName", name);
                     }
                 }
             }
