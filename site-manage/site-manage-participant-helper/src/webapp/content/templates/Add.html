@@ -20,9 +20,9 @@
 		</div>
 		<p>
 			<span rsf:id="add.official" class="highlight"></span>
-			<span rsf:id = "add.official1"></span>
+			<span rsf:id="add.official1"></span>
+			<span rsf:id="add.official.instruction"></span>
 		</p>
-		<p rsf:id = "add.official.instruction"></p>
 		<!-- alert message -->
 		<div rsf:id="error-row:">
 			<div class="sak-banner-error" rsf:id="error">We Have Errors!</div>
@@ -35,7 +35,9 @@
 		<form rsf:id="participant-form" >
 			<input rsf:id="csrfToken" name="csrfToken" id="csrfToken" type="hidden"/>
 			<!-- add official account -->
+			<p>&nbsp;</p>
 			<h3 rsf:id="officialAccountSectionTitle"></h3>
+			<p class="instruction" rsf:id="msg=officialAccountSectionDescription"></p>
 			<label rsf:id="officialAccountLabel" for ="officialAccountParticipant">
 	           Official Account Label
 	        </label>
@@ -45,7 +47,9 @@
 			<p class="help-block textPanelFooter" rsf:id="msg=add.multiple"></p>
 			
 			<!-- add non-official account -->
+			<p>&nbsp;</p>
 			<h3 rsf:id="nonOfficialAccountSectionTitle"></h3>
+			<p class="instruction" rsf:id="nonOfficialAccountSectionDescription"></p>
 			<label rsf:id="nonOfficialAccountLabel" for ="nonOfficialAccountParticipant">
 	           Non-Official Account Label
 	        </label>

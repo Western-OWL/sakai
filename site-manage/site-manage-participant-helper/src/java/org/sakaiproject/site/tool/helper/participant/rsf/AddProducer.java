@@ -50,6 +50,7 @@ import uk.org.ponder.rsf.viewstate.ViewParamsReporter;
 import uk.org.ponder.stringutil.StringList;
 
 import org.sakaiproject.component.cover.ComponentManager;
+import org.sakaiproject.component.cover.ServerConfigurationService;
 import org.sakaiproject.site.tool.helper.participant.impl.SiteAddParticipantHandler;
 import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.tool.api.Tool;
@@ -64,6 +65,7 @@ import org.sakaiproject.user.api.UserDirectoryService;
 public class AddProducer implements ViewComponentProducer, NavigationCaseReporter, DefaultView, ViewParamsReporter, ActionResultInterceptor {
 
     public SiteAddParticipantHandler handler;
+    public static final String VERSION_SERVICE = "version.service";
     public static final String VIEW_ID = "Add";
     public MessageLocator messageLocator;
     public FrameAdjustingProducer frameAdjustingProducer;
@@ -101,11 +103,12 @@ public class AddProducer implements ViewComponentProducer, NavigationCaseReporte
 	    }
         
     	UIForm participantForm = UIForm.make(content, "participant-form");
+    	String accountType = ServerConfigurationService.getString(VERSION_SERVICE);
     	// csrf token
     	UIInput.make(participantForm, "csrfToken", "#{siteAddParticipantHandler.csrfToken}", handler.csrfToken);
     	// official participant
     	UIInput.make(participantForm, "officialAccountParticipant", "#{siteAddParticipantHandler.officialAccountParticipant}", handler.officialAccountParticipant);
-    	UIOutput.make(participantForm, "officialAccountSectionTitle", messageLocator.getMessage("officialAccountSectionTitle"));
+    	UIOutput.make(participantForm, "officialAccountSectionTitle", messageLocator.getMessage("officialAccountSectionTitle", new Object[] {accountType}));
     	UIOutput.make(participantForm, "officialAccountName", messageLocator.getMessage("officialAccountName"));
     	UIOutput.make(participantForm, "officialAccountLabel", messageLocator.getMessage("officialAccountLabel"));
     	
@@ -121,7 +124,8 @@ public class AddProducer implements ViewComponentProducer, NavigationCaseReporte
     	if (allowAddNonOfficialParticipant.equalsIgnoreCase("true"))
     	{
     		UIInput.make(participantForm, "nonOfficialAccountParticipant", "#{siteAddParticipantHandler.nonOfficialAccountParticipant}", handler.nonOfficialAccountParticipant);
-	    	UIOutput.make(participantForm, "nonOfficialAccountSectionTitle", messageLocator.getMessage("nonOfficialAccountSectionTitle"));
+	    	UIOutput.make(participantForm, "nonOfficialAccountSectionTitle", messageLocator.getMessage("nonOfficialAccountSectionTitle", new Object[] {accountType}));
+	    	UIOutput.make(participantForm, "nonOfficialAccountSectionDescription", messageLocator.getMessage("nonOfficialAccountSectionDescription", new Object[] {accountType}));
 	    	UIOutput.make(participantForm, "nonOfficialAccountName", messageLocator.getMessage("nonOfficialAccountName"));
 	    	UIOutput.make(participantForm, "nonOfficialAccountLabel", messageLocator.getMessage("nonOfficialAccountLabel"));
      		UIMessage.make(participantForm, "nonOfficialAddMultiple", "add.multiple.nonofficial");
