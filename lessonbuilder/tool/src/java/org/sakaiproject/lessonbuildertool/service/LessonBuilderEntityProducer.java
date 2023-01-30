@@ -466,7 +466,7 @@ public class LessonBuilderEntityProducer extends AbstractEntityProvider
 		}
 		// the Sakai ID is good enough for other object types
 		addAttr(doc, itemElement, "name", item.getName());
-		addAttr(doc, itemElement, "html", item.getHtml());
+		addAttr(doc, itemElement, "html", Objects.toString(item.getHtml(), ""));
 		addAttr(doc, itemElement, "description", Objects.toString(item.getDescription(), ""));
 		addAttr(doc, itemElement, "height", item.getHeight());
 		addAttr(doc, itemElement, "width", item.getWidth());
@@ -1605,7 +1605,7 @@ public class LessonBuilderEntityProducer extends AbstractEntityProvider
 	simplePageToolDao.clear();
 	List<SimplePageItem> items = simplePageToolDao.findTextItemsInSite(toContext);
 	for (SimplePageItem item: items) {
-	    String msgBody = item.getHtml();
+	    String msgBody = Objects.toString(item.getHtml(), "");
 	    try {
 		String newBody = (String) migrateAllLinks.invoke(linkMigrationHelperInstance, new Object[] { entrySet, msgBody});
 		if (!msgBody.equals(newBody)) {
