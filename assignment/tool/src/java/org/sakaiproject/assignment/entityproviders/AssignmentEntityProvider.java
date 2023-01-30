@@ -452,6 +452,8 @@ public class AssignmentEntityProvider extends AbstractEntityProvider implements 
     @EntityCustomAction(action = "addTimeSheet", viewKey = EntityView.VIEW_NEW)
     public int addTimeSheet(Map<String, Object> params) {
 
+		checkTimeSheet();
+
         String userId = getCheckedCurrentUser();
 
         User user;
@@ -547,6 +549,8 @@ public class AssignmentEntityProvider extends AbstractEntityProvider implements 
     @EntityCustomAction(action = "removeTimeSheet", viewKey = EntityView.VIEW_NEW)
     public int removeTimeSheet(Map<String, Object> params) {
 
+		checkTimeSheet();
+
         String userId = getCheckedCurrentUser();
 
         User user;
@@ -600,8 +604,21 @@ public class AssignmentEntityProvider extends AbstractEntityProvider implements 
         return HttpServletResponse.SC_OK;
     }
 
+	private void checkTimeSheet()
+	{
+		// OWL: we pass empty string here to avoid looking up a site id, allowing us to just return early. Requires a
+		// refactor if we wish to allow only certain sites to use timesheets.
+		if (!assignmentService.isTimeSheetEnabled(""))
+		{
+			log.warn("The timesheet feature is not enabled");
+            throw new EntityException("The timesheet feature is not enabled", "", HttpServletResponse.SC_FORBIDDEN);
+		}
+	}
+
     @EntityCustomAction(action = "getTimeSheet", viewKey = EntityView.VIEW_LIST)
     public Map<String, String> getTimeSheet(EntityView view , Map<String, Object> params) {
+
+		checkTimeSheet();
 
         String userId = sessionManager.getCurrentSessionUserId();
         Map<String, String> assignData = new HashMap<>(); 
