@@ -836,10 +836,16 @@ var setupCategTools = function () {
 
       var selId = normalizedId($(this).attr("id"));
       var iconId = iconizedId($(this).attr("id"));
+      var iconClass = "";
+      if (iconId.startsWith("lti_")) {
+          iconClass = "fa fa-fw fa-lg fa-globe";
+      } else {
+          iconClass = "icon-sakai--" + iconId;
+      }
 
       var safeLabelText = $("<p></p>").text($(this).next("label").text()).html();
       var newListItem = '<li id=\"' + thisToolId
-              + '\"><span class=\"selectedToolTitle \"><i class="icon-sakai--' + iconId + '"></i>' + safeLabelText + "</span>"
+              + '\"><span class=\"selectedToolTitle \"><i class="' + iconClass + '"></i>' + safeLabelText + "</span>"
               + "<span>" + removeLink + '</span></li>';
       $("#toolSelectionList ul").append(newListItem);
 
