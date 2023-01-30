@@ -995,7 +995,7 @@ public class SimplePageBean {
 
 	public String getName() {
 		if (itemId != null && itemId != -1) {
-			return findItem(itemId).getName();
+			return Objects.toString(findItem(itemId).getName(), "");
 		} else {
 			return null;
 		}
@@ -1841,7 +1841,7 @@ public class SimplePageBean {
 			// editing an existing item which might have customized properties
 			// retrieve the original resource and check for customizations
 			ResourceHelper resHelp = new ResourceHelper(getContentResource(Objects.toString(i.getSakaiId(), "")));
-			boolean hasCustomName = !isWebsite && resHelp.isNameCustom(i.getName());  // ignore website names for now
+			boolean hasCustomName = !isWebsite && resHelp.isNameCustom(Objects.toString(i.getName(), ""));  // ignore website names for now
 			boolean hasCustomDesc = resHelp.isDescCustom(i.getDescription());
 			
 			i.setSakaiId(id);
@@ -2810,7 +2810,7 @@ public class SimplePageBean {
 	    				PathEntry entry = new PathEntry();
 	    				entry.pageId = p.getPageId();
 	    				entry.pageItemId = i.getId();
-	    				entry.title = i.getName();
+	    				entry.title = Objects.toString(i.getName(), "");
 	    				path.add(entry);
 	    			}
 	    		}
@@ -3020,7 +3020,7 @@ public class SimplePageBean {
 			log.warn("createSubpage permission failed going to new page");
 			return "failed";
 		    }
-		    adjustPath((subpageNext ? "next" : "push"), subpage.getPageId(), i.getId(), i.getName());
+		    adjustPath((subpageNext ? "next" : "push"), subpage.getPageId(), i.getId(), Objects.toString(i.getName(), ""));
 
 		    submit();
 
@@ -3686,7 +3686,7 @@ public class SimplePageBean {
                 // skip if this parent was already seen, guard against infinite loop
                 if (!seen.contains(parent.getId())) {
                     seen.add(parent.getId());
-                    String title = parent.getName();
+                    String title = Objects.toString(parent.getName(), "");
                     if (seen.size() > 1) {
                         title += continuation ? " (" + messageLocator.getMessage("simplepage.printall.continuation") + ") " : " > ";
                     }
@@ -6010,7 +6010,7 @@ public class SimplePageBean {
 				return needed;	// reached current page. we're done
 			}
 			if (i.isRequired() && !isItemComplete(i) && isItemVisible(i)) {
-				needed.add(i.getName());
+				needed.add(Objects.toString(i.getName(), ""));
 			}
 		}
 

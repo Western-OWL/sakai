@@ -173,9 +173,9 @@ public class LessonsEntityProvider extends AbstractEntityProvider implements Ent
 			if (item.getType() == SimplePageItem.PAGE) {
 			    String baseURL = developerHelperService.getEntityURL(REFERENCE_ROOT, EntityView.VIEW_LIST, null);   //   /direct/lessons
 			    baseURL = baseURL + "/lesson/";
-			    ret = new DecoratedPageItem(item.getId(), item.getName(), item.getType(), siteId, site.getTitle(), baseURL + item.getId());
+			    ret = new DecoratedPageItem(item.getId(), Objects.toString(item.getName(), ""), item.getType(), siteId, site.getTitle(), baseURL + item.getId());
 			} else
-			    ret = new DecoratedItem(item.getId(), item.getName(), item.getType(), siteId, site.getTitle());
+			    ret = new DecoratedItem(item.getId(), Objects.toString(item.getName(), ""), item.getType(), siteId, site.getTitle());
 		}
 		else
 			throw new EntityNotFoundException("Invalid id", id);
@@ -236,7 +236,7 @@ public class LessonsEntityProvider extends AbstractEntityProvider implements Ent
 		    if (hasUpdatePermission || lessonsAccess.isItemAccessible(item.getId(), siteId, currentUserId, simplePageBean)) {
 			SimplePage currentSimplePage = simplePageBean.getCurrentPage();
 				if (currentSimplePage != null){
-					ret.add(new DecoratedSiteItem(item.getId(), item.getName(), baseURL + item.getId(), currentSimplePage.isHidden(), currentSimplePage.getReleaseDate(), currentSimplePage.getGradebookPoints()));
+					ret.add(new DecoratedSiteItem(item.getId(), Objects.toString(item.getName(), ""), baseURL + item.getId(), currentSimplePage.isHidden(), currentSimplePage.getReleaseDate(), currentSimplePage.getGradebookPoints()));
 				}
 		    }
 		}
@@ -281,7 +281,7 @@ public class LessonsEntityProvider extends AbstractEntityProvider implements Ent
 				{
 				    simplePageBean = makeSimplePageBean(simplePageBean, s.getId(), item);
 				    if (hasUpdatePermission || lessonsAccess.isItemAccessible(item.getId(), s.getId(), currentUserId, simplePageBean))
-					ret.add(new DecoratedUserItem(item.getId(), item.getName(), s.getId(), s.getTitle(), baseURL + item.getId()));
+					ret.add(new DecoratedUserItem(item.getId(), Objects.toString(item.getName(), ""), s.getId(), s.getTitle(), baseURL + item.getId()));
 				}
 
 				//if current user can not access to the lessonbuilder tool on that site, just skip it
@@ -376,7 +376,7 @@ public class LessonsEntityProvider extends AbstractEntityProvider implements Ent
 			if (item.getType() != SimplePageItem.PAGE || !fullTree)
 			{
 				if(simpleType)
-					ret.add(new DecoratedItem(item.getId(), item.getName(), item.getType(), site.getId(), site.getTitle()));
+					ret.add(new DecoratedItem(item.getId(), Objects.toString(item.getName(), ""), item.getType(), site.getId(), site.getTitle()));
 				else
 					addItem(item, ret, hasUpdatePermission, page);
 				return ret.get(0);
@@ -544,7 +544,7 @@ public class LessonsEntityProvider extends AbstractEntityProvider implements Ent
 			if(item != null)
 			{
 				this.id = item.getId();
-				this.name = item.getName();
+				this.name = Objects.toString(item.getName(), "");
 				this.type = item.getType();				
 				this.pageId = item.getPageId();
 				this.prerequisite = item.isPrerequisite();
@@ -944,7 +944,7 @@ public class LessonsEntityProvider extends AbstractEntityProvider implements Ent
 
 	    // say done
 	    pageMap.remove(pageId);
-		entries.add(new DecoratedItem(pageItem.getId(), pageItem.getName(), pageItem.getType(), site.getId(), site.getTitle()));
+		entries.add(new DecoratedItem(pageItem.getId(), Objects.toString(pageItem.getName(), ""), pageItem.getType(), site.getId(), site.getTitle()));
 
 	    // now recursively do subpages
 	    List<SimplePageItem> items = simplePageToolDao.findItemsOnPage(pageId);
@@ -963,7 +963,7 @@ public class LessonsEntityProvider extends AbstractEntityProvider implements Ent
 	    	if (item.getType() == SimplePageItem.PAGE)
 		    findAllSimplePages(item, entries, pageMap, hasUpdatePermission, site, currentUserId);
 		else
-		    entries.add(new DecoratedItem(item.getId(), item.getName(), item.getType(), site.getId(), site.getTitle()));
+		    entries.add(new DecoratedItem(item.getId(), Objects.toString(item.getName(), ""), item.getType(), site.getId(), site.getTitle()));
 	    }
 	}	
 	

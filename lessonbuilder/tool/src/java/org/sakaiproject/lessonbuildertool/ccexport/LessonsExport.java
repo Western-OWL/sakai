@@ -65,6 +65,7 @@ public class LessonsExport {
 
         for (SimplePageItem item : items) {
             String sakaiId = Objects.toString(item.getSakaiId(), "");
+            String name = Objects.toString(item.getName(), "");
             CCResourceItem res = null;
             String itemString = null;
             String urlTitle = null;
@@ -73,19 +74,19 @@ public class LessonsExport {
                 case SimplePageItem.PAGE:
                     Long pId = Long.valueOf(item.getSakaiId());
                     if (ccConfig.getPagesDone().contains(pId)) {
-                        ccConfig.getResults().add(messageSource.getMessage("simplepage.exportcc-pagealreadydone", null, ccConfig.getLocale()).replace("{1}", title).replace("{2}", item.getName()));
+                        ccConfig.getResults().add(messageSource.getMessage("simplepage.exportcc-pagealreadydone", null, ccConfig.getLocale()).replace("{1}", title).replace("{2}", name));
                     } else if ((next != null) && (item.getId() == next.getId())) {
                         if (showNext) {
-                            SimplePageItem n = outputLessonPage(ccConfig, out, pId, item.getName(), indent + 2, false);
+                            SimplePageItem n = outputLessonPage(ccConfig, out, pId, name, indent + 2, false);
                             while ((n != null) && (!ccConfig.getPagesDone().contains(pId = Long.valueOf(n.getSakaiId())))) {
                                 n = outputLessonPage(ccConfig, out, pId, n.getName(), indent + 2, false);
                             }
                             if ((n != null) && (ccConfig.getPagesDone().contains(pId))) {
-                                ccConfig.getResults().add(messageSource.getMessage("simplepage.exportcc-pagealreadydone", null, ccConfig.getLocale()).replace("{1}", title).replace("{2}", item.getName()));
+                                ccConfig.getResults().add(messageSource.getMessage("simplepage.exportcc-pagealreadydone", null, ccConfig.getLocale()).replace("{1}", title).replace("{2}", name));
                             }
                         }
                     } else {
-                        outputLessonPage(ccConfig, out, pId, item.getName(), indent + 2, true);
+                        outputLessonPage(ccConfig, out, pId, name, indent + 2, true);
                     }
                     break;
                 case SimplePageItem.MULTIMEDIA:
@@ -110,7 +111,7 @@ public class LessonsExport {
                         res = ccConfig.addFile(oembed, location);
                         res.setLink(true);
                         res.setUrl(oembed);
-                        res.setTitle(item.getName());
+                        res.setTitle(name);
                         if (StringUtils.isBlank(title)) res.setTitle(oembed);
                         // queue this to output the XML link file
                         ccConfig.getLinkSet().add(res);
@@ -169,7 +170,7 @@ public class LessonsExport {
                         default:
                             break;
                     }
-                    ccConfig.getResults().add(messageSource.getMessage("simplepage.exportcc-bad-type", null, ccConfig.getLocale()).replace("{1}", title).replace("{2}", item.getName()).replace("{3}", itemString));
+                    ccConfig.getResults().add(messageSource.getMessage("simplepage.exportcc-bad-type", null, ccConfig.getLocale()).replace("{1}", title).replace("{2}", name).replace("{3}", itemString));
                     break;
                 default:
                     break;
@@ -177,7 +178,7 @@ public class LessonsExport {
             if (res != null) {
                 ccUtils.outputIndent(out, indent + 2);
                 out.println("<item identifier=\"item_" + item.getId() + "\" identifierref=\"" + res.getResourceId() + "\">");
-                String iTitle = item.getName();
+                String iTitle = name;
 
                 if (StringUtils.isBlank(iTitle)) {
                     if (urlTitle != null) {

@@ -17,6 +17,7 @@
 package org.sakaiproject.lessonbuildertool.util;
 
 import java.util.Objects;
+
 import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.lessonbuildertool.SimplePageItem;
 import org.sakaiproject.util.api.FormattedText;
@@ -31,7 +32,7 @@ public class SimplePageItemUtilities {
      * @return String of the name
      */
     public static String getDisplayName(final SimplePageItem name) {
-        String itemName = name.getName();
+        String itemName = Objects.toString(name.getName(), "");
         if(itemName.isEmpty()) {
             String html = Objects.toString(name.getHtml(), "");
             if(!html.isEmpty()) {

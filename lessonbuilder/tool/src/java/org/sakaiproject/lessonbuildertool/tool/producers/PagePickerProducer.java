@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
@@ -187,7 +188,7 @@ public class PagePickerProducer implements ViewComponentProducer, NavigationCase
         PageEntry entry = new PageEntry();
         entry.pageId = pageId;
         entry.itemId = pageItem.getId();
-        entry.title = pageItem.getName();
+        entry.title = Objects.toString(pageItem.getName(), "");
         entry.level = level;
         entry.toplevel = toplevel;
         entry.hidden = page.isHidden();
@@ -543,7 +544,7 @@ public class PagePickerProducer implements ViewComponentProducer, NavigationCase
                             UIOutput.make(itemListItem, "name", text)
                                 .decorate(new UIFreeAttributeDecorator("class", "text-item-placeholder"));
                         } else {
-                            UIOutput.make(itemListItem, "name", pageItem.getName());
+                            UIOutput.make(itemListItem, "name", Objects.toString(pageItem.getName(), ""));
                         }
                     }
                 } // if (enableShowItems)

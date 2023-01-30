@@ -465,7 +465,7 @@ public class LessonBuilderEntityProducer extends AbstractEntityProvider
 
 		}
 		// the Sakai ID is good enough for other object types
-		addAttr(doc, itemElement, "name", item.getName());
+		addAttr(doc, itemElement, "name", Objects.toString(item.getName(), ""));
 		addAttr(doc, itemElement, "html", Objects.toString(item.getHtml(), ""));
 		addAttr(doc, itemElement, "description", Objects.toString(item.getDescription(), ""));
 		addAttr(doc, itemElement, "height", item.getHeight());
