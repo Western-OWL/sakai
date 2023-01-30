@@ -28,6 +28,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -66,6 +67,7 @@ import org.sakaiproject.tool.cover.SessionManager;
 import org.sakaiproject.util.ResourceLoader;
 
 import lombok.extern.slf4j.Slf4j;
+import org.sakaiproject.site.tool.owl.sitebrowser.SortableAcademicSession;
 
 /**
  * <p>
@@ -120,8 +122,8 @@ public class SiteBrowserAction extends PagedResourceActionII implements SiteHelp
 	
 	private static final String STATE_HELPER_DONE = PREFIX+ "helperDone";
 	
-	private final static String SORT_KEY_SESSION = "worksitesetup.sort.key.session";
-	private final static String SORT_ORDER_SESSION = "worksitesetup.sort.order.session";
+	private final static String SORT_KEY_SESSION = "sitebrowser.sort.key.session";
+	private final static String SORT_ORDER_SESSION = "sitebrowser.sort.order.session";
 	
 	// SAK-28997
 	private final static String SEARCH_TERM_DISPLAY = "sitebrowser.termsearch.display";
@@ -359,7 +361,7 @@ public class SiteBrowserAction extends PagedResourceActionII implements SiteHelp
 			{
 				// SAK-28997
 				String searchTermDisplay = ServerConfigurationService.getString( SEARCH_TERM_DISPLAY, SEARCH_TERM_TITLE );
-				Map<String,String> termsMap = new HashMap<String,String>();
+				Map<String,String> termsMap = new LinkedHashMap<>();
 				Collection<AcademicSession> academicSessions = sortAcademicSessions( cms.getAcademicSessions() );
 				for( AcademicSession as : academicSessions )
 				{
@@ -399,8 +401,25 @@ public class SiteBrowserAction extends PagedResourceActionII implements SiteHelp
 		String[] keys = ServerConfigurationService.getStrings(SORT_KEY_SESSION);
 		String[] orders = ServerConfigurationService.getStrings(SORT_ORDER_SESSION);
 
-		return sortCmObject(sessions, keys, orders);
-	} // sortCourseOffering
+		// OWL-829 - hack for sorting by first word of title only, then by date  --plukasew
+		// from the given collection of sessions, we will create a list of SortableAcademicSessions
+		List<SortableAcademicSession> sortableSessions = new ArrayList<>();
+		for (AcademicSession as : sessions)
+		{
+			sortableSessions.add(new SortableAcademicSession(as));
+		}
+
+		Collection<SortableAcademicSession> sortedSessions = sortCmObject(sortableSessions, keys, orders);
+
+		// convert back into a list of regular AcademicSessions
+		List<AcademicSession> finalSessions = new ArrayList<>();
+		for (SortableAcademicSession sas : sortedSessions)
+		{
+			finalSessions.add(sas.getAcademicSession());
+		}
+
+		return finalSessions;
+	}
 	
 	/**
 	 * Custom sort CM collections using properties provided object has getter & setter for 
