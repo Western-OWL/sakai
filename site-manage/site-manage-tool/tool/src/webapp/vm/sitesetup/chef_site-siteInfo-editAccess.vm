@@ -156,7 +156,7 @@
 		#end
 		<div id="publicChangeableDiv" $publicChangeableDivDisplay >
 			<p  id="site_vis_inst">
-				$tlang.getString("ediacc.vis.instr")
+				$tlang.getFormattedMessage("ediacc.vis.instr", $siteBrowserURL, $uiService)
 				#if(!$!site)$tlang.getString("ediacc.gloacc2")#end
 			</p>
 			<div class="radio">
@@ -205,11 +205,9 @@
 		<div id="globalAccessDiv" $globalAccessDivDisplay>
 			<p id="site_glob_inst">
 				$tlang.getString("ediacc.gloacc1")
+				$tlang.getFormattedMessage("ediacc.yousitcan", $uiService)
 				#if(!$!site)$tlang.getString("ediacc.gloacc2")#end
 				<br />
-			</p>
-			<p >
-				$tlang.getString("ediacc.yousitcan")
 			</p>
 			## set site joinable and joiner role
 			<div class="radio">

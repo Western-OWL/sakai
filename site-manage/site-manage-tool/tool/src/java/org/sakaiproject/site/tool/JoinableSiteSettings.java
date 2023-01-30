@@ -61,25 +61,25 @@ public class JoinableSiteSettings
 {
 
 	// API's
-	private static final UserDirectoryService 		userDirectoryService 	= (UserDirectoryService) 		ComponentManager.get( UserDirectoryService.class );
-	private static final SiteService 				siteService 			= (SiteService) 				ComponentManager.get( SiteService.class );
-	private static final DeveloperHelperService 	developerHelperService	= (DeveloperHelperService) 		ComponentManager.get( DeveloperHelperService.class );
-	private static final ServerConfigurationService serverConfigService		= (ServerConfigurationService) 	ComponentManager.get( ServerConfigurationService.class );
+	private static final UserDirectoryService		userDirectoryService	= (UserDirectoryService)		ComponentManager.get( UserDirectoryService.class );
+	private static final SiteService				siteService				= (SiteService)					ComponentManager.get( SiteService.class );
+	private static final DeveloperHelperService		developerHelperService	= (DeveloperHelperService)		ComponentManager.get( DeveloperHelperService.class );
+	private static final ServerConfigurationService	serverConfigService		= (ServerConfigurationService)	ComponentManager.get( ServerConfigurationService.class );
 	
 	// State variable names
 	private static final String STATE_JOIN_SITE_GROUP_ID				= "state_join_site_group";
 	private static final String STATE_JOIN_SITE_EXCLUDE_PUBLIC_LIST		= "state_join_site_exclude_public_list";
 	private static final String STATE_JOIN_SITE_LIMIT_BY_ACCOUNT_TYPE	= "state_join_site_limit_by_account_type";
-	private static final String STATE_JOIN_SITE_ACCOUNT_TYPES 			= "state_join_site_account_types";
+	private static final String STATE_JOIN_SITE_ACCOUNT_TYPES			= "state_join_site_account_types";
 	private static final String STATE_JOIN_SITE_ACCOUNT_TYPE_PREFIX		= "state_join_site_account_type_";
 	private static final String STATE_JOIN_SITE_SITE_BROWSER_SITE_ID	= "state_join_site_site_browser_site_id";
 	
 	// Site property names
-	private static final String SITE_PROP_JOIN_SITE_GROUP_ID 				= "joinerGroup";
-	private static final String SITE_PROP_JOIN_SITE_GROUP_NO_SEL				= "noSelection";
+		private static final String SITE_PROP_JOIN_SITE_GROUP_ID			= "joinerGroup";
+	private static final String SITE_PROP_JOIN_SITE_GROUP_NO_SEL			= "noSelection";
 	private static final String SITE_PROP_JOIN_SITE_EXCLUDE_PUBLIC_LIST		= "joinExcludeFromPublicList";
-	private static final String SITE_PROP_JOIN_SITE_LIMIT_BY_ACCOUNT_TYPE 	= "joinLimitByAccountType";
-	private static final String SITE_PROP_JOIN_SITE_ACCOUNT_TYPES 			= "joinLimitedAccountTypes";
+	private static final String SITE_PROP_JOIN_SITE_LIMIT_BY_ACCOUNT_TYPE	= "joinLimitByAccountType";
+	private static final String SITE_PROP_JOIN_SITE_ACCOUNT_TYPES			= "joinLimitedAccountTypes";
 	
 	// Context variable/element names
 	private static final String CONTEXT_JOIN_SITE_GROUPS										= "siteGroups";
@@ -104,13 +104,14 @@ public class JoinableSiteSettings
 	private static final String CONTEXT_JOIN_SITE_SITE_TITLE									= "siteTitle";
 	private static final String CONTEXT_JOIN_SITE_LINK											= "link";
 	private static final String CONTEXT_JOIN_SITE_SITE_BROWSER_JOIN_ENABLED						= "siteBrowserJoinEnabled";
-	private static final String CONTEXT_JOIN_SITE_GROUP_ENABLED_LOCAL_DISABLED_GLOBAL 			= "joinGroupEnabledLocalDisabledGlobal";
-	private static final String CONTEXT_JOIN_SITE_EXCLUDE_ENABLED_LOCAL_DISABLED_GLOBAL 			= "joinExcludeEnabledLocalDisabledGlobal";
-	private static final String CONTEXT_JOIN_SITE_LIMIT_ENABLED_LOCAL_DISABLED_GLOBAL 			= "joinLimitEnabledLocalDisabledGlobal";
-	private static final String CONTEXT_UI_SERVICE = "uiService";
+	private static final String CONTEXT_JOIN_SITE_GROUP_ENABLED_LOCAL_DISABLED_GLOBAL			= "joinGroupEnabledLocalDisabledGlobal";
+	private static final String CONTEXT_JOIN_SITE_EXCLUDE_ENABLED_LOCAL_DISABLED_GLOBAL			= "joinExcludeEnabledLocalDisabledGlobal";
+	private static final String CONTEXT_JOIN_SITE_LIMIT_ENABLED_LOCAL_DISABLED_GLOBAL			= "joinLimitEnabledLocalDisabledGlobal";
+	private static final String CONTEXT_UI_SERVICE												= "uiService";
+	private static final String CONTEXT_SITE_BROWSER_URL										= "siteBrowserURL";
 	
 	// Message keys
-	private static final String MSG_KEY_UNJOINABLE 			= "join.unjoinable";
+	private static final String MSG_KEY_UNJOINABLE			= "join.unjoinable";
 	private static final String MSG_KEY_LOGIN				= "join.login";
 	private static final String MSG_KEY_ALREADY_MEMBER_1		= "join.alreadyMember1";
 	private static final String MSG_KEY_ALREADY_MEMBER_2	= "join.alreadyMember2";
@@ -121,15 +122,16 @@ public class JoinableSiteSettings
 	private static final String MSG_KEY_JOIN_FAIL			= "join.fail";
 	
 	// Random other things
-	private static final String CSV_DELIMITER 			= ",";
+	private static final String CSV_DELIMITER			= ",";
 	private static final String TRUE_STRING				= "true";
-	private static final String FALSE_STRING				= "false";
+	private static final String FALSE_STRING			= "false";
 	private static final String ON_STRING				= "on";
 	private static final String FORM_PREFIX				= "form_";
 	private static final String SITE_REF_PREFIX			= "/site/";
 	private static final String SITE_BROWSER_MODE		= "sitebrowser.mode";
-	private static final String DEFAULT_UI_SERVICE 		= "Sakai";
-	public  static final String SITE_BROWSER_JOIN_MODE 	= "join";
+	private static final String DEFAULT_UI_SERVICE		= "Sakai";
+	private static final String SITE_BROWSER_SITE_ID	= "!gateway/page/!gateway-400";
+	public  static final String SITE_BROWSER_JOIN_MODE	= "join";
 	
 	// sakai.properties
 	private static final String SAK_PROP_UI_SERVICE = "ui.service";
@@ -956,6 +958,7 @@ public class JoinableSiteSettings
 		}
 		
 		context.put( CONTEXT_UI_SERVICE, serverConfigService.getString( SAK_PROP_UI_SERVICE, DEFAULT_UI_SERVICE ) );
+		context.put( CONTEXT_SITE_BROWSER_URL, developerHelperService.getPortalURL() + SITE_REF_PREFIX + SITE_BROWSER_SITE_ID );
 		
 		if( isSiteJoinable )
 		{
@@ -989,6 +992,7 @@ public class JoinableSiteSettings
 		}
 		
 		context.put( CONTEXT_UI_SERVICE, serverConfigService.getString( SAK_PROP_UI_SERVICE, DEFAULT_UI_SERVICE ) );
+		context.put( CONTEXT_SITE_BROWSER_URL, developerHelperService.getPortalURL() + SITE_REF_PREFIX + SITE_BROWSER_SITE_ID );
 		
 		if( isSiteJoinable )
 		{
@@ -1099,6 +1103,7 @@ public class JoinableSiteSettings
 		}
 		
 		context.put( CONTEXT_UI_SERVICE, serverConfigService.getString( SAK_PROP_UI_SERVICE, DEFAULT_UI_SERVICE ) );
+		context.put( CONTEXT_SITE_BROWSER_URL, developerHelperService.getPortalURL() + SITE_REF_PREFIX + SITE_BROWSER_SITE_ID );
 		
 		putGlobalEnabledSettingsIntoContext( context );
 		updateContextFromSiteInfo( context, siteInfo );
@@ -1226,7 +1231,9 @@ public class JoinableSiteSettings
 		{
 			return;
 		}
-		
+
+		context.put( CONTEXT_UI_SERVICE, serverConfigService.getString( SAK_PROP_UI_SERVICE ) );
+
 		if( siteService.isGlobalJoinGroupEnabled() )
 		{
 			context.put( CONTEXT_JOIN_SITE_GROUP_ID, siteInfo.joinerGroup );
