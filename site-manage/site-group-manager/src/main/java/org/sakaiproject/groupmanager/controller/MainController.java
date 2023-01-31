@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
@@ -71,7 +70,7 @@ public class MainController {
         Site site = siteOptional.get();
 
         // Group members for each group, separated by comma
-        Map<String, String> groupMemberMap = new HashMap<String, String>();
+        Map<String, List<String>> groupMemberMap = new HashMap<String, List<String>>();
         // Joinable sets for each group
         Map<String, String> groupJoinableSetMap = new HashMap<String, String>();
         // Joinable sets size for each group
@@ -91,7 +90,7 @@ public class MainController {
         for (Group group: groupList) {
             boolean groupLocked = false;
             // Get the group members separated by comma
-            StringJoiner stringJoiner = new StringJoiner(", ");
+            List<String> groupMemberDetails = new ArrayList<String>();
             List<User> groupMemberList = new ArrayList<User>();
             group.getMembers().forEach(member -> {
                 Optional<User> memberUserOptional = sakaiService.getUser(member.getUserId());
@@ -100,8 +99,8 @@ public class MainController {
                 }
             });
             Collections.sort(groupMemberList, new UserSortNameComparator());
-            groupMemberList.forEach(u -> stringJoiner.add(u.getDisplayName()));
-            groupMemberMap.put(group.getId(), stringJoiner.toString());
+            groupMemberList.forEach(u -> groupMemberDetails.add(u.getDisplayName() + " (" + u.getEid() + ")"));
+            groupMemberMap.put(group.getId(), groupMemberDetails);
             // Get the joinable sets and add them to the Map
             groupJoinableSetMap.put(group.getId(), group.getProperties().getProperty(Group.GROUP_PROP_JOINABLE_SET));
             // Get the joinable sets and add them to the Map
