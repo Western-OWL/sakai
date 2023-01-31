@@ -2260,6 +2260,7 @@ public class SiteAction extends PagedResourceActionII {
 					List<Group> filteredSections = new ArrayList<Group>();
 					Collection<String> viewMembershipGroups = new ArrayList<String>();
 					Set<JoinableGroup> unJoinableGroups = new HashSet<>();
+					Collection<String> unjoinableLockedGroups = new ArrayList<>();  // OWL
 					for (Group g : groups)
 					{
 						Object gProp = g.getProperties().getProperty(g.GROUP_PROP_WSETUP_CREATED);
@@ -2281,6 +2282,10 @@ public class SiteAction extends PagedResourceActionII {
 							&& BooleanUtils.toBoolean(unjoinableProp)
 							&& g.getMember(currentUser.getId()) != null) {
 							unJoinableGroups.add(new JoinableGroup(g));
+							if (AuthzGroup.RealmLockMode.ALL.equals(g.getRealmLock()) || AuthzGroup.RealmLockMode.MODIFY.equals(g.getRealmLock()))
+							{
+								unjoinableLockedGroups.add(g.getId());
+							}
 						}
 					}
 
@@ -2293,6 +2298,7 @@ public class SiteAction extends PagedResourceActionII {
 					context.put("sections", filteredSections);
 
 					context.put("unjoinableGroups", new ArrayList<>(unJoinableGroups));
+					context.put("unjoinableLockedGroups", unjoinableLockedGroups);
 				}
 				
 				Set<JoinableGroup> joinableGroups = new HashSet<>();
