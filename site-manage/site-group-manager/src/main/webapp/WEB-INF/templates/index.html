@@ -32,20 +32,19 @@
             </td>
             <td class="hidden-xs" th:if="${anyGroupLocked}">
               <div th:if="${lockedGroupsEntityMap.get(group.id) != null }">
-                <div th:if="${!lockedGroupsEntityMap.get(group.id).get('assignments').isEmpty()}">
+                <div class="group-locked-container" th:if="${!lockedGroupsEntityMap.get(group.id).get('assignments').isEmpty()}">
                   <span class="group-locked-info collapsed" data-toggle="collapse" th:data-target="|#lockingassignments-${group.id}|" tabindex="0" role="button" th:text="#{index.table.assignments}"></span>
                   <div th:id="|lockingassignments-${group.id}|" class="collapse">
-                    <ul th:each=" assigment : ${lockedGroupsEntityMap.get(group.id).get('assignments')}">
-                      <li th:text="${assigment}"></li>
+                    <ul class="group-locked-groups" th:each=" assigment : ${lockedGroupsEntityMap.get(group.id).get('assignments')}">
+                      <li class="group-locked-info-group" th:text="${assigment}"></li>
                     </ul>
                   </div>
                 </div>
-                <div class="clearfix"></div>
-                <div th:if="${!lockedGroupsEntityMap.get(group.id).get('assessments').isEmpty()}">
+                <div class="group-locked-container" th:if="${!lockedGroupsEntityMap.get(group.id).get('assessments').isEmpty()}">
                 <span class="group-locked-info collapsed" data-toggle="collapse" th:data-target="|#lockingassessments-${group.id}|" tabindex="0" role="button" th:text="#{index.table.assessments}"></span>
                   <div th:id="|lockingassessments-${group.id}|" class="collapse">
-                    <ul th:each=" assessment : ${lockedGroupsEntityMap.get(group.id).get('assessments')}">
-                      <li th:text="${assessment}"></li>
+                    <ul class="group-locked-groups" th:each=" assessment : ${lockedGroupsEntityMap.get(group.id).get('assessments')}">
+                      <li class="group-locked-info-group" th:text="${assessment}"></li>
                     </ul>
                   </div>
                 </div>
