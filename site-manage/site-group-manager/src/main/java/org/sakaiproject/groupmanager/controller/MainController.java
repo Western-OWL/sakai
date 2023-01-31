@@ -23,6 +23,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import javax.inject.Inject;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -46,10 +47,14 @@ import org.sakaiproject.site.api.Site;
 import org.sakaiproject.user.api.User;
 import org.sakaiproject.util.comparator.GroupTitleComparator;
 import org.sakaiproject.util.comparator.UserSortNameComparator;
+import org.springframework.context.MessageSource;
 
 @Slf4j
 @Controller
 public class MainController {
+
+    @Inject
+    private MessageSource messageSource;
 
     @Autowired
     private SakaiService sakaiService;
@@ -142,7 +147,7 @@ public class MainController {
     }
 
     @PostMapping(value = "/removeGroups")
-    public String removeGroups(@ModelAttribute MainForm deleteGroupsForm, Model model) {
+    public String removeGroups(@ModelAttribute MainForm deleteGroupsForm, Model model, HttpServletRequest request, HttpServletResponse response) {
         log.debug("removeGroups called with the following groups {}.", deleteGroupsForm.getDeletedGroupList());
 
         Optional<Site> siteOptional = sakaiService.getCurrentSite();
@@ -156,14 +161,21 @@ public class MainController {
         boolean anyGroupDeleted = false;
 
         // For each group, try to delete it from the site
+        List<Group> lockedGroups = new ArrayList<>(deleteGroupsForm.getDeletedGroupList().size());
         for (String deletedGroupId : deleteGroupsForm.getDeletedGroupList()) {
             log.debug("Deleting the group {}.", deletedGroupId);
             Optional<Group> groupOptional = sakaiService.findGroupById(deletedGroupId);
             if (groupOptional.isPresent()) {
+                // Check if group is locked first, if it's locked don't attempt deletion, just skip to the next group
+                Group group = groupOptional.get();
+                if (RealmLockMode.ALL.equals(group.getRealmLock()) || RealmLockMode.DELETE.equals(group.getRealmLock())) {
+                    lockedGroups.add(group);
+                    continue;
+                }
                 try {
-                    site.deleteGroup(groupOptional.get());
-                    anyGroupDeleted=true;
-                } catch (AuthzRealmLockException e) {
+                    site.deleteGroup(group);
+                    anyGroupDeleted = true;
+                } catch (AuthzRealmLockException e) { // This exception is not thrown in the event that the group list UI is stale; see OWL-4879
                     log.error("The group {} is locked and cannot be deleted.", deletedGroupId);
                 }
             }
@@ -173,7 +185,14 @@ public class MainController {
             sakaiService.saveSite(site);
         }
 
-        //Return to the list of groups after deleting them.
+        // If any groups selected to be deleted could not be due to locks, populate an error message indicating which groups and why
+        if (!lockedGroups.isEmpty()) {
+            String groups = String.join(", ", lockedGroups.stream().map(g -> g.getTitle()).collect(Collectors.toList()));
+            model.addAttribute("errorMessage", messageSource.getMessage("index.error.cantDeleteLockedGroup", new Object[] {groups}, sakaiService.getCurrentUserLocale()));
+            return showIndex(model, request, response);
+        }
+
+        // Return to the list of groups after deleting them.
         return GroupManagerConstants.REDIRECT_MAIN_TEMPLATE;
     }
 
