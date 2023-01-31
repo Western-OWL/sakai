@@ -69,7 +69,6 @@ import org.sakaiproject.user.api.PreferencesService;
 import org.sakaiproject.user.api.User;
 import org.sakaiproject.user.api.UserDirectoryService;
 import org.sakaiproject.util.ArrayUtil;
-import org.sakaiproject.util.RequestFilter;
 import org.sakaiproject.util.Web;
 import org.sakaiproject.util.api.LinkMigrationHelper;
 import org.springframework.transaction.TransactionStatus;
@@ -363,14 +362,16 @@ public class SiteManageServiceImpl implements SiteManageService {
      * Copies the site information from one site ot another.
      * @param fromSiteId    the source site
      * @param toSiteId      the destinatination site
+     * @param cleanup       if the existing content should be removed first
      * @return the site with the updated site information
      */
-    private Site copySiteInformation(String fromSiteId, String toSiteId) {
+    private Site copySiteInformation(String fromSiteId, String toSiteId, boolean cleanup) {
         Site toSite = null;
         try {
             Site fromSite = siteService.getSite(fromSiteId);
             toSite = siteService.getSite(toSiteId);
-            toSite.setDescription(fromSite.getDescription());
+            String desc = cleanup ? fromSite.getDescription() : toSite.getDescription() + fromSite.getDescription();
+            toSite.setDescription(desc);
             toSite.setInfoUrl(fromSite.getInfoUrl());
             saveSite(toSite);
         } catch (IdUnusedException iue) {
@@ -476,7 +477,7 @@ public class SiteManageServiceImpl implements SiteManageService {
                         && importTools.containsKey(toolId)) {
                     for (String fromSiteId : importTools.get(toolId)) {
                         if (SiteManageConstants.SITE_INFO_TOOL_ID.equals(toolId)) {
-                            site = copySiteInformation(fromSiteId, toSiteId);
+                            site = copySiteInformation(fromSiteId, toSiteId, cleanup);
                         } else {
                             transversalMap.putAll(transferCopyEntities(toolId, fromSiteId, toSiteId, toolOptions, cleanup));
                             transversalMap.putAll(getDirectToolUrlEntityReferences(toolId, fromSiteId, toSiteId));
