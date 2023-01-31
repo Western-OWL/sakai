@@ -406,10 +406,13 @@
 						</tr>
 					</thead>
 					<tbody>
+					#if ($unjoinableLockedGroups.size() > 0) <div class="instruction"><span class="fa fa-fw fa-lock" aria-hidden="true"></span> - $tlang.getString("sinfo.list.joinable.locked.info")</div> #end
 					#foreach ($g in $!groups)
 						#set ($gdesc = "")
-						<tr>
+						#set ($glocked = $!unjoinableLockedGroups.contains($g.Id))
+						<tr #if ($$glocked) style="color:gray"#end >
 							<td>
+								#if ($glocked)<span class="fa fa-fw fa-lock" aria-hidden="true"></span><span class="sr-only">$tlang.getString("sinfo.list.joinable.locked")</span>#end
 								<span id ="group$g.Id">$formattedText.escapeHtml($g.Title)</span>
 							</td>
 							#if ($!viewRoster || !$viewMembershipGroups.isEmpty())
@@ -448,7 +451,7 @@
 										<form name="unjoinableGroupForm" class="inlineForm" method="post" action="#toolForm("unjoinable-set")">
 											<input type="hidden" name="group-ref" value="$g.reference" />
 											<input type="hidden" name="sakai_csrf_token" value="$sakai_csrf_token" />
-											<input type="submit" name="eventSubmit_doUnjoinableSet" value="$tlang.getString("sinfo.list.joinable.unjoin")" title="$tlang.getString("sinfo.list.joinable.unjoin") $formattedText.escapeHtml($g.Title)" onclick="SPNR.disableControlsAndSpin( this, null );" />
+											<input type="submit" #if ($glocked) disabled #end name="eventSubmit_doUnjoinableSet" value="$tlang.getString("sinfo.list.joinable.unjoin")" title="$tlang.getString("sinfo.list.joinable.unjoin") $formattedText.escapeHtml($g.Title)" onclick="SPNR.disableControlsAndSpin( this, null );" />
 										</form>
 									#end
 								#end
@@ -466,6 +469,11 @@
 				<span>#if ($!allowUpdate) $tlang.getString("sinfo.list.joinable.joinable-sets") #else $tlang.getString("sinfo.list.joinable.groups") #end</span>
 			</h4>
 			<div class="toggledContent">
+				#set ($hasLockedJoinableGroups = false)
+				#foreach ($g in $!joinableGroups)
+					#if ($g.locked) #set ($hasLockedJoinableGroups = true) #end
+				#end
+				#if ($hasLockedJoinableGroups) <div class="instruction"><span class="fa fa-fw fa-lock" aria-hidden="true"></span> - $tlang.getString("sinfo.list.joinable.locked.info")</div> #end
 				<table class="table table-striped table-bordered table-hover">
 					<thead>
 						<tr>
@@ -488,8 +496,10 @@
 					</thead>
 					<tbody>
 					#foreach ($g in $!joinableGroups)
-						<tr>
+						#set ($disabled = $g.size >= $g.max || $g.locked)
+						<tr #if ($$disabled) style="color:gray"#end >
 							<td>
+								#if ($g.locked)<span class="fa fa-fw fa-lock" aria-hidden="true"></span><span class="sr-only">$tlang.getString("sinfo.list.joinable.locked")</span>#end
 								<span>$formattedText.escapeHtml($g.title)</span>
 							</td>
 							<td>
