@@ -157,25 +157,38 @@
     background: none repeat scroll 0 0 var(--sakai-active-color-1);
   }
 
+  .group-locked-container {
+    margin-bottom: $standard-spacing;
+  }
+
+  .group-locked-info {
+    display: flex;
+    white-space: nowrap;
+  }
+
   .group-locked-info.collapsed::before {
     content: '\f0da';
-    font-family: 'FontAwesome';
-    font-size: 18px;
-    font-weight: bold;
-    cursor: pointer;
   }
 
   .group-locked-info::before {
     content: '\f0d7';
+    display: inline-block;
+    width: 0.75em;
+    margin-right: $standard-space;
     font-family: 'FontAwesome';
-    font-size: 18px;
+    font-size: 1em;
     font-weight: bold;
+    text-align: center;
     cursor: pointer;
     margin-right: 4px;
   }
 
   .group-locked-info + .collapsing {
     transition: none !important;
+  }
+
+  .group-locked-groups {
+    padding-left: 2em;
   }
 
   .group-member {
