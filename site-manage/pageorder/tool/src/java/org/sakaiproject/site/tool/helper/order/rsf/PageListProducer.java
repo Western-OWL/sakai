@@ -38,6 +38,7 @@ import uk.org.ponder.rsf.components.UIForm;
 import uk.org.ponder.rsf.components.UIInitBlock;
 import uk.org.ponder.rsf.components.UIInput;
 import uk.org.ponder.rsf.components.UIInternalLink;
+import uk.org.ponder.rsf.components.UILink;
 import uk.org.ponder.rsf.components.UIMessage;
 import uk.org.ponder.rsf.components.UIOutput;
 import uk.org.ponder.rsf.components.decorators.UIFreeAttributeDecorator;
@@ -229,7 +230,8 @@ public class PageListProducer
             else {
                 UIInitBlock.make(tofill, "jsreorder","disableReorder",new Object[] {});
             }
- 
+
+            UILink.make(pageForm, "lockResourcesLink", messageLocator.getMessage("warn_lockResources_linkText"), serverConfigurationService.getString("content.permissions.warning.link"));
         }
         else {
             //error messages - apparently nothing in template for these
