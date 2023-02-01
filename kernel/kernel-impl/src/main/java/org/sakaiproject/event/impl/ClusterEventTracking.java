@@ -651,7 +651,11 @@ public abstract class ClusterEventTracking extends BaseEventTrackingService impl
 			}
 			// for each new event found, notify observers
 			for (Event event : events) {
-				notifyObservers(event, false);
+				try {
+					notifyObservers(event, false);
+				} catch(Throwable t) {
+					log.error("{}error during execution for event:{}\nMessage: {}", m_logId, event.toString(), t.getMessage(), t);
+				}
 			}
 		}
 		catch (Throwable t)
