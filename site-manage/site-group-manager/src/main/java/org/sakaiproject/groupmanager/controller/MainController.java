@@ -73,6 +73,9 @@ public class MainController {
         }
 
         Site site = siteOptional.get();
+        if (!sakaiService.allowUpdateGroupMembershipInSite(site.getId())) {
+            return "redirect:" + site.getUrl();
+        }
 
         // Group members for each group, separated by comma
         Map<String, List<String>> groupMemberMap = new HashMap<String, List<String>>();
@@ -156,6 +159,9 @@ public class MainController {
         }
 
         Site site = siteOptional.get();
+        if (!sakaiService.allowUpdateGroupMembershipInSite(site.getId())) {
+            return "redirect:" + site.getUrl();
+        }
 
         // Control if any group has been deleted
         boolean anyGroupDeleted = false;

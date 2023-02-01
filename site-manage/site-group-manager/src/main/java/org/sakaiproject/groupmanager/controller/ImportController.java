@@ -153,6 +153,9 @@ public class ImportController {
         }
 
         Site site = siteOptional.get();
+        if (!sakaiService.allowUpdateGroupMembershipInSite(site.getId())) {
+            return "redirect:" + site.getUrl();
+        }
 
         // List of groups of the site, excluding the ones which GROUP_PROP_WSETUP_CREATED property is false.
         List<Group> groupList = (List<Group>) site.getGroups().stream().filter(group -> group.getProperties().getProperty(Group.GROUP_PROP_WSETUP_CREATED) != null && Boolean.valueOf(group.getProperties().getProperty(Group.GROUP_PROP_WSETUP_CREATED)).booleanValue()).collect(Collectors.toList());
@@ -251,6 +254,9 @@ public class ImportController {
         }
 
         Site site = siteOptional.get();
+        if (!sakaiService.allowUpdateGroupMembershipInSite(site.getId())) {
+            return "redirect:" + site.getUrl();
+        }
 
         List<Group> groupList = (List<Group>) site.getGroups().stream().filter(group -> group.getProperties().getProperty(Group.GROUP_PROP_WSETUP_CREATED) != null && Boolean.valueOf(group.getProperties().getProperty(Group.GROUP_PROP_WSETUP_CREATED)).booleanValue()).collect(Collectors.toList());
         ObjectMapper objectMapper = new ObjectMapper();
