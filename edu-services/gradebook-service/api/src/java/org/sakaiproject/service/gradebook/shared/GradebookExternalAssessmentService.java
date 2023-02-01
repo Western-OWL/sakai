@@ -99,7 +99,9 @@ public interface GradebookExternalAssessmentService {
     public void addExternalAssessment(String gradebookUid, String externalId, String externalUrl, String title, Double points,
 									  Date dueDate, String externalServiceDescription, String externalData, Boolean ungraded, Long categoryId)
             throws GradebookNotFoundException, ConflictingAssignmentNameException, ConflictingExternalIdException, AssignmentHasIllegalPointsException, InvalidCategoryException;
-	
+
+	public void validateNewExternalAssessmentTitle(String gradebookUid, String title) throws ConflictingAssignmentNameException, InvalidGradeItemNameException;
+
 		/**
 		 * @deprecated Replaced by
 		 *		{@link updateExternalAssessment(String, String, String, String, Double, Date, Boolean)}

@@ -223,9 +223,11 @@ import org.sakaiproject.scoringservice.api.ScoringService;
 import org.sakaiproject.service.gradebook.shared.AssessmentNotFoundException;
 import org.sakaiproject.service.gradebook.shared.AssignmentHasIllegalPointsException;
 import org.sakaiproject.service.gradebook.shared.CategoryDefinition;
+import org.sakaiproject.service.gradebook.shared.ConflictingAssignmentNameException;
 import org.sakaiproject.service.gradebook.shared.GradebookExternalAssessmentService;
 import org.sakaiproject.service.gradebook.shared.GradebookNotFoundException;
 import org.sakaiproject.service.gradebook.shared.GradebookService;
+import org.sakaiproject.service.gradebook.shared.InvalidGradeItemNameException;
 import org.sakaiproject.site.api.Group;
 import org.sakaiproject.site.api.Site;
 import org.sakaiproject.site.api.SiteService;
@@ -7373,6 +7375,17 @@ public class AssignmentAction extends PagedResourceActionII {
                 // gradebook integration only available to point-grade assignment
                 if (gradeType != SCORE_GRADE_TYPE) {
                     addAlert(state, rb.getString("addtogradebook.wrongGradeScale"));
+                }
+
+                if (GRADEBOOK_INTEGRATION_ADD.equals(grading) && validify) {
+                    try {
+                        String siteId = (String) state.getAttribute(STATE_CONTEXT_STRING);
+                        gradebookExternalAssessmentService.validateNewExternalAssessmentTitle(siteId, title);
+                    } catch (ConflictingAssignmentNameException cane) {
+                        addAlert(state, rb.getString("addtogradebook.validate.nonUniqueTitle"));
+                    } catch (InvalidGradeItemNameException igine) {
+                        addAlert(state, rb.getString("addtogradebook.validate.titleInvalidCharacters"));
+                    }
                 }
 
                 // if chosen as "associate", have to choose one assignment from Gradebook
