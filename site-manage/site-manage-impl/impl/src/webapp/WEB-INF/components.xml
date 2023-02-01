@@ -187,4 +187,17 @@
 			<value>quartz.seedsites.autorun</value>
 		</property>
 	</bean>
+
+	<bean id="RoleGroupEventWatcher"
+		class="org.sakaiproject.sitemanage.impl.RoleGroupEventWatcher"
+		init-method="init"
+		destroy-method="destroy">
+		<property name="eventTrackingService"><ref bean="org.sakaiproject.event.api.EventTrackingService"/></property>
+		<property name="siteService"><ref bean="org.sakaiproject.site.api.SiteService"/></property>
+		<property name="authzGroupService"><ref bean="org.sakaiproject.authz.api.AuthzGroupService"/></property>
+		<property name="securityService"><ref bean="org.sakaiproject.authz.api.SecurityService"/></property>
+		<property name="entityManager"><ref bean="org.sakaiproject.entity.api.EntityManager"/></property>
+		<property name="threadLocalManager"><ref bean="org.sakaiproject.thread_local.api.ThreadLocalManager"/></property>
+
+	</bean>
 </beans>
