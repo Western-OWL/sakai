@@ -670,7 +670,7 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 	 */
 	private Map<String, Member> getMemberMap(Map<String, MemberWithRoleId> mMap, Map<?,?> roleMap)
 	{
-	    Map<String, Member> rv = new HashMap<String, Member>();
+	    Map<String, Member> rv = new HashMap<String, Member>(mMap.size());
 	    for (Map.Entry<String, MemberWithRoleId> entry : mMap.entrySet())
 	    {
 	        String userId = entry.getKey();
@@ -692,7 +692,7 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 	 */
 	private Map<String, MemberWithRoleId> getMemberWithRoleIdMap(Map<String, Member> userGrants)
 	{
-	    Map<String, MemberWithRoleId> rv = new HashMap<String, MemberWithRoleId>();
+	    Map<String, MemberWithRoleId> rv = new HashMap<>(userGrants.size());
 	    for (Map.Entry<String, Member> entry : userGrants.entrySet())
 	    {
 	        String userId = entry.getKey();
@@ -875,20 +875,17 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 
 			if (realmRoleGRCache != null) {
 				// KNL-1037 read the cached role and membership information
-				Map<String, Role> roles = new HashMap<String, Role>();
-				
 				// dehydrate to SimpleRoles, which can be stored in a distributed Terracotta cache
 				Map<String, SimpleRole> roleProperties = realmRoleGRCache.get(REALM_ROLES_CACHE);
+				Map<String, Role> roles = new HashMap<>(roleProperties.size());
 				for (java.util.Map.Entry<String, SimpleRole> mapEntry : roleProperties.entrySet()) {
 					roles.put(mapEntry.getKey(), new BaseRole(mapEntry.getValue()));
 				}
-				Map<String, Member> userGrants = new HashMap<String, Member>();
 				
 				Map<String, MemberWithRoleId> userGrantsWithRoleIdMap = (Map<String, MemberWithRoleId>) realmRoleGRCache.get(REALM_USER_GRANTS_CACHE);
-				userGrants.putAll(getMemberMap(userGrantsWithRoleIdMap, roles));
 				
 				realm.m_roles = roles;
-				realm.m_userGrants = userGrants;
+				realm.m_userGrants = getMemberMap(userGrantsWithRoleIdMap, roles);
 			} else {
 			    // KNL-1183
 			    refreshAuthzGroup(realm);
@@ -1010,9 +1007,9 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 			        }
 			    });
 
-				Map<String, Map> payLoad = new HashMap<String, Map>();
+				Map<String, Map> payLoad = new HashMap<>(2);
 				// rehydrate from SimpleRole, which can be stored in a Terracotta cache
-				Map<String, SimpleRole> roleProperties = new HashMap<String, SimpleRole>();
+				Map<String, SimpleRole> roleProperties = new HashMap<>(realm.m_roles.size());
 				for (java.util.Map.Entry<String, BaseRole> entry : ((Map<String, BaseRole>) realm.m_roles).entrySet()) {
 					roleProperties.put(entry.getKey(), entry.getValue().exportToSimpleRole());
 				}
@@ -1104,7 +1101,7 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 		public List getAuthzUserGroupIds(ArrayList authzGroupIds, String userid)
 		{
 			if (authzGroupIds == null || userid == null || authzGroupIds.size() < 1)
-				return new ArrayList(); // empty list
+				return new ArrayList(0); // empty list
 
 			// first consult the cache
 			UserAndGroups uag = (UserAndGroups) authzUserGroupIdsCache.get(userid);
@@ -1173,7 +1170,7 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
         public Collection<String> getAuthzUsersInGroups(Set<String> groupIds)
         {
             if (groupIds == null || groupIds.isEmpty()) {
-                return new ArrayList<String>(); // empty list
+                return new ArrayList<>(0); // empty list
             }
 
             // make a big where condition for groupIds with ORs
@@ -1194,7 +1191,7 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 			List results = sqlService().dbRead(statement, new Object[] {authzGroupId}, null);
 			if (results == null)
 			{
-				return new HashSet<>();
+				return Collections.emptySet();
 			}
 			return new HashSet<>(results);
 		}
@@ -1204,7 +1201,9 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 		 */
 		public Map<String, List<String>> getProviderIDsForRealms(List<String> realmIDs)
 		{
-			Map<String, List<String>> realmProviderMap = new HashMap<>();
+			/* I'm keeping code close to original reduce any risk of backport conflicts.
+			 * When contributing, return an empty Map if realmIDs == null || realmIDs.size() == 0,
+			 * then remove the following 'if' condition  --bbailla2 */
 			if (realmIDs != null && realmIDs.size() > 0)
 			{
 				// Custom reader to get only realm_id and provider_id
@@ -1213,7 +1212,7 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 					{
 						String realmID = result.getString(1);
 						String providerIDs = result.getString(2);
-						List<String> retVal = new ArrayList<>();
+						List<String> retVal = new ArrayList<>(2);
 						retVal.add(realmID);
 						retVal.add(providerIDs);
 						return retVal;
@@ -1232,6 +1231,7 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 				List<List<String>> results = (List<List<String>>) m_sql.dbRead(sql, fields, reader);
 
 				// Build the realm-provider map
+				Map<String, List<String>> realmProviderMap = new HashMap<>(results.size());
 				for (List<String> list : results)
 				{
 					String realmID = list.get(0);
@@ -1242,9 +1242,11 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 						realmProviderMap.put(realmID, Arrays.asList(providerIDs.split("\\+")));
 					}
 				}
+
+				return realmProviderMap;
 			}
 
-			return realmProviderMap;
+			return Collections.emptyMap();
 		}
 
 		/**
@@ -1256,7 +1258,7 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 			List results = sqlService().dbRead(statement, new Object[] {providerId}, null);
 			if (results == null)
 			{
-				return new HashSet();
+				return Collections.emptySet();
 			}
 			return new HashSet(results);
 		}
@@ -1272,7 +1274,7 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 			// or if the lock is null
 			if (((azGroups != null) && azGroups.isEmpty()) || lock == null)
 			{
-				return new HashSet();
+				return Collections.emptySet();
 			}
 
             if ("".equals(lock) || "*".equals(lock)) {
@@ -1333,7 +1335,7 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 
 			// Get resultset
 			List results = m_sql.dbRead(sql, fields, null);
-			Set rv = new HashSet();
+			Set rv = new HashSet(results.size());
 			rv.addAll(results);
 
 			return rv;
@@ -1646,7 +1648,7 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 			}
 
             // KNL-1230 need to be able to tell when changes occur in the AZG
-            HashSet<RoleAndFunction> lastChanged = new HashSet<RoleAndFunction>();
+            HashSet<RoleAndFunction> lastChanged = new HashSet<>(toAdd.size() + toDelete.size());
             if (!toAdd.isEmpty()) {
                 lastChanged.addAll(toAdd);
             }
@@ -1659,8 +1661,9 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 		protected void save_REALM_RL_GR(AuthzGroup azg)
 		{
 			// add what we have in the azg, unless we see it in the db
-			final Set<UserAndRole> toAdd = new HashSet<UserAndRole>();
-			for (Iterator i = ((BaseAuthzGroup) azg).m_userGrants.entrySet().iterator(); i.hasNext();)
+			Map userGrants = ((BaseAuthzGroup) azg).m_userGrants;
+			final Set<UserAndRole> toAdd = new HashSet<>(userGrants.size());
+			for (Iterator i = userGrants.entrySet().iterator(); i.hasNext();)
 			{
 				Map.Entry entry = (Map.Entry) i.next();
 				Member grant = (Member) entry.getValue();
@@ -1668,7 +1671,8 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 			}
 
 			// delete anything we see in the db we don't have in the azg
-			final Set<UserAndRole> toDelete = new HashSet<UserAndRole>();
+			int deleteSetInitCapacity = Math.min(userGrants.size(), 16);
+			final Set<UserAndRole> toDelete = new HashSet<>(deleteSetInitCapacity);
 
 			// read what we have there now
 			String sql = dbAuthzGroupSql.getSelectRealmRoleGroup2Sql();
@@ -1747,8 +1751,9 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 			}
 
 			// add what we have in the azg, unless we see it in the db
-			final Set<String> toAdd = new HashSet<String>();
 			String[] ids = m_provider.unpackId(azg.getProviderGroupId());
+			int numIds = ids == null ? 0 : ids.length;
+			final Set<String> toAdd = new HashSet<>(numIds);
 			if (ids != null)
 			{
 				for (String id : ids)
@@ -1758,7 +1763,7 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 			}
 
 			// delete anything we see in the db we don't have in the azg
-			final Set<String> toDelete = new HashSet<String>();
+			final Set<String> toDelete = new HashSet<>(Math.min(numIds, 16));
 
 			// read what we have there now
 			String sql = dbAuthzGroupSql.getSelectRealmProviderId2Sql();
@@ -1816,15 +1821,17 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 		protected void save_REALM_ROLE_DESC(AuthzGroup azg)
 		{
 			// add what we have in the azg, unless we see it in the db
-			final Set<RoleAndDescription> toAdd = new HashSet<RoleAndDescription>();
-			for (Iterator iRoles = ((BaseAuthzGroup) azg).m_roles.values().iterator(); iRoles.hasNext();)
+			Map roles = ((BaseAuthzGroup) azg).m_roles;
+			final Set<RoleAndDescription> toAdd = new HashSet<>(roles.size());
+			for (Iterator iRoles = roles.values().iterator(); iRoles.hasNext();)
 			{
 				Role role = (Role) iRoles.next();
 				toAdd.add(new RoleAndDescription(role.getId(), role.getDescription(), role.isProviderOnly()));
 			}
 
 			// delete anything we see in the db we don't have in the azg
-			final Set<RoleAndDescription> toDelete = new HashSet<RoleAndDescription>();
+			int deleteCapacity = Math.min(roles.size(), 16);
+			final Set<RoleAndDescription> toDelete = new HashSet<>(deleteCapacity);
 
 			// read what we have there now
 			String sql = dbAuthzGroupSql.getSelectRealmProvider2Sql();
@@ -1891,11 +1898,13 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 		protected void save_REALM_LOCKS(AuthzGroup azg)
 		{
 			// add what we have in the azg, unless we see it in the db
-			final Set<RealmLock> toAdd = new HashSet<>();
-			((BaseAuthzGroup)azg).m_realmLocks.forEach(l -> toAdd.add(new RealmLock(l)));
+			Set<RealmLock> realmLocks = ((BaseAuthzGroup)azg).m_realmLocks;
+			final Set<RealmLock> toAdd = new HashSet<>(realmLocks.size());
+			realmLocks.forEach(l -> toAdd.add(new RealmLock(l)));
 
 			// delete anything we see in the db we don't have in the azg
-			final Set<RealmLock> toDelete = new HashSet<>();
+			int deleteCapacity = Math.min(realmLocks.size(), 16);
+			final Set<RealmLock> toDelete = new HashSet<>(deleteCapacity);
 
 			// read what we have there now
 			final String selectSql = dbAuthzGroupSql.getSelectRealmLocksSql();
@@ -2355,7 +2364,7 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 		 */
 		public Set<String> getUsersIsAllowed(String lock, Collection<String> realms)
 		{
-			if ((lock == null) || (realms == null) || (realms.isEmpty())) return new HashSet<String>();
+			if ((lock == null) || (realms == null) || (realms.isEmpty())) return Collections.emptySet();
 
 			String sql = dbAuthzGroupSql.getSelectRealmRoleUserIdSql(orInClause(realms.size(), "SR.REALM_ID"));
 			Object[] fields = new Object[1 + realms.size()];
@@ -2370,7 +2379,7 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 			List<String> results = m_sql.dbRead(sql, fields, null);
 
 			// prepare the return
-			Set<String> rv = new HashSet<String>();
+			Set<String> rv = new HashSet<>(results.size());
 			rv.addAll(results);
 			return rv;
 		}
@@ -2432,9 +2441,9 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 		 */
 		public Map<String,Integer> getUserCountIsAllowed(String function, Collection<String> azGroups)
 		{
-			final Map<String, Integer> userCountByGroup = new HashMap<String, Integer>();
+			if ((function == null) || (azGroups != null && azGroups.isEmpty())) return Collections.emptyMap();
 
-			if ((function == null) || (azGroups != null && azGroups.isEmpty())) return userCountByGroup;
+			final Map<String, Integer> userCountByGroup = new HashMap<>(azGroups.size());
 
 			String sql;
 			Object[] fields;
@@ -2484,7 +2493,7 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 		 */
 		public Set getAllowedFunctions(String role, Collection realms)
 		{
-			if ((role == null) || (realms == null) || (realms.isEmpty())) return new HashSet();
+			if ((role == null) || (realms == null) || (realms.isEmpty())) return Collections.emptySet();
 
 			String sql = dbAuthzGroupSql.getSelectRealmFunctionFunctionNameSql(orInClause(realms.size(), "SR.REALM_ID"));
 			Object[] fields = new Object[1 + realms.size()];
@@ -2500,7 +2509,7 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 			List results = m_sql.dbRead(sql, fields, null);
 
 			// prepare the return
-			Set rv = new HashSet();
+			Set rv = new HashSet(results.size());
 			rv.addAll(results);
 			return rv;
 		}
@@ -2538,9 +2547,10 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 			});
 
 			// make a map, realm id -> role granted, each for provider and non-provider (or inactive)
-			Map<Integer, String> existing = new HashMap<Integer, String>();
-			Map<Integer, String> providedInactive = new HashMap<Integer, String>();
-			Map<Integer, String> nonProvider = new HashMap<Integer, String>();
+			int capacity = Math.min(grants.size(), 16);
+			Map<Integer, String> existing = new HashMap<>(capacity);
+			Map<Integer, String> providedInactive = new HashMap<>(capacity);
+			Map<Integer, String> nonProvider = new HashMap<>(capacity);
 			for (RealmAndRole rar : grants)
 			{
 				// active and provided are the currently stored provider grants
@@ -2770,9 +2780,10 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 			List<UserAndRole> grants = getGrants(realm);
 
 			// make a map, user id -> role granted, each for provider and non-provider (or inactive)
-			Map<String, String> existing = new HashMap<String, String>();
-			Map<String, String> providedInactive = new HashMap<String, String>();
-			Map<String, String> nonProvider = new HashMap<String, String>();
+			int capacity = Math.min(grants.size(), 16);
+			Map<String, String> existing = new HashMap<>(capacity);
+			Map<String, String> providedInactive = new HashMap<>(capacity);
+			Map<String, String> nonProvider = new HashMap<>(capacity);
 			for (UserAndRole uar : grants)
 			{
 				// active and provided are the currently stored provider grants
@@ -3070,9 +3081,8 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 		 */
 		public Map<String, String> getUserRoles(String userId, Collection<String> azGroupIds)
 		{
-			final HashMap<String, String> rv = new HashMap<String, String>();
 			if (userId == null || "".equals(userId))
-				return rv;
+				return Collections.emptyMap();
 
 			String inClause;
 			int azgCount = azGroupIds == null ? 0 : azGroupIds.size();
@@ -3093,6 +3103,7 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 				}
 			}
 
+			final HashMap<String, String> rv = new HashMap<>(azgCount);
 			m_sql.dbRead(sql, fields, new SqlReader()
 			{
 				public Object readSqlResultRecord(ResultSet result)
@@ -3127,7 +3138,7 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 		{
 			if ((userIds == null) || (userIds.isEmpty()) || (azGroupId == null))
 			{
-				return new HashMap();
+				return Collections.emptyMap();
 			}
 
 			String inClause = orInClause(userIds.size(), "SRRG.USER_ID");
@@ -3141,7 +3152,7 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 			}
 
 			// the return
-			final Map rv = new HashMap();
+			final Map rv = new HashMap(userIds.size());
 
 			// read
 			m_sql.dbRead(sql, fields, new SqlReader()
@@ -3434,7 +3445,7 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 	} // DbStorage
 	
 	private Set<Integer> getRealmRoleKeys(Set<String> roles) {
-		Set<Integer> roleIds = new HashSet<Integer>();
+		Set<Integer> roleIds = new HashSet<>(roles.size());
 		for(String role: roles) {
 			Integer realmRoleKey = getRealmRoleKey(role);
 			// If the role hasn't yet been used then it won't exist and so we can't lookup it's ID.
