@@ -82,6 +82,9 @@ public class GroupController {
         }
 
         Site site = siteOptional.get();
+        if (!sakaiService.allowUpdateGroupMembershipInSite(site.getId())) {
+            return "redirect:" + site.getUrl();
+        }
 
         // The form values which are optional.
         GroupForm groupForm = new GroupForm();
@@ -135,6 +138,9 @@ public class GroupController {
                 Group group = optionalGroup.get();
                 if (RealmLockMode.ALL.equals(group.getRealmLock()) || RealmLockMode.MODIFY.equals(group.getRealmLock())) {
                     log.error("The user {} is trying to modify the locked group {}, returning to main.", sakaiService.getCurrentUserId(), groupId);
+                    return GroupManagerConstants.REDIRECT_MAIN_TEMPLATE;
+                }
+                if (!sakaiService.allowUpdateGroupMembership(group)) {
                     return GroupManagerConstants.REDIRECT_MAIN_TEMPLATE;
                 }
 
@@ -243,6 +249,9 @@ public class GroupController {
         }
 
         Site site = siteOptional.get();
+        if (!sakaiService.allowUpdateGroupMembershipInSite(site.getId())) {
+            return "redirect:" + site.getUrl();
+        }
 
         // Variable definition
         Locale userLocale = sakaiService.getCurrentUserLocale();

@@ -74,6 +74,9 @@ public class AutoGroupsController {
         }
 
         Site site = siteOptional.get();
+        if (!sakaiService.allowUpdateGroupMembershipInSite(site.getId())) {
+            return "redirect:" + site.getUrl();
+        }
 
         // Fill the model attributes.
         model.addAttribute("siteRoleList", site.getRoles().stream().filter(role -> !role.getId().startsWith(".")).collect(Collectors.toList()));
@@ -104,6 +107,9 @@ public class AutoGroupsController {
         }
 
         Site site = siteOptional.get();
+        if (!sakaiService.allowUpdateGroupMembershipInSite(site.getId())) {
+            return "redirect:" + site.getUrl();
+        }
 
         // Build the section list.
         List<Group> sectionList = site.getGroups().stream()
@@ -243,6 +249,9 @@ public class AutoGroupsController {
         }
 
         Site site = siteOptional.get();
+        if (!sakaiService.allowUpdateGroupMembershipInSite(site.getId())) {
+            return "redirect:" + site.getUrl();
+        }
 
         // Avoid duplicates
         autoGroupsForm.setSelectedRoleList(autoGroupsForm.getSelectedRoleList().stream().distinct().collect(Collectors.toList()));
@@ -424,6 +433,9 @@ public class AutoGroupsController {
         }
 
         Site site = siteOptional.get();
+        if (!sakaiService.allowUpdateGroupMembershipInSite(site.getId())) {
+            return "redirect:" + site.getUrl();
+        }
 
         if (StringUtils.isBlank(serializedAutoGroupsMap)) {
             log.error("The auto groups map is empty, aborting the confirmation.");
