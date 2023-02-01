@@ -84,12 +84,12 @@ $(function() {
                    $(".itemHeader").addClass("itemHeader-resource");
 	           $(".title span").text('');
                } else { // for tests, etc need the return warning, but kill the title
-                   $(".itemTitle .title").addClass("instruction title-instruction");
+                   $(".itemTitle .title").addClass("title-instruction");
                    $(".title .crumb-item").hide();
                }               
            } else {
              // call tool from picker
-                   $(".itemTitle .title").addClass("instruction title-instruction");
+                   $(".itemTitle .title").addClass("title-instruction");
            }
 	   $(".Mrphs-siteHierarchy").children().wrapAll('<div class="hierarchyWrap" />');
 	   $(".Mrphs-siteHierarchy").append($(".action").children().first());
@@ -154,12 +154,14 @@ function toggleShortUrlOutput(defaultUrl, checkbox, textbox) {
                 <div class="title">
                     <a role="button" href="#" rsf:id="resetbutton2" class="title-tools reset reload Mrphs-toolTitleNav__link Mrphs-toolTitleNav__link--reset"><img rsf:id="resetimage2" src="/library/image/transparent.gif"/></a>
                     <span rsf:id="crumb:" class="crumb-item"><a style="background:none" href="#" rsf:id="crumb-link" class="crumb-link"></a><span rsf:id="crumb-follow" class="lessons-siteHierarchy-title"></span><span rsf:id="crumb-separator" class="Mrphs-hierarchy--separator"><i class="fa fa-lg fa-angle-right"></i></span></span>
-                    <span class="returnheader nextprev"><a role="button" style="background:none; width:auto" href="#" class="usebutton nextprev returnmsg" rsf:id="return"></a></span>
-                    <span rsf:id="returnwarning" class="returnwarning sak-banner-warn"></span>
+                    <div class="returnwidget">
+                        <span class="returnheader"><a role="button" href="#" class="returnmsg" rsf:id="return"></a></span>
+                        <span rsf:id="returnwarning" class="returnwarning"></span>
+                    </div>
                 </div>
                 <div class="action itemAction">
                     
-                    <span class="nextprev buttonset ui-buttonset"><a role="button" style="background:none" href="#" rsf:id="prev" class="nextprev nextbutton ui-button ui-widget ui-state-default ui-button-text-only ui-corner-left ui-button-text">prev</a><a role="button" href="#" rsf:id="next" style="background:none" class="nextprev nextbutton ui-button ui-widget ui-state-default ui-button-text-only ui-corner-right ui-button-text">next</a></span>
+                    <span class="nextprev buttonset ui-buttonset"><a role="button" href="#" rsf:id="prev" class="nextprev button">prev</a> <a role="button" href="#" rsf:id="next" class="nextprev button">next</a></span>
                     <a role="button" aria-haspopup="dialog" aria-controls="direct-dialog" href="#" rsf:id="directurl" id="directurl" class="title-tools tool-directurl Mrphs-toolTitleNav__link Mrphs-toolTitleNav__link--directurl">
                       <img rsf:id="directimage" src="/library/image/transparent.gif"/>
 	            </a>
