@@ -65,6 +65,7 @@ import org.springframework.orm.hibernate5.HibernateTemplate;
 
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.sakaiproject.service.gradebook.shared.InvalidGradeItemNameException;
 
 @Slf4j
 public class GradebookExternalAssessmentServiceImpl extends BaseHibernateManager implements GradebookExternalAssessmentService {
@@ -165,13 +166,7 @@ public class GradebookExternalAssessmentServiceImpl extends BaseHibernateManager
 			throw new AssignmentHasIllegalPointsException("Points must be > 0");
 		}
 
-		// Ensure that the assessment name is unique within this gradebook
-		if (isAssignmentDefined(gradebookUid, title)) {
-			throw new ConflictingAssignmentNameException("An assignment with that name already exists in gradebook uid=" + gradebookUid);
-		}
-
-		// name cannot contain these chars as they are reserved for special columns in import/export
-		GradebookHelper.validateGradeItemName(title);
+		validateNewExternalAssessmentTitle(gradebookUid, title);
 
 		getHibernateTemplate().execute(session -> {
 			// Ensure that the externalId is unique within this gradebook
@@ -207,6 +202,18 @@ public class GradebookExternalAssessmentServiceImpl extends BaseHibernateManager
 		});
 		log.info("External assessment added to gradebookUid={}, externalId={} by userUid={} from externalApp={}", gradebookUid, externalId,
 				getUserUid(), externalServiceDescription);
+	}
+
+	@Override
+	public void validateNewExternalAssessmentTitle(String gradebookUid, String title) throws ConflictingAssignmentNameException, InvalidGradeItemNameException
+	{
+		// Ensure that the assessment name is unique within this gradebook
+		if (isAssignmentDefined(gradebookUid, title)) {
+			throw new ConflictingAssignmentNameException("An assignment with that name already exists in gradebook uid=" + gradebookUid);
+		}
+
+		// name cannot contain these chars as they are reserved for special columns in import/export
+		GradebookHelper.validateGradeItemName(title);
 	}
 
 	@Override
