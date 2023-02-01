@@ -2761,8 +2761,6 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 				}
 			}
 
-			String sql = "";
-
 			// Note: the realm is still lazy - we have the realm id but don't need to worry about changing grants
 
 			// get the latest userEid -> role name map from the provider
@@ -2972,7 +2970,7 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 				// caused by transactions modifying more than one row at a time.
 
 				// delete
-				sql = dbAuthzGroupSql.getDeleteRealmRoleGroup4Sql();
+				String sql = dbAuthzGroupSql.getDeleteRealmRoleGroup4Sql();
 				Object[] fields = new Object[2];
 				fields[0] = caseId(realm.getId());
 				for (String userId : toDelete)
