@@ -331,6 +331,9 @@ public class GradebookServiceHibernateImpl extends BaseHibernateManager implemen
 	}
 
 	private org.sakaiproject.service.gradebook.shared.Assignment getAssignmentDefinition(final GradebookAssignment internalAssignment) {
+		if (internalAssignment == null) {
+			return null;
+		}
 		final org.sakaiproject.service.gradebook.shared.Assignment assignmentDefinition = new org.sakaiproject.service.gradebook.shared.Assignment();
     	assignmentDefinition.setName(internalAssignment.getName());
     	assignmentDefinition.setPoints(internalAssignment.getPointsPossible());

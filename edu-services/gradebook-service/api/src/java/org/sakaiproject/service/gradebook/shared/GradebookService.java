@@ -236,6 +236,13 @@ public interface GradebookService extends EntityProducer {
 	public Assignment getAssignment(String gradebookUid, String assignmentName)
 			throws AssessmentNotFoundException;
 
+	/**
+	 * Gets a gradebook item in the specified gradebook by externnalId
+	 * @param gradebookUid
+	 * @param externalId
+	 * @return the gradebook item in the specified gradebook matching the specified externalId. Returns null if the result cannot be found.
+	 * Refactoring to return Optional<Assignment> is encouraged.
+	 */
 	public Assignment getExternalAssignment(final String gradebookUid, final String externalId)
 			throws GradebookNotFoundException;
 
