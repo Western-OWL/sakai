@@ -405,14 +405,19 @@ $(document).ready(function() {
 			resizable: false,
 			modal: true,
 			dialogClass: "no-close",
-			    buttons: [{text:msg("simplepage.delete"),
+			buttons: [{text:msg("simplepage.delete"),
+					'class':'active',
 				          click: function() {
 				          insist = true;
 				          delbutton.click();
 				      }},{text:msg("simplepage.cancel_message"),
 				          click: function() {
 				          $( this ).dialog( "close" );}}
-				]}).parent('.ui-dialog').css('zIndex',900);
+				],
+			open: function( event, ui) {
+				$(this).parent().find(".ui-dialog-buttonset").addClass("act");
+			}
+		}).parent('.ui-dialog').css('zIndex',900);
 		
 		$(window).resize(function() {
 			var modalDialogList = ['#subpage-dialog', '#edit-item-dialog', '#edit-multimedia-dialog',
