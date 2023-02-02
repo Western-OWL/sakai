@@ -31,7 +31,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.SocketException;
 import java.net.URI;
@@ -50,7 +49,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.SortedSet;
@@ -80,7 +78,6 @@ import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MimeTypes;
 import org.apache.tika.parser.txt.CharsetDetector;
 import org.apache.tika.parser.txt.CharsetMatch;
-import org.odftoolkit.odfdom.doc.OdfTextDocument;
 import org.sakaiproject.alias.api.AliasService;
 import org.sakaiproject.antivirus.api.VirusFoundException;
 import org.sakaiproject.antivirus.api.VirusScanIncompleteException;
@@ -194,11 +191,6 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
-import org.zwobble.mammoth.DocumentConverter;
-import org.zwobble.mammoth.Result;
-
-import fr.opensagres.odfdom.converter.xhtml.XHTMLConverter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -14330,49 +14322,6 @@ SiteContentAdvisorProvider, SiteContentAdvisorTypeRegistry, HardDeleteAware
 
     public List<String> getHtmlForRefMimetypes() {
         return Arrays.asList(new String[] { ODP_MIMETYPE, PDF_MIMETYPE, DOCX_MIMETYPE, ODT_MIMETYPE });
-    }
-
-    public Map<String, String> getHtmlForRef(String ref) {
-
-        Map<String, String> map = new HashMap<>();
-
-        try {
-            ContentResource cr = getResource(ref);
-
-            long contentLength = cr.getContentLength();
-
-            long limit = m_serverConfigurationService.getLong("ootbconversion.sizelimitmb", 10L) * 1024L * 1024L;
-
-            if (contentLength > limit) {
-                log.warn("{} is larger than {}, returning an empty Optional ...", ref, limit);
-                map.put("status", CONVERSION_TOO_BIG);
-                return map;
-            }
-
-            byte[] content = cr.getContent();
-            String contentType = cr.getContentType();
-
-            switch (cr.getContentType()) {
-                case DOCX_MIMETYPE:
-                    try (InputStream in = cr.streamContent()) {
-                        Result<String> result = new DocumentConverter().convertToHtml(in);
-                        String html = result.getValue();
-                        if (log.isDebugEnabled()) {
-                            result.getWarnings().forEach(w -> log.debug("Warning while converting {} to html: {}", ref, w));
-                        }
-                        map.put("status", CONVERSION_OK);
-                        map.put("content", html);
-                        return map;
-                    }
-                default:
-                    map.put("status", CONVERSION_NOT_SUPPORTED);
-                    return map;
-            }
-        } catch (Exception e) {
-            log.error("Failed to get html for ref {}", ref, e);
-        }
-        map.put("status", CONVERSION_FAILED);
-        return map;
     }
 
     /**
