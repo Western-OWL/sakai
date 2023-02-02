@@ -30,7 +30,8 @@ CKEDITOR.dialog.add('aspell', function( editor )
 				if (typeof interval !== 'undefined')
 					window.clearInterval(interval);
 
-				var spellCheckScript = editor.plugins.aspell.path+'spellerpages/server-scripts/spellchecker.php';
+				//var spellCheckScript = editor.plugins.aspell.path+'spellerpages/server-scripts/spellchecker.php';
+				var spellCheckScript = editor.plugins.aspell.path+'spellerpages/server-scripts/spellchecker.jsp'; // bjones86
 				if (typeof editor.config.aspell_scriptLanguage !== 'undefined') {
 					spellCheckScript = editor.plugins.aspell.path
 						+ 'spellerpages/server-scripts/spellchecker.'+editor.config.aspell_scriptLanguage;
@@ -50,7 +51,7 @@ CKEDITOR.dialog.add('aspell', function( editor )
 				// A bit of a hack, but how does e.g. controls.html know which language to use?
 				FCKLang = {};
 				// spellChecker.js
-				FCKLang.DlgSpellNoChanges     = CKEDITOR.lang[editor.langCode].wsc.noChanges;
+				/*FCKLang.DlgSpellNoChanges     = CKEDITOR.lang[editor.langCode].wsc.noChanges;
 				FCKLang.DlgSpellNoMispell     = CKEDITOR.lang[editor.langCode].wsc.noMispell;
 				FCKLang.DlgSpellOneChange     = CKEDITOR.lang[editor.langCode].wsc.oneChange;
 				FCKLang.DlgSpellManyChanges   = CKEDITOR.lang[editor.langCode].wsc.manyChanges;
@@ -65,7 +66,24 @@ CKEDITOR.dialog.add('aspell', function( editor )
 				// controlWindow.js
 				FCKLang.DlgSpellNoSuggestions = CKEDITOR.lang[editor.langCode].wsc.noSuggestions;
 				// spellchecker.html
-				FCKLang.DlgSpellProgress      = CKEDITOR.lang[editor.langCode].wsc.progress;
+				FCKLang.DlgSpellProgress      = CKEDITOR.lang[editor.langCode].wsc.progress;*/
+				// OWL mod to find the new location of the wsc plugin lang bundle --plukasew
+				FCKLang.DlgSpellNoChanges     = editor.plugins.wsc.langEntries[editor.langCode].noChanges;
+				FCKLang.DlgSpellNoMispell     = editor.plugins.wsc.langEntries[editor.langCode].noMispell;
+				FCKLang.DlgSpellOneChange     = editor.plugins.wsc.langEntries[editor.langCode].oneChange;
+				FCKLang.DlgSpellManyChanges   = editor.plugins.wsc.langEntries[editor.langCode].manyChanges;
+				// controls.html
+				FCKLang.DlgSpellNotInDic      = editor.plugins.wsc.langEntries[editor.langCode].notInDic;
+				FCKLang.DlgSpellChangeTo      = editor.plugins.wsc.langEntries[editor.langCode].changeTo;
+				FCKLang.DlgSpellBtnIgnore     = editor.plugins.wsc.langEntries[editor.langCode].btnIgnore;
+				FCKLang.DlgSpellBtnIgnoreAll  = editor.plugins.wsc.langEntries[editor.langCode].btnIgnoreAll;
+				FCKLang.DlgSpellBtnReplace    = editor.plugins.wsc.langEntries[editor.langCode].btnReplace;
+				FCKLang.DlgSpellBtnReplaceAll = editor.plugins.wsc.langEntries[editor.langCode].btnReplaceAll;
+				FCKLang.DlgSpellBtnUndo       = editor.plugins.wsc.langEntries[editor.langCode].btnUndo;
+				// controlWindow.js
+				FCKLang.DlgSpellNoSuggestions = editor.plugins.wsc.langEntries[editor.langCode].noSuggestions;
+				// spellchecker.html
+				FCKLang.DlgSpellProgress      = editor.plugins.wsc.langEntries[editor.langCode].progress;
 				// End language
 
 				// Start spellcheck!
