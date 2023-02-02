@@ -324,7 +324,7 @@ sakai.editor.editors.ckeditor.launch = function(targetId, config, w, h) {
             'uicolor',
             'uploadfile',
             'widget',
-            // 'wsc',
+            'wsc', // re-enable wsc (webspellchecker) plugin which is now disabled by default --plukasew
             
             //These are additional plugins not included in the ckeditor4 webjar
             'audiorecorder',
@@ -340,6 +340,7 @@ sakai.editor.editors.ckeditor.launch = function(targetId, config, w, h) {
             (sakai.editor.enableSakaiPreview ? 'sakaipreview' : 'preview'),
             (sakai.editor.enableResourceSearch ? 'resourcesearch' : ''),
             (sakai.editor.enableSakaiOpenLink ? 'sakaiopenlink' : ''),
+            'aspell',
             `${ckeditor-extra-plugins}`,
             `${ckeditor-a11y-extra-plugins}`
         ].join(','),
@@ -355,7 +356,7 @@ sakai.editor.editors.ckeditor.launch = function(targetId, config, w, h) {
         
         toolbar_Basic:
         [
-            ['Source', '-', 'Bold', 'Italic', 'Underline', '-', 'Link', 'Unlink', '-', 'NumberedList','BulletedList', 'Blockquote']
+            ['Source', '-', 'Bold', 'Italic', 'Underline', '-', 'Link', 'Unlink', 'SpellCheck', '-', 'NumberedList','BulletedList', 'Blockquote']
         ],
         toolbar_Full:
         [
@@ -364,7 +365,7 @@ sakai.editor.editors.ckeditor.launch = function(targetId, config, w, h) {
             // Uncomment the next line and comment the following to enable the default spell checker.
             // Note that it uses spellchecker.net, displays ads and sends content to remote servers without additional setup.
             //['Cut','Copy','Paste','PasteText','-','Print', 'SpellChecker', 'Scayt'],
-            ['Cut','Copy','Paste','PasteText','-','Print', 'SakaiPreview'],
+            ['Cut','Copy','Paste','PasteText','-','Print', 'SpellCheck', 'SakaiPreview'],
             ['Undo','Redo','-','Find','Replace','-','SelectAll','RemoveFormat'],
             ['NumberedList','BulletedList','-','Outdent','Indent','Blockquote','CreateDiv'],
             // //if sakaiDropdownToolbar is true, everything defined after the / will be displayed only after toggle
@@ -472,6 +473,7 @@ sakai.editor.editors.ckeditor.launch = function(targetId, config, w, h) {
         //Autosave has a dependency on notification
         CKEDITOR.plugins.addExternal('autosave',webJars+'ckeditor-autosave/${ckeditor.autosave.version}/', 'plugin.js');
         CKEDITOR.plugins.addExternal('wordcount',webJars+'wordcount/${ckeditor.wordcount.version}/', 'plugin.js');
+        CKEDITOR.plugins.addExternal('aspell',basePath+'aspell/', 'plugin.js');
         CKEDITOR.plugins.addExternal('notification',basePath+'notification/', 'plugin.js');
         // Accessibility checker has a dependency on balloonpanel
         CKEDITOR.plugins.addExternal('a11ychecker',webJars+'a11ychecker/${ckeditor.a11ychecker.version}/', 'plugin.js');
@@ -490,6 +492,7 @@ sakai.editor.editors.ckeditor.launch = function(targetId, config, w, h) {
         //ckconfig.atd_rpc='//localhost/proxy/spellcheck';
         //ckconfig.extraPlugins+="atd-ckeditor,";
         //ckconfig.contentsCss = [basePath+'atd-ckeditor/atd.css'];
+        ckconfig.contentsCss.push(basePath+'aspell/aspell.css');
 
         // Load FontAwesome CSS in case a user wants to manually add FA markup
         ckconfig.contentsCss.push(webJars+'fontawesome/4.7.0/css/font-awesome.min.css');
