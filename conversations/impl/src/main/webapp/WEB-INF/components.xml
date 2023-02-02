@@ -132,7 +132,8 @@
     <property name="userTimeService" ref="org.sakaiproject.time.api.UserTimeService" />
   </bean>
 
-  <bean id="org.sakaiproject.user.api.UserNotificationPreferencesRegistration.conversations"
+  <!-- OWL: tool is stealthed, remove user preferences registration -->
+  <!--<bean id="org.sakaiproject.user.api.UserNotificationPreferencesRegistration.conversations"
         parent="org.sakaiproject.user.api.UserNotificationPreferencesRegistration"
         class="org.sakaiproject.conversations.impl.notificationprefs.ConversationsNotificationPreferencesRegistrationImpl"
         init-method="init">
@@ -153,6 +154,6 @@
     </property>
     <property name="overrideBySite"><value>true</value></property>
     <property name="expandByDefault"><value>true</value></property>
-  </bean>
+  </bean>-->
 
 </beans>
