@@ -83,10 +83,10 @@
 		<input name="publishedOption" id="publishedOption" type="hidden" #if($published) value="true" #else value="false" #end />
 		## site status ##
 		<fieldset>
-		<legend>
-		<h4>
+		<legend class="nopad">
+		<h2>
 			$tlang.getString("ediacc.sitsta")
-		</h4>
+		</h2>
 		</legend>
 		<p id="site_status_inst">
 			$tlang.getString("ediacc.pubyousit")
@@ -107,15 +107,15 @@
 		## END site status ##
 		## Additional Access ##
 		#if (!$!disableAdditional)
-        <fieldset>
-			<legend>
-				<h4>$tlang.getString("ediacc.addit")</h4>
+		<fieldset>
+			<legend class="nopad">
+				<h2>$tlang.getString("ediacc.addit")</h2>
 			</legend>
  			<p>$tlang.getString("ediacc.additin")</p>
 			#foreach($roleGroup in $additionalRoleGroups)
 				#if ($roleGroup.size > 0)
-					<fieldset style="float: left; width: 20em;">
-						<legend><h4>$roleGroup.name</h4></legend>
+					<fieldset>
+						<legend class="nopad"><h2>$roleGroup.name</h2></legend>
 						#foreach($role in $roleGroup.roles)
 							<p class="checkbox indnt1">
 								<label>
@@ -127,17 +127,15 @@
 					</fieldset>
 				#end
 			#end
-			<div class="clear"></div>
-			</p>
-        </fieldset>
-        #end
-        ## END Additional Access ##
+			</fieldset>
+		#end
+		## END Additional Access ##
 		## Site visibility ##
 		<fieldset>
-		<legend>
-		<h4>
+		<legend class="nopad">
+		<h2>
 			$tlang.getString("ediacc.vis")
-		</h4>
+		</h2>
 		</legend>
 		#if ($!publicChangeable && $published) 
 			#set($publicChangeableDivDisplay='style="display:block"')
@@ -190,10 +188,10 @@
 		## END site visibility ##
 		## Global Access ##
 		<fieldset>
-		<legend>
-		<h4>
+		<legend class="nopad">
+		<h2>
 			$tlang.getString("ediacc.gloacc")
-		</h4>
+		</h2>
 		</legend>
 		#if (!$!disableJoinable && $published)
 			#set($globalAccessDivDisplay='style="display:block"')
@@ -227,7 +225,7 @@
 				</label>
 			</div>
 			<div id="joinerrole" #if ($joinable) style="display: block;" #else  style="display: none;" #end>
-				<div class="sak-banner-warn indnt3" style="width:60%">$tlang.getString("ediacc.yousitcan.warn")</div>
+				<div class="sak-banner-warn indnt3">$tlang.getString("ediacc.yousitcan.warn")</div>
 				<p class="checkbox indnt3">
 					<label for="joinerRole">
 							<span class="reqStar" id="joinreqStar">*</span>
@@ -252,12 +250,12 @@
 				## SAK-24423 - joinable site settings title
 				#if( $joinGroupEnabled || $joinNotificationEnabled || $joinExcludeFromPublicListEnabled || $joinLimitAccountTypesEnabled ||
 						$joinGroupEnabledLocalDisabledGlobal || $joinExcludeEnabledLocalDisabledGlobal || $joinLimitEnabledLocalDisabledGlobal )
-					<p class="indnt3">$tlang.getString( "ediacc.additionJoinAccessOptions" )</p>
+					<h3 class="indnt3">$tlang.getString( "ediacc.additionJoinAccessOptions" )</h3>
 				#end
 				
 				## SAK-24423 - joinable site settings - joiner group
 				#if( $joinGroupEnabled || $joinGroupEnabledLocalDisabledGlobal )
-					<p class="checkbox indnt6">
+					<p class="checkbox indnt4">
 						<label for="selectJoinerGroup" #if( !$joinGroupEnabled || $joinGroupEnabledLocalDisabledGlobal ) class="instruction" #end>
 							$tlang.getString( "ediacc.joinToGroup" )
 						</label>
@@ -268,7 +266,7 @@
 							#end
 						</select>
 						#if( $joinGroupEnabledLocalDisabledGlobal )
-							<p class="indnt7 sak-banner-info">$tlang.getString( "ediacc.groupEnabledLocalDiabledGlobal" )</p>
+							<p class="indnt5 sak-banner-info">$tlang.getString( "ediacc.groupEnabledLocalDiabledGlobal" )</p>
 						#end
 					</p>
 				#end
@@ -285,7 +283,7 @@
 						</label>
 					</p>
 					#if( $joinNotifyEnabledLocalDisabledGlobal )
-						<p class="indnt7 messageInformation">$tlang.getString( "ediacc.notifyEnabledLocalDisabledGlobal" )</p>
+						<p class="indnt7 sak-banner-info">$tlang.getString( "ediacc.notifyEnabledLocalDisabledGlobal" )</p>
 					#end
 				#end
 
@@ -346,31 +344,29 @@
 								#end
 							#end
 	
-							<p class="checkbox #if( $joinLimitEnabledLocalDisabledGlobal ) instruction #end">
-								$category
-								#foreach( $accType in $joinableAccountTypes )
-									#if( $accType.category == $category )
-										#set( $checkboxName = "$accType.category$accType.type" )
-										<p class="checkbox">
-											<input type="checkbox" name="chkJoin-$accType.type" id="chkJoin-$checkboxName" onclick="doCategoryCheck( this ); validatePage();"
-												#foreach( $accountType in $joinLimitedAccountTypes )
-													#if( $accountType == $accType.type )
-														checked="checked"
-													#end
+							<h4 class="#if( $joinLimitEnabledLocalDisabledGlobal ) instruction #end">$category</h4>
+							#foreach( $accType in $joinableAccountTypes )
+								#if( $accType.category == $category )
+									#set( $checkboxName = "$accType.category$accType.type" )
+									<p class="checkbox">
+										<input type="checkbox" name="chkJoin-$accType.type" id="chkJoin-$checkboxName" onclick="doCategoryCheck( this ); validatePage();"
+											#foreach( $accountType in $joinLimitedAccountTypes )
+												#if( $accountType == $accType.type )
+													checked="checked"
 												#end
-												#if( $joinLimitEnabledLocalDisabledGlobal )
-													disabled
-												#end
-											/>
-											<label for="chkJoin-$checkboxName" #if( $joinLimitEnabledLocalDisabledGlobal ) class="instruction" #end>
-												$accType.label
-											</label>
-										</p>
-									#end
+											#end
+											#if( $joinLimitEnabledLocalDisabledGlobal )
+												disabled
+											#end
+										/>
+										<label for="chkJoin-$checkboxName" #if( $joinLimitEnabledLocalDisabledGlobal ) class="instruction" #end>
+											$accType.label
+										</label>
+									</p>
 								#end
-							</p>
+							#end
 						#end
-			</div>
+					</div>
 				#end
 				
 		</div>
@@ -388,8 +384,8 @@
 			<span id="viewDelegatedAccessUsers" style="display:none">true</span>
 			<div id="viewDelegatedAccessUsersDiv" style="display:none">
 				<fieldset>
-				<legend>
-				<h4>$tlang.getString("daAccess.header")</h4>
+				<legend class="nopad">
+				<h2>$tlang.getString("daAccess.header")</h2>
 				</legend>
 				<div class="instruction">
 					$tlang.getString("daAccess.instructions")
@@ -415,8 +411,8 @@
 		<div id="shoppingVisibilityDiv" style="display:none">
 			<!-- easy access for JS -->
 			<fieldset>
-			<legend>
-			<h4>$tlang.getString("shopping.header")</h4>
+			<legend class="nopad">
+			<h2>$tlang.getString("shopping.header")</h2>
 			</legend>
 			<div class="instruction" id="editShoppingInstructions" name="editShoppingInstructions">
 				$tlang.getString("shopping.instructions")
