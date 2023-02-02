@@ -23,7 +23,7 @@ package org.sakaiproject.portal.charon.handlers;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -420,7 +420,7 @@ public class SiteHandler extends WorksiteHandler
 		session.removeAttribute(Portal.ATTR_SITE_PAGE + siteId);
 
 		// SAK-29138 - form a context sensitive title
-		List<String> providers = PortalSiteHelperImpl.getProviderIDsForSites(((List<Site>) Arrays.asList(new Site[] { site }))).get(site.getReference());
+		List<String> providers = PortalSiteHelperImpl.getProviderIDsForSites(Collections.singletonList(site)).get(site.getReference());
 		String title = ServerConfigurationService.getString("ui.service","Sakai") + " : "
 				+ portal.getSiteHelper().getUserSpecificSiteTitle(site, false, false, providers);
 

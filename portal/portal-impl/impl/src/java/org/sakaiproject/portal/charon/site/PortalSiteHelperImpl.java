@@ -85,6 +85,7 @@ import org.sakaiproject.util.api.FormattedText;
 import org.sakaiproject.util.comparator.AliasCreatedTimeComparator;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 
 /**
  * @author ieb
@@ -372,13 +373,8 @@ public class PortalSiteHelperImpl implements PortalSiteHelper
 	 */
 	public static List<String> getProviderIDsForSite(Site site)
 	{
-		List<String> providers = new ArrayList<>();
-		if (site != null)
-		{
-			providers.addAll(getAuthzGroupService().getProviderIds(site.getReference()));
-		}
-
-		return providers;
+		List<String> providers = getProviderIDsForSites(Collections.singletonList(site)).get(site.getReference());
+		return providers == null ? Collections.emptyList() : providers;
 	}
 
 	/**
@@ -387,16 +383,29 @@ public class PortalSiteHelperImpl implements PortalSiteHelper
 	 * @param sites the list of sites to retrieve all provider IDs
 	 * @return a Map, where the key is the realm ID, and the value is a list of provider IDs for that site
 	 */
-	public static Map<String, List<String>> getProviderIDsForSites(List<Site> sites) {
-
-		if (sites.isEmpty()) {
-			return Collections.EMPTY_MAP;
+	public static Map<String, List<String>> getProviderIDsForSites(List<Site> sites)
+	{
+		if (CollectionUtils.isEmpty(sites))
+		{
+			return Collections.emptyMap();
 		}
 
-		List<String> realmIDs
-			= sites.stream().map(s -> s.getReference()).collect(Collectors.toList());
+		Map<String, List<String>> realmProviderMap = new HashMap<>(sites.size());
+		List<String> realmIDs = new ArrayList<>();
+		for (Site site : sites)
+		{
+			if ("course".equals(site.getType())) // only course site realms have providers
+			{
+				realmIDs.add(site.getReference());
+			}
+			else
+			{
+				realmProviderMap.put(site.getReference(), Collections.emptyList());
+			}
+		}
 
-		return getAuthzGroupService().getProviderIDsForRealms(realmIDs);
+		realmProviderMap.putAll(getAuthzGroupService().getProviderIDsForRealms(realmIDs));
+		return realmProviderMap;
 	}
 
 	/**
