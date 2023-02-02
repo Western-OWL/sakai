@@ -53,7 +53,7 @@
          a site type has been picked, and then the user (from the next screen) hits "back"  - the "Build own" radio
          should be checked, as well as the selected site type
          *#
-        <div id="siteTypeList" class="indnt3">
+        <div id="siteTypeList">
             #foreach ($type in $siteTypes)
 				#set($courseTypeWithPerm    = (($courseSiteTypeStrings.contains($type) || $type == "course")    && $canAddCourse ))
 				#set($portfolioTypeWithPerm = (($portfolioSiteTypeStrings.contains($type) || $type == "portfolio") && $canAddPortfolio )) 
