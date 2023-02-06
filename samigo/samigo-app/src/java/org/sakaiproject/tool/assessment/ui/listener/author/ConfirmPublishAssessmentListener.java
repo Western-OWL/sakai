@@ -45,6 +45,7 @@ import org.sakaiproject.tool.assessment.data.ifc.assessment.AssessmentAccessCont
 import org.sakaiproject.tool.assessment.data.ifc.assessment.EvaluationModelIfc;
 import org.sakaiproject.tool.assessment.facade.AgentFacade;
 import org.sakaiproject.tool.assessment.facade.AssessmentFacade;
+import org.sakaiproject.tool.assessment.facade.GradebookFacade;
 import org.sakaiproject.tool.assessment.integration.context.IntegrationContextFactory;
 import org.sakaiproject.tool.assessment.integration.helper.ifc.GradebookServiceHelper;
 import org.sakaiproject.tool.assessment.services.assessment.AssessmentService;
@@ -397,10 +398,20 @@ public class ConfirmPublishAssessmentListener
             getBean("org.sakaiproject.service.gradebook.GradebookExternalAssessmentService");
     }
     try{
-	if (assessmentSettings.getToDefaultGradebook() && gbsHelper.isAssignmentDefined(assessmentSettings.getTitle(), g)){
-        String gbConflict_err= ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AssessmentSettingsMessages" , "gbConflict_error");
-        context.addMessage(null,new FacesMessage(gbConflict_err));
-        error=true;
+      if (g != null && assessmentSettings.getToDefaultGradebook()) {
+        GradebookServiceHelper.ExternalTitleValidationResult result = gbsHelper.validateNewExternalTitle(GradebookFacade.getGradebookUId(), assessmentName, g);
+        switch(result) {
+            case DUPLICATE_TITLE:
+                String gbConflict_error=ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AssessmentSettingsMessages","gbConflict_error");
+                context.addMessage(null,new FacesMessage(FacesMessage.SEVERITY_ERROR, gbConflict_error, null));
+                error=true;
+                break;
+            case INVALID_CHARS:
+                String gbTitleError=ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AuthorMessages","gradebook_exception_title_invalid");
+                context.addMessage(null,new FacesMessage(FacesMessage.SEVERITY_ERROR, gbTitleError, null));
+                error=true;
+                break;
+        }
       }
     }
     catch(Exception e){

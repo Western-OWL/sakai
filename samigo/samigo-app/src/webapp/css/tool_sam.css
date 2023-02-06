@@ -1505,3 +1505,8 @@ td.stats-correctness {
 #autosave-lasttime-msg {
 	display: none;
 }
+
+
+ul.sak-banner-success, ul.sak-banner-info, ul.sak-banner-warn, ul.sak-banner-error {
+	list-style: none;
+}

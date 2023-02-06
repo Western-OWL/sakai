@@ -232,9 +232,9 @@
         <!-- HEADINGS -->
         <%@ include file="/jsf/author/assessmentHeadings.jsp" %>
 
-        <h:panelGroup layout="block" styleClass="sak-banner-error" rendered="#{! empty facesContext.maximumSeverity}">
-            <h:messages rendered="#{! empty facesContext.maximumSeverity}" layout="table"/>
-        </h:panelGroup>
+
+        <h:messages styleClass="sak-banner-error" rendered="#{! empty facesContext.maximumSeverity && facesContext.maximumSeverity.ordinal != 1}"/>
+        <h:messages styleClass="sak-banner-warn" rendered="#{! empty facesContext.maximumSeverity && facesContext.maximumSeverity.ordinal == 1}"/>
 
         <div class="samigo-container">
             <div class="page-header">

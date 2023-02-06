@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.faces.application.FacesMessage;
@@ -40,6 +41,7 @@ import org.sakaiproject.component.cover.ServerConfigurationService;
 import org.sakaiproject.event.cover.EventTrackingService;
 import org.sakaiproject.samigo.util.SamigoConstants;
 import org.sakaiproject.service.gradebook.shared.GradebookExternalAssessmentService;
+import org.sakaiproject.service.gradebook.shared.GradebookExternalAssessmentService.ExternalAssignmentInfo;
 import org.sakaiproject.spring.SpringBeanLocator;
 import org.sakaiproject.tool.assessment.api.SamigoApiFactory;
 import org.sakaiproject.tool.assessment.data.dao.assessment.AssessmentAccessControl;
@@ -778,14 +780,27 @@ implements ActionListener
 			}
 			
 			String assessmentName;
-			boolean gbItemExists = false;
+			Optional<ExternalAssignmentInfo> extInfo = Optional.empty();
+			boolean isRetracted = AssessmentBaseIfc.RETRACT_FOR_EDIT_STATUS.equals(assessment.getStatus());
 			try{
 				assessmentName = TextFormat.convertPlaintextToFormattedTextNoHighUnicode(assessmentSettings.getTitle().trim());
-				gbItemExists = gbsHelper.isAssignmentDefined(assessmentName, g);
-				if (assessmentSettings.getToDefaultGradebook() && gbItemExists && isTitleChanged){
-					String gbConflict_error=ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AssessmentSettingsMessages","gbConflict_error");
-					context.addMessage(null,new FacesMessage(gbConflict_error));
-					return false;
+				extInfo = gbsHelper.getExternalAssignmentInfo(GradebookFacade.getGradebookUId(), assessment.getPublishedAssessmentId().toString(), g);
+				// if a quiz is retracted, it can have a different title than its external gb item so it is possible that it is now switching back
+				// to its original title. This needs to be allowed, so bypass the title checks because the original title is already valid
+				// and we don't want a false positive from matching against it.
+				boolean retractedBypass = isRetracted && isTitleChanged && extInfo.isPresent() && extInfo.get().title.equals(assessmentName);
+				if (assessmentSettings.getToDefaultGradebook() && (isTitleChanged || !extInfo.isPresent()) && !retractedBypass) {
+					GradebookServiceHelper.ExternalTitleValidationResult result = gbsHelper.validateNewExternalTitle(GradebookFacade.getGradebookUId(), assessmentName, g);
+					switch (result) {
+						case DUPLICATE_TITLE:
+							String gbConflict_error=ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AssessmentSettingsMessages","gbConflict_error");
+							context.addMessage(null,new FacesMessage(FacesMessage.SEVERITY_ERROR, gbConflict_error, null));
+							return false;
+						case INVALID_CHARS:
+							String gbTitleError=ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AuthorMessages","gradebook_exception_title_invalid");
+							context.addMessage(null,new FacesMessage(FacesMessage.SEVERITY_ERROR, gbTitleError, null));
+							return false;
+					}
 				}
 			}
 			catch(Exception e){
@@ -800,7 +815,7 @@ implements ActionListener
 			}
 
 			// If the assessment is retracted for edit, we don't sync with gradebook (only until it is republished)
-			if(AssessmentBaseIfc.RETRACT_FOR_EDIT_STATUS.equals(assessment.getStatus())) {
+			if(isRetracted) {
 				return true;
 			}
 			Integer scoringType = evaluation.getScoringType();
@@ -808,7 +823,7 @@ implements ActionListener
 					evaluation.getToGradeBook().equals(EvaluationModelIfc.TO_DEFAULT_GRADEBOOK.toString())){
 
 				// Can't trust the old assessment category id because the instructor could have changed inside Gradebook directly!
-				Long externalCategoryId = gbsHelper.getExternalAssessmentCategoryId(GradebookFacade.getGradebookUId(), assessment.getPublishedAssessmentId().toString(), g);
+				Long externalCategoryId = extInfo.isPresent() ? extInfo.get().categoryId.orElse(null) : null;
 				long currentCategoryId =  externalCategoryId != null ? externalCategoryId : -1;
 				long newCategoryId = NumberUtils.toLong(assessmentSettings.getCategorySelected(), -1);
 				boolean isCategoryChanged = (currentCategoryId > 0 || newCategoryId > 0) && currentCategoryId != newCategoryId;
@@ -824,7 +839,7 @@ implements ActionListener
 					}
 				}
 				
-				if(gbItemExists && !(isTitleChanged || isScoringTypeChanged || isCategoryChanged)){
+				if(extInfo.isPresent() && !(isTitleChanged || isScoringTypeChanged || isCategoryChanged)){
 					try {
 						gbsHelper.updateGradebook(assessment, g);
 					} catch (Exception e) {

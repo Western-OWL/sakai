@@ -22,9 +22,10 @@
 package org.sakaiproject.tool.assessment.integration.helper.ifc;
 import java.io.Serializable;
 import java.util.Map;
+import java.util.Optional;
 
 import org.sakaiproject.service.gradebook.shared.GradebookExternalAssessmentService;
-import org.sakaiproject.service.gradebook.shared.GradebookService;
+import org.sakaiproject.service.gradebook.shared.GradebookExternalAssessmentService.ExternalAssignmentInfo;
 import org.sakaiproject.tool.assessment.data.dao.assessment.PublishedAssessmentData;
 import org.sakaiproject.tool.assessment.data.dao.grading.AssessmentGradingData;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.PublishedAssessmentIfc;
@@ -41,6 +42,8 @@ import org.sakaiproject.tool.assessment.data.ifc.assessment.PublishedAssessmentI
  */
 public interface GradebookServiceHelper extends Serializable
 {
+  public enum ExternalTitleValidationResult { VALID, INVALID_CHARS, DUPLICATE_TITLE };
+
   public boolean gradebookExists(String gradebookUId, GradebookExternalAssessmentService g);
   
   public boolean isGradebookExist(String SiteId);
@@ -57,6 +60,10 @@ public interface GradebookServiceHelper extends Serializable
   public boolean isAssignmentDefined(String assessmentTitle,
 		  GradebookExternalAssessmentService g) throws Exception;
 
+
+  public Optional<ExternalAssignmentInfo> getExternalAssignmentInfo(String gradebookUId, String publishedAssessmentId,
+		  GradebookExternalAssessmentService g) throws Exception;
+
   public void updateExternalAssessmentScore(AssessmentGradingData ag,
 		  GradebookExternalAssessmentService g) throws Exception;
   
@@ -66,8 +73,21 @@ public interface GradebookServiceHelper extends Serializable
   public void updateExternalAssessmentComment(Long publishedAssessmentId, String studentUid, String comment, 
 		  GradebookExternalAssessmentService g) throws Exception;
   
-  public Long getExternalAssessmentCategoryId(String gradebookUId,
-		  String publishedAssessmentId, GradebookExternalAssessmentService g);
-
   public String getAppName();
+
+  /**
+   * Validates the assessment title against the Gradebook's rules for item names. Intended for avoiding
+   * exceptions before enabling a gradebook integration for the first time, or changing an assessment title
+   * that is already integrated. Do not use this if you have an existing gb item and have not changed the title,
+   * the result will be duplicate name because it will match against your existing item.
+   * OWLTODO: consider if refactoring this and the related GEAS call to not match against itself is valuable.
+   * @param gradebookUid the gradebook UUID
+   * @param assessmentTitle the assessment title
+   * @param g the GradebookExternalAssessmentService
+   * @return enum value representing the validation result
+   * @throws Exception if gradebook with given UUID is not found
+   */
+  public ExternalTitleValidationResult validateNewExternalTitle(String gradebookUid, String assessmentTitle,
+		  GradebookExternalAssessmentService g) throws Exception;
+
 }

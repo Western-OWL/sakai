@@ -21,6 +21,7 @@
 
 package org.sakaiproject.tool.assessment.ui.listener.author;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -35,12 +36,20 @@ import javax.faces.event.ActionListener;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.sakaiproject.component.cover.ComponentManager;
+import org.sakaiproject.service.gradebook.shared.GradebookExternalAssessmentService;
+import org.sakaiproject.spring.SpringBeanLocator;
 import org.sakaiproject.tool.assessment.api.SamigoApiFactory;
 import org.sakaiproject.tool.assessment.data.dao.assessment.AssessmentAccessControl;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.AssessmentAccessControlIfc;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.EvaluationModelIfc;
+import org.sakaiproject.tool.assessment.facade.AgentFacade;
 import org.sakaiproject.tool.assessment.facade.AssessmentFacade;
+import org.sakaiproject.tool.assessment.facade.GradebookFacade;
+import org.sakaiproject.tool.assessment.facade.PublishedAssessmentFacade;
+import org.sakaiproject.tool.assessment.integration.context.IntegrationContextFactory;
+import org.sakaiproject.tool.assessment.integration.helper.ifc.GradebookServiceHelper;
 import org.sakaiproject.tool.assessment.services.assessment.AssessmentService;
+import org.sakaiproject.tool.assessment.services.assessment.PublishedAssessmentService;
 import org.sakaiproject.tool.assessment.shared.api.assessment.SecureDeliveryServiceAPI;
 import org.sakaiproject.tool.assessment.ui.bean.author.AssessmentSettingsBean;
 import org.sakaiproject.tool.assessment.ui.bean.author.AuthorBean;
@@ -60,8 +69,8 @@ import org.sakaiproject.util.api.FormattedText;
 public class SaveAssessmentSettingsListener
     implements ActionListener
 {
-  //private static final GradebookServiceHelper gbsHelper = IntegrationContextFactory.getInstance().getGradebookServiceHelper();
-  //private static final boolean integrated = IntegrationContextFactory.getInstance().isIntegrated();
+  private static final GradebookServiceHelper gbsHelper = IntegrationContextFactory.getInstance().getGradebookServiceHelper();
+  private static final boolean integrated = IntegrationContextFactory.getInstance().isIntegrated();
 
   public SaveAssessmentSettingsListener()
   {
@@ -307,6 +316,53 @@ public class SaveAssessmentSettingsListener
     	}			
     }
 
+	// check gradebook integration
+	// NOTE: Points > 0 validation is not performed to allow saving the settings before any questions are added. This validation will occur at the publish step.
+	// NOTE: this validation needs to be the last validation that occurs because it only results in warnings and does not prevent saving the settings.
+	// If any other validation fails, this check should be skipped until those issues are resolved to avoid presenting false information to the user about
+	// whether or not settings were saved
+	if (!error && assessmentSettings.getToDefaultGradebook() && !"Anonymous Users".equals(assessmentSettings.getFirstTargetSelected())) {
+		GradebookExternalAssessmentService g = null;
+		if (integrated) {
+			g = (GradebookExternalAssessmentService) SpringBeanLocator.getInstance().getBean("org.sakaiproject.service.gradebook.GradebookExternalAssessmentService");
+		}
+
+		if (gbsHelper.gradebookExists(GradebookFacade.getGradebookUId(), g)) {
+			try {
+				final Long assId = assessmentSettings.getAssessmentId();
+				final String title = TextFormat.convertPlaintextToFormattedTextNoHighUnicode(assessmentSettings.getTitle());
+				GradebookServiceHelper.ExternalTitleValidationResult result = gbsHelper.validateNewExternalTitle(GradebookFacade.getGradebookUId(), title, g);
+				String draftLabel = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AuthorFrontDoorMessages", "assessment_draft");
+				switch (result) {
+					case INVALID_CHARS:
+						String gbTitleWarn = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AuthorMessages","gradebook_exception_title_invalid_warn");
+						String titleWarning = MessageFormat.format( gbTitleWarn, new Object[] { draftLabel + " - " + title} );
+						context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_WARN, titleWarning, null));
+						break;
+					case DUPLICATE_TITLE:
+						// this could be a false positive with the published copy of this quiz if we are editing the working copy, so check for that
+						PublishedAssessmentService pubServ = new PublishedAssessmentService();
+						List<PublishedAssessmentFacade> published = pubServ.getBasicInfoOfAllPublishedAssessments2("", true, AgentFacade.getCurrentSiteId());
+						boolean falsePositive = published.stream().filter(p -> p.getTitle().equals(title)).map(p -> pubServ.getPublishedAssessmentQuick(p.getPublishedAssessmentId().toString()))
+								.anyMatch(pa -> assId.equals(pa.getAssessmentId()) && EvaluationModelIfc.TO_DEFAULT_GRADEBOOK.toString().equals(pa.getEvaluationModel().getToGradeBook()));
+						// Note: there is a rare scenario this check fails to detect. If a published quiz with a gradebook integration is retracted and the name is changed,
+						// but the quiz is not yet republished, it will not match and a warning will be issued about the quiz title.
+						if (!falsePositive) {
+							String gbConflictWarn = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AssessmentSettingsMessages", "gbConflict_warn");
+							String conflictWarning = MessageFormat.format( gbConflictWarn, new Object[] { draftLabel + " - " + title} );
+							context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_WARN, conflictWarning, null));
+						}
+						break;
+				}
+			}
+			catch (Exception e) {
+				// we've already confirmed the Gradebook exists so something very strange is likely going on with the false positive check
+				log.error("Unexpected error validating assessment title '{}'", assessmentSettings.getTitle(), e);
+				String unexpected = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AssessmentSettingsMessages","unexpectedTitleValidationWarn");
+				context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_WARN, unexpected, null));
+			}
+		}
+	}
 
     if (error){
       String blockDivs = ContextUtil.lookupParam("assessmentSettingsAction:blockDivs");

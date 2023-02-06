@@ -221,7 +221,6 @@
   </div>
   <br/>
   
-
   <h:dataTable value="#{assessmentSettings.errorMessages}" var="message" styleClass="sak-banner-error" rendered="#{assessmentSettings.renderErrorMessage}">
   	<h:column>
   	  <h:outputText value="#{message.detail}"/>
