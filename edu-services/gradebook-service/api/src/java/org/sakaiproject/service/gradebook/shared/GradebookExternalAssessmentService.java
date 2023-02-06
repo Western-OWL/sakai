@@ -19,6 +19,7 @@ import java.util.Date;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.OptionalLong;
 
 /**
@@ -323,14 +324,6 @@ public interface GradebookExternalAssessmentService {
 	 */
 	public void setExternalAssessmentToGradebookAssignment(String gradebookUid, String externalId);
 
-	/**
-	 * Get the category of a gradebook with the externalId given
-	 * 
-	 * @param gradebookUId
-	 * @param externalId
-	 * @return
-	 */
-	public Long getExternalAssessmentCategoryId(String gradebookUId, String externalId);
 
 	/**
 	 * Checks to see whether a gradebook has the categories option enabled.
@@ -350,4 +343,26 @@ public interface GradebookExternalAssessmentService {
 	 * @throws AssessmentNotFoundException
 	 */
 	public OptionalLong getInternalAssessmentID(String gradebookUUID, String externalID) throws GradebookNotFoundException, AssessmentNotFoundException;
+
+	/**
+	 * Retrieves information about an external assignment that would be useful to external assessment engines.
+	 *
+	 * @param gradebookUid the UUID of the gradebook
+	 * @param externalId the external ID of the assignment (gradebook item) in question
+	 * @return an ExternalAssignmentData object, or empty optional if no assignment with the given external id was found
+	 * @throws GradebookNotFoundException if the gradebook doesn't exist
+	 */
+	public Optional<ExternalAssignmentInfo> getExternalAssignmentInfo(String gradebookUid, String externalId) throws GradebookNotFoundException;
+
+	public static class ExternalAssignmentInfo {
+		public final String externalId;
+		public final String title;
+		public final Optional<Long> categoryId;
+
+		public ExternalAssignmentInfo(String externalId, String title, Long categoryId) {
+			this.externalId = externalId;
+			this.title = title;
+			this.categoryId = Optional.ofNullable(categoryId);
+		}
+	}
 }

@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -955,19 +956,6 @@ public class GradebookExternalAssessmentServiceImpl extends BaseHibernateManager
 		return NumberFormat.getInstance(new ResourceLoader().getLocale());
 	}
 
-	@Override
-	public Long getExternalAssessmentCategoryId(final String gradebookUId, final String externalId) {
-		Long categoryId = null;
-		final GradebookAssignment assignment = getExternalAssignment(gradebookUId, externalId);
-		if (assignment == null) {
-			throw new AssessmentNotFoundException("There is no assessment id=" + externalId + " in gradebook uid=" + gradebookUId);
-		}
-		if (assignment.getCategory() != null) {
-			categoryId = assignment.getCategory().getId();
-		}
-		return categoryId;
-	}
-
 	/**
 	 * Determines whether to update a grade record when there have been no changes. This is useful when we need to update only
 	 * gb_grade_record_t's 'DATE_RECORDED' field for instance. Generally uses the sakai.property
@@ -1006,5 +994,18 @@ public class GradebookExternalAssessmentServiceImpl extends BaseHibernateManager
 			throw new AssessmentNotFoundException("There is no assessment id=" + gradebookUUID + " in gradebook uid=" + externalID);
 		}
 		return asn == null || asn.getId() == null ? OptionalLong.empty() : OptionalLong.of(asn.getId());
+	}
+
+	@Override
+	public Optional<ExternalAssignmentInfo> getExternalAssignmentInfo(String gradebookUid, String externalId) throws GradebookNotFoundException {
+
+		final GradebookAssignment assignment = getExternalAssignment(gradebookUid, externalId);
+		if (assignment == null) {
+			return Optional.empty();
+		}
+
+		Long catId = assignment.getCategory() == null ? null : assignment.getCategory().getId();
+
+		return Optional.of(new ExternalAssignmentInfo(externalId, assignment.getName(), catId));
 	}
 }
