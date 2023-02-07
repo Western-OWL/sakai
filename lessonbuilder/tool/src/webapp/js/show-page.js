@@ -3658,14 +3658,20 @@ function checkQuestionGradedForm() {
 
 // Prepares the question dialog to be submitted
 function prepareQuestionDialog() {
+	const gradebookItemTitle = $("#question-gradebook-title").val();
 	if ($("#question-graded").prop("checked") && !isFinite(safeParseInt($("#question-max").val()))) {
 	    $('#question-error').text(intError(safeParseInt($("#question-max").val())));
 	    $('#question-error-container').show();
 	    return false;
-	} else if($("#question-graded").prop("checked") && $("#question-gradebook-title").val() === '') {
+	} else if($("#question-graded").prop("checked") && gradebookItemTitle === '') {
 	    $('#question-error').text(msg("simplepage.gbname-expected"));
 	    $('#question-error-container').show();
 	    return false;
+	} else if ($("#question-graded").prop("checked") && (gradebookItemTitle.startsWith("*") || gradebookItemTitle.startsWith("#") || gradebookItemTitle.includes("[")
+			|| gradebookItemTitle.includes("]"))) {
+		$('#question-error').text(msg("simplepage.question.gradebookTitleInvalid"));
+		$('#question-error-container').show();
+		return false;
 	} else if ($("#question-text-input").val() === '') {
 	    $('#question-error').text(msg("simplepage.missing-question-text"));
 	    $('#question-error-container').show();

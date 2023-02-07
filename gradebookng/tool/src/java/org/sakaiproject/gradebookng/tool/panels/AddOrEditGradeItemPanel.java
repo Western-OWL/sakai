@@ -207,7 +207,7 @@ public class AddOrEditGradeItemPanel extends BasePanel {
 		// 2. names cannot contain these special chars
 		if (validated) {
 			try {
-				GradebookHelper.validateGradeItemName(assignment.getName());
+				assignment.setName(GradebookHelper.validateGradeItemName(assignment.getName()));
 			} catch (final InvalidGradeItemNameException e) {
 				validated = false;
 				error(getString("error.addeditgradeitem.titlecharacters"));

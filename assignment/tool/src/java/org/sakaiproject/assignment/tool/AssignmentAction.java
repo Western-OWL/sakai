@@ -225,6 +225,7 @@ import org.sakaiproject.service.gradebook.shared.AssignmentHasIllegalPointsExcep
 import org.sakaiproject.service.gradebook.shared.CategoryDefinition;
 import org.sakaiproject.service.gradebook.shared.ConflictingAssignmentNameException;
 import org.sakaiproject.service.gradebook.shared.GradebookExternalAssessmentService;
+import org.sakaiproject.service.gradebook.shared.GradebookHelper;
 import org.sakaiproject.service.gradebook.shared.GradebookNotFoundException;
 import org.sakaiproject.service.gradebook.shared.GradebookService;
 import org.sakaiproject.service.gradebook.shared.InvalidGradeItemNameException;
@@ -7385,8 +7386,9 @@ public class AssignmentAction extends PagedResourceActionII {
                  * 2) Associating with an existing item, and the existing item is managed by assignments.
                  * Note:
                  * If we associate with a gradebook item that is not already associated with an existing assignment, the gradebook item keeps its name; so title validation is not required.
+                 * Skip if the title is blank as this has already been validated.
                  */
-                if (validify)
+                if (validify && !StringUtils.isBlank(title))
                 {
                     switch (grading) {
                         case GRADEBOOK_INTEGRATION_ADD:
@@ -7431,7 +7433,12 @@ public class AssignmentAction extends PagedResourceActionII {
 
                             if (StringUtils.equals(gbItem.getName(), title))
                             {
-                                // The title will not change. Validating the name in this case will detect itself as a duplicate.
+                                // The title will not change, but we should validate that the resulting GB item name will be valid
+                                try {
+                                    title = GradebookHelper.validateGradeItemName(title);
+                                } catch (InvalidGradeItemNameException igine) {
+                                    addAlert(state, rb.getFormattedMessage("addtogradebook.validate.associate.titleInvalidCharacters", formattedText.escapeHtml(gbItem.getName()), formattedText.escapeHtml(title)));
+                                }
                                 break;
                             }
 

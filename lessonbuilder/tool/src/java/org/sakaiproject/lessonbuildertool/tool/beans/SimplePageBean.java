@@ -98,6 +98,7 @@ import org.sakaiproject.memory.api.Cache;
 import org.sakaiproject.memory.api.MemoryService;
 import org.sakaiproject.portal.util.ToolUtils;
 import org.sakaiproject.service.gradebook.shared.ConflictingAssignmentNameException;
+import org.sakaiproject.service.gradebook.shared.GradebookService;
 import org.sakaiproject.site.api.Group;
 import org.sakaiproject.site.api.Site;
 import org.sakaiproject.site.api.SitePage;
@@ -7848,9 +7849,19 @@ public class SimplePageBean {
 
 			String gradebookId = "lesson-builder:question:" + item.getId();
 			String title = gradebookTitle;
-			if(title == null || title.equals("")) {
-				title = questionText;
-			}	
+
+			// Must supply gradebook item title
+			if(StringUtils.isBlank(title)) {
+				setErrMessage(messageLocator.getMessage("simplepage.gbname-expected"));
+				return "failure";
+			}
+
+			// Gradebook item title must be valid
+			if (StringUtils.containsAny(title, GradebookService.INVALID_CHARS_WITHIN_GB_ITEM_NAME)
+					|| StringUtils.startsWithAny(title, GradebookService.INVALID_CHARS_AT_START_OF_GB_ITEM_NAME)) {
+				setErrMessage(messageLocator.getMessage("simplepage.question.gradebookTitleInvalid"));
+				return "failure";
+			}
 
 			try {
 				boolean add = gradebookIfc.addExternalAssessment(getCurrentSiteId(), gradebookId, null, title, pointsInt, null, LESSONBUILDER_ID);				

@@ -398,7 +398,8 @@ public class ConfirmPublishAssessmentListener
             getBean("org.sakaiproject.service.gradebook.GradebookExternalAssessmentService");
     }
     try{
-      if (g != null && assessmentSettings.getToDefaultGradebook()) {
+      // Validate the assessment title against gradebook's rules. Skip if assessmentName is blank, as that case has already been validated (the error message would be misleading otherwise)
+      if (g != null && assessmentSettings.getToDefaultGradebook() && !StringUtils.isBlank(assessmentName)) {
         GradebookServiceHelper.ExternalTitleValidationResult result = gbsHelper.validateNewExternalTitle(GradebookFacade.getGradebookUId(), assessmentName, g);
         switch(result) {
             case DUPLICATE_TITLE:

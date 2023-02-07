@@ -26,13 +26,14 @@ public class GradebookHelper {
      * @throws ConflictingAssignmentNameException
      * returns validatedName
      */
-    public static String validateGradeItemName(String title) throws InvalidGradeItemNameException, ConflictingAssignmentNameException {
+    public static String validateGradeItemName(String title) throws InvalidGradeItemNameException {
         // validate the name
         title = StringUtils.trimToNull(title);
         if (StringUtils.isBlank(title)) {
-            throw new ConflictingAssignmentNameException("You cannot save an assignment without a name");
+            throw new InvalidGradeItemNameException("Grade Item name cannot be empty");
         }
-        else if (StringUtils.startsWithAny(title, GradebookService.INVALID_CHARS_AT_START_OF_GB_ITEM_NAME)) {
+        else if (StringUtils.startsWithAny(title, GradebookService.INVALID_CHARS_AT_START_OF_GB_ITEM_NAME)
+                || StringUtils.containsAny(title, GradebookService.INVALID_CHARS_WITHIN_GB_ITEM_NAME)) {
             throw new InvalidGradeItemNameException("Grade Item name is invalid: " + title);
         }
         return title;
