@@ -408,7 +408,7 @@ public class ConfirmPublishAssessmentListener
                 break;
             case INVALID_CHARS:
                 String gbTitleError=ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AuthorMessages","gradebook_exception_title_invalid");
-                context.addMessage(null,new FacesMessage(FacesMessage.SEVERITY_ERROR, gbTitleError, null));
+                context.addMessage(null,new FacesMessage(FacesMessage.SEVERITY_WARN, gbTitleError, null));
                 error=true;
                 break;
         }
