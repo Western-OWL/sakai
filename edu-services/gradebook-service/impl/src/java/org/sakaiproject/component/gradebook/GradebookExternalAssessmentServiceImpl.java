@@ -220,7 +220,7 @@ public class GradebookExternalAssessmentServiceImpl extends BaseHibernateManager
 	@Override
 	public void updateExternalAssessment(final String gradebookUid, final String externalId, final String externalUrl,
 										 String externalData, final String title, final double points, final Date dueDate)
-			throws GradebookNotFoundException, AssessmentNotFoundException, AssignmentHasIllegalPointsException {
+			throws GradebookNotFoundException, AssessmentNotFoundException, AssignmentHasIllegalPointsException, InvalidGradeItemNameException {
 		final GradebookAssignment asn = getExternalAssignment(gradebookUid, externalId);
 
 		if (asn == null) {
@@ -238,8 +238,13 @@ public class GradebookExternalAssessmentServiceImpl extends BaseHibernateManager
 			throw new RuntimeException("ExternalId, and title must not be empty");
 		}
 
-		// name cannot contain these chars as they are reserved for special columns in import/export
-		GradebookHelper.validateGradeItemName(title);
+		// If the name is the same as it was before, we don't need to check for conflicting names
+		if (!StringUtils.equals(title, asn.getName())) {
+			validateNewExternalAssessmentTitle(gradebookUid, title);
+		} else {
+			// name cannot contain these chars as they are reserved for special columns in import/export
+			GradebookHelper.validateGradeItemName(title);
+		}
 
 		final HibernateCallback<?> hc = new HibernateCallback<Object>() {
 			@Override
@@ -772,7 +777,7 @@ public class GradebookExternalAssessmentServiceImpl extends BaseHibernateManager
     @Override
     public void updateExternalAssessment(final String gradebookUid, final String externalId, final String externalUrl, String externalData, final String title,
                                          final Double points, final Date dueDate, final Boolean ungraded)
-            throws GradebookNotFoundException, AssessmentNotFoundException, ConflictingAssignmentNameException, AssignmentHasIllegalPointsException {
+            throws GradebookNotFoundException, AssessmentNotFoundException, ConflictingAssignmentNameException, AssignmentHasIllegalPointsException, InvalidGradeItemNameException {
         final GradebookAssignment asn = getExternalAssignment(gradebookUid, externalId);
 
 		if (asn == null) {
@@ -791,8 +796,13 @@ public class GradebookExternalAssessmentServiceImpl extends BaseHibernateManager
 			throw new RuntimeException("ExternalId, and title must not be empty");
 		}
 
-		// name cannot contain these chars as they are reserved for special columns in import/export
-		GradebookHelper.validateGradeItemName(title);
+		// If the name is the same as it was before, we don't need to check for conflicting names
+		if (!StringUtils.equals(title, asn.getName())) {
+			validateNewExternalAssessmentTitle(gradebookUid, title);
+		} else {
+			// name cannot contain these chars as they are reserved for special columns in import/export
+			GradebookHelper.validateGradeItemName(title);
+		}
 
 		final HibernateCallback<?> hc = session -> {
 			asn.setExternalInstructorLink(externalUrl);

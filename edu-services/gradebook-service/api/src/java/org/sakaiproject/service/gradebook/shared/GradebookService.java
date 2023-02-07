@@ -104,7 +104,12 @@ public interface GradebookService extends EntityProducer {
 	/**
 	 * Array of chars that are not allowed at the beginning of a gb item title
 	 */
-	public static final String[] INVALID_CHARS_AT_START_OF_GB_ITEM_NAME = { "#", "*", "[" };
+	public static final String[] INVALID_CHARS_AT_START_OF_GB_ITEM_NAME = { "#", "*" };
+
+	/**
+	 * Array of chars that are not allowed anywhere within a gb item title
+	 */
+	public static final String[] INVALID_CHARS_WITHIN_GB_ITEM_NAME = { "[", "]" };
 
 	/**
 	 * Comparator to ensure correct ordering of letter grades, catering for + and - in the grade This is duplicated in GradebookNG. If

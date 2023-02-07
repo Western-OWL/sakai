@@ -528,9 +528,20 @@ public class AssignmentToolUtils {
                             try {
                                 // update attributes if the GB assignment was created for the assignment
                                 gradebookExternalAssessmentService.updateExternalAssessment(gradebookUid, associateGradebookAssignment, null, null, newAssignment_title, newAssignment_maxPoints / (double) a.getScaleFactor(), Date.from(newAssignment_dueTime), false);
-                            } catch (Exception e) {
+                            } catch (AssessmentNotFoundException e) {
                                 alerts.add(rb.getFormattedMessage("cannotfin_assignment", assignmentRef));
                                 log.warn("{}", rb.getFormattedMessage("cannotfin_assignment", assignmentRef));
+                            } catch (ConflictingAssignmentNameException e) {
+                                alerts.add(rb.getFormattedMessage("addtogradebook.nonUniqueTitle", "\"" + newAssignment_title + "\""));
+                                log.warn(this + ":integrateGradebook " + e.getMessage());
+                            } catch (AssignmentHasIllegalPointsException e) {
+                                alerts.add(rb.getString("addtogradebook.illegalPoints"));
+                                log.warn(this + ":integrateGradebook " + e.getMessage());
+                            } catch (InvalidGradeItemNameException e) {
+                                alerts.add(rb.getFormattedMessage("addtogradebook.titleInvalidCharacters", "\"" + newAssignment_title + "\""));
+                                log.warn(this + ":integrateGradebook " + e.getMessage());
+                            } catch (Exception e) {
+                                log.warn(this + ":integrateGradebook " + e.getMessage());
                             }
                         }
                     }    // addUpdateRemove != null

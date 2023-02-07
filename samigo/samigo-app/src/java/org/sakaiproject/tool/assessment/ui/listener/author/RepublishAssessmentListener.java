@@ -33,6 +33,8 @@ import org.sakaiproject.samigo.util.SamigoConstants;
 import org.sakaiproject.event.cover.EventTrackingService;
 import org.sakaiproject.service.gradebook.shared.GradebookExternalAssessmentService;
 import org.sakaiproject.service.gradebook.shared.GradebookExternalAssessmentService.ExternalAssignmentInfo;
+import org.sakaiproject.service.gradebook.shared.GradebookHelper;
+import org.sakaiproject.service.gradebook.shared.InvalidGradeItemNameException;
 import org.sakaiproject.service.gradebook.shared.GradebookService;
 import org.sakaiproject.spring.SpringBeanLocator;
 import org.sakaiproject.tool.assessment.data.dao.assessment.PublishedAssessmentData;
@@ -210,6 +212,12 @@ public class RepublishAssessmentListener implements ActionListener {
 			if (!extInfo.isPresent() || !extInfo.get().title.equals(assessment.getTitle())) {
 				// no GB item for this quiz previously, or the current quiz title doesn't match the GB item title, so validate
 				return gbsHelper.validateNewExternalTitle(GradebookFacade.getGradebookUId(), assessment.getTitle(), g);
+			} else {
+				try {
+					assessment.setTitle(GradebookHelper.validateGradeItemName(assessment.getTitle()));
+				} catch (InvalidGradeItemNameException ex) {
+					return ExternalTitleValidationResult.INVALID_CHARS;
+				}
 			}
 		}
 		catch (Exception e) {
