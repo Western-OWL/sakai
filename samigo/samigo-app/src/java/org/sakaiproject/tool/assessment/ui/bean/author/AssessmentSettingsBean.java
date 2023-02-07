@@ -1990,24 +1990,32 @@ public class AssessmentSettingsBean extends SpringBeanAutowiringSupport implemen
         this.editingExtendedTime = false;
     }
     
-    public List<FacesMessage> getErrorMessages() {
-        List<FacesMessage> list = FacesContext.getCurrentInstance().getMessageList();
-        Stream<FacesMessage> stream = list.stream();
-        return stream.filter(message -> FacesMessage.SEVERITY_WARN.equals(message.getSeverity()))
-        		.collect(Collectors.toList());
+    private List<FacesMessage> getMessagesForSeverity(final FacesMessage.Severity severity) {
+        return FacesContext.getCurrentInstance().getMessageList().stream()
+            .filter(message -> severity.equals(message.getSeverity()))
+            .collect(Collectors.toList());
     }
-    
+
+    public List<FacesMessage> getErrorMessages() {
+        return getMessagesForSeverity(FacesMessage.SEVERITY_ERROR);
+    }
+
+    public List<FacesMessage> getWarnMessages() {
+        return getMessagesForSeverity(FacesMessage.SEVERITY_WARN);
+    }
+
     public List<FacesMessage> getInfoMessages() {
-        List<FacesMessage> list = FacesContext.getCurrentInstance().getMessageList();
-        Stream<FacesMessage> stream = list.stream();
-        return stream.filter(message -> FacesMessage.SEVERITY_INFO.equals(message.getSeverity()))
-        		.collect(Collectors.toList());
+        return getMessagesForSeverity(FacesMessage.SEVERITY_INFO);
     }
     
     public boolean isRenderErrorMessage() {
         return !getErrorMessages().isEmpty();
     }
     
+    public boolean isRenderWarnMessage() {
+        return !getWarnMessages().isEmpty();
+    }
+
     public boolean isRenderInfoMessage() {
         return !getInfoMessages().isEmpty();
     }
