@@ -35,7 +35,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -1055,7 +1054,9 @@ public class GradingService
       // This is for DeliveryBean.checkDataIntegrity()
       if (!regrade && persistToDB)
       {
-    	data.setSubmittedDate(new Date());
+        // OWLTODO: this needs to use the effective due date (due, late, exception)
+        // it's safe to leave as is for now becasue getSubmitFromTimeoutPopup is only true when the button is clicked, and we removed the button entirely for now
+        data.setSubmittedDate(data.getSubmitFromTimeoutPopup() ? pub.getAssessmentAccessControl().getDueDate() : new Date());
         setIsLate(data, pub);
       }
       
@@ -2372,7 +2373,7 @@ Here are the definition and 12 cases I came up with (lydia, 01/2006):
   private void setIsLate(AssessmentGradingData data, PublishedAssessmentIfc pub){
     Boolean isLate = Boolean.FALSE;
     AssessmentAccessControlIfc a = pub.getAssessmentAccessControl();
-    if (a.getDueDate() != null && a.getDueDate().before(new Date())) {
+    if (a.getDueDate() != null && a.getDueDate().before(new Date()) && !data.getSubmitFromTimeoutPopup()) {
       isLate = Boolean.TRUE;
     }
 

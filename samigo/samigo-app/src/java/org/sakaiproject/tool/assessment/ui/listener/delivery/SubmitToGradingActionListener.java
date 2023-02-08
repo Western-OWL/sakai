@@ -315,23 +315,28 @@ public class SubmitToGradingActionListener implements ActionListener {
 		HashSet<ItemGradingData> adds = new HashSet<>();
 		HashSet<ItemGradingData> removes = new HashSet<>();
 
-		// we go through all the answer collected from JSF form per each
-		// publsihedItem and
-		// work out which answer is an new addition and in cases like
-		// MC/MCMR/Survey, we will
-		// discard any existing one and just save the new one. For other
-		// question type, we
-		// simply modify the publishedText or publishedAnswer of the existing
-		// ones.
-		while (iter.hasNext()) {
-			SectionContentsBean part = iter.next();
-			log.debug("****1c. inside submitToGradingService, part " + part);
-			for (ItemContentsBean item : part.getItemContents()) { // go through each item from form
-				log.debug("****** before prepareItemGradingPerItem");
-				prepareItemGradingPerItem(ae, delivery, item, adds, removes);
-				log.debug("****** after prepareItemGradingPerItem");
+		// Don't process any changes from the form submission if it was submited from timeoutPopup (due date forced submission)
+		// and it's after the due date
+		// OWLTODO: this needs to use the effective due date (due, late, exception)
+		//if (!delivery.isSubmitFromTimeoutPopup() && new Date().before(publishedAssessment.getDueDate())) {
+			// we go through all the answer collected from JSF form per each
+			// publsihedItem and
+			// work out which answer is an new addition and in cases like
+			// MC/MCMR/Survey, we will
+			// discard any existing one and just save the new one. For other
+			// question type, we
+			// simply modify the publishedText or publishedAnswer of the existing
+			// ones.
+			while (iter.hasNext()) {
+				SectionContentsBean part = iter.next();
+				log.debug("****1c. inside submitToGradingService, part " + part);
+				for (ItemContentsBean item : part.getItemContents()) { // go through each item from form
+					log.debug("****** before prepareItemGradingPerItem");
+					prepareItemGradingPerItem(ae, delivery, item, adds, removes);
+					log.debug("****** after prepareItemGradingPerItem");
+				}
 			}
-		}
+		//}
 		
 		AssessmentGradingData adata = persistAssessmentGrading(ae, delivery,
 				itemGradingHash, publishedAssessment, adds, removes, invalidFINMap, invalidSALengthList);
@@ -391,8 +396,7 @@ public class SubmitToGradingActionListener implements ActionListener {
 		
 		delivery.setSubmissionId(submissionId);
 		delivery.setSubmissionTicket(submissionId);// is this the same thing?
-		// hmmmm
-		delivery.setSubmissionDate(new Date());
+		delivery.setSubmissionDate(adata.getSubmittedDate());
 		delivery.setSubmitted(true);
 		return adata;
 	}

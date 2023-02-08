@@ -144,11 +144,12 @@ function SaveFormContentAsync(toUrl, formId, buttonName, updateVar, updateVar2, 
 	}
 	window.status = "";
 
+   // OWLTODO: this check and below should likely also be checking the student's exception date, if one exists
     //check noLateSubmission or isRetracted controlled by pastDueDate()
-    if (text.indexOf("noLateSubmission") >= 0 || text.indexOf("isRetracted") >= 0 || text.indexOf("assessment_has_been_submitted") >= 0) {
-        $("#autosave-timeexpired-warning").show();
-        $("[id$=\\:save]")[0].click();
-    }
+    //if (text.indexOf("noLateSubmission") >= 0 || text.indexOf("isRetracted") >= 0 || text.indexOf("assessment_has_been_submitted") >= 0) {
+        //$("#autosave-timeexpired-warning").show();
+        //$("[id$=\\:save]")[0].click();
+    //}
 
     if (d !== -1) {
         var timeNow = Date.now();
