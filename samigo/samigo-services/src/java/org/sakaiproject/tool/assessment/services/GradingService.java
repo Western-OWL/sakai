@@ -1618,7 +1618,7 @@ public class GradingService
 		  EventLogData eventLogData= (EventLogData) eventLogDataList.get(0);
 		  //will do the i18n issue later.
 		  eventLogData.setErrorMsg("No Errors (Auto submit)");
-		  final Date endDate = adata.getSubmittedDate() != null ? adata.getSubmittedDate() : new Date();
+		  Date endDate = new Date();
 		  eventLogData.setEndDate(endDate);
 		  if(eventLogData.getStartDate() != null) {
 			  double minute= 1000*60;
