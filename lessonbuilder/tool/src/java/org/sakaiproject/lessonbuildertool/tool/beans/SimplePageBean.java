@@ -93,11 +93,15 @@ import org.sakaiproject.lessonbuildertool.tool.producers.PagePickerProducer;
 import org.sakaiproject.lessonbuildertool.tool.producers.ShowItemProducer;
 import org.sakaiproject.lessonbuildertool.tool.producers.ShowPageProducer;
 import org.sakaiproject.lessonbuildertool.tool.view.GeneralViewParameters;
+import org.sakaiproject.lessonbuildertool.util.SimplePageBeanGbDelegate;
+import org.sakaiproject.lessonbuildertool.util.SimplePageBeanGbDelegate.ExternalAttributes;
+import org.sakaiproject.lessonbuildertool.util.SimplePageBeanGbDelegate.GB_RESULT;
 import org.sakaiproject.lti.api.LTIService;
 import org.sakaiproject.memory.api.Cache;
 import org.sakaiproject.memory.api.MemoryService;
 import org.sakaiproject.portal.util.ToolUtils;
 import org.sakaiproject.service.gradebook.shared.ConflictingAssignmentNameException;
+import org.sakaiproject.service.gradebook.shared.InvalidGradeItemNameException;
 import org.sakaiproject.service.gradebook.shared.GradebookService;
 import org.sakaiproject.site.api.Group;
 import org.sakaiproject.site.api.Site;
@@ -4480,23 +4484,49 @@ public class SimplePageBean {
 			if (newPoints == null && currentPoints != null) {
 				add = gradebookIfc.removeExternalAssessment(site.getId(), "lesson-builder:" + page.getPageId());
 			} else if (newPoints != null && currentPoints == null) {
+				boolean validTitle = true; // OWLTODO could be refactored to use the new SimplePageBeanGbDelegate
 				try {
+					gradebookIfc.validateExternalTitle(pageTitle, site.getId(), "lesson-builder:" + page.getPageId());
 					add = gradebookIfc.addExternalAssessment(site.getId(), "lesson-builder:" + page.getPageId(), null,
 						       	pageTitle, newPoints, null, LESSONBUILDER_ID);
 				} catch(ConflictingAssignmentNameException cane) {
 					add = false;
+					validTitle = false;
 					setErrMessage(messageLocator.getMessage("simplepage.existing-gradebook"));
+				} catch (InvalidGradeItemNameException igine) {
+					add = false;
+					validTitle = false;
+					setErrMessage(messageLocator.getMessage("simplepage.gradebookTitleInvalid"));
 				}
 				if(!add) {
-					setErrMessage(messageLocator.getMessage("simplepage.no-gradebook"));
+					if (validTitle) {
+						setErrMessage(messageLocator.getMessage("simplepage.no-gradebook"));
+					}
 				} else
 				    needRecompute = true;
 			} else if (currentPoints != null && 
 					(!currentPoints.equals(newPoints) || !pageTitle.equals(page.getTitle()))) {
-				add = gradebookIfc.updateExternalAssessment(site.getId(), "lesson-builder:" + page.getPageId(), null,
+				boolean validTitle = true;
+				try {
+					gradebookIfc.validateExternalTitle(pageTitle, site.getId(), "lesson-builder:" + page.getPageId());
+					add = gradebookIfc.updateExternalAssessment(site.getId(), "lesson-builder:" + page.getPageId(), null,
 							  	pageTitle, newPoints, null);
+				}
+				catch(ConflictingAssignmentNameException cane) {
+					add = false;
+					validTitle = false;
+					setErrMessage(messageLocator.getMessage("simplepage.edit.existing-gradebook"));
+				} catch (InvalidGradeItemNameException igine) {
+					add = false;
+					validTitle = false;
+					setErrMessage(messageLocator.getMessage("simplepage.edit.gradebookTitleInvalid"));
+				}
 				if(!add) {
-					setErrMessage(messageLocator.getMessage("simplepage.no-gradebook"));
+					if (validTitle) {
+						setErrMessage(messageLocator.getMessage("simplepage.no-gradebook"));
+					} else { // title is not valid for GB integration so revert to the original title
+						pageTitle = page.getTitle();
+					}
 				} else if (!currentPoints.equals(newPoints))
 					needRecompute = true;
 			}
@@ -7442,23 +7472,27 @@ public class SimplePageBean {
 					if(comment.getPageId() >= 0) {
 						pageTitle = getPage(comment.getPageId()).getTitle();
 						gradebookId = "lesson-builder:comment:" + comment.getId();
-						
-						if(comment.getGradebookId() != null && !comment.getGradebookPoints().equals(points)) {
-						    add = gradebookIfc.updateExternalAssessment(getCurrentSiteId(), "lesson-builder:comment:" + comment.getId(), null,
-							      pageTitle + " Comments (item:" + comment.getId() + ")", Integer.valueOf(maxPoints), null);
-						} else {
-							try {
-								add = gradebookIfc.addExternalAssessment(getCurrentSiteId(), "lesson-builder:comment:" + comment.getId(), null,
-									pageTitle + " Comments (item:" + comment.getId() + ")", Integer.valueOf(maxPoints), null, LESSONBUILDER_ID);
-							} catch(ConflictingAssignmentNameException cane) {
+						boolean existing = comment.getGradebookId() != null && !comment.getGradebookPoints().equals(points);
+						ExternalAttributes attr = ExternalAttributes.builder().gbUid(getCurrentSiteId()).extId(gradebookId)
+								.extUrl(null).title(pageTitle + " Comments (item:" + comment.getId() + ")")
+								.points(Integer.valueOf(maxPoints)).due(null).build();
+						GB_RESULT res = existing ? SimplePageBeanGbDelegate.updateExternalAssessment(gradebookIfc, attr) : SimplePageBeanGbDelegate.addExternalAssessment(gradebookIfc, attr);
+						switch (res)
+						{
+							case SUCCESS:
+								comment.setGradebookTitle(pageTitle + " Comments (item:" + comment.getId() + ")");
+								break;
+							case INVALID_CHARS:
+								add = false;
+								setErrMessage(messageLocator.getMessage("simplepage.comments.gradebookTitleInvalid"));
+								break;
+							case DUP_TITLE:
 								add = false;
 								setErrMessage(messageLocator.getMessage("simplepage.existing-gradebook"));
-							}
-						}
-						if(!add) {
-							setErrMessage(messageLocator.getMessage("simplepage.no-gradebook"));
-						} else {
-							comment.setGradebookTitle(pageTitle + " Comments (item:" + comment.getId() + ")");
+								break;
+							default:
+								add = false;
+								setErrMessage(messageLocator.getMessage("simplepage.no-gradebook"));
 						}
 					}else {
 						// Must be a student page comments tool.
@@ -7838,49 +7872,53 @@ public class SimplePageBean {
 			}
 		}
 		
-		if (!graded || (gradebookTitle != null && gradebookTitle.trim().equals("")))
-		    gradebookTitle = null;
+		if (!graded) {
+			gradebookTitle = null;
+		} else if(StringUtils.isBlank(gradebookTitle)) { // Must supply gradebook item title
+			setErrMessage(messageLocator.getMessage("simplepage.gbname-expected"));
+			return "failure";
+		}
 
-		if(gradebookTitle != null && (item.getGradebookId() == null || item.getGradebookId().equals(""))) {
-			// Creating new gradebook entry
-			if (itemId != null && itemId < 0) {
-				saveItem(item);
-			}
-
-			String gradebookId = "lesson-builder:question:" + item.getId();
-			String title = gradebookTitle;
-
-			// Must supply gradebook item title
-			if(StringUtils.isBlank(title)) {
-				setErrMessage(messageLocator.getMessage("simplepage.gbname-expected"));
-				return "failure";
-			}
-
-			// Gradebook item title must be valid
-			if (StringUtils.containsAny(title, GradebookService.INVALID_CHARS_WITHIN_GB_ITEM_NAME)
-					|| StringUtils.startsWithAny(title, GradebookService.INVALID_CHARS_AT_START_OF_GB_ITEM_NAME)) {
-				setErrMessage(messageLocator.getMessage("simplepage.question.gradebookTitleInvalid"));
-				return "failure";
-			}
-
-			try {
-				boolean add = gradebookIfc.addExternalAssessment(getCurrentSiteId(), gradebookId, null, title, pointsInt, null, LESSONBUILDER_ID);				
-				if(!add) {
-					setErrMessage(messageLocator.getMessage("simplepage.no-gradebook"));
-				}else {
-					item.setGradebookId(gradebookId);
-					item.setGradebookTitle(title);
+		if (gradebookTitle != null) {
+			boolean addNew = item.getGradebookId() == null || item.getGradebookId().equals("");
+			if (addNew) {
+				// Creating new gradebook entry
+				if (itemId != null && itemId < 0) {
+					saveItem(item);
 				}
-			} catch(ConflictingAssignmentNameException cane) {
-				setErrMessage(messageLocator.getMessage("simplepage.existing-gradebook"));
 			}
-		}else if(gradebookTitle != null) {
-			// Updating an old gradebook entry
-			
-			gradebookIfc.updateExternalAssessment(getCurrentSiteId(), item.getGradebookId(), null, gradebookTitle, pointsInt, null);
-			
-			item.setGradebookTitle(gradebookTitle);
-		}else if(gradebookTitle == null && (item.getGradebookId() != null && !item.getGradebookId().equals(""))) {
+
+			String gradebookId = addNew ? "lesson-builder:question:" + item.getId() : item.getGradebookId();
+			ExternalAttributes attr = ExternalAttributes.builder().gbUid(getCurrentSiteId()).extId(gradebookId)
+					.extUrl(null).title(gradebookTitle).points(pointsInt).due(null).build();
+			GB_RESULT res = addNew ? SimplePageBeanGbDelegate.addExternalAssessment(gradebookIfc, attr) : SimplePageBeanGbDelegate.updateExternalAssessment(gradebookIfc, attr);
+			switch (res)
+			{
+				case SUCCESS:
+					item.setGradebookId(gradebookId);
+					item.setGradebookTitle(gradebookTitle);
+					break;
+				case INVALID_CHARS:
+					if (addNew) {
+						graded = false;
+						setErrMessage(messageLocator.getMessage("simplepage.question.gradebookTitleInvalid"));
+					} else {
+						setErrMessage(messageLocator.getMessage("simplepage.question.edit.gradebookTitleInvalid"));
+					}
+					break;
+				case DUP_TITLE:
+					if (addNew) {
+						graded = false;
+						setErrMessage(messageLocator.getMessage("simplepage.existing-gradebook"));
+					} else {
+						setErrMessage(messageLocator.getMessage("simplepage.question.edit.existing-gradebook"));
+					}
+					break;
+				default:
+					setErrMessage(messageLocator.getMessage("simplepage.no-gradebook"));
+			}
+		}
+		else if(gradebookTitle == null && (item.getGradebookId() != null && !item.getGradebookId().equals(""))) {
 			// Removing an existing gradebook entry
 			
 			gradebookIfc.removeExternalAssessment(getCurrentSiteId(), item.getGradebookId());
@@ -8153,27 +8191,28 @@ public class SimplePageBean {
 					setErrMessage(messageLocator.getMessage("simplepage.integer-expected"));
 					return "failure";
 				}
-				
-				if(page.getGradebookId() == null || !page.getGradebookPoints().equals(points)) {
-				 	boolean add;
-					if (page.getGradebookId() != null && !page.getGradebookPoints().equals(points)) {
-					    add = gradebookIfc.updateExternalAssessment(getCurrentSiteId(), "lesson-builder:page:" + page.getId(), null, getPage(page.getPageId()).getTitle() + " Student Pages (item:" + page.getId() + ")", Integer.valueOf(maxPoints), null);
-					} else {
-						try {
-							add = gradebookIfc.addExternalAssessment(getCurrentSiteId(), "lesson-builder:page:" + page.getId(), null, gradebookTitle, Integer.valueOf(maxPoints), null, LESSONBUILDER_ID);
-						} catch(ConflictingAssignmentNameException cane) {
-							add = false;
-							setErrMessage(messageLocator.getMessage("simplepage.existing-gradebook"));
-					    }
-					}
-					if(!add) {
-						setErrMessage(messageLocator.getMessage("simplepage.no-gradebook"));
-					}else {
+
+				ExternalAttributes attr = ExternalAttributes.builder().gbUid(getCurrentSiteId()).extId("lesson-builder:page:" + page.getId())
+							.extUrl(null).title(getPage(page.getPageId()).getTitle() + " Student Pages (item:" + page.getId() + ")")
+							.points(Integer.valueOf(maxPoints)).due(null).build();
+				boolean existing = page.getGradebookId() != null && !page.getGradebookPoints().equals(points);
+				GB_RESULT res = existing ? SimplePageBeanGbDelegate.updateExternalAssessment(gradebookIfc, attr) : SimplePageBeanGbDelegate.addExternalAssessment(gradebookIfc, attr);
+				switch (res)
+				{
+					case SUCCESS:
 						page.setGradebookId("lesson-builder:page:" + page.getId());
 						page.setGradebookTitle(getPage(page.getPageId()).getTitle() + " Student Pages (item:" + page.getId() + ")");
 						page.setGradebookPoints(points);
 						regradeStudentPages(page);
-					}
+						break;
+					case INVALID_CHARS:
+						setErrMessage(messageLocator.getMessage("simplepage.student-pages.gradebookTitleInvalid"));
+						break;
+					case DUP_TITLE:
+						setErrMessage(messageLocator.getMessage("simplepage.existing-gradebook"));
+						break;
+					default:
+						setErrMessage(messageLocator.getMessage("simplepage.no-gradebook"));
 				}
 			}else if(page.getGradebookId() != null) {
 				gradebookIfc.removeExternalAssessment(getCurrentSiteId(), page.getGradebookId());
@@ -8193,27 +8232,26 @@ public class SimplePageBean {
 				
 				if(page.getAltGradebook() == null || !page.getAltPoints().equals(points)) {
 					String title = getPage(page.getPageId()).getTitle() + " Student Page Comments (item:" + page.getId() + ")";
-					boolean add;
-					if(page.getAltGradebook() != null && !page.getAltPoints().equals(points)) {
-						add = gradebookIfc.updateExternalAssessment(getCurrentSiteId(), "lesson-builder:page-comment:" + page.getId(), null,
-											title, points, null);
-					} else {
-					    try {
-							add = gradebookIfc.addExternalAssessment(getCurrentSiteId(), "lesson-builder:page-comment:" + page.getId(), null,
-								title, points, null, LESSONBUILDER_ID);
-					    } catch(ConflictingAssignmentNameException cane) {
-							add = false;
+					boolean existing = page.getAltGradebook() != null && !page.getAltPoints().equals(points);
+					ExternalAttributes attr = ExternalAttributes.builder().gbUid(getCurrentSiteId()).extId("lesson-builder:page-comment:" + page.getId())
+							.extUrl(null).title(title).points(points).due(null).build();
+					GB_RESULT res = existing ? SimplePageBeanGbDelegate.updateExternalAssessment(gradebookIfc, attr) : SimplePageBeanGbDelegate.addExternalAssessment(gradebookIfc, attr);
+					switch (res)
+					{
+						case SUCCESS:
+							page.setAltGradebook("lesson-builder:page-comment:" + page.getId());
+							page.setAltGradebookTitle(title);
+							page.setAltPoints(points);
+							regradeStudentPageComments(page);
+							break;
+						case INVALID_CHARS:
+							setErrMessage(messageLocator.getMessage("simplepage.student-pages.comments.gradebookTitleInvalid"));
+							break;
+						case DUP_TITLE:
 							setErrMessage(messageLocator.getMessage("simplepage.existing-gradebook"));
-					    }
-					}
-					// The assessment couldn't be added
-					if(!add) {
-						setErrMessage(messageLocator.getMessage("simplepage.no-gradebook"));
-					}else {
-						page.setAltGradebook("lesson-builder:page-comment:" + page.getId());
-						page.setAltGradebookTitle(title);
-						page.setAltPoints(points);
-						regradeStudentPageComments(page);
+							break;
+						default:
+							setErrMessage(messageLocator.getMessage("simplepage.no-gradebook"));
 					}
 				}
 			}else if(page.getAltGradebook() != null) {

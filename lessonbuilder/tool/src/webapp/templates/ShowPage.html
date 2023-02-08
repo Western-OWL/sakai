@@ -1143,6 +1143,7 @@
 			  <p rsf:id="msg=simplepage.integer-expected" id="simplepage.integer-expected"></p>
 			  <p rsf:id="msg=simplepage.integer-too-big" id="simplepage.integer-too-big"></p>
 			  <p rsf:id="msg=simplepage.gbname-expected" id="simplepage.gbname-expected"></p>
+			  <p rsf:id="msg=simplepage.gradebookTitleInvalid" id="simplepage.gradebookTitleInvalid"></p>
 			  <p rsf:id="msg=simplepage.question.gradebookTitleInvalid" id="simplepage.question.gradebookTitleInvalid"></p>
 			  <p rsf:id="msg=simplepage.width-height" id="simplepage.width-height"></p>
 			  <p rsf:id="msg=simplepage.nothing-over-100-percent" id="simplepage.nothing-over-100-percent"></p>
@@ -2000,6 +2001,10 @@
 			</div>
 			
 			<div id="comments-dialog" rsf:id="comments-dialog" class="lessonsDialog">
+				<div class="ui-widget" id="comments-error-container">
+					<div class="sak-banner-error" id="comments-error">
+					</div>
+				</div>
        <form action="#" rsf:id="comments-form" class="controlsPanel">
          <input type="hidden" rsf:id="csrf19" />
 
@@ -2079,6 +2084,10 @@
 			</div>
 	
 			<div id="student-dialog" rsf:id="student-dialog" class="lessonsDialog">
+				<div class="ui-widget" id="student-error-container">
+					<div class="sak-banner-error" id="student-error">
+					</div>
+				</div>
                 <form action="#" rsf:id="student-form" class="controlsPanel">
                     <input type="hidden" rsf:id="csrf20" />
                     <input type="hidden" rsf:id="studentEditId" id="studentEditId" />
@@ -2202,7 +2211,7 @@
 		    </div>
 
                     <div class="act">
-                        <input class="active" type="submit" onclick="return true;" id="update-student" rsf:id="update-student" />
+                        <input class="active" type="submit" onclick="event.returnValue = checkStudentForm(); return checkStudentForm();" id="update-student" rsf:id="update-student" />
                         <input type="submit" rsf:id="cancel-student" onclick="closeStudentDialog(); return false" />
                         <input type="submit" class="deleteButton" id="delete-student-item" rsf:id="delete-student-item" />
                     </div>
