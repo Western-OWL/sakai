@@ -2164,3 +2164,12 @@ a.layoutPreviewLink{
     display: block;
     text-align: center;
 }
+
+/* OWLTODO: test this; add if still needed, and pick a suitable color var
+input[type="text"]:disabled {
+	background-color: #eee;
+	opacity: 1;
+	color: #999;
+	cursor: not-allowed;
+}
+*/

@@ -25,11 +25,15 @@ package org.sakaiproject.lessonbuildertool.service;
 
 import java.util.Date;
 import java.util.Map;
+import java.util.Optional;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import org.sakaiproject.service.gradebook.shared.ConflictingAssignmentNameException;
 import org.sakaiproject.service.gradebook.shared.GradebookExternalAssessmentService;
+import org.sakaiproject.service.gradebook.shared.GradebookService;
+import org.sakaiproject.service.gradebook.shared.InvalidGradeItemNameException;
 
 /**
  * Interface to Gradebook
@@ -102,4 +106,20 @@ public class GradebookIfc {
 	return true;
     }
 
+	/**
+	 * Validates the title for use in an external gradebook item. Will throw exceptions for duplicate titles and invalid characters.
+	 * @param title the proposed title
+	 * @param gradebookUid the gradebook uuid
+	 * @param externalId the external id (typically a Lessons page/item id)
+	 */
+	public void validateExternalTitle(final String title, final String gradebookUid, final String externalId) {
+		Optional<GradebookExternalAssessmentService.ExternalAssignmentInfo> extInfo = gbExternalService.getExternalAssignmentInfo(gradebookUid, externalId);
+		if (!extInfo.isPresent() || !extInfo.get().title.equals(title)) {
+			gbExternalService.validateNewExternalAssessmentTitle(gradebookUid, title);
+		}
+		else if (StringUtils.containsAny(title, GradebookService.INVALID_CHARS_WITHIN_GB_ITEM_NAME)
+				|| StringUtils.startsWithAny(title, GradebookService.INVALID_CHARS_AT_START_OF_GB_ITEM_NAME)) {
+			throw new InvalidGradeItemNameException("Invalid chars in title " + title);
+		}
+	}
 }
