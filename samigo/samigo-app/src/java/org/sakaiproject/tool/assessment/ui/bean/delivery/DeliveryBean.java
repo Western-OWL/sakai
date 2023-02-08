@@ -752,13 +752,16 @@ public class DeliveryBean implements Serializable {
     }
 	  
 	  // We don't need to call completeItemGradingData to create new ItemGradingData for linear access
-	  // because each ItemGradingData is created when it is viewed/answered 
-	  if (!"1".equals(navigation)) {
+	  // because each ItemGradingData is created when it is viewed/answered
+	  // Don't save any progress if this was called from timeoutPopup (due date forced submission) and the due date has actually passed
+	  PublishedAssessmentService publishedAssessmentService = new PublishedAssessmentService();
+	  PublishedAssessmentFacade paf = publishedAssessmentService.getPublishedAssessment(adata.getPublishedAssessmentId().toString());
+	  // OWLTODO: this needs to use the effective due date (due, late, exception)
+	  if (!"1".equals(navigation) /*&& (!submitFromTimeoutPopup || (submitFromTimeoutPopup && new Date().before(paf.getDueDate())))*/) {
 		  gradingService.completeItemGradingData(adata);
 	  }
 
 	  String returnValue="submitAssessment";
-	  PublishedAssessmentService publishedAssessmentService = new PublishedAssessmentService();
 	  String siteId = publishedAssessmentService.getPublishedAssessmentOwner(adata.getPublishedAssessmentId());
 	  String resource = "siteId=" + AgentFacade.getCurrentSiteId() + ", submissionId=" + local_assessmentGradingID;
 
