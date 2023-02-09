@@ -258,8 +258,8 @@ public class ExtendedTimeValidator
     private void addError( String errorKey, FacesContext context, Object[] replacements )
     {
         String errorMsg = ContextUtil.getLocalizedString( ASSESSMENT_SETTINGS_BUNDLE, errorKey );
-        errorMsg = MessageFormat.format( errorMsg, new Object[] { replacements } );
-        context.addMessage( null, new FacesMessage( FacesMessage.SEVERITY_WARN, errorMsg, null ) );
+        errorMsg = MessageFormat.format( errorMsg, replacements );
+        context.addMessage( null, new FacesMessage( FacesMessage.SEVERITY_ERROR, errorMsg, null ) );
         valid = false;
     }
     

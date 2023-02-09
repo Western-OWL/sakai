@@ -25,6 +25,7 @@ import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -37,7 +38,6 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import javax.annotation.Resource;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
 import javax.faces.context.ExternalContext;
@@ -1820,7 +1820,9 @@ public void setFeedbackComponentOption(String feedbackComponentOption) {
   public void addExtendedTime() {
       ExtendedTime entry = this.extendedTime;
       FacesContext context = FacesContext.getCurrentInstance();
-      if (new ExtendedTimeValidator().validateEntry(entry, context, this)) {
+      List<ExtendedTime> validateList = new ArrayList<>(extendedTimes);
+      validateList.add(entry);
+      if (new ExtendedTimeValidator().validateEntries(validateList, context, this)) {
           AssessmentAccessControlIfc accessControl = new AssessmentAccessControl();
           accessControl.setStartDate(this.startDate);
           accessControl.setDueDate(this.dueDate);
@@ -1900,5 +1902,15 @@ public void setFeedbackComponentOption(String feedbackComponentOption) {
       server = server.substring(0, index);
       String url = server + extContext.getRequestContextPath();
       return url + "/servlet/Login?id=" + this.alias;
+  }
+
+  public List<SelectItem> getElligibleExtendedTimeUsers() {
+      List<String> extendedTimeUserIds = getExtendedTimes().stream().filter(e -> StringUtils.isNotBlank(e.getUser())).map(e -> e.getUser()).collect(Collectors.toList());
+      return Arrays.asList(getUsersInSite()).stream().filter(s -> !extendedTimeUserIds.contains(s.getValue().toString())).collect(Collectors.toList());
+  }
+
+  public List<SelectItem> getElligibleExtendedTimeGroups() {
+      List<String> extendedTimeGroupIds = getExtendedTimes().stream().filter(e -> StringUtils.isNotBlank(e.getGroup())).map(e -> e.getGroup()).collect(Collectors.toList());
+      return Arrays.asList(getGroupsForSiteWithNoGroup()).stream().filter(s -> !extendedTimeGroupIds.contains(s.getValue().toString())).collect(Collectors.toList());
   }
 }
