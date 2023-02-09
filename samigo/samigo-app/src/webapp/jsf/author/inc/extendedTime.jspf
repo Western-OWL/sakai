@@ -13,7 +13,7 @@
                 <h:outputLabel styleClass="sr-only" for="newEntry-user" value="#{assessmentSettingsMessages.extendedTimeUser}"/>
                 <h:panelGroup styleClass="col-xs-12 col-lg-4" layout="block">
                     <h:selectOneMenu id="newEntry-user" value="#{assessmentSettings.extendedTime.user}">
-                        <f:selectItems value="#{assessmentSettings.usersInSite}" />
+                        <f:selectItems value="#{assessmentSettings.elligibleExtendedTimeUsers}" />
                     </h:selectOneMenu>
                 </h:panelGroup>
         </h:panelGroup>
@@ -26,7 +26,7 @@
                 <h:outputLabel styleClass="sr-only" for="newEntry-group" value="#{assessmentSettingsMessages.extendedTimeGroup}"/>
                 <h:panelGroup styleClass="col-xs-12 col-lg-4" layout="block">
                     <h:selectOneMenu id="newEntry-group" value="#{assessmentSettings.extendedTime.group}">
-                        <f:selectItems value="#{assessmentSettings.groupsForSiteWithNoGroup}" />
+                        <f:selectItems value="#{assessmentSettings.elligibleExtendedTimeGroups}" />
                     </h:selectOneMenu>
                 </h:panelGroup>
         </h:panelGroup>
