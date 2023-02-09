@@ -238,9 +238,10 @@ sakai.editor.editors.ckeditor.launch = function(targetId, config, w, h) {
         filebrowserImageBrowseUrl : filebrowser.imageBrowseUrl,
         filebrowserFlashBrowseUrl : filebrowser.flashBrowseUrl,
 
-        filebrowserUploadUrl: directUploadUrl,
-        uploadUrl: directUploadUrl,
-        imageUploadUrl: directUploadUrl,
+        // OWL: remove references to the disabled direct-upload endpoint
+        //filebrowserUploadUrl: directUploadUrl,
+        //uploadUrl: directUploadUrl,
+        //imageUploadUrl: directUploadUrl,
         sakaiDropdownToolbar: true,
         toolbarCanCollapse: true,
         toolbarStartupExpanded: false,
