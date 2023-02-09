@@ -9,6 +9,6 @@ ALTER TABLE POLL_OPTION MODIFY OPTION_ORDER NUMBER(10, 0) NOT NULL;
 -- DROP TABLE rbc_criterion_ratings;
 -- DROP TABLE rbc_rubric_criterions;
 -- OWL: we will instead just rename them
-RENAME TABLE rbc_criterion_ratings to rbc_criterion_ratings_old;
-RENAME TABLE rbc_rubric_criterions to rbc_rubric_criterions_old;
+RENAME rbc_criterion_ratings to rbc_criterion_ratings_old;
+RENAME rbc_rubric_criterions to rbc_rubric_criterions_old;
 
