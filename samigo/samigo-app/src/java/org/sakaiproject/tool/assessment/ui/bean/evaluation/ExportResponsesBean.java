@@ -348,7 +348,7 @@ public class ExportResponsesBean extends SpringBeanAutowiringSupport implements 
 		
 		short rowPos = 0;
 		CellStyle style = wb.createCellStyle();
-		style.setDataFormat((short) 15);
+		style.setDataFormat(wb.getCreationHelper().createDataFormat().getFormat("m/d/yy h:mm"));
 		while (dataIter.hasNext()) {
 			List<Object> rowData = dataIter.next();
 
