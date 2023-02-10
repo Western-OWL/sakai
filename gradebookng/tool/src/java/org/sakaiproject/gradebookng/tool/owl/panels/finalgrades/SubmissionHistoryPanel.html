@@ -1,0 +1,29 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:wicket="http://wicket.apache.org/dtds.data/wicket-xhtml1.4-strict.dtd" >
+
+<body>
+<wicket:panel>
+	<div id="revisionHistoryContainer" class="revisionHistoryContainer">
+		<h3 class="submissionHistoryHeading">Submission History</h3>
+		<div class="submissionStatus">
+			<span wicket:id="currentStatus">Since last submission, 0 grades have been revised, 0 grades have been added, and 1 grade has been removed.</span>
+		</div>
+		<div wicket:id="submissionHistoryContainer" class="submissionHistoryContainer">
+			<table>
+				<thead>
+					<tr>
+						<th>Submission Date</th><th>Submitted By</th><th>Status</th><th>Approval Date</th><th>Approved By</th><th>Report (PDF)</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr wicket:id="rows">
+						<td wicket:id="historyRow"></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		<div wicket:id="noHistoryMsg" class="noSubmissionsListedMessage sak-banner-info"><wicket:message key="finalgrades_no_submission_history"></wicket:message></div>
+	 </div>
+</wicket:panel>
+</body>
+</html>

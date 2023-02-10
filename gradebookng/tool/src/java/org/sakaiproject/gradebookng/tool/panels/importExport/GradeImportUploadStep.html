@@ -25,14 +25,22 @@
     <section>
     	<div class="instruction">
     		<h2><wicket:message key="importExport.instructions.title" /></h2>
-    		<p><wicket:message key="importExport.instructions.summary" /></p>
+			<p wicket:id="summary"><!-- OWL <wicket:message key="importExport.instructions.summary" />--></p>
+			<h3><wicket:message key="importExport.instructions.subHeader.1" /></h3> <!-- OWL -->
     		<ul>
-    			<li><wicket:message key="importExport.instructions.1" /></li>
+    			<li wicket:id="instructions1"><!-- OWL <wicket:message key="importExport.instructions.1" />--></li>
     			<li><wicket:message key="importExport.instructions.2" /></li>
     			<li><wicket:message key="importExport.instructions.3" /></li>
     			<li><wicket:message key="importExport.instructions.4" /></li>
     			<li><wicket:message key="grade.notifications.invalid" /></li>
     		</ul>
+			<!-- OWL -->
+			<h3><wicket:message key="importExport.instructions.subHeader.2" /></h3>
+			<ul>
+				<li><wicket:message key="importExport.instructions.dpc.1" /></li>
+				<li><wicket:message key="importExport.instructions.dpc.2" /></li>
+				<li wicket:id="dpc3"></li>
+			</ul>
     	</div>
     
     </section>

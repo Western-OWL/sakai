@@ -24,7 +24,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import org.sakaiproject.gradebookng.business.importExport.HeadingValidationReport;
-import org.sakaiproject.gradebookng.business.importExport.UsernameIdentifier;
+import org.sakaiproject.gradebookng.business.owl.importExport.UserIdentifier;
+import org.sakaiproject.gradebookng.business.owl.importExport.UserIdentifierFactory;
 
 /**
  * Wraps an imported file
@@ -41,7 +42,7 @@ public class ImportedSpreadsheetWrapper implements Serializable {
 	private List<ImportedColumn> columns;
 
 	@Getter
-	private UsernameIdentifier userIdentifier;
+	private UserIdentifier userIdentifier; // OWL
 
 	@Getter
 	private final HeadingValidationReport headingReport;
@@ -55,6 +56,6 @@ public class ImportedSpreadsheetWrapper implements Serializable {
 
 	public void setRows(List<ImportedRow> rows, Map<String, GbUser> rosterMap) {
 		this.rows = rows;
-		userIdentifier = new UsernameIdentifier(rows, rosterMap);
+		userIdentifier = UserIdentifierFactory.buildIdentifierForSheet(rows, rosterMap); // OWL
 	}
 }

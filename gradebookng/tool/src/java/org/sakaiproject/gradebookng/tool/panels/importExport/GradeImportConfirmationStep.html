@@ -70,8 +70,8 @@
 
     <form wicket:id="form">
         <div class="act">
-            <input type="submit" wicket:id="backbutton" wicket:message="value:importExport.button.back"/>
-            <input class="active" type="submit" wicket:id="finishbutton" wicket:message="value:importExport.button.finish"/>
+            <button type="submit" wicket:id="backbutton"><wicket:message key="importExport.button.back"/></button><wicket:remove>OWL</wicket:remove>
+            <button class="active" type="submit" wicket:id="finishbutton"><wicket:message key="importExport.button.finish"/></button><wicket:remove>OWL</wicket:remove>
             <input type="submit" wicket:id="cancelbutton" wicket:message="value:importExport.button.cancel"/>
         </div>
     </form>

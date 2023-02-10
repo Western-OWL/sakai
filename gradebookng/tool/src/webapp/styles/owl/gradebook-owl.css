@@ -1,0 +1,20 @@
+/* OWL customizations to the main gradebook pages */
+
+/* this is the proper way to do it but there is a lack of good browser support */
+#gradebookSpreadsheet[data-owl-anon-context='true'] colgroup col:first-child,
+#gradebookSpreadsheet[data-owl-hide-course-grade='true'] colgroup col:nth-child(3)
+{
+	visibility: collapse;
+}
+
+/* this is needed for webkit-derived browsers, although it is not enough as they
+leave a blank gap instead of actually collapsing. These columns also have to be
+resized to 1px width in JavaScript as a result.*/
+#gradebookSpreadsheet[data-owl-anon-context='true'] thead tr th:first-child,
+#gradebookSpreadsheet[data-owl-anon-context='true'] tbody tr td:first-child,
+#gradebookSpreadsheet[data-owl-hide-course-grade='true'] thead tr th:nth-child(3),
+#gradebookSpreadsheet[data-owl-hide-course-grade='true'] tbody tr td:nth-child(3)
+{
+	visibility: collapse;
+}
+

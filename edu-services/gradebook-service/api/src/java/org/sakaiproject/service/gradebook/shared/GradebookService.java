@@ -33,6 +33,7 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.sakaiproject.entity.api.Entity;
 import org.sakaiproject.entity.api.EntityProducer;
+import org.sakaiproject.service.gradebook.shared.owl.OwlGradebookService;
 
 /**
  * This is the externally exposed API of the gradebook application.
@@ -45,7 +46,7 @@ import org.sakaiproject.entity.api.EntityProducer;
  * <p>
  * WARNING: For documentation of the deprecated methods, please see the service interfaces which own them.
  */
-public interface GradebookService extends EntityProducer {
+public interface GradebookService extends EntityProducer, OwlGradebookService {
 	// Application service hooks.
 
 	// These have been deprecated in favour of the {@link GradingType} enum

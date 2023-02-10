@@ -36,6 +36,7 @@ import org.sakaiproject.gradebookng.business.util.FormatHelper;
 import org.sakaiproject.gradebookng.tool.pages.GradebookPage;
 import org.sakaiproject.gradebookng.business.GradebookNgBusinessService;
 import org.sakaiproject.gradebookng.business.model.GbCourseGrade;
+import org.sakaiproject.gradebookng.business.owl.finalgrades.OwlCourseGradeFormatter;
 import org.sakaiproject.gradebookng.tool.model.GbGradebookData;
 import org.sakaiproject.service.gradebook.shared.CategoryScoreData;
 import org.sakaiproject.service.gradebook.shared.CourseGrade;
@@ -176,17 +177,18 @@ public class GradeUpdateAction extends InjectableAction implements Serializable 
 
 		final CourseGrade studentCourseGrade = businessService.getCourseGrade(studentUuid);
 		final Gradebook gradebook = businessService.getGradebook();
-		final CourseGradeFormatter courseGradeFormatter = new CourseGradeFormatter(
+		final OwlCourseGradeFormatter courseGradeFormatter = new OwlCourseGradeFormatter(
 				gradebook,
 				page.getCurrentRole(),
 				businessService.isCourseGradeVisible(businessService.getCurrentUser().getId()),
 				page.getUiSettings().getShowPoints(),
-				true,
 				true);
 		final GbCourseGrade gbcg = new GbCourseGrade(studentCourseGrade);
 		gbcg.setDisplayString(courseGradeFormatter.format(studentCourseGrade));
 
-		final String[] courseGradeData = GbGradebookData.getCourseGradeData(gbcg, gradebook.getSelectedGradeMapping().getGradeMap());
+		// OWL anon - don't send course grade data if course grade is hidden
+		boolean hideCourseGrade = page.getOwlUiSettings().isCourseGradeHiddenInCurrentContext();
+		final String[] courseGradeData = hideCourseGrade ? new String[] {"", "", "0"} : GbGradebookData.getCourseGradeData(gbcg, gradebook.getSelectedGradeMapping().getGradeMap());
 
 		Optional<CategoryScoreData> catData = categoryId == null ?
 				Optional.empty() : businessService.getCategoryScoreForStudent(Long.valueOf(categoryId), studentUuid, true);

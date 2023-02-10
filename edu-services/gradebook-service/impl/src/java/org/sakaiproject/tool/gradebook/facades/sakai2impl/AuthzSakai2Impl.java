@@ -25,6 +25,8 @@ import org.sakaiproject.authz.cover.SecurityService;
 import org.sakaiproject.site.cover.SiteService;
 import org.sakaiproject.section.api.facade.Role;
 import org.sakaiproject.tool.gradebook.facades.Authz;
+import org.sakaiproject.tool.gradebook.facades.owl.OwlAuthz;
+import org.sakaiproject.tool.gradebook.facades.sakai2impl.owl.OwlAuthzImpl;
 import org.sakaiproject.tool.gradebook.facades.sections.AuthzSectionsImpl;
 import org.sakaiproject.user.api.User;
 import org.sakaiproject.user.api.UserNotDefinedException;
@@ -39,6 +41,8 @@ import org.sakaiproject.user.cover.UserDirectoryService;
  */
 @Slf4j
 public class AuthzSakai2Impl extends AuthzSectionsImpl implements Authz {
+
+	private OwlAuthzImpl owl;
 
     /**
      * Perform authorization-specific framework initializations for the Gradebook.
@@ -64,7 +68,15 @@ public class AuthzSakai2Impl extends AuthzSectionsImpl implements Authz {
         if(!registered.contains(PERMISSION_VIEW_STUDENT_NUMBERS)) {
             FunctionManager.registerFunction(PERMISSION_VIEW_STUDENT_NUMBERS);
         }
+
+		owl = new OwlAuthzImpl();
+		owl.init(registered);
     }
+
+	public OwlAuthz owl()
+	{
+		return owl;
+	}
 
 	public boolean isUserAbleToGrade(String gradebookUid) {
 		return (hasPermission(gradebookUid, PERMISSION_GRADE_ALL) || hasPermission(gradebookUid, PERMISSION_GRADE_SECTION));

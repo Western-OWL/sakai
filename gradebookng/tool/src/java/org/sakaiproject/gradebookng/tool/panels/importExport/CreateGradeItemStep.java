@@ -40,6 +40,7 @@ import org.sakaiproject.service.gradebook.shared.Assignment;
 import org.sakaiproject.util.api.FormattedText;
 
 import lombok.extern.slf4j.Slf4j;
+import org.sakaiproject.gradebookng.tool.owl.component.SakaiAjaxButton;
 
 /**
  * Importer has detected that items need to be created so extract the data and wrap the 'AddOrEditGradeItemPanelContent' panel
@@ -92,7 +93,7 @@ public class CreateGradeItemStep extends BasePanel {
 		final Form<Assignment> form = new Form("form", assignmentModel);
 		add(form);
 
-		final AjaxButton nextButton = new AjaxButton("nextbutton") {
+		final AjaxButton nextButton = new SakaiAjaxButton("nextbutton") {  // OWL
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -108,7 +109,7 @@ public class CreateGradeItemStep extends BasePanel {
 		};
 		form.add(nextButton);
 
-		final AjaxButton backButton = new AjaxButton("backbutton") {
+		final AjaxButton backButton = new SakaiAjaxButton("backbutton") {  // OWL
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -142,7 +143,12 @@ public class CreateGradeItemStep extends BasePanel {
 		// wrap the form create panel
 		form.add(new Label("createItemHeader",
 				new StringResourceModel("importExport.createItem.heading", this, null, step, importWizardModel.getTotalSteps())));
-		form.add(new AddOrEditGradeItemPanelContent("subComponents", assignmentModel, UiMode.ADD));
+
+		// OWL
+		AddOrEditGradeItemPanelContent newItemPanel = new AddOrEditGradeItemPanelContent("subComponents", assignmentModel, UiMode.ADD);
+		newItemPanel.lockAnonymousToValue(importWizardModel.isContextAnonymous());
+		form.add(newItemPanel);
+		
 		this.previewGradesPanel = new PreviewImportedGradesPanel("previewGradesPanel", this.model);
 		form.add(this.previewGradesPanel);
 	}

@@ -28,6 +28,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormSubmitBehavior;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.markup.html.form.upload.FileUploadField;
@@ -38,9 +39,12 @@ import org.apache.wicket.util.upload.FileUploadException;
 import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.gradebookng.business.exception.GbImportExportInvalidFileTypeException;
 import org.sakaiproject.gradebookng.business.model.ImportedSpreadsheetWrapper;
+import org.sakaiproject.gradebookng.business.owl.importExport.DpcDelegate;
 import org.sakaiproject.gradebookng.business.util.ImportGradesHelper;
 import org.sakaiproject.gradebookng.business.util.MessageHelper;
 import org.sakaiproject.gradebookng.tool.model.ImportWizardModel;
+import org.sakaiproject.gradebookng.tool.owl.component.SakaiAjaxButton;
+import org.sakaiproject.gradebookng.tool.owl.panels.importExport.OwlExportPanel;
 import org.sakaiproject.gradebookng.tool.pages.GradebookPage;
 import org.sakaiproject.gradebookng.tool.pages.ImportExportPage;
 import org.sakaiproject.gradebookng.tool.panels.BasePanel;
@@ -70,8 +74,20 @@ public class GradeImportUploadStep extends BasePanel {
 	public void onInitialize() {
 		super.onInitialize();
 
-		add(new ExportPanel("export"));
+		add(new OwlExportPanel("export"));
 		add(new UploadForm("form"));
+
+		// OWL - customize instructions for anonymous grading / DPC support
+		boolean hasAnon = !businessService.owl().anon.getAnonGradingIDsForCurrentSite().isEmpty();
+		String summaryMsgKey = "importExport.instructions.summary";
+		String normalInstructionsMsgKey1 = "importExport.instructions.1";
+		if (hasAnon) {
+			summaryMsgKey = "importExport.instructions.summary.anon";
+			normalInstructionsMsgKey1 = "importExport.instructions.1.anon";
+		}
+		add(new Label("summary", getString(summaryMsgKey)));
+		add(new Label("instructions1", getString(normalInstructionsMsgKey1)));
+		add(new Label("dpc3", getString("importExport.instructions.dpc.3")).setVisible(hasAnon));
 	}
 
 	/*
@@ -101,7 +117,9 @@ public class GradeImportUploadStep extends BasePanel {
 						String fileName = file.getClientFileName();
 						String mimeType = file.getContentType();
 						if((StringUtils.endsWithAny(fileName, ImportGradesHelper.CSV_FILE_EXTS) || ArrayUtils.contains(ImportGradesHelper.CSV_MIME_TYPES, mimeType))
-								|| (StringUtils.endsWithAny(fileName, ImportGradesHelper.XLS_FILE_EXTS) || ArrayUtils.contains(ImportGradesHelper.XLS_MIME_TYPES, mimeType))) {
+								|| (StringUtils.endsWithAny(fileName, ImportGradesHelper.XLS_FILE_EXTS) || ArrayUtils.contains(ImportGradesHelper.XLS_MIME_TYPES, mimeType))
+								|| DpcDelegate.isDpc(fileName))  // OWL
+						{
 							continueButton.setEnabled(true);
 							page.clearFeedback();
 						} else {
@@ -123,7 +141,7 @@ public class GradeImportUploadStep extends BasePanel {
 			});
 			add(this.fileUploadField);
 
-			this.continueButton = new AjaxButton("continuebutton") {
+			this.continueButton = new SakaiAjaxButton("continuebutton") {  // OWL
 				@Override
 				public void onSubmit(AjaxRequestTarget target, Form<?> form) {
 					processUploadedFile(target);
@@ -133,7 +151,7 @@ public class GradeImportUploadStep extends BasePanel {
 			this.continueButton.setEnabled(false);
 			add(this.continueButton);
 
-			final AjaxButton cancel = new AjaxButton("cancelbutton") {
+			final AjaxButton cancel = new SakaiAjaxButton("cancelbutton") {  // OWL
 				@Override
 				public void onSubmit(AjaxRequestTarget target, Form<?> form) {
 					setResponsePage(GradebookPage.class);

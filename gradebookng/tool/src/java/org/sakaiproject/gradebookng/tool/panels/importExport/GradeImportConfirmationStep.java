@@ -49,6 +49,7 @@ import org.sakaiproject.gradebookng.business.util.FormatHelper;
 import org.sakaiproject.gradebookng.business.util.EventHelper;
 import org.sakaiproject.gradebookng.business.util.MessageHelper;
 import org.sakaiproject.gradebookng.tool.model.ImportWizardModel;
+import org.sakaiproject.gradebookng.tool.owl.component.SakaiAjaxButton;
 import org.sakaiproject.gradebookng.tool.pages.GradebookPage;
 import org.sakaiproject.gradebookng.tool.pages.ImportExportPage;
 import org.sakaiproject.gradebookng.tool.panels.BasePanel;
@@ -106,7 +107,7 @@ public class GradeImportConfirmationStep extends BasePanel {
 		add(form);
 
 		// back button
-		final AjaxButton backButton = new AjaxButton("backbutton") {
+		final AjaxButton backButton = new SakaiAjaxButton("backbutton") {  // OWL
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -136,7 +137,7 @@ public class GradeImportConfirmationStep extends BasePanel {
 		form.add(backButton);
 
 		// finish button
-		final AjaxButton finishButton = new AjaxButton("finishbutton") {
+		final AjaxButton finishButton = new SakaiAjaxButton("finishbutton") {  // OWL
 			private static final long serialVersionUID = 1L;
 
 			@Override

@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.AttributeModifier;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -32,6 +33,7 @@ import org.sakaiproject.gradebookng.business.GbCategoryType;
 import org.sakaiproject.gradebookng.business.GbRole;
 import org.sakaiproject.gradebookng.business.model.GbGradeInfo;
 import org.sakaiproject.gradebookng.business.model.GbStudentGradeInfo;
+import org.sakaiproject.gradebookng.business.owl.finalgrades.OwlCourseGradeFormatter;
 import org.sakaiproject.gradebookng.business.util.CourseGradeFormatter;
 import org.sakaiproject.gradebookng.tool.pages.GradebookPage;
 import org.sakaiproject.service.gradebook.shared.Assignment;
@@ -83,18 +85,19 @@ public class InstructorGradeSummaryGradesPanel extends BasePanel {
 		// build the grade matrix for the user
 		final Gradebook gradebook = getGradebook();
 		final SortType sortedBy = this.isGroupedByCategory ? SortType.SORT_BY_CATEGORY : SortType.SORT_BY_SORTING;
-		final List<Assignment> assignments = this.businessService.getGradebookAssignmentsForStudent(userId, sortedBy);
+		// OWL
+		final boolean anonContext = gradebookPage.getOwlUiSettings().isContextAnonymous();
+		final List<Assignment> assignments = businessService.getGradebookAssignmentsForStudent(userId, sortedBy).stream()
+				.filter(a -> anonContext == a.isAnon()).collect(Collectors.toList());
 
 		final boolean isCourseGradeVisible = this.businessService.isCourseGradeVisible(this.businessService.getCurrentUser().getId());
 		final GbRole userRole = gradebookPage.getCurrentRole();
 
-		final CourseGradeFormatter courseGradeFormatter = new CourseGradeFormatter(
+		final OwlCourseGradeFormatter courseGradeFormatter = new OwlCourseGradeFormatter(
 				gradebook,
 				userRole,
 				isCourseGradeVisible,
-				gradebook.isCoursePointsDisplayed(),
-				true,
-				this.businessService.getShowCalculatedGrade());
+				gradebook.isCoursePointsDisplayed());
 
 		// TODO catch if this is null, the get(0) will throw an exception
 		// TODO also catch the GbException
@@ -150,14 +153,18 @@ public class InstructorGradeSummaryGradesPanel extends BasePanel {
 		// course grade, via the formatter
 		final CourseGrade courseGrade = this.businessService.getCourseGrade(userId);
 
-		addOrReplace(new Label("courseGrade", courseGradeFormatter.format(courseGrade)).setEscapeModelStrings(false));
-
-		addOrReplace(new Label("courseGradeNotReleasedFlag", getString("label.studentsummary.coursegradenotreleasedflag")) {
+		// OWL - don't show the course grade if it is pure anon
+		boolean pureAnon = businessService.owl().anon.isCourseGradePureAnon();
+		WebMarkupContainer courseGradePanel = new WebMarkupContainer("courseGradePanel");
+		courseGradePanel.setVisible(!pureAnon);
+		courseGradePanel.addOrReplace(new Label("courseGrade", courseGradeFormatter.format(courseGrade)).setEscapeModelStrings(false));
+		courseGradePanel.addOrReplace(new Label("courseGradeNotReleasedFlag", getString("label.studentsummary.coursegradenotreleasedflag")) {
 			@Override
 			public boolean isVisible() {
 				return showDisplayCourseGradeToStudent(gradebook, userRole, isCourseGradeVisible);
 			}
 		});
+		addOrReplace(courseGradePanel);
 
 		addOrReplace(new Label("courseGradeNotReleasedMessage", getString("label.studentsummary.coursegradenotreleasedmessage")) {
 			@Override

@@ -16,10 +16,13 @@
 package org.sakaiproject.service.gradebook.shared;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -35,12 +38,19 @@ public class GradeMappingDefinition implements Serializable {
 	private String name;
 	private Map<String, Double> gradeMap;
 	private Map<String, Double> defaultBottomPercents;
+	private final List<String> unmappedGrades; // OWL
 
-	public GradeMappingDefinition(final Long id, final String name, final Map<String,Double> gradeMap, final Map<String, Double> defaultBottomPercents){
+	public GradeMappingDefinition(final Long id, final String name, final Collection<String> grades, final Map<String,Double> gradeMap, final Map<String, Double> defaultBottomPercents){
 		this.id = Long.toString(id);
 		this.name = name;
 		this.gradeMap = gradeMap;
 		this.defaultBottomPercents = defaultBottomPercents;
+		unmappedGrades = grades.stream().filter(g -> !gradeMap.containsKey(g)).collect(Collectors.toList());
+	}
+
+	public List<String> getUnmappedGrades()
+	{
+		return unmappedGrades;
 	}
 
 	public String getId() {

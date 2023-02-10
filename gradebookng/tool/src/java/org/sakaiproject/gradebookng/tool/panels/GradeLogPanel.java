@@ -30,6 +30,7 @@ import org.sakaiproject.gradebookng.business.model.GbGradeLog;
 import org.sakaiproject.gradebookng.business.model.GbUser;
 import org.sakaiproject.gradebookng.business.util.FormatHelper;
 import org.sakaiproject.gradebookng.tool.component.GbAjaxLink;
+import org.sakaiproject.gradebookng.tool.owl.component.OwlGbUtils;
 import org.sakaiproject.service.gradebook.shared.GradingEventStatus;
 
 /**
@@ -113,9 +114,10 @@ public class GradeLogPanel extends BasePanel {
 		// heading
 		// TODO if user has been deleted since rendering the GradebookPage, handle a null here gracefully
 		final GbUser user = this.businessService.getUser(studentUuid);
-		GradeLogPanel.this.window.setTitle(
-				(new StringResourceModel("heading.gradelog", null,
-						new Object[] { user.getDisplayName(), user.getDisplayId() })).getString());
+		// OWL
+		Object[] normalArgs = new Object[] { user.getDisplayName(), user.getDisplayId() };
+		StringResourceModel title = OwlGbUtils.getModalTitleModel(businessService, user, getPage(), "heading.gradelog", normalArgs);
+		GradeLogPanel.this.window.setTitle(title);
 
 	}
 

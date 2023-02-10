@@ -28,6 +28,8 @@ import org.sakaiproject.service.gradebook.shared.Assignment;
 import org.sakaiproject.service.gradebook.shared.SortType;
 
 import java.util.List;
+import org.sakaiproject.gradebookng.tool.owl.model.OwlGbUiSettings;
+import org.sakaiproject.gradebookng.tool.pages.GradebookPage;
 
 public class SortGradeItemsByGradeItemPanel extends Panel {
 
@@ -44,7 +46,14 @@ public class SortGradeItemsByGradeItemPanel extends Panel {
 	public void onInitialize() {
 		super.onInitialize();
 
-		final List<Assignment> assignments = this.businessService.getGradebookAssignments(SortType.SORT_BY_SORTING);
+		List<Assignment> assignments = this.businessService.getGradebookAssignments(SortType.SORT_BY_SORTING); // OWL - remove final
+
+		// OWL - filter assignments for anon
+		OwlGbUiSettings settings = ((GradebookPage) getPage()).getOwlUiSettings();
+		if (settings.isAnonPossible())
+		{
+			assignments = businessService.owl().anon.filterByAnonContext(assignments, settings);
+		}
 
 		add(new ListView<Assignment>("gradeItemList", assignments) {
 			@Override

@@ -1,0 +1,22 @@
+<wicket:panel>
+<div class="sakai-table-filterContainer">
+	<div class="sakai-table-viewFilter">
+		<label for="groupFilterSelect"><wicket:message key="filter.view" /></label>
+		<span class="groupFilter" wicket:id="groupFilter"></span>
+		<wicket:enclosure>
+			<span wicket:id="groupFilterOnlyOne" class="gb-group-title" role="status">Section 001</span>
+		</wicket:enclosure>
+	</div>
+	<form wicket:id="studentFilterForm" class="sakai-table-searchFilter">
+		<label for="studentFilterInput"><wicket:message key="filter.search" /></label>
+		<div class="sakai-table-searchFilterControls">
+			<input wicket:id="studentFilter" type="text" id="studentFilterInput" class="sakai-table-searchFilter-searchField"/>
+			<button wicket:id="studentFilterButton"><wicket:message key="filter.search"/></button>
+			<button wicket:id="studentFilterClear"><wicket:message key="filter.search.clear"/></button>
+		</div>
+	</form>
+</div>
+<div class="sakai-table-pagerContainer">
+	<div class="gb-pager" wicket:id="gradebookPager" />
+</div>
+</wicket:panel>

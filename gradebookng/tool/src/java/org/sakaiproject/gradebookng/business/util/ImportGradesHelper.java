@@ -79,6 +79,10 @@ import java.util.Set;
 
 import lombok.extern.slf4j.Slf4j;
 import org.sakaiproject.gradebookng.business.model.GbUnidentifiedUser;
+import org.sakaiproject.gradebookng.business.owl.anon.OwlAnonGradingService;
+import org.sakaiproject.gradebookng.business.owl.importExport.AnonIdentifier;
+import org.sakaiproject.gradebookng.business.owl.importExport.DpcDelegate;
+import org.sakaiproject.gradebookng.business.owl.importExport.StudentNumberIdentifier;
 
 /**
  * Helper to handling parsing and processing of an imported gradebook file
@@ -143,7 +147,13 @@ public class ImportGradesHelper {
 			rval = ImportGradesHelper.parseCsv(is, businessService, userDecimalSeparator);
 		} else if (StringUtils.endsWithAny(filename, XLS_FILE_EXTS) || ArrayUtils.contains(XLS_MIME_TYPES, mimetype)) {
 			rval = ImportGradesHelper.parseXls(is, businessService, userDecimalSeparator);
-		} else {
+		}
+		else if (DpcDelegate.isDpc(filename)) // OWL
+		{
+			rval = DpcDelegate.parseDPC(is, businessService.owl().getUserStudentNumMap());
+		}
+		else
+		{
 			throw new GbImportExportInvalidFileTypeException("Invalid file type for grade import: " + mimetype);
 		}
 		return rval;
@@ -188,6 +198,7 @@ public class ImportGradesHelper {
 				if (lineCount == 0) {
 					// header row, capture it
 					mapping = mapHeaderRow(nextLine, importedGradeWrapper.getHeadingReport());
+					userEidMap = resolveIdUserMap(mapping.get(0), userEidMap, businessService);  // OWL
 				} else {
 					// map the fields into the object
 					final ImportedRow importedRow = mapLine(nextLine, mapping, userEidMap, userDecimalSeparator);
@@ -243,6 +254,7 @@ public class ImportGradesHelper {
 				final String[] r = convertRow(row, numCells);
 				// header row, capture it
 				mapping = mapHeaderRow(r, importedGradeWrapper.getHeadingReport());
+				userEidMap = resolveIdUserMap(mapping.get(0), userEidMap, businessService);  // OWL
 			} else {
 				final String[] r = convertRow(row, numCells);
 				// map the fields into the object
@@ -267,7 +279,7 @@ public class ImportGradesHelper {
 	 * @param mapping
 	 * @return
 	 */
-	private static ImportedRow mapLine(final String[] line, final Map<Integer, ImportedColumn> mapping, final Map<String, GbUser> userMap, String userDecimalSeparator) {
+	public static ImportedRow mapLine(final String[] line, final Map<Integer, ImportedColumn> mapping, final Map<String, GbUser> userMap, String userDecimalSeparator) {
 
 		final ImportedRow row = new ImportedRow();
 		NumberFormat nbFormat = NumberFormat.getInstance(new ResourceLoader().getLocale());
@@ -292,6 +304,14 @@ public class ImportGradesHelper {
 			}
 
 			switch (column.getType()) {
+				// OWL (allow fall-through for our two cases so the USER_ID case also runs)
+				case STUDENT_NUMBER:
+					row.setStudentNumber(lineVal);
+				case ANONYMOUS_ID:
+					if (StringUtils.isBlank(row.getStudentNumber()))
+					{
+						row.setAnonID(lineVal); // we didn't fall through from above, set the anon id
+					}
 				case USER_ID:
 					// skip blank lines
 					if (StringUtils.isBlank(lineVal)) {
@@ -393,11 +413,22 @@ public class ImportGradesHelper {
 			hasValidationErrors = true;
 		}
 
+		// OWL
+		boolean isContextAnonymous = spreadsheetWrapper.getUserIdentifier() instanceof AnonIdentifier;
+		boolean isSourceDPC = spreadsheetWrapper.getUserIdentifier() instanceof StudentNumberIdentifier;
+		OwlAnonGradingService ags = businessService.owl().anon;
+		final Map<String, Integer> anonIdMap = isContextAnonymous ? ags.getStudentAnonIdMap(ags.getAnonGradingIDsForCurrentSite()) : Collections.emptyMap();
+
 		// If there are duplicate student entries, tell the user now (we can't make the decision about which entry takes precedence)
 		UserIdentificationReport userReport = spreadsheetWrapper.getUserIdentifier().getReport();
 		SortedSet<GbUser> duplicateStudents = userReport.getDuplicateUsers();
 		if (!duplicateStudents.isEmpty()) {
 			String duplicates = StringUtils.join(duplicateStudents, ", ");
+			if (isContextAnonymous)  // OWL
+			{
+				duplicates = duplicateStudents.stream().map(s -> anonIdMap.getOrDefault(s.getDisplayId(), -1))
+						.filter(a -> a > -1).map(String::valueOf).collect(Collectors.joining(", "));
+			}
 			sourcePanel.error(MessageHelper.getString("importExport.error.duplicateStudents", duplicates));
 			hasValidationErrors = true;
 		}
@@ -405,7 +436,7 @@ public class ImportGradesHelper {
 		// Perform grade validation; present error message with invalid grades on current page
 		List<ImportedColumn> columns = spreadsheetWrapper.getColumns();
 		List<ImportedRow> rows = spreadsheetWrapper.getRows();
-		GradeValidationReport gradeReport = new GradeValidator(businessService).validate(rows, columns);
+		GradeValidationReport gradeReport = new GradeValidator(businessService).validate(rows, columns, isSourceDPC, isContextAnonymous);  // OWL
 		// maps columnTitle -> (userEid -> grade)
 		SortedMap<String, SortedMap<String, String>> invalidGradesMap = gradeReport.getInvalidNumericGrades();
 		if (!invalidGradesMap.isEmpty()) {
@@ -532,6 +563,7 @@ public class ImportGradesHelper {
 		// Setup and return the model
 		importWizardModel.setProcessedGradeItems(processedGradeItems);
 		importWizardModel.setUserReport(userReport);
+		importWizardModel.setContextAnonymous(isContextAnonymous);
 		return true;
 	}
 
@@ -605,6 +637,8 @@ public class ImportGradesHelper {
 					// never hit
 					break;
 				case USER_ID:
+				case ANONYMOUS_ID: // OWL
+				case STUDENT_NUMBER: // OWL
 					// never hit
 					break;
 				case USER_NAME:
@@ -807,6 +841,8 @@ public class ImportGradesHelper {
 		// retain order
 		final Map<Integer, ImportedColumn> mapping = new LinkedHashMap<>();
 
+		boolean isContextAnonymous = false;  // OWL
+
 		for (int i = 0; i < line.length; i++) {
 
 			ImportedColumn column;
@@ -814,10 +850,17 @@ public class ImportGradesHelper {
 			log.debug("i: {}", i);
 			log.debug("line[i]: {}", line[i]);
 
-			if (i == USER_ID_POS) {
+			// OWL
+			if (i == USER_ID_POS && MessageHelper.getString("importExport.export.csv.headers.anonId").equals(line[i]))
+			{
+				column = new ImportedColumn();
+				column.setType(ImportedColumn.Type.ANONYMOUS_ID);
+				isContextAnonymous = true;
+			}
+			else if (i == USER_ID_POS) {
 				column = new ImportedColumn();
 				column.setType(ImportedColumn.Type.USER_ID);
-			} else if (i == USER_NAME_POS) {
+			} else if (!isContextAnonymous && i == USER_NAME_POS) {  // OWL
 				column = new ImportedColumn();
 				column.setType(ImportedColumn.Type.USER_NAME);
 			} else {
@@ -910,5 +953,11 @@ public class ImportGradesHelper {
 		}
 
 		return s;
+	}
+
+	// OWL
+	private static Map<String, GbUser> resolveIdUserMap(ImportedColumn col, Map<String, GbUser> origMap, GradebookNgBusinessService bus)
+	{
+		return (col != null && col.getType() == ImportedColumn.Type.ANONYMOUS_ID) ? bus.owl().anon.getAnonIDUserMap() : origMap;
 	}
 }

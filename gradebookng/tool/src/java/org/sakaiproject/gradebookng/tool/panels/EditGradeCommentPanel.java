@@ -38,6 +38,7 @@ import org.sakaiproject.service.gradebook.shared.Assignment;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.sakaiproject.gradebookng.tool.owl.component.OwlGbUtils;
 
 /**
  *
@@ -128,9 +129,11 @@ public class EditGradeCommentPanel extends BasePanel {
 		// TODO if user/assignment has been deleted since rendering the GradebookPage, handle nulls here gracefully
 		final GbUser user = this.businessService.getUser(studentUuid);
 		final Assignment assignment = this.businessService.getAssignment(assignmentId);
-		EditGradeCommentPanel.this.window.setTitle(
-				(new StringResourceModel("heading.editcomment", null,
-						new Object[] { user.getDisplayName(), user.getDisplayId(), assignment.getName() })).getString());
+		// OWL
+		Object[] normalArgs = new Object[] { user.getDisplayName(), user.getDisplayId(), assignment.getName() };
+		Object[] anonArgs = new Object[] { assignment.getName() };
+		StringResourceModel title = OwlGbUtils.getModalTitleModel(businessService, user, getPage(), "heading.editcomment", normalArgs, anonArgs);
+		EditGradeCommentPanel.this.window.setTitle(title);
 
 		// textarea
 		form.add(new TextArea<>("comment", new PropertyModel<>(formModel, "gradeComment"))

@@ -11,8 +11,8 @@
         </div>
 
         <div class="act">
-            <input type="submit" wicket:id="backbutton" wicket:message="value:importExport.button.back"/>
-            <input type="submit" wicket:id="nextbutton" wicket:message="value:importExport.button.next" class="active"/>
+            <button type="submit" wicket:id="backbutton"><wicket:message key="importExport.button.back"/></button><wicket:remove>OWL</wicket:remove>
+            <button type="submit" wicket:id="nextbutton" class="active"><wicket:message key="importExport.button.next"/></button><wicket:remove>OWL</wicket:remove>
             <input type="submit" wicket:id="cancelbutton" wicket:message="value:importExport.button.cancel"/>
         </div>
     </form>

@@ -55,6 +55,10 @@ import org.sakaiproject.service.gradebook.shared.SortType;
 import org.sakaiproject.util.Validator;
 import org.sakaiproject.util.api.FormattedText;
 
+/******************************************************************/
+/********* OWL NOTE: This class is NOT used in OWL. ***************/
+/******************* See OwlExportPanel instead *******************/
+/******************************************************************/
 public class ExportPanel extends BasePanel {
 
 	private static final long serialVersionUID = 1L;

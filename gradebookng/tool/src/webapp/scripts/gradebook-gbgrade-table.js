@@ -649,7 +649,7 @@ GbGradeTable.renderTable = function (elementId, tableData) {
     headerTemplate: GbGradeTable.templates.studentHeader,
     _data_: GbGradeTable.students,
     editor: false,
-    width: 220,
+    width: 'owlAnonContext' in document.getElementById('gradebookSpreadsheet').dataset ? 1 : 220,
     sortCompare: function(a, b) {
         return GbGradeTable.studentSorter(a, b);
     }
@@ -660,7 +660,7 @@ GbGradeTable.renderTable = function (elementId, tableData) {
     headerTemplate: GbGradeTable.templates.courseGradeHeader,
     _data_: tableData.courseGrades,
     editor: false,
-    width: GbGradeTable.settings.showPoints ? 220 : 140,
+    width: 'owlHideCourseGrade' in document.getElementById('gradebookSpreadsheet').dataset ? 1 : GbGradeTable.settings.showPoints ? 220 : 140,
     sortCompare: function(a, b) {
         const a_percent = parseFloat(a[1]);
         const b_percent = parseFloat(b[1]);
@@ -749,6 +749,12 @@ GbGradeTable.renderTable = function (elementId, tableData) {
     var scrollbarWidth = GbGradeTable.students.length > 0 ? 16 : 0;
     return GbGradeTable.getColumnWidths().reduce(function (acc, cur) { return acc + cur; }, 0) + scrollbarWidth;
   };
+
+  // OWL - reset default sort if anonymous context
+  if ('owlAnonContext' in document.getElementById('gradebookSpreadsheet').dataset === true)
+  {
+	  GbGradeTable.currentSortColumn = 1; // student number column (contains anon ids in this context)
+  }
 
   GbGradeTable.instance = new Handsontable(document.getElementById(elementId), {
     data: GbGradeTable.getFilteredData(),
@@ -2169,7 +2175,7 @@ GbGradeTable.setupToggleGradeItems = function() {
 
 
 GbGradeTable.currentSortColumn = 0;
-GbGradeTable.currentSortDirection = 'desc';
+GbGradeTable.currentSortDirection = 'asc'; // OWL
 
 GbGradeTable.setupColumnSorting = function() {
   var $table = $(GbGradeTable.instance.rootElement);
@@ -2701,6 +2707,21 @@ GbGradeTable.setupKeyboardNavigation = function() {
       if (!editing && event.keyCode == 32) {
         iGotThis();
 
+		// OWL - abort if this is a hidden student cell or course grade cell so a menu doesn't pop up
+		const gs = document.getElementById('gradebookSpreadsheet');
+		const currentIsStudentCell = $current.find('.gb-view-grade-summary').length > 0;
+		const anonContext = 'owlAnonContext' in gs.dataset === true;
+		if (currentIsStudentCell && anonContext)
+		{
+			return;
+		}
+		const currentIsCourseGradeCell = $current.find('.gb-course-grade-override').length > 0;
+		const hideCourseGrade = 'owlHideCourseGrade' in gs.dataset === true;
+		if (currentIsCourseGradeCell && hideCourseGrade)
+		{
+			return;
+		}
+
         var $dropdown;
 
         // ctrl+space to open the header menu
@@ -3211,8 +3232,21 @@ GbGradeTable.syncCategoryAverage = function(studentId, categoryId, categoryScore
 
     // update model
     var modelRow = GbGradeTable.modelIndexForStudent(studentId);
-    var modelCol = $.inArray(GbGradeTable.colModelForCategoryId(categoryId), GbGradeTable.columns);
-    GbGradeTable.grades[modelRow][modelCol + GbGradeTable.FIXED_COLUMN_OFFSET] = categoryScore;
+    // OWL - colModelForCategoryId will throw an exception if category column can't be found
+	// normally this is a legit error, but in an anon context a mixed category won't have a column
+	// therefore, we have to catch the exception and check
+	try
+	{
+		var modelCol = $.inArray(GbGradeTable.colModelForCategoryId(categoryId), GbGradeTable.columns);
+		GbGradeTable.grades[modelRow][modelCol + GbGradeTable.FIXED_COLUMN_OFFSET] = categoryScore;
+	}
+	catch (e)
+	{
+		if ('owlAnonContext' in document.getElementById('gradebookSpreadsheet').dataset === false)
+		{
+			throw e;
+		}
+	}
 
     // update dropped status of all items in this category
     var categoryItems = GbGradeTable.itemsInCategory(categoryId);

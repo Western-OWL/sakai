@@ -48,6 +48,10 @@ public class ImportedRow implements Serializable {
 	@Setter
 	private Map<String, ImportedCell> cellMap;
 
+	// OWL
+	@Getter	@Setter private String studentNumber;
+	@Getter	@Setter private String anonID;
+
 	public ImportedRow() {
 		this.cellMap = new HashMap<>();
 	}

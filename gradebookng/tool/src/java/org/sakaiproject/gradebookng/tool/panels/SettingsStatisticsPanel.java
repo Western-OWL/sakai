@@ -87,7 +87,12 @@ public class SettingsStatisticsPanel extends BasePanel {
 			}
 		};
 		displayCourseGradeStats.setOutputMarkupId(true);
-		settingsStatisticsPanel.add(displayCourseGradeStats);
+
+		// OWL-4207
+		WebMarkupContainer displayCourseGradeStatsContainer = new WebMarkupContainer("displayCourseGradeStatsContainer");
+		displayCourseGradeStatsContainer.add(displayCourseGradeStats);
+		displayCourseGradeStatsContainer.setVisible(false);
+		settingsStatisticsPanel.add(displayCourseGradeStatsContainer);
 
 	}
 

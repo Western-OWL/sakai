@@ -32,8 +32,10 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.ResourceModel;
 import org.apache.wicket.spring.injection.annot.SpringBean;
 
 import org.sakaiproject.component.api.ServerConfigurationService;
@@ -103,6 +105,25 @@ public class GbGradeTable extends Panel implements IHeaderContributor {
 		});
 
 		add(component);
+	}
+
+	// OWL
+	@Override
+	public void onInitialize()
+	{
+		super.onInitialize();
+
+		// hack out the student messager webcomponent for anon
+		String msg = "<a href=\"javascript:void(0);\" class=\"gb-message-students\" role=\"menuitem\" data-assignment-id=\"${assignmentId}\">%s</a>";
+		String title = new ResourceModel("label.submission-messager.title").getObject();
+		add(new Label("messageStudents", String.format(msg, title)).setEscapeModelStrings(false).setVisible(false));
+		add(new WebMarkupContainer("subMsg").setVisible(false));
+
+		// also remove the course grade statistics menu item
+		boolean showStats = serverConfigService.getBoolean("gradebookng.showCourseGradeStatistics", true);
+		WebMarkupContainer cgStats = new WebMarkupContainer("cgStats");
+		cgStats.add(new Label("cgStatsMsg", new ResourceModel("coursegrade.option.viewcoursegradestatistics")).setRenderBodyOnly(true));
+		add(cgStats.setVisible(showStats));
 	}
 
 	public void renderHead(final IHeaderResponse response) {

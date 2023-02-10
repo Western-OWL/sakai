@@ -35,6 +35,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import org.sakaiproject.gradebookng.tool.owl.model.OwlGbUiSettings;
+import org.sakaiproject.gradebookng.tool.pages.GradebookPage;
 
 public class SortGradeItemsByCategoryPanel extends Panel {
 
@@ -53,9 +55,11 @@ public class SortGradeItemsByCategoryPanel extends Panel {
 
 		final Map<String, Object> model = (Map<String, Object>) getDefaultModelObject();
 		final GradebookUiSettings settings = (GradebookUiSettings) model.get("settings");
+		final OwlGbUiSettings owlSettings = ((GradebookPage) getPage()).getOwlUiSettings(); // OWL
 
 		// retrieve all categories, remove empty and ensure they're sorted
 		final List<CategoryDefinition> categories = this.businessService.getGradebookCategories().stream()
+				.filter(c -> !owlSettings.isAnonPossible() || !businessService.owl().anon.filterByAnonContext(c.getAssignmentList(), owlSettings).isEmpty()) // OWL
 				.filter(c -> !c.getAssignmentList().isEmpty()).collect(Collectors.toList());
 		Collections.sort(categories, CategoryDefinition.orderComparator);
 
@@ -63,7 +67,7 @@ public class SortGradeItemsByCategoryPanel extends Panel {
 			@Override
 			protected void populateItem(final ListItem<CategoryDefinition> categoryItem) {
 				final CategoryDefinition category = categoryItem.getModelObject();
-				final List<Assignment> assignments = category.getAssignmentList();
+				final List<Assignment> assignments = owlSettings.isAnonPossible() ? businessService.owl().anon.filterByAnonContext(category.getAssignmentList(), owlSettings) : category.getAssignmentList(); // OWL
 				Collections.sort(assignments, new CategorizedAssignmentComparator());
 
 				categoryItem.add(new AttributeModifier("style",

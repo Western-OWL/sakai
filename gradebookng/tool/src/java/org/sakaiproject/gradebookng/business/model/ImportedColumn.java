@@ -52,7 +52,8 @@ public class ImportedColumn implements Serializable {
 		COMMENTS,
 		USER_ID,
 		USER_NAME,
-		IGNORE;
+		IGNORE,
+		STUDENT_NUMBER, ANONYMOUS_ID; // OWL
 	}
 
 	/**
@@ -61,7 +62,8 @@ public class ImportedColumn implements Serializable {
 	 * @return
 	 */
 	public boolean isIgnorable() {
-		return this.type == Type.USER_ID || this.type == Type.USER_NAME || this.type == Type.IGNORE;
+		return type == Type.STUDENT_NUMBER || type == Type.ANONYMOUS_ID  // OWL
+				|| this.type == Type.USER_ID || this.type == Type.USER_NAME || this.type == Type.IGNORE;
 	}
 
 	/**

@@ -52,7 +52,7 @@
 				<entry key="GSI" value="Teaching Assistant"/>
 				<entry key="S" value="Student"/>
 				<entry key="A" value="Auditor"/>
-			</map>
+			</map> <!-- OWL NOTE: any changes made here MUST be reflected in Java class OwlAuthzImpl.SectionRole in edu-services -->
 		</entry>
 		<entry key="courseOfferingRoleToSiteRole">
 			<map>

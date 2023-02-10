@@ -104,6 +104,11 @@ public class SettingsGradingSchemaPanel extends BasePanel implements IFormModelU
 	 */
 	boolean dirty;
 
+	// OWL
+	private static final Double UNMAPPED = Double.NaN;
+	private boolean showStats = true;
+	private String registrarSchemaId = "";
+
 	public SettingsGradingSchemaPanel(final String id, final IModel<GbSettings> model, final boolean expanded) {
 		super(id, model);
 		this.model = model;
@@ -114,8 +119,13 @@ public class SettingsGradingSchemaPanel extends BasePanel implements IFormModelU
 	public void onInitialize() {
 		super.onInitialize();
 
+		// OWL - determine if we are showing course grade statistics
+		showStats = serverConfigService.getBoolean("gradebookng.showCourseGradeStatistics", true);
+
 		// get all mappings available for this gradebook
 		this.gradeMappings = this.model.getObject().getGradebookInformation().getGradeMappings();
+
+		registrarSchemaId = gradeMappings.stream().filter(m -> "Official Registrar Grades".equals(m.getName())).findFirst().map(m -> m.getId()).orElse(""); // OWL
 
 		// get current one
 		this.configuredGradeMappingId = this.model.getObject().getGradebookInformation().getSelectedGradeMappingId();
@@ -217,17 +227,25 @@ public class SettingsGradingSchemaPanel extends BasePanel implements IFormModelU
 
 				final GbGradingSchemaEntry entry = item.getModelObject();
 
+				final boolean isRegistrarSchema = registrarSchemaId.equals(currentGradeMappingId);  // OWL
+
 				// grade
 				final TextField<Double> grade = new TextField<>("grade", new PropertyModel<Double>(entry, "grade"));
+				grade.setEnabled(!isRegistrarSchema);  // OWL
 				item.add(grade);
 
 				// minpercent
 				final TextField<Double> minPercent = new TextField<>("minPercent", new PropertyModel<Double>(entry, "minPercent"));
+				minPercent.setVisible(!isRegistrarSchema && !UNMAPPED.equals(entry.getMinPercent()));  // OWL
+				minPercent.setEnabled(!isRegistrarSchema);  // OWL
 				item.add(minPercent);
 
-				// attach the onchange behaviours
-				minPercent.add(new GradingSchemaChangeBehaviour(GradingSchemaChangeBehaviour.ONCHANGE));
-				grade.add(new GradingSchemaChangeBehaviour(GradingSchemaChangeBehaviour.ONCHANGE));
+				if (!isRegistrarSchema)  // OWL
+				{
+					// attach the onchange behaviours
+					minPercent.add(new GradingSchemaChangeBehaviour(GradingSchemaChangeBehaviour.ONCHANGE));
+					grade.add(new GradingSchemaChangeBehaviour(GradingSchemaChangeBehaviour.ONCHANGE));
+				}
 
 				// remove button
 				final AjaxButton remove = new AjaxButton("remove") {
@@ -243,12 +261,15 @@ public class SettingsGradingSchemaPanel extends BasePanel implements IFormModelU
 						// repaint table
 						target.add(SettingsGradingSchemaPanel.this.schemaWrap);
 
+						refreshDuplicateCheck(target);  // OWL
+
 						// repaint chart
 						refreshCourseGradeChart(target);
 					}
 
 				};
 				remove.setDefaultFormProcessing(false);
+				remove.setVisible(!isRegistrarSchema);  // OWL
 				item.add(remove);
 			}
 		};
@@ -278,11 +299,13 @@ public class SettingsGradingSchemaPanel extends BasePanel implements IFormModelU
 				SettingsGradingSchemaPanel.this.modifiedSchema.setVisible(SettingsGradingSchemaPanel.this.schemaModifiedFromDefault);
 				target.add(SettingsGradingSchemaPanel.this.modifiedSchema);
 
-				// refresh chart
-				refreshCourseGradeChart(target);
-
-				// refresh stats
-				refreshStats(target);
+				// OWL
+				refreshDuplicateCheck(target);
+				if (showStats)
+				{
+					refreshCourseGradeChart(target);
+					refreshStats(target);
+				}
 			}
 		});
 
@@ -304,6 +327,13 @@ public class SettingsGradingSchemaPanel extends BasePanel implements IFormModelU
 				// focus the new grading schema input
 				target.appendJavaScript("sakai.gradebookng.settings.gradingschemas.focusLastRow();");
 			}
+
+			// OWL
+			@Override
+			public boolean isVisible()
+			{
+				return !registrarSchemaId.equals(currentGradeMappingId);
+			}
 		};
 		addMapping.setDefaultFormProcessing(false);
 		this.schemaWrap.add(addMapping);
@@ -315,7 +345,7 @@ public class SettingsGradingSchemaPanel extends BasePanel implements IFormModelU
 
 					@Override
 					public boolean isVisible() {
-						return SettingsGradingSchemaPanel.this.total == 0;
+						return showStats && SettingsGradingSchemaPanel.this.total == 0; // OWL
 					}
 				});
 
@@ -326,6 +356,7 @@ public class SettingsGradingSchemaPanel extends BasePanel implements IFormModelU
 
 		this.stats = new CourseGradeStatistics("stats", getStatsData());
 		this.statsWrap.add(this.stats);
+		statsWrap.setVisible(showStats); // OWL
 
 		// if there are course grade overrides, add the list of students
 		final List<GbUser> usersWithOverrides = getStudentsWithCourseGradeOverrides();
@@ -339,12 +370,13 @@ public class SettingsGradingSchemaPanel extends BasePanel implements IFormModelU
 
 			@Override
 			public boolean isVisible() {
-				return !usersWithOverrides.isEmpty();
+				return showStats && !usersWithOverrides.isEmpty(); // OWL
 			}
 		});
 
 		// chart
 		this.chart = new CourseGradeChart("gradingSchemaChart", getCurrentSiteId(), null);
+		chart.setVisible(showStats);
 		settingsGradingSchemaPanel.add(this.chart);
 	}
 
@@ -358,7 +390,10 @@ public class SettingsGradingSchemaPanel extends BasePanel implements IFormModelU
 
 		final Map<String, Double> bottomPercents = new HashMap<>();
 		for (final GbGradingSchemaEntry schemaEntry : schemaEntries) {
-			bottomPercents.put(schemaEntry.getGrade(), schemaEntry.getMinPercent());
+			if (!UNMAPPED.equals(schemaEntry.getMinPercent())) // OWL: ignore unmapped grades
+			{
+				bottomPercents.put(schemaEntry.getGrade(), schemaEntry.getMinPercent());
+			}
 		}
 
 		this.model.getObject().getGradebookInformation().setSelectedGradingScaleBottomPercents(bottomPercents);
@@ -372,6 +407,18 @@ public class SettingsGradingSchemaPanel extends BasePanel implements IFormModelU
 	 * @return the list of {@link GbGradingSchemaEntry} for the currently selected grading schema id
 	 */
 	private List<GbGradingSchemaEntry> getGradingSchemaEntries() {
+
+		if (registrarSchemaId.equals(currentGradeMappingId)) // OWL
+		{
+			// inject the unmapped grades here at the beginning of a new list to maintain expected presentation order
+			// only do this for registrar's for now because it conflicts with removing mappings in other schemas
+			List<String> unmappedGrades = model.getObject().getGradebookInformation().getSelectedGradingScaleUnmappedGrades();
+			List<GbGradingSchemaEntry> finalEntries = unmappedGrades.stream().map(g -> new GbGradingSchemaEntry(g, UNMAPPED)).collect(Collectors.toList());
+			finalEntries.addAll(SettingsHelper.asList(getBottomPercents()));
+
+			return finalEntries;
+		}
+		
 		return SettingsHelper.asList(getBottomPercents());
 	}
 
@@ -490,7 +537,12 @@ public class SettingsGradingSchemaPanel extends BasePanel implements IFormModelU
 			this.target = t;
 			this.target.prependJavaScript("sakai.gradebookng.settings.gradingschemas.getFocusedCell();");
 			refreshGradingSchemaTable();
-			refreshCourseGradeChart(this.target);
+			// OWL
+			refreshDuplicateCheck(target);
+			if (showStats)
+			{
+				refreshCourseGradeChart(this.target);
+			}
 			refreshMessages();
 			this.target.appendJavaScript("sakai.gradebookng.settings.gradingschemas.focusPreviousCell();");
 			this.target.appendJavaScript("sakai.gradebookng.settings.gradingschemas.addCategoryFunction();");
@@ -576,6 +628,14 @@ public class SettingsGradingSchemaPanel extends BasePanel implements IFormModelU
 		Map<String, Double> schemaMap = SettingsHelper.asMap(schemaList);
 		schemaMap = GradeMappingDefinition.sortGradeMapping(schemaMap);
 		this.chart.refresh(target, schemaMap);
+	}
+
+	// OWL - move the duplicate entry check into its own method so we can call it independently of refreshing the chart
+	private void refreshDuplicateCheck(AjaxRequestTarget target)
+	{
+		// add warning for duplicates
+		this.duplicateEntries.setVisible(SettingsHelper.hasDuplicates(getGradingSchemaList()));
+		target.add(this.duplicateEntries);
 	}
 
 	/**

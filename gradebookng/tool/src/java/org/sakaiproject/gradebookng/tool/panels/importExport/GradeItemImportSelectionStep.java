@@ -52,6 +52,7 @@ import org.sakaiproject.gradebookng.business.model.ProcessedGradeItem.Type;
 import org.sakaiproject.gradebookng.tool.component.GbStyle;
 import org.sakaiproject.gradebookng.tool.component.GbStyleableWebMarkupContainer;
 import org.sakaiproject.gradebookng.tool.model.ImportWizardModel;
+import org.sakaiproject.gradebookng.tool.owl.component.SakaiAjaxButton;
 import org.sakaiproject.gradebookng.tool.pages.ImportExportPage;
 import org.sakaiproject.gradebookng.tool.panels.BasePanel;
 import org.sakaiproject.portal.util.PortalUtils;
@@ -175,7 +176,7 @@ public class GradeItemImportSelectionStep extends BasePanel {
 		final Form<?> form = new Form("form");
 		add(form);
 
-		final AjaxButton backButton = new AjaxButton("backbutton") {
+		final AjaxButton backButton = new SakaiAjaxButton("backbutton") {  // OWL
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -199,7 +200,7 @@ public class GradeItemImportSelectionStep extends BasePanel {
 		backButton.setDefaultFormProcessing(false);
 		form.add(backButton);
 
-		final AjaxButton nextButton = new AjaxButton("nextbutton") {
+		final AjaxButton nextButton = new SakaiAjaxButton("nextbutton") {  // OWL
 			private static final long serialVersionUID = 1L;
 
 			@Override

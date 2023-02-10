@@ -37,6 +37,7 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import org.sakaiproject.gradebookng.business.owl.finalgrades.OwlCourseGradeFormatter;
 
 public class ExcuseGradeAction extends InjectableAction implements Serializable {
 
@@ -117,10 +118,12 @@ public class ExcuseGradeAction extends InjectableAction implements Serializable 
         final CourseGrade studentCourseGrade = businessService.getCourseGrade(studentUuid);
 
         boolean isOverride = false;
-        String grade = getGrade(studentCourseGrade, page);
-        String points = "0";
+		// OWL - don't send course grade if it is hidden
+		boolean hideCourseGrade = page.getOwlUiSettings().isCourseGradeHiddenInCurrentContext();
+        String grade = hideCourseGrade ? "" : getGrade(studentCourseGrade, page);getGrade(studentCourseGrade, page);
+        String points = hideCourseGrade ? "" : "0";
 
-        if (studentCourseGrade != null) {
+        if (!hideCourseGrade && studentCourseGrade != null) {
             if (studentCourseGrade.getPointsEarned() != null) {
                 points = FormatHelper.formatDoubleToDecimal(studentCourseGrade.getPointsEarned());
             }
@@ -145,13 +148,11 @@ public class ExcuseGradeAction extends InjectableAction implements Serializable 
 
         final GradebookUiSettings uiSettings = page.getUiSettings();
         final Gradebook gradebook = businessService.getGradebook();
-        final CourseGradeFormatter courseGradeFormatter = new CourseGradeFormatter(
+        final OwlCourseGradeFormatter courseGradeFormatter = new OwlCourseGradeFormatter(
                 gradebook,
                 page.getCurrentRole(),
                 businessService.isCourseGradeVisible(businessService.getCurrentUser().getId()),
-                uiSettings.getShowPoints(),
-                true,
-                true);
+                uiSettings.getShowPoints());
         if (studentCourseGrade != null)
             return courseGradeFormatter.format(studentCourseGrade);
         else

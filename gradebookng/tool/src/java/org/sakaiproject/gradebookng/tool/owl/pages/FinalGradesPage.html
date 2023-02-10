@@ -1,0 +1,28 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:wicket="http://wicket.apache.org/dtds.data/wicket-xhtml1.4-strict.dtd" >
+<body>
+<wicket:extend>
+  <form wicket:id="form" id="gradebookSpreadsheet" class="finalGradesForm">
+	<div wicket:id="gradeOverrideLogWindow" />
+	  
+	<div id="gb-course-grade-submission">
+		<div id="gbConnectionTimeoutFeedback" class="messageWarning" style="display:none;">
+			<wicket:message key="feedback.connectiontimeout" />
+		</div>
+
+		<div wicket:id="courseGradeSubmissionPanel"></div>
+	</div>
+
+	<div wicket:id="spreadsheet" class="gb-final-grades-table">
+		<h2>Final Grades</h2>
+		<div wicket:id="toolbar" id="gradebookGradesToolbar" class="sakai-table-toolBar"></div>
+
+		<div id="gradebookGrades" class="gb-course-grades-container">
+			<table wicket:id="table" id="gradebookGradesTable" class="table-striped table-bordered table-hover" role="grid"></table>
+		</div>
+	</div>
+		
+  </form>
+</wicket:extend>
+</body>
+</html>

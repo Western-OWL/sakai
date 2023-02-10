@@ -42,6 +42,12 @@ public class Assignment implements Serializable, Comparable<Assignment> {
 	private static final long serialVersionUID = 1L;
 
 	/**
+	 * OWL
+	 * Whether or not this gradebook item is anonymous (used by Faculty of Law)
+	 */
+	@Getter	@Setter private boolean anon = false;
+
+	/**
 	 * @return Returns the name of the assignment. The assignment name is unique among currently defined assignments. However, it is not a
 	 *         safe UID for persistance, since an assignment can be renamed. Also, an assignment can be deleted and a new assignment can be
 	 *         created re-using the old name.

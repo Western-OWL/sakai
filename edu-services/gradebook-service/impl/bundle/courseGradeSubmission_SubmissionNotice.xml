@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<emailTemplates>
+	<emailTemplate>
+		<subject>OWL Course Grade Submission Notice - ${sectionName}</subject>
+		<message>
+This message is a notification that ${submitter} has submitted final course grades for ${sectionName}
+
+Section: ${sectionName}
+Section Id: ${sectionEid}
+Submission Type: ${submissionType}
+Submitted by: ${submitter}
+
+These grades are pending department approval and will not be submitted to the Office of the Registrar until you approve them.
+
+To approve these grades:
+
+1. Visit ${gradebookLink}
+2. Select "Course Grades"
+3. Select ${sectionName} from the "View" dropdown menu located in the Grading Table section of the page
+4. Review the submitted grades and click the "Approve" button when ready
+
+If you have any questions regarding this email, please contact ${emailSupport}.
+		</message>
+		<locale>en</locale>
+		<version>1</version>
+	</emailTemplate>
+</emailTemplates>

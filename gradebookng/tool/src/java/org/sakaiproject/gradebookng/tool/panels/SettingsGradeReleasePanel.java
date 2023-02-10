@@ -282,6 +282,7 @@ public class SettingsGradeReleasePanel extends BasePanel {
 		};
 		this.letterGrade.setOutputMarkupPlaceholderTag(true);
 		this.courseGradeType.add(this.letterGrade);
+		letterGrade.setVisible(false); // OWL-2994  --plukasew
 
 		// percentage
 		this.percentage = new AjaxCheckBox("percentage",
@@ -329,9 +330,10 @@ public class SettingsGradeReleasePanel extends BasePanel {
 				// validation label
 				if (settings.isCourseGradeDisplayed()) {
 					int displayOptions = 0;
-					if (settings.isCourseLetterGradeDisplayed()) {
+					// OWL-2994  --plukasew
+					/*if (settings.isCourseLetterGradeDisplayed()) {
 						displayOptions++;
-					}
+					}*/
 					if (settings.isCourseAverageDisplayed()) {
 						displayOptions++;
 					}
@@ -360,9 +362,10 @@ public class SettingsGradeReleasePanel extends BasePanel {
 
 				final GradebookInformation settings = SettingsGradeReleasePanel.this.model.getObject().getGradebookInformation();
 
-				if (settings.isCourseLetterGradeDisplayed()) {
+				// OWL-2994 --plukasew
+				/*if (settings.isCourseLetterGradeDisplayed()) {
 					parts.add(getString("settingspage.displaycoursegrade.preview-letter"));
-				}
+				}*/
 
 				if (settings.isCourseAverageDisplayed()) {
 					if (parts.isEmpty()) {

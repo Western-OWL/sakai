@@ -79,6 +79,18 @@ public class GbUser implements GbUserBase, Serializable, Comparable<GbUser> {
 		this.sortName = u.getSortName();
 	}
 
+	// OWL - restore the standard constructor, it is useful for anon grading
+	public GbUser(String uuid, String displayId, String displayName, String firstName, String lastName, String sortName, String studentNumber) {
+		this.userUuid = uuid;
+		this.displayId = displayId;
+		this.displayName = FormatHelper.htmlEscape(displayName);
+		this.firstName = FormatHelper.htmlEscape(firstName);
+		this.lastName = FormatHelper.htmlEscape(lastName);
+		this.studentNumber = FormatHelper.htmlEscape(studentNumber);
+		this.sections = Collections.emptyList();
+		this.sortName = FormatHelper.htmlEscape(sortName);
+	}
+
 	public boolean isValid() {
 		return StringUtils.isNotBlank(userUuid);
 	}

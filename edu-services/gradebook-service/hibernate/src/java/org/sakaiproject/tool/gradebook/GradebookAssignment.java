@@ -98,6 +98,7 @@ public class GradebookAssignment extends GradableObject {
 	@Setter private String itemType;
 	@Getter @Setter public String selectedGradeEntryValue;
 	@Setter private Boolean hideInAllGradesTable = Boolean.FALSE;
+	@Getter @Setter private Boolean anon = Boolean.FALSE; // OWL
 
 	static {
 		dateComparator = new Comparator() {

@@ -16,11 +16,11 @@
                             <table class="table table-striped table-bordered table-hover">
                                 <thead>
                                     <tr>
-                                        <th>
-                                            <wicket:message key="importExport.selection.previewGrades.studentID.heading">Student ID</wicket:message>
+                                        <th wicket:id="studentIdHeading">
+                                            Student ID <!-- OWL -->
                                         </th>
-                                        <th>
-                                            <wicket:message key="importExport.selection.previewGrades.studentName.heading">Student Name</wicket:message>
+                                        <th wicket:id="studentNameHeading">
+                                            Student Name <!-- OWL -->
                                         </th>
                                         <th>
                                             <wicket:message key="importExport.selection.previewGrades.grade.heading">Grade</wicket:message>
@@ -32,8 +32,8 @@
                                         <td>
                                             <span wicket:id="studentID">student0001</span>
                                         </td>
-                                        <td>
-                                            <span wicket:id="studentName">firstName lastName</span>
+                                        <td wicket:id="studentName">
+											firstName lastName <!-- OWL -->
                                         </td>
                                         <td>
                                             <span wicket:id="studentGrade">85</span>

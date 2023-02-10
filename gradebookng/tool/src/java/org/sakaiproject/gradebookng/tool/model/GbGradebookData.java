@@ -51,6 +51,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.Data;
 import lombok.Value;
+import org.sakaiproject.gradebookng.tool.owl.model.OwlGbGradeTableData;
 
 public class GbGradebookData {
 
@@ -79,6 +80,8 @@ public class GbGradebookData {
 	private final Map<Long, CategoryDefinition> categoryMap = new HashMap<>();
 
 	private final Component parent;
+
+	private final boolean isAnonContext; // OWL
 
 	@Data
 	private class StudentDefinition {
@@ -242,6 +245,8 @@ public class GbGradebookData {
 
 		this.columns = loadColumns(gbGradeTableData.getAssignments());
 		this.students = loadStudents(this.studentGradeInfoList);
+
+		isAnonContext = ((OwlGbGradeTableData) gbGradeTableData).isAnonContext; // OWL
 	}
 
 	/**
@@ -409,6 +414,7 @@ public class GbGradebookData {
 		result.put("isSectionsVisible", this.isSectionsVisible && ServerConfigurationService.getBoolean("gradebookng.showSections", true));
 		result.put("isSetUngradedToZeroEnabled", ServerConfigurationService.getBoolean(SAK_PROP_SHOW_SET_ZERO_SCORE, SAK_PROP_SHOW_SET_ZERO_SCORE_DEFAULT));
 		result.put("isShowDisplayCourseGradeToStudentEnabled", ServerConfigurationService.getBoolean(SAK_PROP_SHOW_COURSE_GRADE_STUDENT, SAK_PROP_SHOW_COURSE_GRADE_STUDENT_DEFAULT));
+		result.put("isAnonContext", isAnonContext); // OWL
 
 		return result;
 	};
@@ -566,6 +572,7 @@ public class GbGradebookData {
 			// categories, put out a total.
 			if (userSettings.isGroupedByCategory() && (GbCategoryType.valueOf(this.settings.getCategoryType()) != GbCategoryType.NO_CATEGORY) &&
 					a1.getCategoryId() != null &&
+					categoryMap.containsKey(a1.getCategoryId()) && // OWL - prevent adding category column for mixed categories in anon view by checking if category is allowed
 					(a2 == null || !a1.getCategoryId().equals(a2.getCategoryId()))) {
 				result.add(new CategoryAverageDefinition(a1.getCategoryId(),
 						a1.getCategoryName(),

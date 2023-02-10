@@ -35,6 +35,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.model.StringResourceModel;
 import org.sakaiproject.gradebookng.business.util.FormatHelper;
 import org.sakaiproject.gradebookng.tool.model.GradebookUiSettings;
+import org.sakaiproject.gradebookng.tool.owl.model.OwlGbUiSettings;
 import org.sakaiproject.gradebookng.tool.pages.GradebookPage;
 import org.sakaiproject.service.gradebook.shared.Assignment;
 
@@ -56,10 +57,12 @@ public class ToggleGradeItemsToolbarPanel extends BasePanel {
 		// setup
 		final Map<String, Long> categoryNameToIdMap = new HashMap<>();
 		final Map<String, List<Assignment>> categoryNamesToAssignments = new HashMap<>();
+		final List<String> mixedCategoryNames = new ArrayList<>(); // OWL
 
 		final Map<String, Object> model = (Map<String, Object>) getDefaultModelObject();
 		final List<Assignment> assignments = (List<Assignment>) model.get("assignments");
 		final GradebookUiSettings settings = (GradebookUiSettings) model.get("settings");
+		final OwlGbUiSettings owlSettings =  ((GradebookPage) getPage()).getOwlUiSettings();
 		final boolean categoriesEnabled = (Boolean) model.get("categoriesEnabled");
 
 		// iterate over assignments and build map of categoryname to list of assignments
@@ -71,6 +74,11 @@ public class ToggleGradeItemsToolbarPanel extends BasePanel {
 			if (!categoryNamesToAssignments.containsKey(categoryName)) {
 				categoryNameToIdMap.put(categoryName, categoryID);
 				categoryNamesToAssignments.put(categoryName, new ArrayList<>());
+				// OWL
+				if (owlSettings.isContextAnonymous() && !owlSettings.getAnonAwareCategoryIDsForContext().contains(categoryID))
+				{
+					mixedCategoryNames.add(categoryName);
+				}
 			}
 
 			categoryNamesToAssignments.get(categoryName).add(assignment);
@@ -165,6 +173,13 @@ public class ToggleGradeItemsToolbarPanel extends BasePanel {
 				};
 				categoryScoreCheckbox.add(new AttributeModifier("value", categoryName));
 				categoryScoreFilter.add(categoryScoreCheckbox);
+
+				// OWL - If the context is anonymous, we have to filter out category scores for mixed categories
+				// (scores for mixed categories should display in normal view only)
+				if (owlSettings.isContextAnonymous() && mixedCategoryNames.contains(categoryName))
+				{
+					categoryScoreFilter.setVisible(false);
+				}
 
 				categoryItem.add(categoryScoreFilter);
 			}
