@@ -144,16 +144,18 @@ public class EmailUtil {
             StringBuffer buffer = attachments.stream().map(att -> entityManager.newReference(att)).collect(StringBuffer::new, (sb, ref) -> {
 
                 ResourceProperties properties = ref.getProperties();
-                boolean isArchiveFile = isArchiveFile(ref);
-                sb.append(properties.getProperty(ResourceProperties.PROP_DISPLAY_NAME))
-                    .append(" (")
-                    .append(ref.getProperties().getPropertyFormatted(ResourceProperties.PROP_CONTENT_LENGTH))
-                    .append(isArchiveFile ? "):" : ")")
-                    .append(NEW_LINE);
-                if (isArchiveFile(ref)) {
-                    sb.append("<blockquote>\n");
-                    sb.append(getArchiveManifest(ref, true));
-                    sb.append("</blockquote>\n");
+                if (!"true".equals(properties.getProperty(AssignmentConstants.                       PROP_INLINE_SUBMISSION))) {
+                    boolean isArchiveFile = isArchiveFile(ref);
+                    sb.append(properties.getProperty(ResourceProperties.PROP_DISPLAY_NAME))
+                        .append(" (")
+                        .append(ref.getProperties().getPropertyFormatted(ResourceProperties.PROP_CONTENT_LENGTH))
+                        .append(isArchiveFile ? "):" : ")")
+                        .append(NEW_LINE);
+                    if (isArchiveFile(ref)) {
+                        sb.append("<blockquote>\n");
+                        sb.append(getArchiveManifest(ref, true));
+                        sb.append("</blockquote>\n");
+                    }
                 }
             }, StringBuffer::append);
             replacements.put("attachmentsBlock", buffer.toString());
