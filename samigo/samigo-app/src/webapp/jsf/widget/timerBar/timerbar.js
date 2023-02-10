@@ -377,7 +377,7 @@
                   if (totalTime === elapsedTime) {
                       clearInterval(localCount);
                       clearInterval(ajaxCount);
-                      $("[id$=\\:submitNoCheck]")[0].click();
+                      $("[id$=\\:submitTimerExpiry]")[0].click();
                       return;
                   }
                   if (currentAid && lastAid && currentAid > 0 && lastAid > 0 && currentAid !== lastAid) {

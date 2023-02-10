@@ -811,7 +811,7 @@ public class DeliveryBean implements Serializable {
  	  List eventLogDataList = eventService.getEventLogData(adata.getAssessmentGradingId());
 	  if(eventLogDataList != null && eventLogDataList.size() > 0) {
 	 	  EventLogData eventLogData= (EventLogData) eventLogDataList.get(0);
-	 	  if (submitFromTimeoutPopup) {
+	 	  if (isFromTimer) {
 	 	    eventLogData.setErrorMsg(eventLogMessages.getString("timer_submit"));
 	 	  } else {
 	 	    eventLogData.setErrorMsg(eventLogMessages.getString("no_error"));
