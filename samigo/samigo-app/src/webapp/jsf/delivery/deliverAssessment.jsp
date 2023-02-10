@@ -586,6 +586,9 @@ document.links[newindex].onclick();
   <%-- SUBMIT FOR DUE OR RETRACT DATE --%>
   <%--<h:commandButton id="submitNoCheck" type="submit" styleClass="hidden active" action="#{delivery.submitFromTimeoutPopup}" value="" />--%>
 
+  <%-- SUBMIT FOR TIMER EXPIRY --%>
+  <h:commandButton id="submitTimerExpiry" type="submit" styleClass="hidden active" rendered="#{delivery.hasTimeLimit}" action="#{delivery.submitForGradeFromTimer}" value="" />
+
   </h:panelGrid>
 </h:panelGrid>
 
