@@ -109,7 +109,7 @@ $Id$
 	  </h:panelGroup>
     </h:panelGroup>
 	<div class="pager-holder col-md-6" style="text-align: right">
-	  <sakai:pager id="pager" totalItems="#{submissionStatus.dataRows}" firstItem="#{submissionStatus.firstRow}" pageSize="#{submissionStatus.maxDisplayedRows}" textStatus="#{evaluationMessages.paging_status}" />
+	  <sakai:pager id="pager" totalItems="#{submissionStatus.dataRows}" firstItem="#{submissionStatus.firstRow}" pageSize="#{submissionStatus.maxDisplayedRows}" pageSizes="5,10,20,50,100,200" textStatus="#{evaluationMessages.paging_status}" />
 	</div>
   </h:panelGroup>
 

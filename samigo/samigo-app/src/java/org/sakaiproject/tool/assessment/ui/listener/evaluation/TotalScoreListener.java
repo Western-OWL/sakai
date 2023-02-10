@@ -49,7 +49,6 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.tool.assessment.api.SamigoApiFactory;
-import org.sakaiproject.rubrics.api.RubricsConstants;
 import org.sakaiproject.rubrics.api.RubricsService;
 import org.sakaiproject.tool.assessment.business.entity.RecordingData;
 import org.sakaiproject.tool.assessment.data.dao.assessment.AssessmentAccessControl;
@@ -201,14 +200,11 @@ import org.sakaiproject.util.comparator.UserSortNameComparator;
     questionbean.setSelectedSARationaleView(QuestionScoresBean.SHOW_SA_RATIONALE_RESPONSES_INLINE);
     
     // if comes from scores link in author index (means to view the score of a different assessment)
-    // we reset the following values for paging (for audio, displays 5 records; for others, display all)
-    if (ae == null) {
-    	submissionbean.setMaxDisplayedRows(0);
-    	bean.setMaxDisplayedRows(0);
-    	questionbean.setHasAudioMaxDisplayedScoreRowsChanged(false);
-    	questionbean.setMaxDisplayedRows(0);
-    	questionbean.setOtherMaxDisplayedScoreRows(0);
-    	questionbean.setAudioMaxDisplayedScoreRows(5);
+    if ((ae == null || ae.getComponent().getId().startsWith("authorIndexToScore")) && !publishedId.equals(bean.getPublishedId())) {
+        // quiz changed, reset to page 1 (but retain selected page size)
+        bean.setFirstRow(0);
+        submissionbean.setFirstRow(0);
+        questionbean.setFirstRow(0);
     }
 
     if (!totalScores(pubAssessment, bean, false))

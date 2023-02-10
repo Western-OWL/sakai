@@ -218,7 +218,7 @@ $(document).ready(function(){
   </h:panelGroup>
    
   <h:panelGroup layout="block" styleClass="samigo-pager col-md-6" style="text-align: right">
-    <sakai:pager id="pager1" totalItems="#{totalScores.dataRows}" firstItem="#{totalScores.firstRow}" pageSize="#{totalScores.maxDisplayedRows}" textStatus="#{evaluationMessages.paging_status}" />
+    <sakai:pager id="pager1" totalItems="#{totalScores.dataRows}" firstItem="#{totalScores.firstRow}" pageSize="#{totalScores.maxDisplayedRows}" pageSizes="5,10,20,50,100,200" textStatus="#{evaluationMessages.paging_status}" />
   </h:panelGroup>
 </h:panelGroup>
 
@@ -251,7 +251,7 @@ $(document).ready(function(){
   </h:panelGroup>
   
   <h:panelGroup>
-	<sakai:pager id="pager2" totalItems="#{totalScores.dataRows}" firstItem="#{totalScores.firstRow}" pageSize="#{totalScores.maxDisplayedRows}" textStatus="#{evaluationMessages.paging_status}" />
+	<sakai:pager id="pager2" totalItems="#{totalScores.dataRows}" firstItem="#{totalScores.firstRow}" pageSize="#{totalScores.maxDisplayedRows}" pageSizes="5,10,20,50,100,200" textStatus="#{evaluationMessages.paging_status}" />
   </h:panelGroup>
 </h:panelGroup>
 

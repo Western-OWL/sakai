@@ -145,9 +145,9 @@ public class QuestionScoresBean implements Serializable, PhaseAware {
   @Getter @Setter
   private int dataRows;
   @Getter @Setter
-  private int audioMaxDisplayedScoreRows;
+  private int audioMaxDisplayedScoreRows = 5; // default for audio questions only
   @Getter @Setter
-  private int otherMaxDisplayedScoreRows;
+  private int otherMaxDisplayedScoreRows = 200; // default for all other question types
   @Getter @Setter
   private boolean hasAudioMaxDisplayedScoreRowsChanged;
   
@@ -208,9 +208,7 @@ public class QuestionScoresBean implements Serializable, PhaseAware {
 			log.debug("init(): subList " + firstRow + ", " + nextPageRow);
 		}
 
-		agents.clear();
-		agents.addAll(newAgents);
-
+		agents = newAgents;
 	}
  
 	// Following three methods are for interface PhaseAware
