@@ -45,6 +45,9 @@ import org.sakaiproject.portal.util.PortalUtils;
 import org.sakaiproject.rubrics.api.RubricsService;
 
 import lombok.extern.slf4j.Slf4j;
+import org.sakaiproject.gradebookng.business.model.GbGroup;
+import org.sakaiproject.gradebookng.business.owl.OwlGbSiteType;
+import org.sakaiproject.gradebookng.tool.owl.pages.FinalGradesPage;
 
 /**
  * Base page for our app
@@ -70,6 +73,7 @@ public class BasePage extends WebPage {
 	Link<Void> settingsPageLink;
 	Link<Void> importExportPageLink;
 	Link<Void> permissionsPageLink;
+	protected Link<Void> finalGradesPageLink; // OWL
 
 	public final GbFeedbackPanel feedbackPanel;
 
@@ -162,6 +166,22 @@ public class BasePage extends WebPage {
 		};
 		this.settingsPageLink.add(new Label("screenreaderlabel", getString("link.screenreader.tabnotselected")));
 		nav.add(this.settingsPageLink);
+
+		// final grades page -- OWL
+		finalGradesPageLink = new Link<Void>("finalGradesPageLink")
+		{
+			@Override
+			public void onClick()
+			{
+				setResponsePage(FinalGradesPage.class);
+			}
+		};
+		finalGradesPageLink.add(new Label("screenreaderlabel", getString("link.screenreader.tabnotselected")));
+		WebMarkupContainer finalGradesPageTab = new WebMarkupContainer("finalGradesPageTab");
+		OwlGbSiteType siteType = businessService.getCurrentSite().map(OwlGbSiteType::from).orElse(OwlGbSiteType.PROJECT);
+		finalGradesPageTab.setVisible(siteType == OwlGbSiteType.COURSE && businessService.owl().fg.currentUserCanSeeFinalGradesPage(businessService.getCurrentSiteId()));
+		finalGradesPageTab.add(finalGradesPageLink);
+		nav.add(finalGradesPageTab);
 
 		add(nav);
 
@@ -310,5 +330,15 @@ public class BasePage extends WebPage {
 			default:
 				break;
 		}
+	}
+
+	// OWL
+	/**
+	 * Gets a localized "ALL" group suitable for display in dropdowns, etc.
+	 * @return
+	 */
+	public GbGroup getAllGroup()
+	{
+		return new GbGroup(null, getString("groups.all"), null, GbGroup.Type.ALL);
 	}
 }

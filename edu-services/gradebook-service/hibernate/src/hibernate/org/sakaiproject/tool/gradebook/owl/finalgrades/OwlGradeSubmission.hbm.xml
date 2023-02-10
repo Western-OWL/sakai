@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="org.sakaiproject.tool.gradebook">
+  <class name="org.sakaiproject.service.gradebook.shared.owl.finalgrades.OwlGradeSubmission" table="OWL_GRADE_SUBMISSION">
+    <id column="ID" name="id" type="long">
+      <generator class="native">
+        <param name="sequence">OWL_GRADE_SUBMISSION_SEQ</param>
+      </generator>
+    </id>
+    <property column="SITE_ID" name="siteId" not-null="true" type="string"/>
+    <property column="SECTION_EID" name="sectionEid" not-null="true" type="string"/>
+    <property column="SUBMISSION_DATE" name="submissionDate" not-null="true" type="timestamp"/>
+    <property column="USER_EID" name="userEid" not-null="true" type="string"/>
+    <property column="USER_IP" name="userIp" not-null="true" type="string"/>
+    <property column="STATUS_CODE" name="statusCode" not-null="true" type="integer"/>
+    <many-to-one class="org.sakaiproject.service.gradebook.shared.owl.finalgrades.OwlGradeSubmission" column="PREV_SUBMISSION_ID" name="prevSubmission" unique="true" lazy="false"/>
+    <many-to-one cascade="save-update" class="org.sakaiproject.service.gradebook.shared.owl.finalgrades.OwlGradeApproval" column="APPROVAL_ID" name="approval" unique="true" lazy="false"/>
+    <set cascade="save-update" name="gradeData" order-by="STUDENT_LAST_NAME asc" table="OWL_GRADE_SUBMISSION_GRADES" lazy="false">
+      <key column="SUBMISSION_ID"/>
+      <composite-element class="org.sakaiproject.service.gradebook.shared.owl.finalgrades.OwlGradeSubmissionGrades">
+        <property column="STUDENT_EID" length="32" name="studentEid" not-null="true" type="string"/>
+        <property column="STUDENT_FIRST_NAME" length="100" name="studentFirstName" not-null="true" type="string"/>
+        <property column="STUDENT_LAST_NAME" length="100" name="studentLastName" not-null="true" type="string"/>
+        <property column="STUDENT_NUMBER" length="32" name="studentNumber" not-null="true" type="string"/>
+        <property column="GRADE" length="3" name="grade" not-null="true" type="string"/>
+      </composite-element>
+    </set>
+  </class>
+</hibernate-mapping>

@@ -78,6 +78,10 @@ public class AddOrEditGradeItemPanelContent extends BasePanel {
 	private boolean scaleGradesTriggered = false;
 	private WebMarkupContainer scaleGradesContainer;
 
+	// OWL
+	private CheckBox anonymous;
+	private boolean isAnonymousLocked = false;
+
 	public AddOrEditGradeItemPanelContent(final String id, final Model<Assignment> assignmentModel, final UiMode mode) {
 		super(id, assignmentModel);
 
@@ -358,6 +362,31 @@ public class AddOrEditGradeItemPanelContent extends BasePanel {
 		if (assignment.isExternallyMaintained()) {
 			warn(MessageFormat.format(getString("info.edit_assignment_external_items"), this.businessService.getExternalAppName(assignment.getExternalAppName())));
 		}
+
+		// OWL anon
+		WebMarkupContainer anonContainer = new WebMarkupContainer("anonContainer");
+		anonContainer.setVisible(!businessService.owl().anon.getAnonGradingIDsForCurrentSite().isEmpty());
+		anonymous = new CheckBox("anonymous", new PropertyModel<>(assignmentModel, "anon"))
+		{
+			@Override
+			public boolean isEnabled()
+			{
+				return !isAnonymousLocked && assignment.getId() == null;
+			}
+		};
+		anonContainer.add(anonymous);
+		add(anonContainer);
+	}
+
+	/**
+	 * OWL. Use case: newly imported items. The anonymity needs to match the type of spreadsheet that was imported.
+	 * @param isItemAnonymous is the item anonymous
+	 */
+	public void lockAnonymousToValue(boolean isItemAnonymous)
+	{
+		Assignment assignment = (Assignment) getDefaultModel().getObject();
+		assignment.setAnon(isItemAnonymous);
+		isAnonymousLocked = true;
 	}
 
 	public ZonedDateTime getDueDate() {

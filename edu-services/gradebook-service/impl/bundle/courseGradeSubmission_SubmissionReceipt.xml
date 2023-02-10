@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<emailTemplates>
+	<emailTemplate>
+		<subject>OWL Course Grade Submission Receipt - ${sectionName}</subject>
+		<message>
+This receipt acknowledges that you submitted course grades from OWL to your department. Please keep this email as a record of your grade submission.
+
+Section: ${sectionName}
+Section Id: ${sectionEid}
+Submission Type: ${submissionType}
+Submitted to: ${approverList}
+
+Your department may be contacting you to collect your signature. If you have any questions regarding this email, please contact your department or ${emailSupport}.
+		</message>
+		<locale>en</locale>
+		<version>1</version>
+	</emailTemplate>
+</emailTemplates>

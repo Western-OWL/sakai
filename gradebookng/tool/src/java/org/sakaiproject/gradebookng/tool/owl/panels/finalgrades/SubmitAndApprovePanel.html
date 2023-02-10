@@ -1,0 +1,22 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:wicket="http://wicket.apache.org/dtds.data/wicket-xhtml1.4-strict.dtd" >
+
+<body>
+<wicket:panel>
+<div class="submitAndApprove">
+	<div class="submissionStatus">
+		<span wicket:id="currentStatus">Since last submission, 0 grades have been revised, 0 grades have been added, and 1 grade has been removed.</span>
+	</div>
+	<div class="submitAndApproveActions">
+		<button wicket:id="submitFinalGrades" class="button_color submitFinalGrades">
+			Submit
+		</button>
+		<button wicket:id="approveFinalGrades" class="button_color approveFinalGrades">
+			Approve
+		</button>
+		<span wicket:id="submitAndApproveFeedback"></span>
+	</div>
+</div>
+</wicket:panel>
+</body>
+</html>

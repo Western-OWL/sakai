@@ -51,6 +51,7 @@ import org.sakaiproject.util.api.FormattedText;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.sakaiproject.gradebookng.tool.owl.model.UiSettings;
 
 /**
  *
@@ -204,7 +205,7 @@ public class UpdateUngradedItemsPanel extends BasePanel {
 			}
 		}
 
-		final GradebookUiSettings settings = ((GradebookPage) getPage()).getUiSettings();
+		final UiSettings settings = ((GradebookPage) getPage()).getGbUiSettings(); // OWL mod
 
 		final DropDownChoice<GbGroup> groupAndSectionFilter = new DropDownChoice<GbGroup>(
 				"group",
@@ -225,9 +226,10 @@ public class UpdateUngradedItemsPanel extends BasePanel {
 				});
 
 		groupAndSectionFilter.setNullValid(false);
+		groupAndSectionFilter.setVisible(!settings.owl.isContextAnonymous());
 		if (!groups.isEmpty()) {
 			groupAndSectionFilter.setModelObject(
-					(settings.getGroupFilter() != null) ? settings.getGroupFilter() : groups.get(0));
+					(settings.gb.getGroupFilter() != null) ? settings.gb.getGroupFilter() : groups.get(0));
 		}
 		form.add(groupAndSectionFilter);
 

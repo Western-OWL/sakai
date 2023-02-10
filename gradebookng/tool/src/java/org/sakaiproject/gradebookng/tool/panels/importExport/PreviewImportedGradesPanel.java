@@ -15,6 +15,8 @@
  */
 package org.sakaiproject.gradebookng.tool.panels.importExport;
 
+import java.util.Collections;
+import java.util.Map;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.ajax.AjaxEventBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -22,22 +24,24 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.ResourceModel;
 import org.apache.wicket.model.StringResourceModel;
 
 import org.sakaiproject.gradebookng.business.model.GbUser;
 import org.sakaiproject.gradebookng.business.model.ProcessedGradeItem;
 import org.sakaiproject.gradebookng.business.model.ProcessedGradeItemDetail;
+import org.sakaiproject.gradebookng.business.owl.anon.OwlAnonGradingService;
 import org.sakaiproject.gradebookng.business.util.FormatHelper;
 import org.sakaiproject.gradebookng.tool.model.ImportWizardModel;
+import org.sakaiproject.gradebookng.tool.panels.BasePanel;
 
 /**
  * This panel provides a table previewing the grades that will be imported for the current item in the {@link ImportWizardModel}.
  *
  * @author bjones86
  */
-public class PreviewImportedGradesPanel extends Panel
+public class PreviewImportedGradesPanel extends BasePanel  // OWL
 {
     IModel<ImportWizardModel> model;
 
@@ -79,6 +83,19 @@ public class PreviewImportedGradesPanel extends Panel
 
         // Create and populate the list of grades that will be imported for the current item
         final WebMarkupContainer previewGradesContainer = new WebMarkupContainer( "previewGradesContainer" );
+
+		// OWL
+		final boolean isAnon = importWizardModel.isContextAnonymous();
+		final OwlAnonGradingService anonServ = businessService.owl().anon;
+		final Map<String, Integer> anonIdMap = isAnon ? anonServ.getStudentAnonIdMap(anonServ.getAnonGradingIDsForCurrentSite()) : Collections.emptyMap();
+		String studentIdHeaderKey = isAnon ? "importExport.selection.previewGrades.anonId.heading" : "importExport.selection.previewGrades.studentID.heading";
+        Label studentIdHeading = new Label( "studentIdHeading", new ResourceModel( studentIdHeaderKey ) );
+        Label studentNameHeading = new Label( "studentNameHeading", new ResourceModel( "importExport.selection.previewGrades.studentName.heading" ) );
+        studentNameHeading.setVisible(!isAnon);
+        previewGradesContainer.add( studentIdHeading );
+        previewGradesContainer.add( studentNameHeading );
+
+
         final ListView<ProcessedGradeItemDetail> previewGrades = new ListView<ProcessedGradeItemDetail>( "previewGrades", processedGradeItem.getProcessedGradeItemDetails() )
         {
             @Override
@@ -86,8 +103,9 @@ public class PreviewImportedGradesPanel extends Panel
             {
                 final ProcessedGradeItemDetail details = item.getModelObject();
                 final GbUser user = details.getUser();
-                item.add( new Label( "studentID", user.getDisplayId() ) );
-                item.add( new Label( "studentName", user.getDisplayName() ) );
+                // OWL
+                item.add( new Label( "studentID", isAnon ? String.valueOf(anonIdMap.get(user.getDisplayId())) : user.getDisplayId() ) );
+                item.add( new Label( "studentName", user.getDisplayName() ).setVisible(!isAnon) );
 
                 // Convert back to user's locale for display/validation purposes
                 String grade = FormatHelper.formatGradeForDisplay( details.getGrade() );

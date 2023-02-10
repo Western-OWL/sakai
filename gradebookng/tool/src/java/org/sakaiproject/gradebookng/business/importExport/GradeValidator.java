@@ -24,6 +24,7 @@ import org.sakaiproject.gradebookng.business.model.ImportedCell;
 import org.sakaiproject.gradebookng.business.model.ImportedColumn;
 import org.sakaiproject.gradebookng.business.model.ImportedColumn.Type;
 import org.sakaiproject.gradebookng.business.model.ImportedRow;
+import org.sakaiproject.gradebookng.business.owl.importExport.DpcDelegate;
 
 /**
  * Used to validate grades in an imported file.
@@ -35,8 +36,8 @@ import org.sakaiproject.gradebookng.business.model.ImportedRow;
  */
 public class GradeValidator
 {
-    private GradeValidationReport report;
-    private final GradebookNgBusinessService bus;
+    protected GradeValidationReport report;  // OWL
+    protected final GradebookNgBusinessService bus;  // OWL
 
     public GradeValidator(GradebookNgBusinessService service)
     {
@@ -50,9 +51,23 @@ public class GradeValidator
      * @param columns the list of parsed columns, so we can access the column type
      * @return the {@link GradeValidationReport}
      */
-    public GradeValidationReport validate(List<ImportedRow> rows, List<ImportedColumn> columns)
+    public GradeValidationReport validate(List<ImportedRow> rows, List<ImportedColumn> columns, boolean isDpc, boolean isAnon)  // OWL
     {
         report = new GradeValidationReport();
+
+		// OWL
+		if (isDpc)
+		{
+			String col = DpcDelegate.DPC_DEFAULT_GRADE_ITEM_TITLE;
+			if (columns.size() > 1) // we have a grade column
+			{
+				for (ImportedRow row : rows)
+				{
+					validateGrade(col, row.getStudentNumber(), row.getCellMap().get(col).getScore());
+				}
+			}
+			return report;
+		}
 
         for (ImportedColumn column : columns)
         {
@@ -65,7 +80,7 @@ public class GradeValidator
                     ImportedCell cell = row.getCellMap().get(columnTitle);
                     if (cell != null)
                     {
-                        String studentIdentifier = row.getStudentEid();
+                        String studentIdentifier = isAnon ? row.getAnonID() : row.getStudentEid(); // OWL
 
                         // Validation is locale-aware, so use the raw score that the user input in their own locale
                         validateGrade( columnTitle, studentIdentifier, cell.getRawScore() );
@@ -83,7 +98,7 @@ public class GradeValidator
      * @param userID
      * @param grade
      */
-    private void validateGrade(String columnTitle, String userID, String grade)
+    protected void validateGrade(String columnTitle, String userID, String grade)  // OWL
     {
         // Empty grades are valid
         if (StringUtils.isBlank(grade))

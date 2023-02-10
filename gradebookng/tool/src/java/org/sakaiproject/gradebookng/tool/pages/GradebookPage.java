@@ -44,7 +44,9 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.string.StringValue;
 import org.sakaiproject.gradebookng.business.GbRole;
+import org.sakaiproject.gradebookng.business.SortDirection;
 import org.sakaiproject.gradebookng.business.model.GbGroup;
+import org.sakaiproject.gradebookng.business.owl.anon.OwlAnonGradingService;
 import org.sakaiproject.gradebookng.business.util.GbStopWatch;
 import org.sakaiproject.gradebookng.tool.actions.DeleteAssignmentAction;
 import org.sakaiproject.gradebookng.tool.actions.EditAssignmentAction;
@@ -65,12 +67,17 @@ import org.sakaiproject.gradebookng.tool.actions.ViewCourseGradeStatisticsAction
 import org.sakaiproject.gradebookng.tool.actions.ViewGradeLogAction;
 import org.sakaiproject.gradebookng.tool.actions.ViewGradeSummaryAction;
 import org.sakaiproject.gradebookng.tool.actions.ViewRubricGradeAction;
+import org.sakaiproject.gradebookng.tool.actions.owl.OwlEmptyAction;
 import org.sakaiproject.gradebookng.tool.component.GbAjaxButton;
 import org.sakaiproject.gradebookng.tool.component.GbAjaxLink;
 import org.sakaiproject.gradebookng.tool.component.GbGradeTable;
 import org.sakaiproject.gradebookng.tool.model.GbGradeTableData;
 import org.sakaiproject.gradebookng.tool.model.GbModalWindow;
 import org.sakaiproject.gradebookng.tool.model.GradebookUiSettings;
+import org.sakaiproject.gradebookng.tool.owl.model.OwlGbGradeTableData;
+import org.sakaiproject.gradebookng.tool.owl.model.UiSettings;
+import org.sakaiproject.gradebookng.tool.owl.pages.IGradesPage;
+import org.sakaiproject.gradebookng.tool.owl.panels.anon.AnonTogglePanel;
 import org.sakaiproject.gradebookng.tool.panels.AddOrEditGradeItemPanel;
 import org.sakaiproject.gradebookng.tool.panels.BulkEditItemsPanel;
 import org.sakaiproject.gradebookng.tool.panels.SortGradeItemsPanel;
@@ -90,7 +97,7 @@ import org.sakaiproject.wicket.component.SakaiAjaxButton;
  * @author Steve Swinsburg (steve.swinsburg@gmail.com)
  *
  */
-public class GradebookPage extends BasePage {
+public class GradebookPage extends BasePage implements IGradesPage {
 	private static final long serialVersionUID = 1L;
 
 	public static final String FOCUS_ASSIGNMENT_ID_PARAM = "focusAssignmentId";
@@ -221,7 +228,8 @@ public class GradebookPage extends BasePage {
 		add(new CloseOnESCBehavior(bulkEditItemsWindow));
 
 		// first get any settings data from the session
-		final GradebookUiSettings settings = getUiSettings(gradebook);
+		final UiSettings uiSettings = getGbUiSettings(gradebook); // OWL
+		final GradebookUiSettings settings = uiSettings.gb;
 
 		SortType sortBy = SortType.SORT_BY_SORTING;
 		if (settings.isCategoriesEnabled() && settings.isGroupedByCategory()) {
@@ -232,6 +240,8 @@ public class GradebookPage extends BasePage {
 
 		final List<Assignment> assignments = this.businessService.getGradebookAssignments(sortBy, gradebook);
 		final List<String> students = this.businessService.getGradeableUsers(gradebook);
+
+		initAnon(form, assignments, gradebook); // OWL
 
 		this.hasGradebookItems = !assignments.isEmpty();
 		this.hasStudents = !students.isEmpty();
@@ -281,23 +291,28 @@ public class GradebookPage extends BasePage {
 				new LoadableDetachableModel() {
 					@Override
 					public GbGradeTableData load() {
-						return new GbGradeTableData(GradebookPage.this.businessService, settings);
+						return new OwlGbGradeTableData(GradebookPage.this.businessService, uiSettings);
 					}
 				});
+		// OWL - attach event listeners, replacing with empty action as required for anon grading support
+		// in anonymous gradebooks the student and/or course grade columns can be hidden using CSS
+		// to prevent anyone from tampering with the CSS and exposing these actions, we disable them on the server side
+		boolean anon = ((GradebookPage) getPage()).getOwlUiSettings().isContextAnonymous();
+		boolean hideCourseGrade = ((GradebookPage) getPage()).getOwlUiSettings().isCourseGradeHiddenInCurrentContext();
 		this.gradeTable.addEventListener("setScore", new GradeUpdateAction());
 		this.gradeTable.addEventListener("gradeRubric", new ViewRubricGradeAction());
 		this.gradeTable.addEventListener("viewLog", new ViewGradeLogAction());
 		this.gradeTable.addEventListener("editAssignment", new EditAssignmentAction());
 		this.gradeTable.addEventListener("viewStatistics", new ViewAssignmentStatisticsAction());
-		this.gradeTable.addEventListener("overrideCourseGrade", new OverrideCourseGradeAction());
+		this.gradeTable.addEventListener("overrideCourseGrade", hideCourseGrade ? new OwlEmptyAction() : new OverrideCourseGradeAction());
 		this.gradeTable.addEventListener("editComment", new EditCommentAction());
-		this.gradeTable.addEventListener("viewGradeSummary", new ViewGradeSummaryAction());
-		this.gradeTable.addEventListener("setZeroScore", new SetZeroScoreAction());
-		this.gradeTable.addEventListener("viewCourseGradeLog", new ViewCourseGradeLogAction());
+		this.gradeTable.addEventListener("viewGradeSummary", anon ? new OwlEmptyAction() : new ViewGradeSummaryAction());
+		this.gradeTable.addEventListener("setZeroScore", hideCourseGrade ? new OwlEmptyAction() : new SetZeroScoreAction());
+		this.gradeTable.addEventListener("viewCourseGradeLog", hideCourseGrade ? new OwlEmptyAction() : new ViewCourseGradeLogAction());
 		this.gradeTable.addEventListener("deleteAssignment", new DeleteAssignmentAction());
 		this.gradeTable.addEventListener("setUngraded", new SetScoreForUngradedAction());
-		this.gradeTable.addEventListener("setStudentNameOrder", new SetStudentNameOrderAction());
-		this.gradeTable.addEventListener("toggleCourseGradePoints", new ToggleCourseGradePoints());
+		this.gradeTable.addEventListener("setStudentNameOrder", anon ? new OwlEmptyAction() : new SetStudentNameOrderAction());
+		this.gradeTable.addEventListener("toggleCourseGradePoints", hideCourseGrade ? new OwlEmptyAction() : new ToggleCourseGradePoints());
 		this.gradeTable.addEventListener("editSettings", new EditSettingsAction());
 		this.gradeTable.addEventListener("moveAssignmentLeft", new MoveAssignmentLeftAction());
 		this.gradeTable.addEventListener("moveAssignmentRight", new MoveAssignmentRightAction());
@@ -460,6 +475,13 @@ public class GradebookPage extends BasePage {
 		// if only one item, hide the dropdown
 		groupFilter.setVisible(groups.size() > 1 && this.hasStudents);
 
+		// OWL - hide the group filter in an anonymous context
+		if (uiSettings.owl.isContextAnonymous())
+		{
+			groupFilter.setVisible(false);
+			toolbar.get("groupFilterOnlyOne").setVisible(false);
+		}
+
 		final WebMarkupContainer studentFilter = new WebMarkupContainer("studentFilter");
 		studentFilter.setVisible(this.hasStudents);
 		toolbar.add(studentFilter);
@@ -467,7 +489,7 @@ public class GradebookPage extends BasePage {
 		this.tableArea.add(groupFilter);
 
 		final Map<String, Object> togglePanelModel = new HashMap<>();
-		togglePanelModel.put("assignments", this.businessService.getGradebookAssignments(sortBy));
+		togglePanelModel.put("assignments", uiSettings.owl.isAnonPossible() ? businessService.owl().anon.filterByAnonContext(assignments, uiSettings.owl) : assignments);
 		togglePanelModel.put("settings", settings);
 		togglePanelModel.put("categoriesEnabled", categoriesEnabled);
 
@@ -613,6 +635,9 @@ public class GradebookPage extends BasePage {
 		response.render(JavaScriptHeaderItem
 				.forUrl(String.format("/gradebookng-tool/scripts/gradebook-connection-poll.js%s", version)));
 
+		// OWL
+		response.render(CssHeaderItem.forUrl(String.format("/gradebookng-tool/styles/owl/gradebook-owl.css%s", version)));
+
 		final StringValue focusAssignmentId = getPageParameters().get(FOCUS_ASSIGNMENT_ID_PARAM);
 		final StringValue showPopupForNewItem = getPageParameters().get(NEW_GBITEM_POPOVER_PARAM);
 		if(!showPopupForNewItem.isNull() && !focusAssignmentId.isNull()){
@@ -650,6 +675,84 @@ public class GradebookPage extends BasePage {
 		}
 		return this.liveGradingFeedback;
 	}
+
+	/* --------------- Begin OWL methods --------------------- */
+
+	/**
+	 * Initializes anonymous awareness for the page
+	 * @param form the main form on the page
+	 * @param assignments the gradebook items
+	 * @param gradebook the gradebook object
+	 */
+	private void initAnon(Form form, List<Assignment> assignments, final Gradebook gradebook)
+	{
+		OwlAnonGradingService anonServ = businessService.owl().anon;
+		UiSettings settings = getGbUiSettings(gradebook);
+
+		AnonTogglePanel anonTogglePanel = new AnonTogglePanel("anonymousToggle");
+		form.add(anonTogglePanel);
+
+		// The anonymous toggle should be visible if the gradebook is mixed. That is, if the site has anonymous IDs,
+		// and there is both anonymous and normal content to view.
+		boolean isGradebookMixed = false;
+		boolean siteHasAnonIds = !anonServ.getAnonGradingIDsForCurrentSite(gradebook).isEmpty();
+		settings.owl.setAnonPossible(siteHasAnonIds);
+
+		if (siteHasAnonIds)
+		{
+			// determine if course grade column is anon or normal
+			boolean cgAnon = anonServ.isCourseGradePureAnonForAllAssignments(assignments);
+			settings.owl.setCourseGradeAnon(cgAnon);
+
+			OwlAnonGradingService.AnonStatus status = anonServ.detectAnonStatus(assignments);
+			switch (status)
+			{
+				case NORMAL:
+					// Force this just in case an anonymous item was recently deleted and everything remaining is normal
+					settings.owl.setContextAnonymous(false);
+					// OWL-3069 deletion of last anonymous column
+					// reset the toggle to normal so that if we add a new anonymous item from
+					// the normal view, the toggle is accurate
+					anonTogglePanel.setModelObject(Boolean.FALSE);
+					// also clear anonymous sorting if set
+					if (settings.owl.getAnonIdSortOrder() != null)
+					{
+						// last anonymous item was probably just deleted, reset sort to student asc
+						settings.setSort(UiSettings.GbSortColumn.STUDENT, SortDirection.ASCENDING);
+					}
+					break;
+				case ANON:
+					// only anonymous items exist and the course grade is anonymous; force the context to anonymous
+					if (!settings.owl.isContextAnonymous())
+					{
+						settings.setSort(UiSettings.GbSortColumn.ANON_ID, SortDirection.ASCENDING);
+					}
+					settings.owl.setContextAnonymous(true);
+					break;
+				case MIXED:
+					isGradebookMixed = true;
+					break;
+			}
+
+			// populates settings.getAnonAwareAssignmentIDsForContext() and getCategoryIDsInAnonContext()
+			anonServ.setupAnonAwareAssignmentIDsAndCategoryIDsForContext(settings.owl, assignments);
+
+			// add data attributes to indicate if we're in an anonymous context and/or need to hide the course grade column
+			if (settings.owl.isContextAnonymous())
+			{
+				form.add(new AttributeModifier("data-owl-anon-context", "true"));
+			}
+			if (settings.owl.isCourseGradeHiddenInCurrentContext())
+			{
+				form.add(new AttributeModifier("data-owl-hide-course-grade", "true"));
+			}
+		}
+
+		anonTogglePanel.setVisible(isGradebookMixed);
+		settings.owl.setGradebookMixed(isGradebookMixed);
+	}
+
+	/* --------------- End OWL methods ----------------------- */
 
 	private class GbAddButton extends GbAjaxButton {
 

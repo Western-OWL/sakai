@@ -123,5 +123,10 @@
             <artifactId>xstream</artifactId>
             <version>1.4.18</version>
         </dependency>
+		<!-- OWL dependencies -->
+		<dependency>
+            <groupId>org.sakaiproject.edu-services.course-management</groupId>
+            <artifactId>coursemanagement-api</artifactId>
+        </dependency>
     </dependencies>
 </project>

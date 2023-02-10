@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<emailTemplates>
+	<emailTemplate>
+		<subject>SFTP error during course grade submission</subject>
+		<message>
+There was an error uploading approved grades to the Office of the Registrar's SFTP server for submission id: ${submissionId}
+
+The approval for this submission has been ignored and the approver (${approverEid}) has been advised to try again later.
+
+Please verify that the connection between the OWL servers and the Registrar's SFTP server is functioning.
+		</message>
+		<locale>en</locale>
+		<version>1</version>
+	</emailTemplate>
+</emailTemplates>

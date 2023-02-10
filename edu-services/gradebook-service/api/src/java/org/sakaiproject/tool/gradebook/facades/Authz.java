@@ -18,6 +18,7 @@ package org.sakaiproject.tool.gradebook.facades;
 
 import java.util.List;
 import java.util.Map;
+import org.sakaiproject.tool.gradebook.facades.owl.OwlAuthz;
 
 /**
  * Facade to external role and authorization service.
@@ -185,4 +186,7 @@ public interface Authz {
 	 * @return GradebookService.gradePermission, GradebookService.viewPermission, or null if no permission
 	 */
 	public String getGradeViewFunctionForUserForStudentForItem(String gradebookUid, Long itemId, String studentUid);
+
+	// OWL
+	public OwlAuthz owl();
 }

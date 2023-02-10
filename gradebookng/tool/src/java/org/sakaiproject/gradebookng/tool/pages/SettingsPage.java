@@ -183,9 +183,10 @@ public class SettingsPage extends BasePage {
 				if (model.getGradebookInformation().isCourseGradeDisplayed()) {
 					int displayOptions = 0;
 
-					if (model.getGradebookInformation().isCourseLetterGradeDisplayed()) {
+					// OWL-2994 --plukasew
+					/*if (model.getGradebookInformation().isCourseLetterGradeDisplayed()) {
 						displayOptions++;
-					}
+					}*/
 
 					if (model.getGradebookInformation().isCourseAverageDisplayed()) {
 						displayOptions++;

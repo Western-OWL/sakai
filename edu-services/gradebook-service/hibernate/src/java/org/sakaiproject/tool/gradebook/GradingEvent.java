@@ -51,7 +51,7 @@ public class GradingEvent implements Serializable {
     private String grade;
     @EqualsAndHashCode.Include
     private Date dateGraded = new Date();
-    private GradingEventStatus status;
+    private GradingEventStatus status = GradingEventStatus.GRADE_NONE;
 
     public static final Comparator<GradingEvent> compareByDateGraded = Comparator.comparing(GradingEvent::getDateGraded);
 
@@ -62,7 +62,6 @@ public class GradingEvent implements Serializable {
         if (grade != null) {
         	this.grade = grade.toString();
         }
-        this.status = GradingEventStatus.GRADE_NONE;
     }
 }
 

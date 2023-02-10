@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<emailTemplates>
+	<emailTemplate>
+		<subject>OWL Course Grade Approval Notice - ${sectionName}</subject>
+		<message>
+This message is a notification that ${approver} has approved final course grades for ${sectionName}
+
+Section: ${sectionName}
+Section Id: ${sectionEid}
+Approved by: ${approver}
+
+These grades have been securely transferred to the Office of the Registrar.
+
+If you have any questions regarding this email, please contact ${emailSupport}.
+		</message>
+		<locale>en</locale>
+		<version>1</version>
+	</emailTemplate>
+</emailTemplates>

@@ -26,6 +26,7 @@ import org.apache.wicket.settings.IRequestCycleSettings.RenderStrategy;
 import org.apache.wicket.spring.injection.annot.SpringComponentInjector;
 
 import org.sakaiproject.gradebookng.framework.GradebookNgStringResourceLoader;
+import org.sakaiproject.gradebookng.tool.owl.pages.FinalGradesPage;
 import org.sakaiproject.gradebookng.tool.pages.AccessDeniedPage;
 import org.sakaiproject.gradebookng.tool.pages.ErrorPage;
 import org.sakaiproject.gradebookng.tool.pages.GradebookPage;
@@ -54,6 +55,7 @@ public class GradebookNgApplication extends WebApplication {
 		mountPage("/gradebook", StudentPage.class);
 		mountPage("/accessdenied", AccessDeniedPage.class);
 		mountPage("/error", ErrorPage.class);
+		mountPage("/finalgrades", FinalGradesPage.class); // OWL
 
 		// remove the version number from the URL so that browser refreshes re-render the page
 		getRequestCycleSettings().setRenderStrategy(RenderStrategy.ONE_PASS_RENDER);

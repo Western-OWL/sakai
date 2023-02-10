@@ -57,7 +57,7 @@
                                     </a>
                                 </li>
                             {/if}
-                                <li><a href="javascript:void(0);" class="gb-view-course-grade-statistics" role="menuitem"><wicket:message key="coursegrade.option.viewcoursegradestatistics" /></a></li>
+                                <!--OWL --><li wicket:id="cgStats"><a href="javascript:void(0);" class="gb-view-course-grade-statistics" role="menuitem"><span wicket:id="cgStatsMsg"></span></a></li>
                         </ul>
                     </div>
                 {/if}
@@ -147,13 +147,14 @@
                             <li><a href="javascript:void(0);" class="gb-set-ungraded" role="menuitem"><wicket:message key="assignment.option.setungraded" /></a></li>
                         {/if}
                         <li><a href="javascript:void(0);" class="gb-hide-column" role="menuitem" data-assignmentid="${assignmentId}"><wicket:message key="assignment.option.hide" /></a></li>
-                        <li><a href="javascript:void(0);" class="gb-message-students" role="menuitem" data-assignment-id="${assignmentId}"><wicket:message key="label.submission-messager.title" /></a></li>
+                        <wicket:remove>OWL modifications below to hide sakai-submission-messager anon</wicket:remove>
+                        <li wicket:id="messageStudents"></li>
                         {if !externallyMaintained && settings.isUserAbleToEditAssessments}
                             <li><a href="javascript:void(0);" class="gb-delete-item text-danger" role="menuitem"><wicket:message key="delete.label" /></a></li>
                         {/if}
                     </ul>
                     <div id="gb-messager-for-${assignmentId}" style="display: none;" wicket:message="title:label.submission-messager.title">
-                      <sakai-submission-messager assignment-id="${assignmentId}" title="${abbrevTitle}"></sakai-submission-messager>
+                      <sakai-submission-messager wicket:id="subMsg" assignment-id="${assignmentId}" title="${abbrevTitle}"></sakai-submission-messager>
                     </div>
                 </div>
             </div>

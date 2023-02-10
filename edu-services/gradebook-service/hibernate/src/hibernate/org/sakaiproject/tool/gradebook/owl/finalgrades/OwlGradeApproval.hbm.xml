@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="org.sakaiproject.tool.gradebook">
+  <class name="org.sakaiproject.service.gradebook.shared.owl.finalgrades.OwlGradeApproval" table="OWL_GRADE_APPROVAL">
+    <id column="ID" name="id" type="long">
+      <generator class="native">
+        <param name="sequence">OWL_GRADE_APPROVAL_SEQ</param>
+      </generator>
+    </id>
+    <property column="APPROVAL_DATE" name="approvalDate" not-null="true" type="timestamp"/>
+    <property column="USER_EID" name="userEid" not-null="true" type="string"/>
+    <property column="USER_IP" name="userIp" not-null="true" type="string"/>
+    <property column="UPLOADED_TO_REGISTRAR" name="uploadedToRegistrar" not-null="true" type="boolean"/>
+  </class>
+</hibernate-mapping>

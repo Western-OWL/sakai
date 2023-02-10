@@ -1,0 +1,65 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:wicket="http://wicket.apache.org/dtds.data/wicket-xhtml1.4-strict.dtd" >
+
+<body>
+<wicket:panel>
+	<div class="panel panel-default">
+		<div class="panel-heading" role="tab" id="sectionStatsHeader">
+			<h3 class="panel-title">
+				<a id="sectionStatsToggle" role="button" data-toggle="collapse" href="#sectionStats" aria-expanded="false" aria-controls="sectionStats">
+					<wicket:message wicket:id="sectionStatsHeader">Section Statistics (based on Final Grade)</wicket:message>
+				</a>
+			</h3>
+		</div>
+		<div id="sectionStats" class="panel-collapse collapse" role="tabpanel" aria-labelledby="sectionStatsHeader">
+			<div wicket:id="redrawable" class="panel-body">
+			<table class="statsSummary" cellspacing="0" cellpadding="0">
+				<tbody>
+					<tr>
+						<td class="statsLabel"><span id="meanLabel">Mean</span></td>
+						<td class="statsValue"><span id="mean" wicket:id="mean">65.89</span></td>
+						<td class="statsLabel"><span id="medianLabel">Median</span></td>
+						<td class="statsValue"><span id="median" wicket:id="median">65.00</span></td>
+						<td class="statsLabel"><span id="sdLabel">Standard Deviation</span></td>
+						<td class="statsValue"><span id="sd" wicket:id="sd">23.27</span></td>
+						<td class="statsLabel"><span id="nLabel">Number of Grades</span></td>
+						<td class="statsValue"><span id="n" wicket:id="n">9</span></td>
+					</tr>
+					<tr>
+						<td class="statsLabel"><span id="modeLabel">Mode</span></td>
+						<td class="statsValue"><span id="mode" wicket:id="mode">--</span></td>
+						<td class="statsLabel"><span id="skewnessLabel">Skewness</span></td>
+						<td class="statsValue"><span id="skewness" wicket:id="skewness">-0.57</span></td>
+						<td class="statsLabel"><span id="aplusLabel">A+</span></td>
+						<td class="statsValue"><span id="aplus" wicket:id="aplus">1</span></td>
+						<td class="statsLabel"><span id="cLabel">C</span></td>
+						<td class="statsValue"><span id="c" wicket:id="c">2</span></td>
+					</tr>
+					<tr>
+						<td class="statsLabel"><span id="minLabel">Minimum</span></td>
+						<td class="statsValue"><span id="min" wicket:id="min">23.00</span></td>
+						<td class="statsLabel"><span id="excludedLabel">Excluded</span></td>
+						<td class="statsValue"><span id="excluded" wicket:id="excluded">0</span></td>
+						<td class="statsLabel"><span id="aLabel">A </span></td>
+						<td class="statsValue"><span id="a" wicket:id="a">2</span></td>
+						<td class="statsLabel"><span id="dLabel">D</span></td>
+						<td class="statsValue"><span id="d" wicket:id="d">1</span></td>
+					</tr>
+					<tr>
+						<td class="statsLabel"><span id="maxLabel">Maximum</span></td>
+						<td class="statsValue"><span id="max" wicket:id="max">98.00</span></td>
+						<td class="statsLabel"><span id="noGradeEnteredLabel">Grade Not Entered</span></td>
+						<td class="statsValue"><span id="noGradeEntered" wicket:id="noGradeEntered">1</span></td>
+						<td class="statsLabel"><span id="bLabel">B</span></td>
+						<td class="statsValue"><span id="b" wicket:id="b">1</span></td>
+						<td class="statsLabel"><span id="fLabel">F</span></td>
+						<td class="statsValue"><span id="f" wicket:id="f">2</span></td>
+					</tr>
+				</tbody>
+			</table>
+			</div>
+		</div>
+	</div>
+</wicket:panel>
+</body>
+</html>

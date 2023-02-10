@@ -37,6 +37,7 @@ import org.sakaiproject.tool.gradebook.Gradebook;
 import org.sakaiproject.tool.gradebook.GradebookAssignment;
 import org.sakaiproject.tool.gradebook.facades.Authn;
 import org.sakaiproject.tool.gradebook.facades.Authz;
+import org.sakaiproject.tool.gradebook.facades.owl.OwlAuthz;
 
 /**
  * An implementation of Gradebook-specific authorization needs based
@@ -47,6 +48,12 @@ public class AuthzSectionsImpl implements Authz {
 	private Authn authn;
 	private SectionAwareness sectionAwareness;
 	private GradebookPermissionService gradebookPermissionService;
+
+	public OwlAuthz owl()
+	{
+		// return null here, subclass AuthzSakai2Impl provides the real impl
+		return null;
+	}
 
 	public boolean isUserAbleToGrade(String gradebookUid) {
 		String userUid = authn.getUserUid();

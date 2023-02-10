@@ -41,6 +41,7 @@ import org.sakaiproject.service.gradebook.shared.CategoryDefinition;
 import org.sakaiproject.wicket.component.SakaiAjaxButton;
 
 import lombok.extern.slf4j.Slf4j;
+import org.sakaiproject.gradebookng.tool.owl.model.OwlGbUiSettings;
 
 /**
  * Handles bulk edits
@@ -73,7 +74,14 @@ public class BulkEditItemsPanel extends BasePanel {
 
 		final String siteId = (String) getDefaultModelObject();
 
-		final List<Assignment> assignments = this.businessService.getGradebookAssignments(siteId);
+		List<Assignment> assignments = this.businessService.getGradebookAssignments(siteId); // OWL - remove final
+
+		// OWL - filter assignments for anon
+		OwlGbUiSettings settings = ((GradebookPage) getPage()).getOwlUiSettings();
+		if (settings.isAnonPossible())
+		{
+			assignments = businessService.owl().anon.filterByAnonContext(assignments, settings);
+		}
 
 		final IModel<List<Assignment>> model = new ListModel<>(assignments);
 

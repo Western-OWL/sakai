@@ -16,6 +16,7 @@
 package org.sakaiproject.gradebookng.tool.panels;
 
 import java.text.NumberFormat;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -34,10 +35,13 @@ import org.apache.wicket.model.StringResourceModel;
 import org.sakaiproject.gradebookng.business.GbCategoryType;
 import org.sakaiproject.gradebookng.business.GbRole;
 import org.sakaiproject.gradebookng.business.model.GbUser;
+import org.sakaiproject.gradebookng.business.owl.finalgrades.OwlCourseGradeFormatter;
 import org.sakaiproject.gradebookng.business.util.CourseGradeFormatter;
 import org.sakaiproject.gradebookng.business.util.FormatHelper;
 import org.sakaiproject.gradebookng.tool.component.GbAjaxButton;
 import org.sakaiproject.gradebookng.tool.component.GbFeedbackPanel;
+import org.sakaiproject.gradebookng.tool.owl.component.OwlGbUtils;
+import org.sakaiproject.gradebookng.tool.pages.GradebookPage;
 import org.sakaiproject.service.gradebook.shared.CourseGrade;
 import org.sakaiproject.service.gradebook.shared.GradebookInformation;
 import org.sakaiproject.tool.gradebook.Gradebook;
@@ -77,18 +81,18 @@ public class CourseGradeOverridePanel extends BasePanel {
 		final boolean courseGradeVisible = this.businessService.isCourseGradeVisible(currentUserUuid);
 
 		final CourseGrade courseGrade = this.businessService.getCourseGrade(studentUuid);
-		final CourseGradeFormatter courseGradeFormatter = new CourseGradeFormatter(
+		final OwlCourseGradeFormatter courseGradeFormatter = new OwlCourseGradeFormatter(
 				gradebook,
 				currentUserRole,
 				courseGradeVisible,
 				false,
-				false,
-				this.businessService.getShowCalculatedGrade());
+				false);
 
 		// heading
-		CourseGradeOverridePanel.this.window.setTitle(
-				(new StringResourceModel("heading.coursegrade", null,
-						new Object[] { studentUser.getDisplayName(), studentUser.getDisplayId() })).getString());
+		// OWL
+		Object[] normalArgs = new Object[] { studentUser.getDisplayName(), studentUser.getDisplayId() };
+		StringResourceModel title = OwlGbUtils.getModalTitleModel(businessService, studentUser, getPage(), "heading.coursegrade", normalArgs);
+		CourseGradeOverridePanel.this.window.setTitle(title);
 
 		// form model
 		// we are only dealing with the 'entered grade' so we use this directly
@@ -97,8 +101,11 @@ public class CourseGradeOverridePanel extends BasePanel {
 		// form
 		final Form<String> form = new Form<String>("form", formModel);
 
-		form.add(new Label("studentName", studentUser.getDisplayName()));
-		form.add(new Label("studentEid", studentUser.getDisplayId()));
+		// OWL
+		boolean anon = ((GradebookPage) getPage()).getOwlUiSettings().isContextAnonymous();
+		String anonId = anon ? businessService.owl().anon.getSectionAnonIdForUser(studentUser.getDisplayId()).map(String::valueOf).orElse("") : "";
+		form.add(new Label("studentName", anon ? "" : studentUser.getDisplayName()));
+		form.add(new Label("studentEid", anon ? anonId : studentUser.getDisplayId()));
 		form.add(new Label("points", formatPoints(courseGrade, gradebook)));
 		form.add(new Label("calculated", courseGradeFormatter.format(courseGrade)));
 
@@ -121,11 +128,39 @@ public class CourseGradeOverridePanel extends BasePanel {
 
 				if (StringUtils.isNotBlank(newGrade)) {
 					final Map<String, Double> schema = gbInfo.getSelectedGradingScaleBottomPercents();
-					
-					if (!schema.containsKey(newGrade)) {
+
+					// OWL
+					final List<String> unmapped = gbInfo.getSelectedGradingScaleUnmappedGrades();
+					boolean gradeFound = false;
+					boolean isUnmapped = false;
+					for (String key : schema.keySet())
+					{
+						if (key.equalsIgnoreCase(newGrade))
+						{
+							newGrade = key;
+							gradeFound = true;
+							break;
+						}
+					}
+					if (!gradeFound)
+					{
+						for (String grade : unmapped)
+						{
+							if (grade.equalsIgnoreCase(newGrade))
+							{
+								newGrade = grade;
+								gradeFound = true;
+								isUnmapped = true;
+								break;
+							}
+						}
+					}
+					boolean showCalculatedGrade = serverConfigService.getBoolean("gradebook.coursegrade.showCalculatedGrade", true);
+
+					if (!gradeFound) {
 						try {
 							gradeScale = FormatHelper.getGradeFromNumber(newGrade, schema, currentUserLocale);
-							newGrade = FormatHelper.transformNewGrade(newGrade, currentUserLocale);
+							newGrade = showCalculatedGrade ? null : FormatHelper.transformNewGrade(newGrade, currentUserLocale); // OWL
 						}
 						catch (NumberFormatException e)	{
 							error(new ResourceModel("message.addcoursegradeoverride.invalid").getObject());
@@ -134,7 +169,8 @@ public class CourseGradeOverridePanel extends BasePanel {
 						}
 					} else {
 						gradeScale = newGrade;
-						newGrade = FormatHelper.getNumberFromGrade(gradeScale, schema, currentUserLocale);
+						// OWL mod
+						newGrade = isUnmapped || !showCalculatedGrade ? null : FormatHelper.getNumberFromGrade(gradeScale, schema, currentUserLocale);
 					}
 				}
 

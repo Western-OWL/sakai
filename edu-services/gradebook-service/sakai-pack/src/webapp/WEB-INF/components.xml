@@ -20,6 +20,10 @@
           		<value>org/sakaiproject/tool/gradebook/Category.hbm.xml</value>
           		<value>org/sakaiproject/tool/gradebook/LetterGradePercenteMapping.hbm.xml</value>
           		<value>org/sakaiproject/tool/gradebook/Permission.hbm.xml</value>
+				<!-- OWL -->
+				<value>org/sakaiproject/tool/gradebook/owl/finalgrades/OwlGradeSubmission.hbm.xml</value>
+				<value>org/sakaiproject/tool/gradebook/owl/finalgrades/OwlGradeApproval.hbm.xml</value>
+				<value>org/sakaiproject/tool/gradebook/owl/anongrading/OwlAnonGradingID.hbm.xml</value>
         		</list>
 		</property>
    </bean>
