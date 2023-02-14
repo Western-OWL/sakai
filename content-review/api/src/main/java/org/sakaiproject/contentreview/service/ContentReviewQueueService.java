@@ -181,4 +181,10 @@ public interface ContentReviewQueueService {
 	@Deprecated
 	void delete(ContentReviewItem item);
 
+	/**
+	 * Gets an item by its contentId without filtering to a specific provider
+	 * @contentId the id of the content item
+	 * @return the ContentReviewItem associated with the specified id
+	 */
+	 Optional<ContentReviewItem> getItemByContentId(String contentId);
 }

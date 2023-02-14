@@ -446,6 +446,11 @@
 		color: var(--sakai-text-color-1);
 	}
 
+	.contentReviewIconServiceUnsupported {
+		@extend .fa, .fa-chain-broken;
+		color: var(--button-disabled-text-color)
+	}
+
 	.contentReviewIconThreshold-1 {
 		@extend .contentReviewIcon;
 		color: var(--errorBanner-color);
