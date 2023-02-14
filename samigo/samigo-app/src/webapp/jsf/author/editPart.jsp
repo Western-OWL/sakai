@@ -45,7 +45,9 @@
 <%-- some back end stuff stubbed --%>
 <%-- TODO need to add validation--%>
 
-<h3><h:outputText value="#{authorMessages.create_modify_p} #{authorMessages.dash} #{sectionBean.assessmentTitle}" escape="false"/></h3>
+<div class="page-header">
+    <h1><h:outputText value="#{sectionBean.assessmentTitle} #{authorMessages.dash} #{authorMessages.create_modify_p}" escape="false"/></h1>
+</div>
 <h:form id="modifyPartForm"  onsubmit="return editorCheck();">
     <f:verbatim><input type="hidden" id="ckeditor-autosave-context" name="ckeditor-autosave-context" value="samigo_editPart" /></f:verbatim>
     <h:panelGroup rendered="#{sectionBean.sectionId!=null}"><f:verbatim><input type="hidden" id="ckeditor-autosave-entity-id" name="ckeditor-autosave-entity-id" value="</f:verbatim><h:outputText value="#{sectionBean.sectionId}"/><f:verbatim>"/></f:verbatim></h:panelGroup>
@@ -53,6 +55,8 @@
     <h:messages styleClass="sak-banner-error" rendered="#{! empty facesContext.maximumSeverity}" layout="table"/>
     <h:inputHidden id="assessmentId" value="#{sectionBean.assessmentId}"/>
     <h:inputHidden id="sectionId" value="#{sectionBean.sectionId}"/>
+
+    <p><h:outputText value="#{authorMessages.required}" /></p>
 
     <div class="tier1">
         <div class="titleEditor">
@@ -136,14 +140,24 @@
         <%-- METADATA --%>
         <fieldset>
             <legend><h:outputText value="#{authorMessages.metadata}"/></legend>
-            <h:panelGrid columns="2" columnClasses="shorttext">
-                <h:outputLabel for="obj" value="#{authorMessages.objective}" />
-                <h:inputText id="obj" value="#{sectionBean.objective}" disabled="#{!author.isEditPendingAssessmentFlow}"/>
-                <h:outputLabel for="keyword" value="#{authorMessages.keyword}" />
-                <h:inputText id="keyword" value="#{sectionBean.keyword}" disabled="#{!author.isEditPendingAssessmentFlow}"/>
-                <h:outputLabel for="rubric" value="#{authorMessages.rubric_colon}" />
-                <h:inputText id="rubric" value="#{sectionBean.rubric}" disabled="#{!author.isEditPendingAssessmentFlow}"/>
-            </h:panelGrid>
+            <div class="form-group row">
+                <h:outputLabel for="obj" value="#{authorMessages.objective}" styleClass="col-md-2 col-lg-1 form-control-label"/>
+                <div class="col-md-5">
+                    <h:inputText size="30" id="obj" value="#{sectionBean.objective}" disabled="#{!author.isEditPendingAssessmentFlow}" styleClass="form-control"/>
+                </div>
+            </div>
+            <div class="form-group row">
+                <h:outputLabel for="keyword" value="#{authorMessages.keyword}" styleClass="col-md-2 col-lg-1 form-control-label"/>
+                <div class="col-md-5">
+                    <h:inputText size="30" id="keyword" value="#{sectionBean.keyword}" disabled="#{!author.isEditPendingAssessmentFlow}" styleClass="form-control"/>
+                </div>
+            </div>
+            <div class="form-group row">
+                <h:outputLabel for="rubric" value="#{authorMessages.rubric_colon}" styleClass="col-md-2 col-lg-1 form-control-label"/>
+                <div class="col-md-5">
+                    <h:inputText size="30" id="rubric" value="#{sectionBean.rubric}" disabled="#{!author.isEditPendingAssessmentFlow}" styleClass="form-control"/>
+                </div>
+            </div>
         </fieldset>
 
   <p class="act">
@@ -159,8 +173,6 @@
           type="org.sakaiproject.tool.assessment.ui.listener.author.EditAssessmentListener" />
      </h:commandButton>
   </p>
-  
-<h:outputText value="#{authorMessages.required}" />
 
 </h:form>
 <!-- end content -->

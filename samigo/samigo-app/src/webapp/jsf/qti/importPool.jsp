@@ -41,15 +41,17 @@
  <h:form id="importPoolForm" enctype="multipart/form-data">
 
    <h:inputHidden value="#{xmlImport.importType}" />
-   <h3><h:outputText  value="#{authorImportExport.import_qp}" /></h3>
-    <div class="tier1">
+   <div class="page-header">
+       <h1><h:outputText  value="#{authorImportExport.import_qp}" /></h1>
+   </div>
+    <div>
      <div class="form_label">
       <h:messages styleClass="sak-banner-error" rendered="#{! empty facesContext.maximumSeverity}" layout="table"/>
       <%-- currently import pool mirrors import assessment --%>
       <h:outputText value="#{authorImportExport.import_pool_instructions}" escape="false"/>
     </div>
     <br />
-   <div class="tier2">
+   <div class="tier1">
    <h:outputLabel  styleClass="form_label" value="#{authorImportExport.choose_file}"/>
     <%-- target represents location where import will be temporarily stored
         check valueChangeListener for final destination --%>
@@ -57,15 +59,14 @@
       valueChangeListener="#{xmlImport.importPoolFromQti}"/>
    </div>
     <br/>
-    <br/>
-     <%-- activates the valueChangeListener --%>
-     <h:commandButton id="questionPoolsLink" value="#{authorImportExport.import_action}" type="submit"
-       style="act" action="poolList" >
+    <div class="act">
+    <%-- activates the valueChangeListener --%>
+     <h:commandButton id="questionPoolsLink" value="#{authorImportExport.import_action}" type="submit" styleClass="active" action="poolList" >
        <f:actionListener type="org.sakaiproject.tool.assessment.ui.listener.questionpool.QuestionPoolListener" />
 	 </h:commandButton>
      <%-- immediate=true bypasses the valueChangeListener --%>
-     <h:commandButton value="#{commonMessages.cancel_action}" type="submit"
-       style="act" action="poolList" immediate="true"/>
+     <h:commandButton value="#{commonMessages.cancel_action}" type="submit" action="poolList" immediate="true"/>
+   </div>
   </div>
 
  </h:form>

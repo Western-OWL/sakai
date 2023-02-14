@@ -24,45 +24,46 @@
   <h:messages rendered="#{! empty facesContext.maximumSeverity}" infoClass="validation" warnClass="validation" errorClass="validation" fatalClass="validation"/>
 
   <div class="page-header">
-    <h1>
-      <h:outputText value="#{eventLogMessages.log}"/>
-    </h1>
+    <h1><h:outputText value="#{eventLogMessages.log}"/></h1>
   </div>
 
-  <h:panelGroup layout="block" styleClass="sakai-table-buttonContainer act pull-right clear">
-    <h:commandButton action="eventLog" value="#{eventLogMessages.previous}" disabled="#{!eventLog.hasPreviousPage}" title="#{eventLogMessages.previous}" styleClass="button" id="previousEventPage">
-      <f:actionListener type="org.sakaiproject.tool.assessment.ui.listener.author.EventLogPreviousPageListener" />
-    </h:commandButton>
-    <h:commandButton action="eventLog" value="#{eventLogMessages.next}" disabled="#{!eventLog.hasNextPage}" title="#{eventLogMessages.previous}" styleClass="button">
-      <f:actionListener type="org.sakaiproject.tool.assessment.ui.listener.author.EventLogNextPageListener" />
-    </h:commandButton>
-  </h:panelGroup>
-
- <div class="divContainer row">
-   <div class="divLeft col-lg-6 col-md-4 col-sm-5 col-xs-12">
-     <h:outputLabel value="#{eventLogMessages.filterBy}" />
-     <h:outputText value="&#160;" escape="false" />
-     <h:selectOneMenu value="#{eventLog.filteredAssessmentId}" id="assessmentTitle"
-         required="true" onchange="document.forms[0].submit();">
-        <f:selectItems value="#{eventLog.assessments}"/>
-        <f:valueChangeListener type="org.sakaiproject.tool.assessment.ui.listener.author.EventLogListener" />
-     </h:selectOneMenu>
-   </div>
-   <div class="divRight col-md-8 col-lg-6 col-sm-7 col-xs-12" id="eventSearchContainer">
-      <h:inputText id="IE_hidden" value="" disabled="true" style="display: none;" />
-      <h:inputText id="filteredUser" value="#{eventLog.filteredUser}" size="30" autocomplete="off" onkeypress="return submitOnEnter(event, 'eventLogId:search');" />
-      <h:outputText value="&#160;" escape="false" />
-      <h:commandButton value="#{eventLogMessages.search}" type="submit" id="search" accesskey="#{eventLogMessages.a_search}">
-         <f:actionListener type="org.sakaiproject.tool.assessment.ui.listener.author.EventLogListener" />
-      </h:commandButton>
-      <h:commandButton value="#{eventLogMessages.clear}" type="submit" id="clear" accesskey="#{eventLogMessages.a_clear}">
-         <f:actionListener type="org.sakaiproject.tool.assessment.ui.listener.author.EventLogListener" />
-      </h:commandButton>
-   </div>
- </div>
+  <div class="sakai-table-toolBar">
+    <div class="sakai-table-filterContainer">
+        <div class="sakai-table-viewFilter">
+            <h:outputLabel value="#{eventLogMessages.filterBy}" for="assessmentTitle" />
+            <h:selectOneMenu value="#{eventLog.filteredAssessmentId}" id="assessmentTitle" required="true" onchange="document.forms[0].submit();">
+                <f:selectItems value="#{eventLog.assessments}"/>
+                <f:valueChangeListener type="org.sakaiproject.tool.assessment.ui.listener.author.EventLogListener" />
+            </h:selectOneMenu>
+        </div>
+        <div class="sakai-table-searchFilter" id="eventSearchContainer">
+            <h:inputText id="IE_hidden" value="" disabled="true" style="display: none;" />
+            <h:outputLabel value="#{eventLogMessages.search}" for="filteredUser" />
+            <div class="sakai-table-searchFilterControls">
+                <h:inputText id="filteredUser" styleClass="sakai-table-searchFilter-searchField" value="#{eventLog.filteredUser}" size="30" autocomplete="off" onkeypress="return submitOnEnter(event, 'eventLogId:search');" />
+                <h:commandButton value="#{eventLogMessages.search}" type="submit" id="search" accesskey="#{eventLogMessages.a_search}">
+                    <f:actionListener type="org.sakaiproject.tool.assessment.ui.listener.author.EventLogListener" />
+                </h:commandButton>
+                <h:commandButton value="#{eventLogMessages.clear}" type="submit" id="clear" accesskey="#{eventLogMessages.a_clear}">
+                    <f:actionListener type="org.sakaiproject.tool.assessment.ui.listener.author.EventLogListener" />
+                </h:commandButton>
+                </div>
+        </div>
+    </div>
+    <div class="sakai-table-pagerContainer">
+        <h:panelGroup layout="block" styleClass="sakai-table-pagerControls">
+            <h:commandButton action="eventLog" value="#{eventLogMessages.previous}" disabled="#{!eventLog.hasPreviousPage}" title="#{eventLogMessages.previous}" styleClass="button" id="previousEventPage">
+                <f:actionListener type="org.sakaiproject.tool.assessment.ui.listener.author.EventLogPreviousPageListener" />
+            </h:commandButton>
+            <h:commandButton action="eventLog" value="#{eventLogMessages.next}" disabled="#{!eventLog.hasNextPage}" title="#{eventLogMessages.previous}" styleClass="button">
+                <f:actionListener type="org.sakaiproject.tool.assessment.ui.listener.author.EventLogNextPageListener" />
+            </h:commandButton>
+            </h:panelGroup>
+    </div>
+  </div>
 
  <div class="table-responsive">
- <h:dataTable styleClass="table table-striped" value="#{eventLog.eventLogDataList}" var="log">
+ <h:dataTable styleClass="table table-hover table-striped table-bordered" value="#{eventLog.eventLogDataList}" var="log">
   <!-- Assessment Title... -->
     <h:column>
     <f:facet name="header">

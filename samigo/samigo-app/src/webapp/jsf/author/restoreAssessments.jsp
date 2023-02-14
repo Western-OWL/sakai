@@ -18,8 +18,9 @@
                     var notEmptyTableTd = $("#restoreAssessmentsForm\\:deletedAssessmentsTable td:not(:empty)").length;
                     if (notEmptyTableTd > 0) {
                         $("#restoreAssessmentsForm\\:deletedAssessmentsTable").DataTable({
+                            "dom": '<"sakai-table-toolBar"<"sakai-table-filterContainer"<"sakai-table-searchFilter"f>><"sakai-table-pagerContainer"<"sakai-table-pagerLabel"i><"sakai-table-pagerControls"l>>>tp',
                             "paging": true,
-                            "lengthMenu": [[5, 10, 20, 50, 100, 200, -1], [5, 10, 20, 50, 100, 200, <h:outputText value="'#{authorFrontDoorMessages.assessment_view_all}'" />]],
+                            "lengthMenu": [[5, 10, 20, 50, 100, 200], [<h:outputText value="'#{authorFrontDoorMessages.datatables_lengthMenu5}'" />, <h:outputText value="'#{authorFrontDoorMessages.datatables_lengthMenu10}'" />, <h:outputText value="'#{authorFrontDoorMessages.datatables_lengthMenu20}'" />, <h:outputText value="'#{authorFrontDoorMessages.datatables_lengthMenu50}'" />, <h:outputText value="'#{authorFrontDoorMessages.datatables_lengthMenu100}'" />, <h:outputText value="'#{authorFrontDoorMessages.datatables_lengthMenu200}'" />]],
                             "pageLength": 20,
                             "aaSorting": [[0, "desc"]],
                             "columns": [
@@ -46,6 +47,7 @@
                                 }
                             },
                             "fnDrawCallback": function(oSettings) {
+                                $("div#restoreAssessmentsForm\\:deletedAssessmentsTable_length > label > select").removeProp("class");
                                 $(".select-checkbox").prop("checked", false);
                                 updateRestoreButton();
                             }
@@ -122,7 +124,7 @@
                         </h:column>
                     </h:dataTable>
                     <div class="clearfix"></div>
-                    <p class="act">
+                    <p class="act samigo-dataTable-footer">
                         <h:commandButton id="restore-selected" value="#{authorMessages.restore_assessments_restore}"
                             type="submit" action="#{restoreAssessmentsBean.restoreAssessments}" styleClass="disabled" />
                         <h:commandButton value="#{authorMessages.button_cancel}" type="submit" action="#{restoreAssessmentsBean.cancel}"/>

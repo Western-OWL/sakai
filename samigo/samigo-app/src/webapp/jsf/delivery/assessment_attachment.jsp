@@ -23,10 +23,8 @@
 <!-- 2a ATTACHMENTS -->
 
  <h:panelGroup rendered="#{delivery.hasAttachment}">
- 	<f:verbatim><p></p></f:verbatim>
+ <h2><h:outputText value="#{deliveryMessages.attachments}" rendered="#{delivery.hasAttachment}"/></h2>
  </h:panelGroup>
- <h:outputLabel value="#{deliveryMessages.attachments}" rendered="#{delivery.hasAttachment}"/>
-  <f:verbatim><br/></f:verbatim>
 
   <h:panelGroup rendered="#{delivery.hasAttachment}">
     <h:dataTable value="#{delivery.attachmentList}" var="attach" border="0">

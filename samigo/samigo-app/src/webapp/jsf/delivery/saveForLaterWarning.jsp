@@ -40,23 +40,20 @@
 
 <h:form id="saveForLater">
 <!-- DONE BUTTON FOR PREVIEW -->
-<h:panelGroup rendered="#{delivery.actionString=='previewAssessment'}">
- <f:verbatim><div class="sak-banner-info"></f:verbatim>
+  <h:panelGroup styleClass="sak-banner-warn" rendered="#{delivery.actionString=='previewAssessment'}" layout="block">
      <h:outputText value="#{deliveryMessages.ass_preview}" escape="false" />
      <h:commandButton value="#{deliveryMessages.exit_preview}"
         styleClass="exitPreviewButton"
         action="#{person.cleanResourceIdListInPreview}"
         type="submit"
         onclick="return returnToHostUrl(\"#{delivery.selectURL}\");" />
- <f:verbatim></div></f:verbatim>
-</h:panelGroup>
+  </h:panelGroup>
 
 <div class="portletBody">
-<h3 style="insColor insBak">
-   <h:outputText value="#{deliveryMessages.assessment_exit_warning_title}" />
-</h3>
-<br/>
-  <!-- content... -->
+    <div class="page-header">
+        <h1><h:outputText value="#{deliveryMessages.assessment_exit_warning_title}" /></h1>
+    </div>
+
   <h:panelGroup styleClass="sak-banner-warn">
   <h:panelGrid border="0">
       <h:outputText value="#{deliveryMessages.save_for_later_warning_1}" escape="false"/>
@@ -74,17 +71,8 @@
        <h:commandButton id="continue" value="#{deliveryMessages.button_continue}" type="submit"
         action="select" disabled="#{delivery.actionString=='previewAssessment'}">
        </h:commandButton>
- </p> 
-  <!-- end content -->
+ </p>
 </div>
-
-<!-- DONE BUTTON IN PREVIEW -->
-<h:panelGroup rendered="#{delivery.actionString=='previewAssessment'}"> 
-  <h:commandButton value="#{deliveryMessages.exit_preview}" 
-     action="#{person.cleanResourceIdListInPreview}" 
-     type="submit" 
-     onclick="return returnToHostUrl(\"#{delivery.selectURL}\");" /> 
-</h:panelGroup> 
 
  </h:form>
       </body>

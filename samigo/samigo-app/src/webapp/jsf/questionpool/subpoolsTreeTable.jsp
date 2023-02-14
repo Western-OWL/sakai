@@ -20,9 +20,7 @@
 **********************************************************************************/
 --%>
 -->
-<h:dataTable id="TreeTable" cellpadding="0" cellspacing="0" value="#{questionpool.sortedSubqpools}"
-	 var="pool" styleClass="listHier" >
-
+<h:dataTable id="TreeTable" cellpadding="0" cellspacing="0" value="#{questionpool.sortedSubqpools}" var="pool" styleClass="table table-hover table-striped table-bordered" >
     <h:column id="col1">
      <f:facet name="header">
       <h:panelGroup>
@@ -47,10 +45,10 @@
      </h:panelGroup>
      </f:facet>
 
-<h:panelGroup styleClass="tier#{questionpool.tree.currentLevel-questionpool.parentPoolSize-1}"  id="firstcolumn">
+<h:panelGroup id="firstcolumn">
 <h:inputHidden id="rowid" value="#{questionpool.tree.currentObjectHTMLId}"/>
 
-<h:outputLink title="#{questionPoolMessages.t_toggletree}" id="parenttogglelink"  onclick="toggleRows(this)" value="#" styleClass="treefolder" rendered="#{questionpool.tree.hasChildList}" >
+<h:outputLink title="#{questionPoolMessages.t_toggletree}" id="parenttogglelink"  onclick="toggleRows(this);return false;" value="#" styleClass="treefolder" rendered="#{questionpool.tree.hasChildList}" >
 <h:graphicImage alt="#{questionPoolMessages.alt_togglelink}" id="spacer_for_mozilla" style="border:0" height="14" width="30" value="/images/delivery/spacer.gif" />
 </h:outputLink>
 
@@ -64,9 +62,8 @@
   <f:param name="qpid" value="#{pool.questionPoolId}"/>
 </h:commandLink>
 
-<f:verbatim><br/></f:verbatim>
 <h:graphicImage id="spacer" style="border:0" height="14" width="30" value="/images/delivery/spacer.gif" />
- <f:verbatim><span class="itemAction"></f:verbatim>
+<h:panelGroup styleClass="itemAction" layout="block">
 
 <!-- Add SubPools -->
 <h:commandLink title="#{questionPoolMessages.t_addSubpool}" rendered="#{questionpool.importToAuthoring != 'true' && pool.ownerId==questionpool.agentId}"  id="addlink" immediate="true" action="#{questionpool.addPool}">	
@@ -114,7 +111,7 @@
   <f:param name="qpid" value="#{pool.questionPoolId}"/>
 </h:commandLink>
 
- <f:verbatim></span></f:verbatim>
+</h:panelGroup>
 
 </h:panelGroup>
     </h:column>

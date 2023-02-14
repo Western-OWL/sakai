@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=utf-8" pageEncoding="utf-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsf/html" prefix="h" %>
 <%@ taglib uri="http://java.sun.com/jsf/core" prefix="f" %>
+<%@ taglib uri="http://myfaces.apache.org/tomahawk" prefix="t"%>
 <%@ taglib uri="http://www.sakaiproject.org/samigo" prefix="samigo" %>
 <!DOCTYPE html
      PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
@@ -36,34 +37,22 @@
 <!-- content... -->
 <div class="portletBody">
  <h:form id="removePoolForm">
-   <h:panelGrid cellpadding="5" cellspacing="3">
-     <h:panelGroup>
-       <f:verbatim><h3 style="insColor insBak"></f:verbatim>
-       <h:outputText  value="#{questionPoolMessages.rm_q_confirm}" />
-       <f:verbatim></h3></f:verbatim>
-     </h:panelGroup>
-     <h:outputText styleClass="validation" value="#{questionPoolMessages.remove_sure_q}" />
-
-<h:dataTable value="#{questionpool.itemsToDelete}" var="question">
-      <h:column>
-       <h:outputText escape="false" value="#{question.text}" />
-      </h:column>
-</h:dataTable>
-
-     <h:panelGrid columns="2" cellpadding="3" cellspacing="3">
-  <h:commandButton type="submit" immediate="true" id="Submit" value="#{commonMessages.remove_action}"
-    action="#{questionpool.removeQuestionsFromPool}" >
-  </h:commandButton>
-
-<h:commandButton id="cancel" style="act" value="#{commonMessages.cancel_action}" action="editPool"/>
-
-     </h:panelGrid>
-   </h:panelGrid>
+   <div class="page-header">
+        <h1><h:outputText  value="#{questionPoolMessages.rm_q_confirm}" /></h1>
+    </div>
+    <div class="sak-banner-warn">
+        <h:outputText value="#{questionPoolMessages.remove_sure_q}" />
+    </div>
+    <t:dataList value="#{questionpool.itemsToDelete}" var="question" layout="unorderedList">
+        <h:outputText escape="false" value="#{question.text}" />
+    </t:dataList>
+    <div class="act">
+        <h:commandButton type="submit" immediate="true" id="Submit" value="#{commonMessages.remove_action}" action="#{questionpool.removeQuestionsFromPool}" styleClass="active" />
+        <h:commandButton id="cancel" style="act" value="#{commonMessages.cancel_action}" action="editPool"/>
+    </div>
 
  </h:form>
  <!-- end content -->
-
-
 </div>
 
 </body>

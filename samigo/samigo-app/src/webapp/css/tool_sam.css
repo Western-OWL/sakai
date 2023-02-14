@@ -63,21 +63,12 @@ table.presentation p {
   font-size: 1.1em;
   margin: 8px 0;
 }
-h4.samigo-category-subhead {
-  font-weight: bold;
-  padding-bottom: 8px;
-  color: var(--sakai-text-color-1);
-}
-
-h4.samigo-category-subhead-2 {
-  font-weight: bold;
-  margin-top: -2px;
-  color: var(--sakai-text-color-1);
-}
 
 .treefolder, .treefolder-open, .treedoc {
  position: relative;
- margin-right: 15px;
+ display: inline-block;
+ width: 1em;
+ height: 1em;
 }
 
 .treefolder:before {
@@ -116,7 +107,7 @@ h4.samigo-category-subhead-2 {
   text-align:left;
   padding: 16px;
   vertical-align: bottom;
-  font-size:1.2em
+  font-size:1em
 }
 
 .textTable
@@ -517,6 +508,11 @@ a.hideDivision {
 {
   color: var(--sakai-text-color-dimmed);
 }
+
+#assessmentSettingsAction\:finalPageUrlValidate {
+  margin-top: 4px;
+}
+
 .submissionInfoCol1{
     width: 200px; 
 }
@@ -553,12 +549,30 @@ span.author_mcLabelText {
 }
 
 #jqueryui-accordion .ui-accordion-content {
-    background-color: var(--sakai-background-color-2);
+    background-color: var(--sakai-background-color-1);
 }
 #jqueryui-accordion .ui-accordion-header {
+    display: flex;
+    align-items: center;
+    margin-top: 5px;
+    padding: 0 10px;
     border-top-left-radius: 4px;
     border-top-right-radius: 4px;
     border: 1px solid var(--sakai-border-color);
+    background-color: var(--sakai-background-color-2);
+    font-size: 16px;
+}
+#jqueryui-accordion .jqueryui-hideDivision {
+    display: inline-block;
+    padding: 10px;
+    width: 100%;
+    font-weight: bold;
+}
+#jqueryui-accordion .ui-state-default a, #jqueryui-accordion .ui-state-default a:link, #jqueryui-accordion .ui-state-default a:visited, #jqueryui-accordion .ui-state-default a:hover, #jqueryui-accordion .ui-state-default a:focus {
+    color: var(--link-color);
+}
+#jqueryui-accordion .ui-state-active a, #jqueryui-accordion .ui-state-active a:link, #jqueryui-accordion .ui-state-active a:visited, #jqueryui-accordion .ui-state-active a:hover, #jqueryui-accordion .ui-state-active a:focus {
+    color: var(--link-color);
 }
 
 .html {
@@ -915,9 +929,8 @@ background-color:var(--sakai-background-color-2);
     margin-top: 3px;
 }
 
-.groupTable {
-	margin-top: 4px;
-    margin-left: 269px;
+#assessmentSettingsAction .hasDatepicker {
+    height: 34px;
 }
 
 label.inactive
@@ -997,8 +1010,12 @@ label.inactive
 
 #modifyPartForm fieldset
 {
-    padding: 1em 0 1em 0;
+    padding: 10px 0;
     margin: 0;
+}
+
+#modifyPartForm legend {
+    padding: 10px 0 0 0;
 }
 
 #modifyPartForm fieldset.addEditPartOptions
@@ -1025,16 +1042,16 @@ label.inactive
     padding: 0;
 }
 
-div.expanded, div.collapsed {
+div.expanded, div.collapsed, span.expanded, span.collapsed {
     cursor: pointer !important;
     padding-left: 1em !important;
 }
 
-div.expanded {
+div.expanded, span.expanded {
     background: url('/library/image/sakai/collapse.gif') no-repeat left !important;
 }
 
-div.collapsed {
+div.collapsed, span.collapsed {
     background: url('/library/image/sakai/expand.gif') no-repeat left !important;
 }
 
@@ -1107,6 +1124,11 @@ div.collapsed {
 #editform .tier10,
 #transferPool .tier10 {
 	margin-left: 10em;
+}
+
+#questionpool .itemAction {
+	display: inline-block;
+	margin: 0 0 0 2em;
 }
 
 ul.groupList {
@@ -1407,19 +1429,6 @@ label#itemForm\:noFeedbackMsg {
 	color: var(--sakai-text-color-disabled);
 }
 
-input#eventLogId\:previousEventPage,
-input#eventLogId\:search {
-	margin-right: 4px;
-}
-
-input#eventLogId\:clear {
-	margin-right: 8px;
-}
-
-div#eventSearchContainer {
-	margin-top: 4px;
-}
-
 .noListStyle {
 	list-style: none;
 	padding-left: 0;
@@ -1494,10 +1503,6 @@ td.stats-correctness {
 	margin-top: 10px;
 }
 
-.feedbackByDatePanel {
-  padding-left: 2em;
-}
-
 #autosave-msg {
 	visibility: hidden;
 }
@@ -1505,8 +1510,22 @@ td.stats-correctness {
 #autosave-lasttime-msg {
 	display: none;
 }
-
-
 ul.sak-banner-success, ul.sak-banner-info, ul.sak-banner-warn, ul.sak-banner-error {
 	list-style: none;
+}
+
+#itemFormHeading h2 {
+  display: flex;
+}
+
+#itemFormHeading .removeLink {
+  margin-left: auto;
+  font-size: 14px;
+  font-weight: normal;
+}
+
+#importAssessmentForm legend {
+  margin-top: 1em;
+  padding-left: 0;
+  font-size: 1em;
 }

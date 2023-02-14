@@ -39,17 +39,17 @@
  <!-- content... -->
  <h:form id="publishAssessmentForm">
    <h:inputHidden id="assessmentId" value="#{assessmentSettings.assessmentId}"/>
-   <h3>
+   <div class="page-header">
+   <h1>
+      <h:outputText value="#{assessmentSettings.title} #{authorMessages.dash} " escape="false" />
       <h:outputText value="#{assessmentSettingsMessages.publish_assessment}" escape="false" rendered="#{author.isEditPendingAssessmentFlow}"/>
       <h:outputText value="#{assessmentSettingsMessages.republish_assessment}" escape="false" rendered="#{!author.isEditPendingAssessmentFlow && !author.isRepublishAndRegrade}"/>
       <h:outputText value="#{assessmentSettingsMessages.regrade_republish_assessment}" escape="false" rendered="#{!author.isEditPendingAssessmentFlow && author.isRepublishAndRegrade}"/>
-   </h3>
-<div class="tier1">
-
-  <!-- Error publishing assessment -->
-  <h:messages globalOnly="true"  styleClass="sak-banner-error" rendered="#{! empty facesContext.maximumSeverity && facesContext.maximumSeverity.ordinal != 1}"/>
+   <</h1>
+   </div>
+<div>
+  <h:messages globalOnly="true"  styleClass="sak-banner-error" rendered="#{! empty facesContext.maximumSeverity}" layout="table"/>
   <h:messages styleClass="sak-banner-warn" rendered="#{! empty facesContext.maximumSeverity && facesContext.maximumSeverity.ordinal == 1}"/>
-
 <h:panelGrid border="0" width="100%">
   <h:outputText value=" " />
   <h:panelGroup rendered="#{author.isEditPendingAssessmentFlow}">
@@ -80,74 +80,17 @@
 </h:panelGrid>
 </h:panelGrid>
 
-<f:verbatim>
-<style type="text/css">
-.topAlign{
-	vertical-align: TOP
-}
-</style>
-</f:verbatim>
-<h:panelGrid columns="5" styleClass="act" rowClasses="topAlign">
-  <!-- Cancel button -->
-   <h:commandButton value="#{commonMessages.cancel_action}" type="submit" action="#{author.getFirstFromPage}" rendered="#{author.isEditPendingAssessmentFlow}"/>
-   <h:commandButton value="#{commonMessages.cancel_action}" type="submit" action="editAssessment" rendered="#{!author.isEditPendingAssessmentFlow}">
-	  <f:actionListener type="org.sakaiproject.tool.assessment.ui.listener.author.EditAssessmentListener" />
-   </h:commandButton>
-
-   <h:commandButton value="#{assessmentSettingsMessages.button_edit_settings}" type="submit" action="editAssessmentSettings" rendered="#{author.isEditPendingAssessmentFlow}">
-      <f:actionListener type="org.sakaiproject.tool.assessment.ui.listener.author.SetFromPageAsPublishAssessmentListener" />
-   </h:commandButton>
-   <h:commandButton value="#{assessmentSettingsMessages.button_edit_settings}" type="submit" action="editPublishedAssessmentSettings" rendered="#{!author.isEditPendingAssessmentFlow}">
-      <f:actionListener type="org.sakaiproject.tool.assessment.ui.listener.author.SetFromPageAsPublishAssessmentListener" />
-   </h:commandButton>
-	
-   <!-- Publish, Republishe and Regrade, or Republish button -->
-   <h:commandButton id="publish" value="#{commonMessages.publish_action}" type="submit"
-	 styleClass="active" action="publishAssessment" onclick="toggle()" onkeypress="toggle()" rendered="#{author.isEditPendingAssessmentFlow}">
-	  <f:actionListener
-		type="org.sakaiproject.tool.assessment.ui.listener.author.PublishAssessmentListener" />
-   </h:commandButton>
-
-	<h:commandButton  value="#{authorMessages.button_republish_and_regrade}" type="submit" styleClass="active" rendered="#{!author.isEditPendingAssessmentFlow && author.isRepublishAndRegrade}" action="publishAssessment" onclick="SPNR.disableControlsAndSpin(this, null);">
-		<f:actionListener type="org.sakaiproject.tool.assessment.ui.listener.author.RepublishAssessmentListener" />
-	</h:commandButton>
-
-	<h:commandButton  value="#{authorMessages.button_republish}" type="submit" styleClass="active" rendered="#{!author.isEditPendingAssessmentFlow && !author.isRepublishAndRegrade}" action="publishAssessment" onclick="SPNR.disableControlsAndSpin(this, null);">
-		<f:actionListener type="org.sakaiproject.tool.assessment.ui.listener.author.RepublishAssessmentListener" />
-	</h:commandButton>
-
-<h:panelGrid columns="1" border="0">
-	<h:selectOneMenu id="number" value="1" onchange="document.forms[0].submit();">
-          <f:selectItems value="#{publishRepublishNotification.notificationLevelChoices}" />
-          <f:valueChangeListener type="org.sakaiproject.tool.assessment.ui.listener.author.PublishRepublishNotificationListener" />
-    </h:selectOneMenu>
-	<h:panelGroup rendered="#{author.isEditPendingAssessmentFlow && not empty assessmentSettings.dueDate && calendarServiceHelper.calendarExistsForSite}">
-		<h:selectBooleanCheckbox id="calendarDueDate" value="true"/>
-		<h:outputText value="#{assessmentSettingsMessages.calendarDueDate} #{calendarServiceHelper.calendarTitle}" escape="false"/>
-	</h:panelGroup>
-	<h:panelGroup rendered="#{!author.isEditPendingAssessmentFlow && not empty publishedSettings.dueDate && calendarServiceHelper.calendarExistsForSite}">
-		<h:selectBooleanCheckbox id="calendarDueDate2" value="true"/>
-		<h:outputText value="#{assessmentSettingsMessages.calendarDueDate} #{calendarServiceHelper.calendarTitle}" escape="false"/>
-	</h:panelGroup>
-</h:panelGrid>
-	
-
-  </h:panelGrid>
+<h:panelGroup styleClass="sak-banner-info" layout="block">
+	<p>
+		<h:outputText value="#{assessmentSettingsMessages.notification}" styleClass="notification" rendered="#{publishRepublishNotification.sendNotification}" escape="false"/>
+		<h:outputText value="#{assessmentSettingsMessages.subject} #{publishRepublishNotification.notificationSubject}" rendered="#{publishRepublishNotification.sendNotification}"/>
+		<h:inputTextarea id="message1" value="#{publishRepublishNotification.prePopulateText}" styleClass='prePopulateText' onmousedown="clearText1()" rows="2" cols="70" rendered="#{publishRepublishNotification.sendNotification && author.isEditPendingAssessmentFlow}"/>
+		<h:inputTextarea id="message2" value="#{publishRepublishNotification.prePopulateText}" styleClass='prePopulateText' onmousedown="clearText2()" rows="2" cols="70" rendered="#{publishRepublishNotification.sendNotification && !author.isEditPendingAssessmentFlow}"/>
+	</p>
 
 
-
-<h:panelGrid columns="1" border="0" width="78%" styleClass="settings">
-<h:panelGrid columns="1" border="0">
-<h:panelGrid columns="1" border="0">
-<h:outputText value="#{assessmentSettingsMessages.notification}" styleClass="notification" rendered="#{publishRepublishNotification.sendNotification}" escape="false"/>
-<h:outputText value="#{assessmentSettingsMessages.subject} #{publishRepublishNotification.notificationSubject}" rendered="#{publishRepublishNotification.sendNotification}"/>
-
-  <h:inputTextarea id="message1" value="#{publishRepublishNotification.prePopulateText}" styleClass='prePopulateText' onmousedown="clearText1()" rows="2" cols="70" rendered="#{publishRepublishNotification.sendNotification && author.isEditPendingAssessmentFlow}"/>
-  <h:inputTextarea id="message2" value="#{publishRepublishNotification.prePopulateText}" styleClass='prePopulateText' onmousedown="clearText2()" rows="2" cols="70" rendered="#{publishRepublishNotification.sendNotification && !author.isEditPendingAssessmentFlow}"/>
-</h:panelGrid>
-
-<h:panelGrid columns="1" rowClasses="shorttextPadding" rendered="#{author.isEditPendingAssessmentFlow}" border="0">
-	<h:panelGroup>
+   <h:panelGroup rendered="#{author.isEditPendingAssessmentFlow}">
+		<p>
 		<h:panelGroup rendered="#{assessmentSettings.title ne null}"> 
 			<f:verbatim><b></f:verbatim>
 			<h:outputText value="\"#{assessmentSettings.title}\"" />
@@ -169,18 +112,17 @@
 			<f:param value="#{assessmentSettings.releaseToGroupsAsHtml}" />
 			<f:param value="#{assessmentSettings.publishedUrl}" />
 		</h:outputFormat>
-	</h:panelGroup>
+	</p>
 	
 	<h:panelGroup  rendered="#{assessmentSettings.dueDate ne null}" > 
-		<f:verbatim><br/></f:verbatim>
+		<p>
 		<h:outputFormat value=" #{assessmentSettingsMessages.it_is_due}" escape="false">
 			<f:param value="#{assessmentSettings.dueDateInClientTimezoneString}" />
-		</h:outputFormat>	
+		</h:outputFormat>
+		</p>
 	</h:panelGroup>
 	
-	<f:verbatim><br/></f:verbatim>    
-
-	<h:panelGroup>
+	<p>
 	<h:outputText value="#{assessmentSettingsMessages.the_time_limit_is} #{assessmentSettings.timedHours} #{assessmentSettingsMessages.hours}, #{assessmentSettings.timedMinutes} #{assessmentSettingsMessages.minutes}. #{assessmentSettingsMessages.submit_when_time_is_up}" rendered="#{assessmentSettings.valueMap.hasTimeAssessment eq 'true' && assessmentSettings.timedMinutes != 0}"/>
 	<h:outputText value="#{assessmentSettingsMessages.the_time_limit_is} #{assessmentSettings.timedHours} #{assessmentSettingsMessages.hours}. #{assessmentSettingsMessages.submit_when_time_is_up}" rendered="#{assessmentSettings.valueMap.hasTimeAssessment eq 'true' && assessmentSettings.timedMinutes == 0}"/>
 	<h:outputText rendered="#{assessmentSettings.valueMap.hasTimeAssessment ne 'true'}" value="#{assessmentSettingsMessages.there_is_no_time_limit}" />
@@ -193,11 +135,9 @@
 		<h:outputText value=" #{assessmentSettingsMessages.record_highest}" rendered="#{assessmentSettings.scoringType eq '1'}" />
 		<h:outputText value=" #{assessmentSettingsMessages.record_last}" rendered="#{assessmentSettings.scoringType eq '2'}" />
 		<h:outputText value=" #{assessmentSettingsMessages.record_average}" rendered="#{assessmentSettings.scoringType eq '4'}" />
-	</h:panelGroup>
+	</p>
 		
-	<f:verbatim><br/></f:verbatim>   
-		
-	<h:panelGroup>
+	<p>
 		<h:outputText value=" #{assessmentSettingsMessages.receive_immediate}" rendered="#{assessmentSettings.feedbackDelivery eq '1'}" escape="false"/>
 		<h:outputText value=" #{assessmentSettingsMessages.receive_feedback_on_submission}" rendered="#{assessmentSettings.feedbackDelivery eq '4'}" escape="false"/>
 		<h:outputText value=" #{assessmentSettingsMessages.receive_no_feedback}" rendered="#{assessmentSettings.feedbackDelivery eq '3'}" escape="false"/>
@@ -221,12 +161,11 @@
 			<f:param value="#{assessmentSettings.feedbackDateInClientTimezoneString}" />
 			<f:param value="#{assessmentSettings.feedbackEndDateInClientTimezoneString}" />
 		</h:outputFormat>
-	</h:panelGroup>
-
-	<f:verbatim><br/></f:verbatim>
+	</p>
 
 	<%-- Autosubmit information --%>
 	<h:panelGroup rendered="#{assessmentSettings.autoSubmit}">
+		<p>
 		<%-- Late submissions allowed --%>
 		<h:panelGroup rendered="#{assessmentSettings.lateHandling == '1'}">
 			<h:outputFormat value="#{assessmentSettingsMessages.autosubmit_info}" escape="false">
@@ -248,12 +187,13 @@
 				<f:param value="#{assessmentSettingsMessages.header_extendedTime_due_date}" />
 			</h:outputFormat>
 		</h:panelGroup>
+		</p>
 	</h:panelGroup>
 
-	</h:panelGrid>
+	</h:panelGroup>
 
-	<h:panelGrid columns="1" rowClasses="shorttextPadding" rendered="#{!author.isEditPendingAssessmentFlow}" border="0">
-		<h:panelGroup>
+	<h:panelGroup rendered="#{!author.isEditPendingAssessmentFlow}">
+		<p>
 			<h:panelGroup rendered="#{publishedSettings.title ne null}"> 
 				<f:verbatim><b></f:verbatim>
 				<h:outputText value="\"#{publishedSettings.title}\"" />
@@ -275,18 +215,17 @@
 				<f:param value="#{publishedSettings.releaseToGroupsAsHtml}" />
 				<f:param value="#{publishedSettings.publishedUrl}" />
 			</h:outputFormat>
-		</h:panelGroup>
+		</p>
 		
 		<h:panelGroup  rendered="#{publishedSettings.dueDate ne null}" >
-			<f:verbatim><br/></f:verbatim> 
+			<p>
 			<h:outputFormat value=" #{assessmentSettingsMessages.it_is_due}" escape="false">
 				<f:param value="#{publishedSettings.dueDateInClientTimezoneString}" />
 			</h:outputFormat>
+			</p>
 		</h:panelGroup>
 		
-		<f:verbatim><br/></f:verbatim>
-		
-		<h:panelGroup>
+		<p>
 		<h:outputText value="#{assessmentSettingsMessages.the_time_limit_is} #{publishedSettings.timedHours} #{assessmentSettingsMessages.hours}, #{publishedSettings.timedMinutes} #{assessmentSettingsMessages.minutes}. #{assessmentSettingsMessages.submit_when_time_is_up}" rendered="#{publishedSettings.valueMap.hasTimeAssessment eq 'true' && publishedSettings.timedMinutes != 0}"/>
 		<h:outputText value="#{assessmentSettingsMessages.the_time_limit_is} #{publishedSettings.timedHours} #{assessmentSettingsMessages.hours}. #{assessmentSettingsMessages.submit_when_time_is_up}" rendered="#{publishedSettings.valueMap.hasTimeAssessment eq 'true' && publishedSettings.timedMinutes == 0}"/>
 		<h:outputText rendered="#{publishedSettings.valueMap.hasTimeAssessment ne 'true'}" value="#{assessmentSettingsMessages.there_is_no_time_limit}" />
@@ -299,11 +238,9 @@
 			<h:outputText value=" #{assessmentSettingsMessages.record_highest}" rendered="#{publishedSettings.scoringType eq '1'}" />
 			<h:outputText value=" #{assessmentSettingsMessages.record_last}" rendered="#{publishedSettings.scoringType eq '2'}" />
 			<h:outputText value=" #{assessmentSettingsMessages.record_average}" rendered="#{publishedSettings.scoringType eq '4'}" />
-		</h:panelGroup>
+		</p>
 		
-	<f:verbatim><br/></f:verbatim>
-		
-	<h:panelGroup>
+	<p>
 		<h:outputText value=" #{assessmentSettingsMessages.receive_immediate}" rendered="#{publishedSettings.feedbackDelivery eq '1'}" escape="false"/>
 		<h:outputText value=" #{assessmentSettingsMessages.receive_feedback_on_submission}" rendered="#{publishedSettings.feedbackDelivery eq '4'}" escape="false"/>
 		<h:outputText value=" #{assessmentSettingsMessages.receive_no_feedback}" rendered="#{publishedSettings.feedbackDelivery eq '3'}" escape="false"/>
@@ -327,12 +264,11 @@
 			<f:param value="#{assessmentSettings.feedbackDateInClientTimezoneString}" />
 			<f:param value="#{assessmentSettings.feedbackEndDateInClientTimezoneString}" />
 		</h:outputFormat>
-	</h:panelGroup>
-
-	<f:verbatim><br/></f:verbatim>
+	</p>
 
 	<%-- Autosubmit information --%>
 	<h:panelGroup rendered="#{assessmentSettings.autoSubmit}">
+		<p>
 		<%-- Late submissions allowed --%>
 		<h:panelGroup rendered="#{assessmentSettings.lateHandling == '1'}">
 			<h:outputFormat value="#{assessmentSettingsMessages.autosubmit_info}" escape="false">
@@ -354,15 +290,53 @@
 				<f:param value="#{assessmentSettingsMessages.header_extendedTime_due_date}" />
 			</h:outputFormat>
 		</h:panelGroup>
+		</p>
 	</h:panelGroup>
+</h:panelGroup>
+</h:panelGroup>
 
-</h:panelGrid>
-</h:panelGrid>
-<h:panelGrid />
-<h:panelGrid />
-</h:panelGrid>
+<h:panelGroup styleClass="act" layout="block">
+  <!-- Cancel button -->
+   <h:commandButton value="#{commonMessages.cancel_action}" type="submit" action="#{author.getFirstFromPage}" rendered="#{author.isEditPendingAssessmentFlow}"/>
+   <h:commandButton value="#{commonMessages.cancel_action}" type="submit" action="editAssessment" rendered="#{!author.isEditPendingAssessmentFlow}">
+	  <f:actionListener type="org.sakaiproject.tool.assessment.ui.listener.author.EditAssessmentListener" />
+   </h:commandButton>
 
-<f:verbatim><p></p></f:verbatim>
+<h:commandButton value="#{assessmentSettingsMessages.button_edit_settings}" type="submit" action="editAssessmentSettings" rendered="#{author.isEditPendingAssessmentFlow}">
+      <f:actionListener type="org.sakaiproject.tool.assessment.ui.listener.author.SetFromPageAsPublishAssessmentListener" />
+   </h:commandButton>
+   <h:commandButton value="#{assessmentSettingsMessages.button_edit_settings}" type="submit" action="editPublishedAssessmentSettings" rendered="#{!author.isEditPendingAssessmentFlow}">
+      <f:actionListener type="org.sakaiproject.tool.assessment.ui.listener.author.SetFromPageAsPublishAssessmentListener" />
+   </h:commandButton>
+
+   <!-- Publish, Republish and Regrade, or Republish button -->
+   <h:commandButton id="publish" value="#{commonMessages.publish_action}" type="submit"
+	 styleClass="active" action="publishAssessment" onclick="toggle()" onkeypress="toggle()" rendered="#{author.isEditPendingAssessmentFlow}">
+	  <f:actionListener
+		type="org.sakaiproject.tool.assessment.ui.listener.author.PublishAssessmentListener" />
+   </h:commandButton>
+
+	<h:commandButton  value="#{authorMessages.button_republish_and_regrade}" type="submit" styleClass="active" rendered="#{!author.isEditPendingAssessmentFlow && author.isRepublishAndRegrade}" action="publishAssessment" onclick="SPNR.disableControlsAndSpin(this, null);">
+		<f:actionListener type="org.sakaiproject.tool.assessment.ui.listener.author.RepublishAssessmentListener" />
+	</h:commandButton>
+
+	<h:commandButton  value="#{authorMessages.button_republish}" type="submit" styleClass="active" rendered="#{!author.isEditPendingAssessmentFlow && !author.isRepublishAndRegrade}" action="publishAssessment" onclick="SPNR.disableControlsAndSpin(this, null);">
+		<f:actionListener type="org.sakaiproject.tool.assessment.ui.listener.author.RepublishAssessmentListener" />
+	</h:commandButton>
+
+	<h:selectOneMenu id="number" value="1" onchange="document.forms[0].submit();">
+          <f:selectItems value="#{publishRepublishNotification.notificationLevelChoices}" />
+          <f:valueChangeListener type="org.sakaiproject.tool.assessment.ui.listener.author.PublishRepublishNotificationListener" />
+    </h:selectOneMenu>
+	<h:panelGroup layout="block" styleClass="tier1" rendered="#{author.isEditPendingAssessmentFlow && not empty assessmentSettings.dueDate && calendarServiceHelper.calendarExistsForSite}">
+		<h:selectBooleanCheckbox id="calendarDueDate" value="true"/>
+		<h:outputLabel for="calendarDueDate" value="#{assessmentSettingsMessages.calendarDueDate} #{calendarServiceHelper.calendarTitle}" escape="false"/>
+	</h:panelGroup>
+	<h:panelGroup layout="block" styleClass="tier1" rendered="#{!author.isEditPendingAssessmentFlow && not empty publishedSettings.dueDate && calendarServiceHelper.calendarExistsForSite}">
+		<h:selectBooleanCheckbox id="calendarDueDate2" value="true"/>
+		<h:outputLabel for="calendarDueDate2" value="#{assessmentSettingsMessages.calendarDueDate} #{calendarServiceHelper.calendarTitle}" escape="false"/>
+	</h:panelGroup>
+</h:panelGroup>
 
 <script>
 var clicked = 'false';
@@ -400,9 +374,6 @@ function clearText2(){
   }
 }
 </script>
-
-
-<f:verbatim><p></p></f:verbatim>
 
  </h:form>
  <!-- end content -->

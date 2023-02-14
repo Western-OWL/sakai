@@ -103,9 +103,7 @@ function displayEMIHelp(){
     </li>
 </ul>
 
-<br/>
-
-<!-- breadcrumb-->
+<!-- breadcrumbs-->
 <ol class="breadcrumb">
   <h:panelGroup rendered="#{itemauthor.target == 'assessment'}" >
     <li>
@@ -115,7 +113,7 @@ function displayEMIHelp(){
     </li>
     <li>
       <h:commandLink title="#{authorMessages.t_question}" action="editAssessment" immediate="true" >
-        <h:outputText value="#{authorMessages.qs}#{authorMessages.column} #{assessmentBean.title}" escape="false"/>
+        <h:outputText value="#{assessmentBean.title}" escape="false"/>
       </h:commandLink>
     </li>
     <li>
@@ -147,18 +145,15 @@ function displayEMIHelp(){
 
 <div class="page-header">
   <h1>
-    <h:outputText value="#{authorMessages.modify_q}#{authorMessages.column} "/>
-    <small> 
-      <h:outputText value="#{assessmentBean.title}" rendered="#{itemauthor.target == 'assessment'}" escape="false"/>
-    </small>
+    <h:outputText value="#{assessmentBean.title} #{authorMessages.dash} " rendered="#{itemauthor.target == 'assessment'}" escape="false"/>
+    <h:outputText value="#{authorMessages.modify_q}"/>
   </h1>
 </div>
 
 <!-- SUBHEADING -->
-<h3>
+<h2>
      <h:outputText value="#{authorMessages.q}"/>
-     <h:outputText rendered="#{itemauthor.target == 'assessment'}" value="#{itemauthor.itemNo}"/>
-  <small class="rightNav">
+     <h:outputText rendered="#{itemauthor.target == 'assessment'}" value=" #{itemauthor.itemNo}"/>
      <h:outputText value=" #{authorMessages.dash} "/>
      <h:outputText rendered="#{itemauthor.currentItem.itemType == 1}" value="#{authorMessages.multiple_choice_type}"/>
      <h:outputText rendered="#{itemauthor.currentItem.itemType== 2}" value="#{authorMessages.multiple_choice_type}"/>
@@ -176,12 +171,11 @@ function displayEMIHelp(){
      <h:outputText rendered="#{itemauthor.currentItem.itemType== 13}" value="#{authorMessages.matrix_choices_surv}"/>
      <h:outputText rendered="#{itemauthor.currentItem.itemType== 15}" value="#{authorMessages.calculated_question}"/><!-- // CALCULATED_QUESTION -->
      <h:outputText rendered="#{itemauthor.currentItem.itemType== 16}" value="#{authorMessages.image_map_question}"/><!-- // IMAGE MAP_QUESTION -->
-  <h:commandLink title="#{authorMessages.t_removeQ}" rendered="#{author.isEditPendingAssessmentFlow && itemauthor.currentItem.itemId != null}" styleClass="navList" immediate="true" id="deleteitem" action="#{itemauthor.confirmDeleteItem}">
-                <h:outputText value="#{commonMessages.remove_action}" />
-                <f:param name="itemid" value="#{itemauthor.currentItem.itemId}"/>
-              </h:commandLink>
-  </small>
-</h3>
+  <h:commandLink title="#{authorMessages.t_removeQ}" rendered="#{author.isEditPendingAssessmentFlow && itemauthor.currentItem.itemId != null}" styleClass="removeLink" immediate="true" id="deleteitem" action="#{itemauthor.confirmDeleteItem}">
+        <h:outputText value="#{commonMessages.remove_action}" />
+        <f:param name="itemid" value="#{itemauthor.currentItem.itemId}"/>
+    </h:commandLink>
+</h2>
 
 <h:messages styleClass="sak-banner-error" rendered="#{! empty facesContext.maximumSeverity}" layout="table"/>
 

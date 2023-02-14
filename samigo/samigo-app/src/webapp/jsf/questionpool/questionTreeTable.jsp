@@ -21,7 +21,7 @@
 -->
 
 <div class="table-responsive">
-  <t:dataTable value="#{questionpool.allItems}" var="question" styleClass="table table-striped tablesorter" id="questionpool-questions" rowIndexVar="row">
+  <t:dataTable value="#{questionpool.allItems}" var="question" styleClass="table table-hover table-striped table-bordered" id="questionpool-questions" rowIndexVar="row">
 
 <h:column id="colremove" rendered="#{questionpool.importToAuthoring == 'false'}" >
   <f:facet name="header">

@@ -79,9 +79,10 @@
 		}
 	}
 	
-	.samigo-checkbox {
+	.samigo-checkbox, .samigo-radio {
 		label {
 			margin: 0 0 0 $standard-space;
+			font-weight: normal;
 		}
 	}
 	
@@ -243,6 +244,16 @@
 		}
 	}
 
+	#extendedTimeSpecificityBlurb {
+		margin-bottom: .5em;
+	}
+
+	#extendedTimeSpecificityPanel {
+		border: 1px solid var(--sakai-border-color);
+		padding: 5px;
+		background-color: var(--sakai-background-color-2);
+	}
+
 	.extendedTimeDataTable {
 		margin-bottom: .5em;
 
@@ -267,8 +278,8 @@
 		}
 	}
 	
-	.navIntraTool {
-		margin: 0px !important;
+	.navIntraTool.actionToolbar {
+		margin-bottom: $standard-spacing;
 	}
 
 	.ui-autocomplete-input {
@@ -286,72 +297,29 @@
 	}
 
 	.dataTables_wrapper {
+		.table {
+			margin-bottom: $standard-spacing;
+		}
 		.dataTables_length {
-			float: left;
+			label {
+				display: inline-block;
+				margin-bottom: 0;
+				font-weight: normal;
 
-			@media #{$phone}{
-				float: initial;
+				select {
+					width: max-content;
+				}
 			}
 		}
 
 		.dataTables_filter {
-			float: right;
-			text-align: right;
-
-			@media #{$phone}{
-				float: initial;
-				text-align: initial;
+			label {
+				font-weight: bold;
 			}
-
 			input {
-				@extend .form-control;
-
-				width: initial;
-				max-width: initial;
 				display: inline-block;
-				margin-left: 6px;
-			}
-		}
-
-		.dataTables_info {
-			clear: both;
-			float: left;
-		}
-
-		.dataTables_paginate {
-			float: right;
-			text-align: right;
-
-			> a.paginate_button {
-				@extend input, [type="submit"];
-
-				&.disabled {
-					@extend input, [type="submit"], [disabled="disabled"];
-				}
-			}
-
-			span {
-				.paginate_button {
-					color: var(--sakai-text-color-1) !important;
-
-					@extend button;
-
-					&:hover {
-						color: var(--sakai-text-color-1) !important;
-					}
-
-					&.current {
-						@extend .btn-default, :active, :hover;
-					}
-				}
-
-				a.paginate_button {
-					@extend .btn-default;
-				}
-			}
-
-			.ellipsis {
-				margin-right: 10px;
+				margin-left: $standard-space;
+				font-weight: normal;
 			}
 		}
 	}
@@ -373,36 +341,26 @@
 					}
 				}
 			}
-
-			.sorting_asc {
-				a::after {
-					background: url(/library/image/sakai/sortascending.gif?panel=Main);
-				}
-			}
-
-			.sorting_desc {
-				a::after {
-					background: url(/library/image/sakai/sortdescending.gif?panel=Main);
-				}
-			}
+		}
+	}
+	@media #{$desktop} {
+		#authorIndexForm .samigo-mainPage-filters {
+			margin-bottom: -1em;	// to align the Sakai filter with the DataTables filters
 		}
 	}
 
+	div.dataTables_paginate.paging_simple_numbers {
+		display: flex;
+	}
+
+	.samigo-dataTable-footer {
+		display: flex;
+		justify-content: flex-end;
+		margin-top: -2.5em;		// to align the Sakai footer with the DataTables footer
+	}
+
 	#{'#authorIndexForm\\:remove-selected'} {
-		@extend button;
-
-		&.disabled {
-			@extend input, [type="submit"], [disabled="disabled"];
-			background: var(--button-disabled-background);
-			border-color: var(--button-disabled-border-color);
-			color: var(--button-disabled-text-color) !important;
-
-			&:hover {
-				background: var(--button-disabled-background);
-				border-color: var(--button-disabled-border-color);
-				color: var(--button-disabled-text-color) !important;
-			}
-		}
+		@include sakai_primary_button()
 	}
 
 	.parts-table {
@@ -431,6 +389,40 @@
 
 	.downloanQuestionCheckbox label {
 		display: none;
+	}
+
+	#editTotalResults {
+		.apply-grades {
+			display: flex;
+			align-items: center;
+			margin: $standard-spacing 0;
+
+			input[type="text"] {
+				align-self: stretch;	// make input field the same height as button
+				margin: 0 $standard-space 0 0;
+			}
+			label {
+				margin: 0;
+				font-weight: normal;
+			}
+		}
+		.deleteSubmission {
+			display: inline-block;
+			width: 100%;
+			text-align: center;
+		}
+		.attachmentsTableContainer {
+			border: 0 none;
+
+			input[type="submit"] {
+				margin-top: 8px; // to match Bootstrap's table cell padding
+			}
+		}
+	}
+
+	.rationaleContainer {
+		display: block;
+		margin-top: 2em;
 	}
 
 	.exitPreviewButton {

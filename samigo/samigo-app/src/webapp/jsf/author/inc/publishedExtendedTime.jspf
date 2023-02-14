@@ -3,6 +3,21 @@
     <h:outputLabel value="#{assessmentSettingsMessages.extendedTimeNew}" />
 </h:panelGroup>
 <h:panelGroup styleClass="row" layout="block">
+    <h:panelGroup id="extendedTimeBlurb" styleClass="col-md-12" layout="block">
+        <h:panelGroup id="extendedTimeInstruction" styleClass="instruction" layout="block">
+            <h:outputText value="#{assessmentSettingsMessages.extendedTimeInstruction}" />
+            <span id="extendedTimeSpecificityShowHide" class="collapsed">
+                <h:outputLink onclick="$('#extendedTimeSpecificityContainer').toggle();toggleCollapse(document.getElementById('extendedTimeSpecificityShowHide'));return false;" value="#">
+                    <h:outputText value="#{assessmentSettingsMessages.extendedTimeSpecificityShowHide}" />
+                </h:outputLink>
+            </span>
+        </h:panelGroup>
+        <div id="extendedTimeSpecificityContainer" style="display:none;">
+            <div id="extendedTimeSpecificityPanel" class="instruction">
+                <h:outputText value="#{assessmentSettingsMessages.extendedTimeSpecificity}" />
+            </div>
+        </div>
+    </h:panelGroup>
     <h:panelGroup styleClass="col-md-12" layout="block">
         <h:panelGroup styleClass="form-group row" layout="block">
                 <h:panelGroup styleClass="col-xs-12 col-lg-2 display-flex" layout="block">
@@ -32,7 +47,7 @@
         </h:panelGroup>
         <h:panelGroup styleClass="form-group row" layout="block">
                 <h:outputLabel styleClass="col-md-2" for="newEntry-start_date" value="#{assessmentSettingsMessages.assessment_available}"/>
-                <h:panelGroup styleClass="col-md-4" layout="block">
+                <h:panelGroup styleClass="col-md-8" layout="block">
                     <h:inputText id="newEntry-start_date" size="25" value="#{publishedSettings.extendedTimeStartString}"/>
                 </h:panelGroup>
         </h:panelGroup>
@@ -58,33 +73,38 @@
                     <h:outputLabel value="#{assessmentSettingsMessages.timed_minutes} " />
                 </h:panelGroup>
         </h:panelGroup>
-	<h:panelGroup styleClass="form-group row col-md-12" layout="block">
-                <h:outputLabel id="newEntry-hoursHelpblock" styleClass="help-block info-text small" value="#{assessmentSettingsMessages.assessment_timed_info} #{assessmentSettingsMessages.assessment_timed_info_extra}" />
+        <h:panelGroup styleClass="instruction" layout="block">
+                <h:outputText id="newEntry-hoursHelpblock" value="#{assessmentSettingsMessages.assessment_timed_info} #{assessmentSettingsMessages.assessment_timed_info_extra}" />
         </h:panelGroup>
         <h:panelGroup styleClass="form-group row" layout="block" rendered="#{publishedSettings.valueMap.lateHandling_isInstructorEditable==true}">
                 <h:outputLabel styleClass="col-md-2" for="newEntry-retract_date" value="#{assessmentSettingsMessages.late_accept_until}"/>
-                <h:panelGroup styleClass="col-md-4" layout="block">
+                <h:panelGroup styleClass="col-md-8" layout="block">
                     <h:inputText id="newEntry-retract_date" size="25" value="#{publishedSettings.extendedTimeRetractString}"/>
                 </h:panelGroup>
         </h:panelGroup>
         <h:panelGroup styleClass="form-group row col-md-12" layout="block">
-                <h:panelGroup rendered="#{not publishedSettings.editingExtendedTime}">
-                    <h:commandButton value="#{assessmentSettingsMessages.extendedTimeAdd}" id="extendedTimeAdd" action="#{publishedSettings.addExtendedTime}" />
-                    <h:outputLabel id="extendedTimeAddHelpBlock" styleClass="help-block info-text small" value="#{assessmentSettingsMessages.extendedTimeInstruction}" />
-                </h:panelGroup>
-                <h:panelGroup rendered="#{publishedSettings.editingExtendedTime}">
-                    <h:commandButton value="#{assessmentSettingsMessages.extendedTimeEdit}" action="#{publishedSettings.saveEditedExtendedTime}" />
-                    <h:commandButton value="#{assessmentSettingsMessages.extendedTimeCancel}" action="#{publishedSettings.cancelEdit}" />
-                </h:panelGroup>
+            <div class="col-md-2"></div>
+            <div class="col-md-4">
+                <h:commandButton value="#{assessmentSettingsMessages.extendedTimeAdd}" id="extendedTimeAdd" action="#{publishedSettings.addExtendedTime}" rendered="#{not publishedSettings.editingExtendedTime}" />
+                <h:commandButton value="#{assessmentSettingsMessages.extendedTimeEdit}" action="#{publishedSettings.saveEditedExtendedTime}" rendered="#{publishedSettings.editingExtendedTime}" />
+                <h:commandButton value="#{assessmentSettingsMessages.extendedTimeCancel}" action="#{publishedSettings.cancelEdit}" rendered="#{publishedSettings.editingExtendedTime}" />
+            </div>
+        </h:panelGroup>
+        <h:panelGroup styleClass="sak-banner-warn" layout="block" rendered="#{not publishedSettings.editingExtendedTime}">
+            <h:outputText value="#{assessmentSettingsMessages.extendedTimeWarning}" />
         </h:panelGroup>
     </h:panelGroup>
 </h:panelGroup>
 
-<h:panelGroup styleClass="samigo-subheading" rendered="#{not empty publishedSettings.extendedTimes}" layout="block">
+<h:panelGroup styleClass="samigo-subheading" layout="block">
     <h:outputLabel value="#{assessmentSettingsMessages.extendedTimeExisting}" />
 </h:panelGroup>
-<h:panelGroup styleClass="row" layout="block" rendered="#{not empty publishedSettings.extendedTimes}">
-    <h:panelGroup styleClass="col-md-10 table-responsive" layout="block">
+<h:panelGroup styleClass="row" layout="block">
+    <h:panelGroup styleClass="col-md-10" layout="block" rendered="#{empty publishedSettings.extendedTimes}">
+        <h:outputText value="#{assessmentSettingsMessages.extendedTimeEmptyState}" />
+    </h:panelGroup>
+
+    <h:panelGroup styleClass="col-md-10 table-responsive" layout="block" rendered="#{not empty publishedSettings.extendedTimes}">
         <t:dataTable
                      id="extendedTimeTable"
                      value="#{publishedSettings.extendedTimes}"

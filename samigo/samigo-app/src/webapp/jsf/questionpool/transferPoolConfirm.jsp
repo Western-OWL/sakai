@@ -22,19 +22,16 @@
         <body onload="<%= request.getAttribute("html.body.onload") %>">
             <div class="portletBody">
                 <h:form id="transferPoolConfirm">
-                    <h:messages infoClass="validation" warnClass="validation" errorClass="validation" fatalClass="validation" />
-
-                    <h3>
-                        <h:outputText value="#{questionPoolMessages.transfer_pool_ownership}"/>
-                    </h3>
-                    <p></p>
+                    <div class="page-header">
+                        <h1><h:outputText value="#{questionPoolMessages.transfer_pool_ownership}"/></h1>
+                    </div>
+                    <h:messages infoClass="sak-banner-info" warnClass="sak-banner-warn" errorClass="sak-banner-error" fatalClass="sak-banner-error"/>
                     <div>
                         <h:outputText value="#{questionpool.confirmMessage}" />
                     </div>
-                    <p></p>
 
                     <h:dataTable id="TreeTable" value="#{questionpool.transferSelectedQpools}"
-                        var="pool" cellpadding="0" cellspacing="0" styleClass="listHier" >
+                        var="pool" cellpadding="0" cellspacing="0" styleClass="table table-striped" >
 
                         <h:column id="col1">
                             <f:facet name="header">
@@ -100,7 +97,7 @@
                             value="#{questionPoolMessages.transfer_pool_ownership}" action="#{questionpool.transferPoolOwnership}" styleClass="active"
                             onclick="SPNR.disableControlsAndSpin(this, null);"/>
                         <h:commandButton accesskey="#{questionPoolMessages.a_transfer_back}" id="transferpoolSubmit2" immediate="true"
-                            value="#{questionPoolMessages.transfer_pool_back}" action="#{questionpool.transferPoolConfirmBack}" styleClass="active"
+                            value="#{questionPoolMessages.transfer_pool_back}" action="#{questionpool.transferPoolConfirmBack}"
                             onclick="SPNR.disableControlsAndSpin(this, null);"/>
                         <h:commandButton accesskey="#{questionPoolMessages.a_cancel}" id="transferpoolCancel" value="#{questionPoolMessages.transfer_pool_cancel}" 
                             action="#{questionpool.cancelTransferPool}" immediate="true" onclick="SPNR.disableControlsAndSpin(this, null);"/>

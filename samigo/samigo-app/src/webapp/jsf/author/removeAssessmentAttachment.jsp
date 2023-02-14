@@ -38,7 +38,7 @@
  <h:form>
    <h:inputHidden id="attachmentId" value="#{attachmentBean.attachmentId}"/>
    <h3> <h:outputText  value="#{authorMessages.remove_attachment_conf}" /></h3>
-   <div class="validation tier1">
+   <div class="sak-banner-warn">
      <h:outputText value="#{authorMessages.cert_rem_attachment}" />
    </div>
    <p>

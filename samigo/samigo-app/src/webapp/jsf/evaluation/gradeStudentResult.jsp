@@ -127,8 +127,8 @@ function toPoint(id)
 
   <h:panelGroup layout="block" styleClass="page-header">
     <h1>
-      <h:outputText value="#{studentScores.studentName} (#{studentScores.displayId})" rendered="#{totalScores.anonymous eq 'false'}"/>
-      <small><h:outputText value="#{evaluationMessages.submission_id}#{deliveryMessages.column} #{studentScores.assessmentGradingId}" rendered="#{totalScores.anonymous eq 'true'}"/></small>
+	  <h:outputText value="#{totalScores.assessmentName} #{deliveryMessages.dash} #{studentScores.studentName} (#{studentScores.displayId})" rendered="#{totalScores.anonymous eq 'false'}"/>
+      <h:outputText value="#{totalScores.assessmentName} #{deliveryMessages.dash} #{evaluationMessages.submission_id}#{deliveryMessages.column} #{studentScores.assessmentGradingId}" rendered="#{totalScores.anonymous eq 'true'}"/>
     </h1>
   </h:panelGroup>
 
@@ -137,21 +137,14 @@ function toPoint(id)
 
   <h:messages styleClass="sak-banner-error" rendered="#{! empty facesContext.maximumSeverity}" layout="table"/>
 
-<h2>
-  <h:outputText value="#{totalScores.assessmentName}" escape="false"/>
-</h2>
-
 <div class="form-group row">
-   <h:outputLabel styleClass="col-md-2" value="#{evaluationMessages.comment_for_student}#{deliveryMessages.column}"/>
+   <h:outputLabel styleClass="col-md-2" value="#{evaluationMessages.comment_for_student}#{deliveryMessages.column}" for="commentForStudent"/>
    <div class="col-md-6">
-     <h:inputTextarea value="#{studentScores.comments}" rows="3" cols="30" styleClass="awesomplete"/>
+     <h:inputTextarea value="#{studentScores.comments}" rows="3" cols="30" styleClass="awesomplete" id="commentForStudent" />
    </div>
 </div>
 
-
-<h2>
-  <h:outputText value="#{deliveryMessages.table_of_contents}" />
-</h2>
+<h2><h:outputText value="#{deliveryMessages.table_of_contents}" /></h2>
 
 <div class="toc-holder">
   <t:dataList styleClass="part-wrapper" value="#{delivery.tableOfContents.partsContents}" var="part">
@@ -163,7 +156,8 @@ function toPoint(id)
                   <h:outputText escape="false" value="#{question.roundedMaxPoints}">
                     <f:convertNumber maxFractionDigits="2" groupingUsed="false"/>
                   </h:outputText>
-                  <h:outputText escape="false" value=" #{deliveryMessages.pt} "/>
+                  <h:outputText escape="false" value=" #{deliveryMessages.pt} " rendered="#{question.roundedMaxPoints != 1 }" />
+                  <h:outputText escape="false" value=" #{deliveryMessages.point} " rendered="#{question.roundedMaxPoints == 1 }" />
                 </span>
                 <h:outputLink value="##{part.number}#{deliveryMessages.underscore}#{question.number}"> 
                   <h:outputText escape="false" value="#{question.sequence}#{deliveryMessages.dot} #{question.strippedText}"/>
@@ -175,19 +169,19 @@ function toPoint(id)
   </t:dataList>
 </div>
 
-<br/>
-<div class="tier2">
+<h2><h:outputText value="#{deliveryMessages.qs}" /></h2>
+<div class="tier1">
   <t:dataList value="#{delivery.pageContents.partsContents}" var="part" styleClass="table">
       <div class="page-header">
-        <h4 class="part-header">
+        <h3 class="part-header">
           <h:outputText value="#{deliveryMessages.p} #{part.number} #{deliveryMessages.of} #{part.numParts}" />
           <small class="part-text">
-            <h:outputText value="#{part.text}" escape="false" rendered="#{part.numParts ne '1'}" />
+            <h:outputText value="#{evaluationMessages.dash} #{part.text}" escape="false" rendered="#{part.numParts ne '1'}" />
           </small>
-        </h4>
+        </h3>
       </div>
 
-      <h:panelGroup layout="block" styleClass="sak-banner-error" rendered="#{part.noQuestions}">
+      <h:panelGroup layout="block" styleClass="sak-banner-info" rendered="#{part.noQuestions}">
         <h:outputText value="#{evaluationMessages.no_questions}" escape="false"/>
       </h:panelGroup>
 
@@ -208,7 +202,8 @@ function toPoint(id)
                 <h:panelGroup layout="block" styleClass="col-sm-12 input-group">
                   <p class="input-group-addon">
                     <h:outputText value=" #{deliveryMessages.splash} #{question.roundedMaxPointsToDisplay} " />
-                    <h:outputText value="#{deliveryMessages.pt}" />
+                    <h:outputText escape="false" value=" #{deliveryMessages.pt} " rendered="#{question.roundedMaxPointsToDisplay != 1 }" />
+                    <h:outputText escape="false" value=" #{deliveryMessages.point} " rendered="#{question.roundedMaxPointsToDisplay == 1 }" />
                     <h:message for="adjustedScore" styleClass="sak-banner-error" />
                     <h:outputText styleClass="extraCreditLabel" rendered="#{question.itemData.isExtraCredit == true}" value=" #{deliveryMessages.extra_credit_preview}" />
                   </p>

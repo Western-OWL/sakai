@@ -39,43 +39,42 @@
  <h:form id="importAssessmentForm" enctype="multipart/form-data">
     <!-- HEADINGS -->
     <%@ include file="/jsf/author/editAssessmentHeadings.jsp" %>
+    <div class="page-header">
+        <h1><h:outputText  value="#{authorImportExport.import_a}" /></h1>
+    </div>
+    <h:messages styleClass="sak-banner-error" rendered="#{! empty facesContext.maximumSeverity}" layout="table"/>
 
-    <h3><h:outputText  value="#{authorImportExport.import_a}" /></h3>
-
-    <div class="tier1">
-     <div class="tier2">
-      <div class="form_label">
-       <h:messages styleClass="sak-banner-error" rendered="#{! empty facesContext.maximumSeverity}" layout="table"/>
+    <div class="instruction">
        <h:outputText value="#{authorImportExport.import_instructions}" escape="false"/>
-      </div>
-      <br />
+    </div>
 
      <h:panelGroup>
-       <h:outputLabel  styleClass="form_label" value="#{authorImportExport.choose_file} "/>
+       <h:outputLabel for="fileUploadElement" styleClass="form_label" value="#{authorImportExport.choose_file} " >
        <%-- target represents location where import will be temporarily stored
             check valueChangeListener for final destination --%>
        <corejsf:upload target="jsf/upload_tmp/qti_imports/#{person.id}" valueChangeListener="#{xmlImport.importAssessment}"/>
+       </h:outputLabel>
      </h:panelGroup>
-     <f:verbatim>&nbsp;</f:verbatim>
-       <h:outputText value="#{authorImportExport.file_is}"/>
+     <fieldset>
+        <legend><h:outputText value="#{authorImportExport.file_is}"/></legend>
        <h:panelGroup>
          <h:selectOneRadio id="sourceType" layout="pageDirection" value="1" styleClass="samigo-inline-form">
            <f:selectItem itemLabel="#{authorImportExport.from_samigo}" itemValue="1"/>
            <f:selectItem itemLabel="#{authorImportExport.from_respondus}" itemValue="2"/>
          </h:selectOneRadio>
        </h:panelGroup>
-   </div>
-    <br/>
-    <h:outputText escape="false" value="#{authorImportExport.importExport_warning2}"/>
-    <br/>
-    <br/>
+     </fieldset>
+
+    <div class="sak-banner-warn">
+        <h:outputText escape="false" value="#{authorImportExport.importExport_warning2}"/>
+    </div>
+
+    <div class="act">
      <%-- activates the valueChangeListener --%>
-     <h:commandButton value="#{authorImportExport.import_action}" type="submit"
-       style="act" action="#{author.getImportOutcome}" />
+     <h:commandButton value="#{authorImportExport.import_action}" type="submit" styleClass="active" action="#{author.getImportOutcome}" />
      <%-- immediate=true bypasses the valueChangeListener --%>
-     <h:commandButton value="#{commonMessages.cancel_action}" type="submit"
-       style="act" action="author" immediate="true"/>
-  </div>
+     <h:commandButton value="#{commonMessages.cancel_action}" type="submit" action="author" immediate="true"/>
+    </div>
 
  </h:form>
 </div>

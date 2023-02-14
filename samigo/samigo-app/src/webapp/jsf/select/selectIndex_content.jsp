@@ -75,14 +75,15 @@
             var notEmptySelectTableTd = $("#selectIndexForm\\:selectTable td:not(:empty)").length;
             if (notEmptySelectTableTd > 0) {
               var table = $("#selectIndexForm\\:selectTable").DataTable({
+                    "dom": '<"sakai-table-toolBar"<"sakai-table-filterContainer"<"sakai-table-searchFilter"f>><"sakai-table-pagerContainer"<"sakai-table-pagerLabel"i><"sakai-table-pagerControls"l>>>tp',
                     "paging": true,
-                    "lengthMenu": [[5, 10, 20, 50, 100, 200, -1], [5, 10, 20, 50, 100, 200, viewAllText]],
+                    "lengthMenu": [[5, 10, 20, 50, 100, 200], [<h:outputText value="'#{authorFrontDoorMessages.datatables_lengthMenu5}'" />, <h:outputText value="'#{authorFrontDoorMessages.datatables_lengthMenu10}'" />, <h:outputText value="'#{authorFrontDoorMessages.datatables_lengthMenu20}'" />, <h:outputText value="'#{authorFrontDoorMessages.datatables_lengthMenu50}'" />, <h:outputText value="'#{authorFrontDoorMessages.datatables_lengthMenu100}'" />, <h:outputText value="'#{authorFrontDoorMessages.datatables_lengthMenu200}'" />]],
                     "pageLength": 20,
                     "aaSorting": [[2, "asc"]],
                     "columns": [
                         {"bSortable": true, "bSearchable": true, "type": "span"},
                         {"bSortable": true, "bSearchable": false},
-                        {"bSortable": true, "bSearchable": true, "type": "numeric"},
+                        {"bSortable": true, "bSearchable": true, "type": "numeric"}
                     ],
                     "language": {
                         "search": searchText,
@@ -94,12 +95,15 @@
                         "emptyTable": emptyTableText,
                         "paginate": {
                             "next": nextText,
-                            "previous": previousText,
+                            "previous": previousText
                         },
                         "aria": {
                             "sortAscending": sortAscendingText,
-                            "sortDescending": sortDescendingText,
+                            "sortDescending": sortDescendingText
                         }
+                    },
+                    "fnDrawCallback": function(oSettings) {
+                        $("div#selectIndexForm\\:selectTable_length > label > select").removeProp("class");
                     }
               });
             }
@@ -108,9 +112,7 @@
             if (notEmptyReviewTableTd > 0) {
               if ($("#selectIndexForm\\:reviewTable .displayAllAssessments").length > 0) {
                 var table = $("#selectIndexForm\\:reviewTable").DataTable({
-                    "paging": true,
-                    "lengthMenu": [[5, 10, 20, 50, 100, 200, -1], [5, 10, 20, 50, 100, 200, viewAllText]],
-                    "pageLength": 20,
+	                "dom": '<"sakai-table-toolBar"<"sakai-table-filterContainer"<"sakai-table-searchFilter"f>>>tp',
                     "aaSorting": [[6, "desc"]],
                     "paging": false,
                     "ordering": false,
@@ -134,20 +136,18 @@
                         "emptyTable": emptyTableText,
                         "paginate": {
                             "next": nextText,
-                            "previous": previousText,
+                            "previous": previousText
                         },
                         "aria": {
                             "sortAscending": sortAscendingText,
-                            "sortDescending": sortDescendingText,
+                            "sortDescending": sortDescendingText
                         }
                     }
                 });
 
               } else {
                 var table = $("#selectIndexForm\\:reviewTable").DataTable({
-                    "paging": true,
-                    "lengthMenu": [[5, 10, 20, 50, 100, 200, -1], [5, 10, 20, 50, 100, 200, viewAllText]],
-                    "pageLength": 20,
+	                "dom": '<"sakai-table-toolBar"<"sakai-table-filterContainer"<"sakai-table-searchFilter"f>>>tp',
                     "paging": false,
                     "ordering": false,
                     "info": false,
@@ -155,7 +155,7 @@
                         {"bSortable": true, "bSearchable": true},
                         {"bSortable": true, "bSearchable": false},
                         {"bSortable": true, "bSearchable": false},
-                        {"bSortable": true, "bSearchable": true},
+                        {"bSortable": true, "bSearchable": true}
                     ],
                     "language": {
                         "search": searchText,
@@ -167,11 +167,11 @@
                         "emptyTable": emptyTableText,
                         "paginate": {
                             "next": nextText,
-                            "previous": previousText,
+                            "previous": previousText
                         },
                         "aria": {
                             "sortAscending": sortAscendingText,
-                            "sortDescending": sortDescendingText,
+                            "sortDescending": sortDescendingText
                         }
                     }
                 });

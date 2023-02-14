@@ -1,7 +1,7 @@
 <!-- $Id: transferPoolTree.jsp 2012-11-10 wang58@iupui.edu -->
 
 <h:inputHidden id="transferPoolIds" value=""/>
-<h:dataTable id="TreeTable" value="#{questionpool.transferQpools}" var="pool" cellpadding="0" cellspacing="0" styleClass="listHier" >
+<h:dataTable id="TreeTable" value="#{questionpool.transferQpools}" var="pool" cellpadding="0" cellspacing="0" styleClass="table table-hover table-striped table-bordered" >
     <h:column id="col1">
         <f:facet name="header">
             <h:panelGroup>

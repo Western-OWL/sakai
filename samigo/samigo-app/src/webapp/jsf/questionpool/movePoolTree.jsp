@@ -29,7 +29,7 @@
 </h:panelGrid>
 
 <h:dataTable cellpadding="0" cellspacing="0" id="TreeTable" value="#{questionpool.moveQpools}"
-   var="pool" styleClass="listHier" >
+   var="pool" styleClass="table table-hover table-striped table-bordered" >
 
     <h:column  id="radiocol">
 <f:facet name="header">

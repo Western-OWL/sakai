@@ -48,12 +48,14 @@
  <div class="portletBody">
 <h:form id="movePool">
 <h:messages styleClass="sak-banner-error" rendered="#{! empty facesContext.maximumSeverity}" layout="table"/>
-<h3>
+<div class="page-header">
+<h1>
 <h:outputText rendered="#{questionpool.actionType == 'pool'}" value="#{questionPoolMessages.mv_p}"/>
 <h:outputText rendered="#{questionpool.actionType == 'item'}" value="#{questionPoolMessages.mv_q}"/>
-</h3>
+</h1>
+</div>
 
-<div class="tier1">
+<div>
 <h:outputText value="#{questionPoolMessages.sel_dest_move} "/>
 <h:outputText rendered="#{questionpool.actionType == 'pool'}" value="#{questionpool.currentPool.displayName}"/>
 <h:outputText rendered="#{questionpool.actionType == 'item' && questionpool.currentItems[1] == null}" escape="false" value="#{questionpool.currentItems[0].text}"/>
@@ -66,15 +68,7 @@
 
 </div>
 
-<%--
-<h:outputText styleClass="number" value="1"/>
-<h:outputLabel rendered="#{questionpool.actionType == 'item'}" value="#{questionPoolMessages.mv_q_to}"/>
-<h:outputLabel rendered="#{questionpool.actionType == 'pool'}" value="#{questionPoolMessages.mv_p_to}"/>
-<br/><br/>
---%>
-
-
-<div class="longtext tier2">
+<div class="longtext tier1">
 <%@ include file="/jsf/questionpool/movePoolTree.jsp" %>
 
 <h:inputHidden id="selectedRadioBtn" value="#{questionpool.destPool}"/>

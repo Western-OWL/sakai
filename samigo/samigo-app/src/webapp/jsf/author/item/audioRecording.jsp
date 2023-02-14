@@ -204,7 +204,7 @@
 
     <!-- METADATA -->
     <h:panelGroup rendered="#{itemauthor.showMetadata == 'true'}" styleClass="longtext">
-        <h:outputLabel value="Metadata"/>
+        <h2><h:outputText value="Metadata"/></h2>
         <div class="form-group row">
             <h:outputLabel for="obj" value="#{authorMessages.objective}" styleClass="col-md-4 col-lg-2 form-control-label"/>
             <div class="col-md-5 col-lg-3">

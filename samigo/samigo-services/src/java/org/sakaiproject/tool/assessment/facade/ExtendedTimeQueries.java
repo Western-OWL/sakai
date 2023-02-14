@@ -17,6 +17,10 @@
 
 package org.sakaiproject.tool.assessment.facade;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +41,8 @@ import org.springframework.orm.hibernate5.support.HibernateDaoSupport;
  */
 @Slf4j
 public class ExtendedTimeQueries extends HibernateDaoSupport implements ExtendedTimeQueriesAPI {
+
+    private static final int MAX_IN_CLAUSE_SIZE = 1000;
 
     /**
      * init
@@ -71,11 +77,12 @@ public class ExtendedTimeQueries extends HibernateDaoSupport implements Extended
     @SuppressWarnings("unchecked")
     public List<ExtendedTime> getEntriesForPub(PublishedAssessmentIfc pub) {
         log.debug("getEntriesForPub " + pub.getPublishedAssessmentId());
+        Long pubId = pub.getPublishedAssessmentId();
 
         try {
             HibernateCallback hcb = (Session s) -> {
                 Query q = s.getNamedQuery(QUERY_GET_ENTRIES_FOR_PUBLISHED);
-                q.setParameter(PUBLISHED_ID, pub, new ManyToOneType(TypeConfiguration::new, "org.sakaiproject.tool.assessment.data.dao.assessment.PublishedAssessmentData"));
+                q.setParameter(PUBLISHED_ID, pubId);
                 return q.list();
             };
 
@@ -102,6 +109,81 @@ public class ExtendedTimeQueries extends HibernateDaoSupport implements Extended
         log.debug("getEntryForPubAndGroup, pub: '" + pub.getPublishedAssessmentId() + "' group: " + groupId);
 
         return getPubAndX(QUERY_GET_ENTRY_FOR_PUB_N_GROUP, pub, GROUP, groupId);
+    }
+
+        /**
+     * {@innheritDoc}
+     */
+    public List<ExtendedTime> getEntriesForPubAndUserOrGroups(PublishedAssessmentIfc pub, String userId, Collection<String> groupIDs) {
+        log.debug("getEntriesForPubAndUserOrGroups, pub: '" + pub.getPublishedAssessmentId() + "', User: " + userId + ", groups: " + groupIDs);
+        Long pubId = pub.getPublishedAssessmentId();
+
+        List<ExtendedTime> entries;
+
+        // Query groupIDs up to 1000 at a time (Oracle in clause limit)
+        Collection<String> queryGroupIDs;
+        Iterator<String> itGroupIDs = groupIDs.iterator();
+        if (groupIDs.size() < MAX_IN_CLAUSE_SIZE) {
+            queryGroupIDs = groupIDs;
+        } else {
+            queryGroupIDs = new ArrayList<>(MAX_IN_CLAUSE_SIZE);
+            while (itGroupIDs.hasNext() && queryGroupIDs.size() < MAX_IN_CLAUSE_SIZE) {
+                queryGroupIDs.add(itGroupIDs.next());
+            }
+        }
+
+        try {
+            HibernateCallback hcb = (Session s) -> {
+                Query q = s.getNamedQuery(QUERY_GET_ENTRIES_FOR_PUB_USER_N_GROUPS);
+                q.setParameter(PUBLISHED_ID, pubId);
+                q.setParameter(USER_ID, userId);
+                q.setParameterList(GROUPS, queryGroupIDs);
+                return q.list();
+            };
+            entries = (List<ExtendedTime>)getHibernateTemplate().execute(hcb);
+        } catch (DataAccessException de) {
+            log.error("Failed to get extended time for pub: '{}', User: {}, groupIDs: {}", pub.getPublishedAssessmentId(), userId, queryGroupIDs);
+            return Collections.emptyList();
+        }
+
+        if (groupIDs.size() >= MAX_IN_CLAUSE_SIZE) {
+            // Use itGroupIDs to continue where we left off
+            entries.addAll(getEntriesForPubAndGroups(pubId, itGroupIDs));
+        }
+
+        return entries;
+    }
+
+    private List<ExtendedTime> getEntriesForPubAndGroups(Long pubId, Iterator<String> itGroupIDs) {
+        log.debug("getEntriesForPubAndGroups, pub: '{}'; using groupId iterator", pubId);
+        if (!itGroupIDs.hasNext()) {
+            return Collections.emptyList();
+        }
+        List<ExtendedTime> entries = new ArrayList<>();
+
+        List<String> queryGroupIDs = new ArrayList<>(MAX_IN_CLAUSE_SIZE);
+        while (itGroupIDs.hasNext()) {
+            queryGroupIDs.clear();
+            while (itGroupIDs.hasNext() && queryGroupIDs.size() < MAX_IN_CLAUSE_SIZE) {
+                queryGroupIDs.add(itGroupIDs.next());
+            }
+
+            try {
+                HibernateCallback hcb = (Session s) -> {
+                    Query q = s.getNamedQuery(QUERY_GET_ENTRIES_FOR_PUB_N_GROUPS);
+                    q.setParameter(PUBLISHED_ID, pubId);
+                    q.setParameterList(GROUPS, queryGroupIDs);
+                    return q.list();
+                };
+                log.debug("getEntriesForPubAndGroups, pub: '{}', groups: {}", pubId, queryGroupIDs);
+                entries.addAll((List<ExtendedTime>)getHibernateTemplate().execute(hcb));
+            } catch (DataAccessException de) {
+                log.error("Failed to get extended time for pug: '{}', groupIDs: {}", pubId, queryGroupIDs);
+                return Collections.emptyList();
+            }
+        }
+
+        return entries;
     }
 
     /**
@@ -143,10 +225,11 @@ public class ExtendedTimeQueries extends HibernateDaoSupport implements Extended
 
     @SuppressWarnings("unchecked")
     private ExtendedTime getPubAndX(final String query, final PublishedAssessmentIfc pub, final String secondParam, final String secondParamValue) {
+        Long pubId = pub.getPublishedAssessmentId();
         try{
             HibernateCallback hcb = (Session s) -> {
                 Query q = s.getNamedQuery(query);
-                q.setParameter(PUBLISHED_ID, pub, new ManyToOneType(TypeConfiguration::new, "org.sakaiproject.tool.assessment.data.dao.assessment.PublishedAssessmentData"));
+                q.setParameter(PUBLISHED_ID, pubId);
                 q.setParameter(secondParam, secondParamValue, new StringType());
                 return q.uniqueResult();
             };

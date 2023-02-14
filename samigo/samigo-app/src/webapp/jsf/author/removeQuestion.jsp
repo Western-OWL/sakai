@@ -39,17 +39,17 @@
 		<!-- content... -->
 
 		<h:form>
-			<h3>
-				<h:outputText value="#{authorMessages.remove_q_conf}" />
-			</h3>
+			<div class="page-header">
+				<h1><h:outputText value="#{authorMessages.remove_q_conf}" /></h1>
+			</div>
+			<div class="sak-banner-warn">
 			<div class="validation tier1">
 				<h:outputText value="#{authorMessages.sure_rem_q}" />
 			</div>
 
 			<p class="act">
 				<h:commandButton immediate="true" value="#{commonMessages.remove_action}" action="editAssessment" type="submit" styleClass="active">
-					<f:actionListener
-						type="org.sakaiproject.tool.assessment.ui.listener.author.ItemRemoveListener" />
+					<f:actionListener type="org.sakaiproject.tool.assessment.ui.listener.author.ItemRemoveListener" />
 					<f:param name="itemid" value="#{question.itemData.itemIdString}" />
 				</h:commandButton>
 				<h:commandButton value="#{commonMessages.cancel_action}" type="submit" action="editAssessment" rendered="#{itemauthor.target=='assessment'}" />

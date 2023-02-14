@@ -79,45 +79,29 @@ $Id$
   <%@ include file="/jsf/evaluation/evaluationHeadings.jsp" %>
 
   <h:panelGroup layout="block" styleClass="page-header">
-    <h1>
-      <h:outputText value="#{evaluationMessages.part} #{questionScores.partName}#{evaluationMessages.column} #{evaluationMessages.question} #{questionScores.itemName} " escape="false"/>
-      <small><h:outputText value="(#{totalScores.assessmentName}) " escape="false"/></small>
-    </h1>
+    <h1><h:outputText value="#{totalScores.assessmentName} #{evaluationMessages.dash} #{evaluationMessages.part} #{questionScores.partName}#{evaluationMessages.column} #{evaluationMessages.question} #{questionScores.itemName} " escape="false"/></h1>
   </h:panelGroup>
 
   <!-- EVALUATION SUBMENU -->
   <%@ include file="/jsf/evaluation/evaluationSubmenu.jsp" %>
 
-<div class="tier1">
+<div>
   <h:messages styleClass="sak-banner-error" rendered="#{! empty facesContext.maximumSeverity}" layout="table"/>
   
-  <h:dataTable value="#{questionScores.sections}" var="partinit">
+  <h:dataTable value="#{questionScores.sections}" var="partinit" styleClass="table table-bordered">
     <h:column>
-      <h:outputText value="#{evaluationMessages.part} #{partinit.partNumber}#{evaluationMessages.column}" />
-    </h:column>
-    <h:column>
-      <samigo:dataLine value="#{partinit.questionNumberList}" var="iteminit" separator=" | " first="0" rows="#{partinit.numberQuestionsTotal}" rendered="#{!partinit.isRandomDrawPart}" >
-        <h:column>
-          <h:commandLink title="#{evaluationMessages.t_questionScores}" action="questionScores" immediate="true" >
-            <h:outputText value="#{evaluationMessages.q}#{iteminit.partNumber} " escape="false"/>
-			<f:actionListener
-              type="org.sakaiproject.tool.assessment.ui.listener.evaluation.QuestionScorePagerListener" />
-            <f:actionListener
-              type="org.sakaiproject.tool.assessment.ui.listener.evaluation.QuestionScoreListener" />
-            <f:param name="newItemId" value="#{iteminit.id}" />
-          </h:commandLink>
-	    </h:column>
-      </samigo:dataLine>
-
-	  <h:outputFormat value="#{evaluationMessages.random_draw_info}" rendered="#{partinit.isRandomDrawPart}">
+      <h:outputText value="#{evaluationMessages.part} #{partinit.partNumber}#{evaluationMessages.column} " />
+      <h:outputFormat value="#{evaluationMessages.random_draw_info}" rendered="#{partinit.isRandomDrawPart}">
 	  	<f:param value="#{partinit.numberQuestionsDraw}" />
 		<f:param value="#{partinit.numberQuestionsTotal}" />
 	  </h:outputFormat>
 
-	  <samigo:dataLine value="#{partinit.questionNumberList}" var="iteminit" separator=" | " first="0" rows="#{partinit.numberQuestionsTotal}" rendered="#{partinit.isRandomDrawPart}" >
+	  </h:column>
+    <h:column>
+    <samigo:dataLine value="#{partinit.questionNumberList}" var="iteminit" separator=" | " first="0" rows="#{partinit.numberQuestionsTotal}">
         <h:column>
           <h:commandLink title="#{evaluationMessages.t_questionScores}" action="questionScores" immediate="true" >
-            <h:outputText value="#{evaluationMessages.q} #{iteminit.partNumber} "/>
+            <h:outputText value="#{evaluationMessages.q}#{iteminit.partNumber}" escape="false"/>
 			<f:actionListener
               type="org.sakaiproject.tool.assessment.ui.listener.evaluation.QuestionScorePagerListener" />
             <f:actionListener
@@ -135,91 +119,49 @@ $Id$
     <div class="page-header">
       <h2>
      <h:panelGroup rendered="#{questionScores.typeId == '7'}">
-         <h:outputText value="#{evaluationMessages.part} #{questionScores.partName}#{evaluationMessages.column} #{evaluationMessages.question} #{question.sequence}" />
-         <small>
-           <h:outputText value=" - #{evaluationMessages.q_aud} (#{questionScores.maxPoint})"/>
-         </small>
+         <h:outputText value="#{evaluationMessages.part} #{questionScores.partName}#{evaluationMessages.column} #{evaluationMessages.question} #{question.sequence} #{evaluationMessages.dash} #{evaluationMessages.q_aud} (#{questionScores.maxPoint})"/>
      </h:panelGroup>
      <h:panelGroup rendered="#{questionScores.typeId == '6'}">
-         <h:outputText value="#{evaluationMessages.part} #{questionScores.partName}#{evaluationMessages.column} #{evaluationMessages.question} #{question.sequence}" />
-         <small>
-         <h:outputText value=" - #{evaluationMessages.q_fu} (#{questionScores.maxPoint})"/>
-         </small>
+         <h:outputText value="#{evaluationMessages.part} #{questionScores.partName}#{evaluationMessages.column} #{evaluationMessages.question} #{question.sequence} #{evaluationMessages.dash} #{evaluationMessages.q_fu} (#{questionScores.maxPoint})"/>
      </h:panelGroup>
      <h:panelGroup rendered="#{questionScores.typeId == '8'}">
-         <h:outputText value="#{evaluationMessages.part} #{questionScores.partName}#{evaluationMessages.column} #{evaluationMessages.question} #{question.sequence}" />
-         <small>
-         <h:outputText value=" - #{evaluationMessages.q_fib} (#{questionScores.maxPoint})"/>
-         </small>
+         <h:outputText value="#{evaluationMessages.part} #{questionScores.partName}#{evaluationMessages.column} #{evaluationMessages.question} #{question.sequence} #{evaluationMessages.dash} #{evaluationMessages.q_fib} (#{questionScores.maxPoint})"/>
      </h:panelGroup>
      <h:panelGroup rendered="#{questionScores.typeId == '11'}">
-         <h:outputText value="#{evaluationMessages.part} #{questionScores.partName}#{evaluationMessages.column} #{evaluationMessages.question} #{question.sequence}" />
-         <small>
-         <h:outputText value=" - #{evaluationMessages.q_fin} (#{questionScores.maxPoint})"/>
-         </small>
+         <h:outputText value="#{evaluationMessages.part} #{questionScores.partName}#{evaluationMessages.column} #{evaluationMessages.question} #{question.sequence} #{evaluationMessages.dash} #{evaluationMessages.q_fin} (#{questionScores.maxPoint})"/>
      </h:panelGroup>
       <h:panelGroup rendered="#{questionScores.typeId == '9'}">
-         <h:outputText value="#{evaluationMessages.part} #{questionScores.partName}#{evaluationMessages.column} #{evaluationMessages.question} #{question.sequence}" />
-         <small>
-         <h:outputText value=" - #{evaluationMessages.q_match} (#{questionScores.maxPoint})"/>
-         </small>
+         <h:outputText value="#{evaluationMessages.part} #{questionScores.partName}#{evaluationMessages.column} #{evaluationMessages.question} #{question.sequence} #{evaluationMessages.dash} #{evaluationMessages.q_match} (#{questionScores.maxPoint})"/>
      </h:panelGroup>
      <h:panelGroup rendered="#{questionScores.typeId == '2'}">
-         <h:outputText value="#{evaluationMessages.part} #{questionScores.partName}#{evaluationMessages.column} #{evaluationMessages.question} #{question.sequence}" />
-         <small>
-         <h:outputText value=" - #{commonMessages.multipl_mc_ms} (#{questionScores.maxPoint})"/>
-         </small>
+         <h:outputText value="#{evaluationMessages.part} #{questionScores.partName}#{evaluationMessages.column} #{evaluationMessages.question} #{question.sequence} #{evaluationMessages.dash} #{commonMessages.multipl_mc_ms} (#{questionScores.maxPoint})"/>
      </h:panelGroup>
      <h:panelGroup rendered="#{questionScores.typeId == '4'}">
-         <h:outputText value="#{evaluationMessages.part} #{questionScores.partName}#{evaluationMessages.column} #{evaluationMessages.question} #{question.sequence}" />
-         <small>
-         <h:outputText value=" - #{evaluationMessages.q_tf} (#{questionScores.maxPoint})"/>
-         </small>
+         <h:outputText value="#{evaluationMessages.part} #{questionScores.partName}#{evaluationMessages.column} #{evaluationMessages.question} #{question.sequence} #{evaluationMessages.dash} #{evaluationMessages.q_tf} (#{questionScores.maxPoint})"/>
      </h:panelGroup>
      <h:panelGroup rendered="#{questionScores.typeId == '5'}">
-         <h:outputText value="#{evaluationMessages.part} #{questionScores.partName}#{evaluationMessages.column} #{evaluationMessages.question} #{question.sequence}" />
-         <small>
-         <h:outputText value=" - #{evaluationMessages.q_short_ess} (#{questionScores.maxPoint})"/>
-         </small>
+         <h:outputText value="#{evaluationMessages.part} #{questionScores.partName}#{evaluationMessages.column} #{evaluationMessages.question} #{question.sequence} #{evaluationMessages.dash} #{evaluationMessages.q_short_ess} (#{questionScores.maxPoint})"/>
      </h:panelGroup>
      <h:panelGroup rendered="#{questionScores.typeId == '3'}">
-         <h:outputText value="#{evaluationMessages.part} #{questionScores.partName}#{evaluationMessages.column} #{evaluationMessages.question} #{question.sequence}" />
-         <small>
-         <h:outputText value=" - #{evaluationMessages.q_mult_surv} (#{questionScores.maxPoint})"/>
-         </small>
+         <h:outputText value="#{evaluationMessages.part} #{questionScores.partName}#{evaluationMessages.column} #{evaluationMessages.question} #{question.sequence} #{evaluationMessages.dash} #{evaluationMessages.q_mult_surv} (#{questionScores.maxPoint})"/>
      </h:panelGroup>
      <h:panelGroup rendered="#{questionScores.typeId == '13'}">
-         <h:outputText value="#{evaluationMessages.part} #{questionScores.partName}#{evaluationMessages.column} #{evaluationMessages.question} #{question.sequence}"/>
-         <small>
-             <h:outputText value=" - #{evaluationMessages.q_matrix_choices_surv} (#{questionScores.maxPoint})"/>
-         </small>
+         <h:outputText value="#{evaluationMessages.part} #{questionScores.partName}#{evaluationMessages.column} #{evaluationMessages.question} #{question.sequence} #{evaluationMessages.dash} #{evaluationMessages.q_matrix_choices_surv} (#{questionScores.maxPoint})"/>
      </h:panelGroup>
      <h:panelGroup rendered="#{questionScores.typeId == '1'}">
-         <h:outputText value="#{evaluationMessages.part} #{questionScores.partName}#{evaluationMessages.column} #{evaluationMessages.question} #{question.sequence}" />
-         <small>
-         <h:outputText value=" - #{commonMessages.multiple_choice_sin} (#{questionScores.maxPoint})"/>
-         </small>
+         <h:outputText value="#{evaluationMessages.part} #{questionScores.partName}#{evaluationMessages.column} #{evaluationMessages.question} #{question.sequence} #{evaluationMessages.dash} #{commonMessages.multiple_choice_sin} (#{questionScores.maxPoint})"/>
      </h:panelGroup>
      <h:panelGroup rendered="#{questionScores.typeId == '12'}">
-		 <h:outputText value="#{evaluationMessages.part} #{questionScores.partName}#{evaluationMessages.column} #{evaluationMessages.question} #{question.sequence}" />
-         <small>
-         <h:outputText value=" - #{commonMessages.multipl_mc_ss} (#{questionScores.maxPoint})"/>
-         </small>
+         <h:outputText value="#{evaluationMessages.part} #{questionScores.partName}#{evaluationMessages.column} #{evaluationMessages.question} #{question.sequence}  #{evaluationMessages.dash} #{commonMessages.multipl_mc_ss} (#{questionScores.maxPoint})"/>
      </h:panelGroup>
-	 <h:panelGroup rendered="#{questionScores.typeId == '16'}"><!-- // IMAGEMAP_QUESTION -->
-		 <h:outputText value="#{evaluationMessages.part} #{questionScores.partName}#{evaluationMessages.column} #{evaluationMessages.question} #{question.sequence}" />
-         <small>
-		 <h:outputText value=" - #{evaluationMessages.q_imq} (#{questionScores.maxPoint})"/>
-         </small>
+    <h:panelGroup rendered="#{questionScores.typeId == '16'}"><!-- // IMAGEMAP_QUESTION -->
+         <h:outputText value="#{evaluationMessages.part} #{questionScores.partName}#{evaluationMessages.column} #{evaluationMessages.question} #{question.sequence} #{evaluationMessages.dash} #{evaluationMessages.q_imq} (#{questionScores.maxPoint})"/>
       </h:panelGroup>
     <h:panelGroup rendered="#{questionScores.typeId == '14'}">
-      <h:outputText value="#{evaluationMessages.question}#{question.sequence} - #{evaluationMessages.q_emi}"/>
+        <h:outputText value="#{evaluationMessages.question}#{question.sequence} - #{evaluationMessages.q_emi}"/>
     </h:panelGroup>   
     <h:panelGroup rendered="#{questionScores.typeId == '15'}"><!-- // CALCULATED_QUESTION -->
-      <h:outputText value="#{evaluationMessages.part} #{questionScores.partName}#{evaluationMessages.column} #{evaluationMessages.question} #{question.sequence}"/>
-      <small>
-          <h:outputText value=" - #{evaluationMessages.q_cq} (#{questionScores.maxPoint})"/>
-      </small>
+         <h:outputText value="#{evaluationMessages.part} #{questionScores.partName}#{evaluationMessages.column} #{evaluationMessages.question} #{question.sequence} #{evaluationMessages.dash} #{evaluationMessages.q_imq} (#{questionScores.maxPoint})"/>
     </h:panelGroup>
      <h:panelGroup rendered="#{question.isExtraCredit == true}">
         <h:outputText styleClass="extraCreditLabel" value=" #{deliveryMessages.extra_credit_preview}" />
@@ -304,148 +246,116 @@ $Id$
   </t:dataList>
   </div>
 
-  <h2>
-    <p class="navView navModeAction">
-      <h:outputText value="#{evaluationMessages.responses}"/>
-    </p>
-  </h2>
+  <h3><h:outputText value="#{evaluationMessages.responses}"/></h3>
 
   <sakai:flowState bean="#{questionScores}" />
 
-  <h:panelGroup styleClass="form-inline" layout="block" rendered="#{totalScores.anonymous eq 'false'}">
-    <div class="form-group">
-        <h:outputLabel value="#{evaluationMessages.view}" />
-        <h:outputText value="&#160;" escape="false" />
-        <h:selectOneMenu value="#{questionScores.allSubmissions}" id="allSubmissionsL1"
-         required="true" onchange="document.forms[0].submit();" rendered="#{totalScores.scoringOption eq '2'  && totalScores.multipleSubmissionsAllowed eq 'true'  }">
-          <f:selectItem itemValue="3" itemLabel="#{evaluationMessages.all_sub}" />
-          <f:selectItem itemValue="2" itemLabel="#{evaluationMessages.last_sub}" />
-          <f:valueChangeListener
-           type="org.sakaiproject.tool.assessment.ui.listener.evaluation.QuestionScoreListener" />
-        </h:selectOneMenu>
-        <h:selectOneMenu value="#{questionScores.allSubmissions}" id="allSubmissionsH1"
-         required="true" onchange="document.forms[0].submit();" rendered="#{totalScores.scoringOption eq '1'  && totalScores.multipleSubmissionsAllowed eq 'true' }">
-          <f:selectItem itemValue="3" itemLabel="#{evaluationMessages.all_sub}" />
-          <f:selectItem itemValue="1" itemLabel="#{evaluationMessages.highest_sub}" />
-          <f:valueChangeListener
-           type="org.sakaiproject.tool.assessment.ui.listener.evaluation.QuestionScoreListener" />
-        </h:selectOneMenu>
-    </div>
-    
-    <h:panelGroup styleClass="form-group" layout="block" 
-                  rendered="#{(questionScores.typeId == '1' || questionScores.typeId == '2' || 
+  <h:panelGroup styleClass="sakai-table-toolBar" layout="block" rendered="#{totalScores.anonymous eq 'false'}">
+    <h:panelGroup styleClass="sakai-table-filterContainer" layout="block">
+      <h:panelGroup styleClass="sakai-table-viewFilter" layout="block">
+        <h:panelGroup rendered="#{totalScores.scoringOption eq '2'  && totalScores.multipleSubmissionsAllowed eq 'true'  }">
+            <h:outputLabel value="#{evaluationMessages.view}" for="allSubmissionsL1" />
+            <h:selectOneMenu value="#{questionScores.allSubmissions}" id="allSubmissionsL1" required="true" onchange="document.forms[0].submit();">
+              <f:selectItem itemValue="3" itemLabel="#{evaluationMessages.all_sub}" />
+              <f:selectItem itemValue="2" itemLabel="#{evaluationMessages.last_sub}" />
+              <f:valueChangeListener type="org.sakaiproject.tool.assessment.ui.listener.evaluation.QuestionScoreListener" />
+            </h:selectOneMenu>
+        </h:panelGroup>
+        <h:panelGroup rendered="#{totalScores.scoringOption eq '1'  && totalScores.multipleSubmissionsAllowed eq 'true' }">
+            <h:outputLabel value="#{evaluationMessages.view}" for="allSubmissionsH1" />
+            <h:selectOneMenu value="#{questionScores.allSubmissions}" id="allSubmissionsH1" required="true" onchange="document.forms[0].submit();">
+              <f:selectItem itemValue="3" itemLabel="#{evaluationMessages.all_sub}" />
+              <f:selectItem itemValue="1" itemLabel="#{evaluationMessages.highest_sub}" />
+              <f:valueChangeListener type="org.sakaiproject.tool.assessment.ui.listener.evaluation.QuestionScoreListener" />
+            </h:selectOneMenu>
+        </h:panelGroup>
+        <h:panelGroup rendered="#{(questionScores.typeId == '1' || questionScores.typeId == '2' ||
                                  questionScores.typeId == '12' || questionScores.typeId == '4'  || questionScores.typeId == '5')}">
-        <h:outputLabel value="&nbsp;#{evaluationMessages.with}&nbsp;" escape="false" />
-        <h:selectOneMenu value="#{questionScores.selectedSARationaleView}" id="inlinepopup1"
-            required="true" onchange="document.forms[0].submit();" >
-            <f:selectItem itemValue="1" itemLabel="#{evaluationMessages.responses_popup}" />
-            <f:selectItem itemValue="2" itemLabel="#{evaluationMessages.responses_inline}" />
-            <f:valueChangeListener type="org.sakaiproject.tool.assessment.ui.listener.evaluation.QuestionScoreListener" />
-        </h:selectOneMenu>
-    </h:panelGroup>
+        <h:outputLabel value="&nbsp;#{evaluationMessages.with}" escape="false" for="inlinepopup1" />
+            <h:selectOneMenu value="#{questionScores.selectedSARationaleView}" id="inlinepopup1" required="true" onchange="document.forms[0].submit();" >
+                <f:selectItem itemValue="1" itemLabel="#{evaluationMessages.responses_popup}" />
+                <f:selectItem itemValue="2" itemLabel="#{evaluationMessages.responses_inline}" />
+                <f:valueChangeListener type="org.sakaiproject.tool.assessment.ui.listener.evaluation.QuestionScoreListener" />
+            </h:selectOneMenu>
+        </h:panelGroup>
     
-    <!-- SECTION AWARE -->
-    <div class="form-group">
-        <h:outputLabel value="&nbsp;#{evaluationMessages.forAllSectionsGroups}&nbsp;" escape="false" 
-                        rendered="#{totalScores.availableSectionSize < 1}"/>
-        <h:outputLabel value="&nbsp;#{evaluationMessages.for_s}&nbsp;" rendered="#{totalScores.availableSectionSize >= 1}" 
-                        escape="false"/>
+        <h:outputLabel value="#{evaluationMessages.forAllSectionsGroups}" rendered="#{totalScores.availableSectionSize < 1}" escape="false" />
+        <h:outputLabel value="&nbsp;#{evaluationMessages.for_s}" rendered="#{totalScores.availableSectionSize >= 1}" escape="false" for="sectionpicker" />
 
-        <h:panelGroup layout="block" rendered="#{totalScores.availableSectionSize >= 1}">
+        <h:panelGroup rendered="#{totalScores.availableSectionSize >= 1}">
             <h:selectOneMenu value="#{questionScores.selectedSectionFilterValue}" id="sectionpicker" required="true" 
                     onchange="document.forms[0].submit();" >
             <f:selectItems value="#{totalScores.sectionFilterSelectItems}"/>
-            <f:valueChangeListener
-            type="org.sakaiproject.tool.assessment.ui.listener.evaluation.QuestionScoreListener"/>
+            <f:valueChangeListener type="org.sakaiproject.tool.assessment.ui.listener.evaluation.QuestionScoreListener"/>
             </h:selectOneMenu>
         </h:panelGroup>
-    </div>
-  </h:panelGroup>
-  <br/>
-  <h:panelGroup styleClass="form-inline" layout="block" rendered="#{totalScores.anonymous eq 'false'}">
 
       <h:panelGroup styleClass="form-group" rendered="#{questionScores.typeId == '6'}" layout="block">
         <h:outputLink styleClass="btn btn-default" title="#{evaluationMessages.download_responses}"  value="/samigo-app/servlet/DownloadAllMedia?publishedId=#{questionScores.publishedId}&publishedItemId=#{questionScores.itemId}&createdBy=#{question.itemData.createdBy}&partNumber=#{part.partNumber}&anonymous=#{totalScores.anonymous}&scoringType=#{questionScores.allSubmissions}">
           <h:outputText value="#{evaluationMessages.download_responses}"/>
         </h:outputLink>
       </h:panelGroup>
-      
-      <div class="form-group">
-        <h:panelGroup styleClass="samigo-search-student" layout="block">
-            <h:outputLabel value="#{evaluationMessages.search}"/>
-            <h:outputText value="&#160;" escape="false" />
-            <h:inputText
+    </h:panelGroup>
+
+      <h:panelGroup styleClass="sakai-table-searchFilter" layout="block">
+            <h:outputLabel value="#{evaluationMessages.search}" for="searchString" />
+            <h:panelGroup styleClass="sakai-table-searchFilterControls" layout="block">
+                <h:inputText
                     id="searchString"
                     value="#{questionScores.searchString}"
                     onfocus="clearIfDefaultString(this, '#{evaluationMessages.search_default_student_search_string}')"
-                    onkeypress="return submitOnEnter(event, 'editTotalResults:searchSubmitButton');"/>
-            <h:outputText value="&nbsp;" escape="false" />
-            <h:commandButton actionListener="#{questionScores.search}" value="#{evaluationMessages.search_find}" id="searchSubmitButton" />
-            <h:outputText value="&nbsp;" escape="false" />
-            <h:commandButton actionListener="#{questionScores.clear}" value="#{evaluationMessages.search_clear}"/>
+                    onkeypress="return submitOnEnter(event, 'editTotalResults:searchSubmitButton');"
+                    styleClass="sakai-table-searchFilter-searchField" />
+                <h:commandButton actionListener="#{questionScores.search}" value="#{evaluationMessages.search_find}" id="searchSubmitButton" />
+                <h:commandButton actionListener="#{questionScores.clear}" value="#{evaluationMessages.search_clear}"/>
+            </h:panelGroup>
          </h:panelGroup>
-	  </div>
   </h:panelGroup>
-   
-   <h:panelGroup>
-	<sakai:pager id="pager1" totalItems="#{questionScores.dataRows}" firstItem="#{questionScores.firstRow}" pageSize="#{questionScores.maxDisplayedRows}" pageSizes="5,10,20,50,100,200" textStatus="#{evaluationMessages.paging_status}" >
-		  <f:valueChangeListener type="org.sakaiproject.tool.assessment.ui.listener.evaluation.QuestionScorePagerListener" />
-	</sakai:pager>
-  </h:panelGroup>  
+    <sakai:pager id="pager1" totalItems="#{questionScores.dataRows}" firstItem="#{questionScores.firstRow}" pageSize="#{questionScores.maxDisplayedRows}" pageSizes="5,10,20,50,100,200" textStatus="#{evaluationMessages.paging_status}" >
+	  <f:valueChangeListener type="org.sakaiproject.tool.assessment.ui.listener.evaluation.QuestionScorePagerListener" />
+  </sakai:pager>
+  </h:panelGroup>
 
-<h:panelGrid columns="3" columnClasses="samLeftNav,samRightNav" width="100%" rendered="#{totalScores.anonymous eq 'true'}">
-  <h:panelGroup>
-      <h:outputText value="#{evaluationMessages.view}" rendered="#{totalScores.multipleSubmissionsAllowed eq 'true' || (questionScores.typeId == '1' || questionScores.typeId == '2' || questionScores.typeId == '12' || questionScores.typeId == '4'  || questionScores.typeId == '5')}"/>
-      <h:panelGroup styleClass="all-submissions" layout="block">
+<h:panelGroup styleClass="sakai-table-toolBar" layout="block" rendered="#{totalScores.anonymous eq 'true'}">
+  <h:panelGroup styleClass="sakai-table-filterContainer" layout="block">
+    <h:panelGroup styleClass="sakai-table-viewFilter" layout="block" rendered="#{totalScores.multipleSubmissionsAllowed eq 'true'}">
+      <h:outputLabel for="allSubmissionsL2" value="#{evaluationMessages.view}" rendered="#{totalScores.scoringOption eq '2'}"/>
         <h:selectOneMenu value="#{questionScores.allSubmissions}" id="allSubmissionsL2"
-         required="true" onchange="document.forms[0].submit();" rendered="#{totalScores.scoringOption eq '2'  && totalScores.multipleSubmissionsAllowed eq 'true' }">
-        <f:selectItem itemValue="3" itemLabel="#{evaluationMessages.all_sub}" />
-        <f:selectItem itemValue="2" itemLabel="#{evaluationMessages.last_sub}" />
-        <f:valueChangeListener
-         type="org.sakaiproject.tool.assessment.ui.listener.evaluation.QuestionScoreListener" />
+                  required="true" onchange="document.forms[0].submit();" rendered="#{totalScores.scoringOption eq '2'}">
+            <f:selectItem itemValue="3" itemLabel="#{evaluationMessages.all_sub}" />
+            <f:selectItem itemValue="2" itemLabel="#{evaluationMessages.last_sub}" />
+            <f:valueChangeListener type="org.sakaiproject.tool.assessment.ui.listener.evaluation.QuestionScoreListener" />
         </h:selectOneMenu>
 
+        <h:outputLabel for="allSubmissionsH2" value="#{evaluationMessages.view}" rendered="#{totalScores.scoringOption eq '1'}"/>
         <h:selectOneMenu value="#{questionScores.allSubmissions}" id="allSubmissionsH2"
-         required="true" onchange="document.forms[0].submit();" rendered="#{totalScores.scoringOption eq '1'  && totalScores.multipleSubmissionsAllowed eq 'true' }">
-          <f:selectItem itemValue="3" itemLabel="#{evaluationMessages.all_sub}" />
-          <f:selectItem itemValue="1" itemLabel="#{evaluationMessages.highest_sub}" />
-          <f:valueChangeListener
-           type="org.sakaiproject.tool.assessment.ui.listener.evaluation.QuestionScoreListener" />
+                  required="true" onchange="document.forms[0].submit();" rendered="#{totalScores.scoringOption eq '1'}">
+            <f:selectItem itemValue="3" itemLabel="#{evaluationMessages.all_sub}" />
+            <f:selectItem itemValue="1" itemLabel="#{evaluationMessages.highest_sub}" />
+            <f:valueChangeListener type="org.sakaiproject.tool.assessment.ui.listener.evaluation.QuestionScoreListener" />
         </h:selectOneMenu>
         
-        <h:outputText value="&nbsp;" escape="false" rendered="#{totalScores.multipleSubmissionsAllowed eq 'true'}"/>
-
-        <h:outputText value="&nbsp;#{evaluationMessages.with}&nbsp;&nbsp;" escape="false" 
-        	rendered="#{totalScores.multipleSubmissionsAllowed eq 'true' && (questionScores.typeId == '1' || questionScores.typeId == '2' || questionScores.typeId == '12' || questionScores.typeId == '4'  || questionScores.typeId == '5')}"/>
-        
-		<h:selectOneMenu value="#{questionScores.selectedSARationaleView}" id="inlinepopup2" 
+        <h:outputLabel for="inlinepopup2" value="&nbsp;#{evaluationMessages.with}&nbsp;" escape="false"
+        	rendered="#{(questionScores.typeId == '1' || questionScores.typeId == '2' || questionScores.typeId == '12' || questionScores.typeId == '4'  || questionScores.typeId == '5')}"/>
+        <h:selectOneMenu value="#{questionScores.selectedSARationaleView}" id="inlinepopup2"
          rendered="#{(questionScores.typeId == '1' || questionScores.typeId == '2' || questionScores.typeId == '12' || questionScores.typeId == '4'  || questionScores.typeId == '5')}" 
        	 required="true" onchange="document.forms[0].submit();" >
            <f:selectItem itemValue="1" itemLabel="#{evaluationMessages.responses_popup}" />
            <f:selectItem itemValue="2" itemLabel="#{evaluationMessages.responses_inline}" />
            <f:valueChangeListener type="org.sakaiproject.tool.assessment.ui.listener.evaluation.QuestionScoreListener" />
         </h:selectOneMenu> 
-
       </h:panelGroup>
 
-      <h:outputText value="&nbsp;#{evaluationMessages.separator}&nbsp;&nbsp;" style="color: #999999;" rendered="#{questionScores.typeId == '6'}" escape="false"/>
-      <h:outputText value="&nbsp;" rendered="#{questionScores.typeId != '6'}" escape="false"/>
-        
-      <h:outputLink styleClass="btn btn-default" title="#{evaluationMessages.t_fileUpload}" rendered="#{questionScores.typeId == '6'}" value="/samigo-app/servlet/DownloadAllMedia?publishedId=#{questionScores.publishedId}&publishedItemId=#{questionScores.itemId}&createdBy=#{question.itemData.createdBy}&partNumber=#{part.partNumber}&anonymous=#{totalScores.anonymous}&scoringType=#{questionScores.allSubmissions}">
+      <h:outputText value="&nbsp;#{evaluationMessages.separator}&nbsp;" style="color: #999999;" rendered="#{questionScores.typeId == '6'}" escape="false"/>
+      <h:outputLink styleClass="btn btn-default" title="#{evaluationMessages.t_fileUpload}&nbsp;" rendered="#{questionScores.typeId == '6'}" value="/samigo-app/servlet/DownloadAllMedia?publishedId=#{questionScores.publishedId}&publishedItemId=#{questionScores.itemId}&createdBy=#{question.itemData.createdBy}&partNumber=#{part.partNumber}&anonymous=#{totalScores.anonymous}&scoringType=#{questionScores.allSubmissions}">
         <h:outputText value="#{evaluationMessages.download_responses}"/>
-      </h:outputLink>   
-      <h:outputText value="&nbsp;" rendered="#{questionScores.typeId != '6'}" escape="false"/>  
-     
+      </h:outputLink>
   </h:panelGroup>
-  
-  <h:panelGroup>
-	<sakai:pager id="pager2" totalItems="#{questionScores.dataRows}" firstItem="#{questionScores.firstRow}" pageSize="#{questionScores.maxDisplayedRows}" pageSizes="5,10,20,50,100,200" textStatus="#{evaluationMessages.paging_status}" >
-	  <f:valueChangeListener type="org.sakaiproject.tool.assessment.ui.listener.evaluation.QuestionScorePagerListener" />
-	</sakai:pager>
-  </h:panelGroup>
-</h:panelGrid>
 
-</div>
+    <sakai:pager id="pager2" totalItems="#{questionScores.dataRows}" firstItem="#{questionScores.firstRow}" pageSize="#{questionScores.maxDisplayedRows}" pageSizes="5,10,20,50,100,200" textStatus="#{evaluationMessages.paging_status}" >
+	  <f:valueChangeListener type="org.sakaiproject.tool.assessment.ui.listener.evaluation.QuestionScorePagerListener" />
+  </sakai:pager>
+</h:panelGroup>
 
   <!-- STUDENT RESPONSES AND GRADING -->
   <!-- note that we will have to hook up with the back end to get N at a time -->
@@ -936,13 +846,13 @@ $Id$
 		<h:outputText  escape="false" value="#{description.fullAnswer}"/>
     </h:panelGroup>
     
-    <h:panelGroup rendered="#{(questionScores.typeId == '1' || questionScores.typeId == '2' || questionScores.typeId == '12' || questionScores.typeId == '4') && description.rationale ne '' && questionScores.selectedSARationaleView == '1'}">
-		<h:outputLink title="#{evaluationMessages.t_rationale}"  value="#" onclick="javascript:window.open('rationale.faces?idString=#{description.assessmentGradingId}','rationale','width=600,height=600,scrollbars=yes, resizable=yes');" onkeypress="javascript:window.open('rationale.faces?idString=#{description.assessmentGradingId}','rationale','width=600,height=600,scrollbars=yes, resizable=yes');">
+    <h:panelGroup layout="block" styleClass="rationaleContainer" rendered="#{(questionScores.typeId == '1' || questionScores.typeId == '2' || questionScores.typeId == '12' || questionScores.typeId == '4') && description.rationale ne '' && questionScores.selectedSARationaleView == '1'}">
+        <h:outputLink title="#{evaluationMessages.t_rationale}"  value="#" onclick="javascript:window.open('rationale.faces?idString=#{description.assessmentGradingId}','rationale','width=600,height=600,scrollbars=yes, resizable=yes');" onkeypress="javascript:window.open('rationale.faces?idString=#{description.assessmentGradingId}','rationale','width=600,height=600,scrollbars=yes, resizable=yes');">
     		<h:outputText  value="(#{evaluationMessages.click_rationale})" />
     	</h:outputLink>
     </h:panelGroup>
     
-    <h:panelGroup rendered="#{(questionScores.typeId == '1' || questionScores.typeId == '2' || questionScores.typeId == '12' || questionScores.typeId == '4') && description.rationale ne '' && questionScores.selectedSARationaleView == '2'}">
+    <h:panelGroup layout="block" styleClass="rationaleContainer" rendered="#{(questionScores.typeId == '1' || questionScores.typeId == '2' || questionScores.typeId == '12' || questionScores.typeId == '4') && description.rationale ne '' && questionScores.selectedSARationaleView == '2'}">
 		<br /><br />
 		<h:outputText escape="false" value="#{description.rationale}"/>
     </h:panelGroup>
@@ -1009,14 +919,14 @@ $Id$
 		<h:outputText  escape="false" value="#{description.fullAnswer}"/>
     </h:panelGroup>
     
-    <h:panelGroup rendered="#{(questionScores.typeId == '1' || questionScores.typeId == '2' || questionScores.typeId == '12' || questionScores.typeId == '4') && description.rationale ne '' && questionScores.selectedSARationaleView == '1'}">
-		<h:outputLink title="#{evaluationMessages.t_rationale}"  
+    <h:panelGroup layout="block" styleClass="rationaleContainer" rendered="#{(questionScores.typeId == '1' || questionScores.typeId == '2' || questionScores.typeId == '12' || questionScores.typeId == '4') && description.rationale ne '' && questionScores.selectedSARationaleView == '1'}">
+        <h:outputLink title="#{evaluationMessages.t_rationale}"
 	value="#" onclick="javascript:window.open('rationale.faces?idString=#{description.assessmentGradingId}','rationale','width=600,height=600,scrollbars=yes, resizable=yes');" onkeypress="javascript:window.open('rationale.faces?idString=#{description.assessmentGradingId}','rationale','width=600,height=600,scrollbars=yes, resizable=yes');">
     		<h:outputText  value="(#{evaluationMessages.click_rationale})" />
     	</h:outputLink>
     </h:panelGroup>
     
-    <h:panelGroup rendered="#{(questionScores.typeId == '1' || questionScores.typeId == '2' || questionScores.typeId == '12' || questionScores.typeId == '4') && description.rationale ne '' && questionScores.selectedSARationaleView == '2'}">
+    <h:panelGroup layout="block" styleClass="rationaleContainer" rendered="#{(questionScores.typeId == '1' || questionScores.typeId == '2' || questionScores.typeId == '12' || questionScores.typeId == '4') && description.rationale ne '' && questionScores.selectedSARationaleView == '2'}">
 		<h:outputText escape="false" value="#{description.rationale}"/>
     </h:panelGroup>
 
@@ -1077,14 +987,14 @@ $Id$
 		<h:outputText  escape="false" value="#{description.fullAnswer}"/>
     </h:panelGroup>
     
-    <h:panelGroup rendered="#{(questionScores.typeId == '1' || questionScores.typeId == '2' || questionScores.typeId == '12' || questionScores.typeId == '4') && description.rationale ne '' && questionScores.selectedSARationaleView == '1'}">
-		<h:outputLink title="#{evaluationMessages.t_rationale}"  
+    <h:panelGroup layout="block" styleClass="rationaleContainer" rendered="#{(questionScores.typeId == '1' || questionScores.typeId == '2' || questionScores.typeId == '12' || questionScores.typeId == '4') && description.rationale ne '' && questionScores.selectedSARationaleView == '1'}">
+        <h:outputLink title="#{evaluationMessages.t_rationale}"
 	value="#" onclick="javascript:window.open('rationale.faces?idString=#{description.assessmentGradingId}','rationale','width=600,height=600,scrollbars=yes, resizable=yes');" onkeypress="javascript:window.open('rationale.faces?idString=#{description.assessmentGradingId}','rationale','width=600,height=600,scrollbars=yes, resizable=yes');">
     		<h:outputText  value="(#{evaluationMessages.click_rationale})" />
     	</h:outputLink>
     </h:panelGroup>
     
-    <h:panelGroup rendered="#{(questionScores.typeId == '1' || questionScores.typeId == '2' || questionScores.typeId == '12' || questionScores.typeId == '4') && description.rationale ne '' && questionScores.selectedSARationaleView == '2'}">
+    <h:panelGroup layout="block" styleClass="rationaleContainer" rendered="#{(questionScores.typeId == '1' || questionScores.typeId == '2' || questionScores.typeId == '12' || questionScores.typeId == '4') && description.rationale ne '' && questionScores.selectedSARationaleView == '2'}">
 		<h:outputText escape="false" value="#{description.rationale}"/>
     </h:panelGroup>
 

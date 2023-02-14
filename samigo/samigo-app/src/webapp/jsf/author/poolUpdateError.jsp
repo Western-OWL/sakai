@@ -37,7 +37,9 @@
 
 <div class="portletBody">
 <h:form id="redirectLoginForm">
-  <h3><h:outputText value="#{authorImportExport.pool_error_title}"/></h3>
+  <div clas="page-header">
+    <h1><h:outputText value="#{authorImportExport.pool_error_title}"/></h1>
+  </div>
 <h:messages styleClass="sak-banner-error" rendered="#{! empty facesContext.maximumSeverity}" layout="table"/>
 <f:subview id="errorView" rendered="#{!empty error}">
   <h:outputText  value="#{error}" styleClass="validation" />

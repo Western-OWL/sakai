@@ -36,10 +36,12 @@
       <body onload="<%= request.getAttribute("html.body.onload") %>">
   <!-- content... -->
  <div class="portletBody">
-  <h3><h:outputText value="#{authorMessages.edit_published_assessment_heading_conf}"/></h3>
+    <div class="page-header">
+        <h1><h:outputText value="#{authorMessages.edit_published_assessment_heading_conf}"/></h1>
+    </div>
  <h:form id="editPublishedAssessmentForm">
-     <div class="sak-banner-warn tier1">
-       <h:outputText value="#{authorMessages.warning}" />
+     <div class="sak-banner-warn">
+       <h:outputText value="<strong>#{authorMessages.warning}</strong>" escape="false" />
    	   <br/>
        <h:outputText value="#{authorMessages.edit_published_assessment_heading_conf_info_1}" />
 	   <br/>

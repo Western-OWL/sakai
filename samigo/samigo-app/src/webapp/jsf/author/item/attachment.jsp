@@ -19,7 +19,7 @@
 --%>
 <!-- 2a ATTACHMENTS -->
 <h:panelGroup layout="block" id="attachments">
-  <h:outputLabel value="#{authorMessages.attachments}" />
+  <h2><h:outputText value="#{authorMessages.attachments}" /></h2>
   <h:panelGroup id="attachmentTable" layout="block" rendered="#{itemauthor.hasAttachment}">
     <h:dataTable styleClass="table table-bordered table-striped attachment-table" value="#{itemauthor.attachmentList}" var="attach">
       <h:column>

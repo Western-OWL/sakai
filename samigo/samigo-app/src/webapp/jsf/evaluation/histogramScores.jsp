@@ -63,10 +63,7 @@ $Id$
         <%@ include file="/jsf/evaluation/evaluationHeadings.jsp" %>
 
         <h:panelGroup layout="block" styleClass="page-header">
-          <h1>
-            <h:outputText value="#{evaluationMessages.stat_view}#{evaluationMessages.column} " escape="false" />
-            <small><h:outputText value="#{histogramScores.assessmentName} " escape="false" /></small>
-          </h1>
+          <h1><h:outputText value="#{histogramScores.assessmentName} #{evaluationMessages.dash} #{evaluationMessages.stat_view}" escape="false" /></h1>
         </h:panelGroup>
 
         <!-- EVALUATION SUBMENU -->
@@ -74,33 +71,38 @@ $Id$
 
         <h:messages styleClass="sak-banner-error" rendered="#{! empty facesContext.maximumSeverity}" layout="table" />
 
-        <div class="tier1">
+        <div>
 
           <!-- LAST/ALL SUBMISSIONS; PAGER; ALPHA INDEX  -->
-          <h:panelGroup rendered="#{histogramScores.hasNav==null || histogramScores.hasNav=='true'}">
-            <h:outputText value="#{evaluationMessages.view} " />
+          <h:panelGroup styleClass="sakai-table-toolBar" layout="block" rendered="#{histogramScores.hasNav==null || histogramScores.hasNav=='true'}">
+            <div class="sakai-table-filterContainer">
+              <h:panelGroup styleClass="sakai-table-viewFilter" layout="block" rendered="#{totalScores.scoringOption eq '2'}">
+                <h:outputLabel value="#{evaluationMessages.view} " for="allSubmissionsL" />
+                <h:selectOneMenu value="#{histogramScores.allSubmissions}" id="allSubmissionsL" required="true" onchange="document.forms[0].submit();" rendered="#{totalScores.scoringOption eq '2'}">
+                  <f:selectItem itemValue="3" itemLabel="#{evaluationMessages.all_sub}" />
+                  <f:selectItem itemValue="2" itemLabel="#{evaluationMessages.last_sub}" />
+                  <f:valueChangeListener type="org.sakaiproject.tool.assessment.ui.listener.evaluation.HistogramListener" />
+                </h:selectOneMenu>
+              </h:panelGroup>
 
-            <h:selectOneMenu value="#{histogramScores.allSubmissions}" id="allSubmissionsL" required="true"
-              onchange="document.forms[0].submit();" rendered="#{totalScores.scoringOption eq '2'}">
-              <f:selectItem itemValue="3" itemLabel="#{evaluationMessages.all_sub}" />
-              <f:selectItem itemValue="2" itemLabel="#{evaluationMessages.last_sub}" />
-              <f:valueChangeListener type="org.sakaiproject.tool.assessment.ui.listener.evaluation.HistogramListener" />
-            </h:selectOneMenu>
+              <h:panelGroup styleClass="sakai-table-viewFilter" rendered="#{totalScores.scoringOption eq '1'}">
+                <h:outputLabel value="#{evaluationMessages.view} " for="allSubmissionsH" />
+                <h:selectOneMenu value="#{histogramScores.allSubmissions}" id="allSubmissionsH" required="true" onchange="document.forms[0].submit();" rendered="#{totalScores.scoringOption eq '1'}">
+                  <f:selectItem itemValue="3" itemLabel="#{evaluationMessages.all_sub}" />
+                  <f:selectItem itemValue="1" itemLabel="#{evaluationMessages.highest_sub}" />
+                  <f:valueChangeListener type="org.sakaiproject.tool.assessment.ui.listener.evaluation.HistogramListener" />
+                </h:selectOneMenu>
+              </h:panelGroup>
 
-            <h:selectOneMenu value="#{histogramScores.allSubmissions}" id="allSubmissionsH" required="true"
-              onchange="document.forms[0].submit();" rendered="#{totalScores.scoringOption eq '1'}">
-              <f:selectItem itemValue="3" itemLabel="#{evaluationMessages.all_sub}" />
-              <f:selectItem itemValue="1" itemLabel="#{evaluationMessages.highest_sub}" />
-              <f:valueChangeListener type="org.sakaiproject.tool.assessment.ui.listener.evaluation.HistogramListener" />
-            </h:selectOneMenu>
-            <h:selectOneMenu value="#{histogramScores.allSubmissions}" id="allSubmissionsA" required="true"
-              onchange="document.forms[0].submit();" rendered="#{totalScores.scoringOption eq '4'}">
-              <f:selectItem itemValue="3" itemLabel="#{evaluationMessages.all_sub}" />
-              <f:valueChangeListener type="org.sakaiproject.tool.assessment.ui.listener.evaluation.HistogramListener" />
-            </h:selectOneMenu>
+              <h:panelGroup styleClass="sakai-table-viewFilter" rendered="#{totalScores.scoringOption eq '4'}">
+                <h:outputLabel value="#{evaluationMessages.view} " for="allSubmissionsA" />
+                <h:selectOneMenu value="#{histogramScores.allSubmissions}" id="allSubmissionsA" required="true" onchange="document.forms[0].submit();" rendered="#{totalScores.scoringOption eq '4'}">
+                  <f:selectItem itemValue="3" itemLabel="#{evaluationMessages.all_sub}" />
+                  <f:valueChangeListener type="org.sakaiproject.tool.assessment.ui.listener.evaluation.HistogramListener" />
+                </h:selectOneMenu>
+              </h:panelGroup>
+            </div>
           </h:panelGroup>
-
-          <br /><br />
 
           <script type="text/javascript" src="/library/webjars/jquery/1.12.4/jquery.min.js"></script>
 
@@ -308,15 +310,17 @@ $Id$
         </div>
 
         <!-- The parts drop down. -->
-        <h:panelGroup layout="block" styleClass="form-group" rendered="#{histogramScores.assesmentPartCount > 1}">
-          <h:outputLabel value="#{evaluationMessages.part} #{evaluationMessages.column} ">
-            <h:selectOneMenu id="partNumber" onchange="document.forms[0].submit();"
-              value="#{histogramScores.partNumber}">
-              <f:selectItem itemValue="" itemLabel="#{evaluationMessages.all_parts}" />
-              <f:selectItems value="#{histogramScores.selectItemParts}" />
-              <f:valueChangeListener type="org.sakaiproject.tool.assessment.ui.listener.evaluation.HistogramListener" />
-            </h:selectOneMenu>
-          </h:outputLabel>
+        <h:panelGroup layout="block" styleClass="sakai-table-toolBar" rendered="#{histogramScores.assesmentPartCount > 1}">
+            <div class="sakai-table-filterContainer">
+                <div class="sakai-table-viewFilter">
+                    <h:outputLabel value="#{evaluationMessages.part}" for="partNumber" />
+                      <h:selectOneMenu onchange="document.forms[0].submit();" value="#{histogramScores.partNumber}" id="partNumber" >
+                        <f:selectItem itemValue="" itemLabel="#{evaluationMessages.all_parts}" />
+                        <f:selectItems value="#{histogramScores.selectItemParts}" />
+                        <f:valueChangeListener type="org.sakaiproject.tool.assessment.ui.listener.evaluation.HistogramListener" />
+                      </h:selectOneMenu>
+                </div>
+            </div>
         </h:panelGroup>
 
         <h:dataTable styleClass="table table-striped presentation" value="#{histogramScores.partInfo}" var="item">
