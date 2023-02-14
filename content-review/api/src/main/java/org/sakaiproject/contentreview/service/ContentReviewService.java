@@ -357,7 +357,6 @@ public interface ContentReviewService {
 
 	/**
 	 * This method returns all the information related with a ContentReviewItem encapsulated as a ContentReviewResult
-	 * Using this method will likely tie you to a particular Content Review implementation.
 	 * 
 	 * @param contentId
 	 * @return ContentReviewResult

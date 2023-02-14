@@ -4726,8 +4726,8 @@ public class AssignmentServiceImpl implements AssignmentService, EntityTransferr
 
             AssignmentReferenceReckoner.AssignmentReference referenceReckoner = AssignmentReferenceReckoner.reckoner().assignment(s.getAssignment()).reckon();
             reviewResult.setReviewReport(getReviewReport(cr, referenceReckoner.getReference()));
-            String iconUrl = getReviewIconCssClass(reviewResult);
-            reviewResult.setReviewIconCssClass(iconUrl);
+            String iconCssClass = getReviewIconCssClass(reviewResult);
+            reviewResult.setReviewIconCssClass(iconCssClass);
             reviewResult.setReviewError(getReviewError(reviewResult));
 
             if ("true".equals(reviewResult.isInline())) {
@@ -4812,7 +4812,9 @@ public class AssignmentServiceImpl implements AssignmentService, EntityTransferr
         String reviewReport = reviewResult.getReviewReport();
         String iconCssClass = null;
 
-        if (!"Error".equals(reviewReport)) {
+        if (!Objects.equals(reviewResult.getContentReviewItem().getProviderId(), contentReviewService.getProviderId())) {
+            iconCssClass = "contentReviewIconServiceUnsupported";
+        } else if (!"Error".equals(reviewReport)) {
             iconCssClass = contentReviewService.getIconCssClassforScore(reviewResult.getReviewScore(), reviewResult.getContentResource().getId());
         } else if (ContentReviewConstants.CONTENT_REVIEW_SUBMITTED_AWAITING_REPORT_CODE.equals(status) || ContentReviewConstants.CONTENT_REVIEW_NOT_SUBMITTED_CODE.equals(status)) {
             iconCssClass = "contentReviewIconPending";

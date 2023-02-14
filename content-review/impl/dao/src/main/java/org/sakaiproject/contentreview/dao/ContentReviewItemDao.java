@@ -121,4 +121,12 @@ public class ContentReviewItemDao extends HibernateCommonDao<ContentReviewItem> 
 		
 		return Optional.ofNullable((ContentReviewItem) c.uniqueResult());
 	}
+
+	public Optional<ContentReviewItem> findByContentId(String contentId) {
+		Criteria c = sessionFactory.getCurrentSession()
+				.createCriteria(ContentReviewItem.class)
+				.add(Restrictions.eq("contentId", contentId));
+
+		return Optional.ofNullable((ContentReviewItem) c.uniqueResult());
+	}
 }

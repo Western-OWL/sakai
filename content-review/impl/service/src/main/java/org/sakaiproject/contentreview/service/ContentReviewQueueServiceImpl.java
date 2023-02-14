@@ -276,4 +276,12 @@ public class ContentReviewQueueServiceImpl implements ContentReviewQueueService 
 		
 		itemDao.delete(item);
 	}	
+
+	@Override
+	@Transactional
+	public Optional<ContentReviewItem> getItemByContentId(String contentId) {
+		Objects.requireNonNull(contentId, "contentId cannot be null");
+
+		return itemDao.findByContentId(contentId);
+	}
 }

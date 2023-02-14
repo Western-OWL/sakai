@@ -197,7 +197,25 @@ public abstract class BaseContentReviewService implements ContentReviewService{
 		// So delete them via removeFromQueue:
 		items.forEach(item -> crqs.removeFromQueue(providerId, item.getContentId()));
 	}
-	
+
+	@Override
+	public ContentReviewItem getContentReviewItemByContentId(String contentId) {
+		ContentReviewItem item = crqs.getItemByContentId(contentId).orElse(null);
+		if (item != null && getProviderId().equals(item.getProviderId())) {
+			additionalContentReviewItemPreparation(item);
+		}
+		return item;
+	}
+
+	/**
+	 * Override to do any additional work when retrieving a content review item (only invoked when the item is in fact associated with this content review provider).
+	 * This method may result in a mutation of the specified ContentReviewItem -
+	 * for instance, particular content review services may have additional features, corresponding to properties we need to populate on the ContentReviewItem.
+	 */
+	protected void additionalContentReviewItemPreparation(ContentReviewItem item) {
+		// Default implementation: NoOp
+	}
+
 	@Override
 	public String getReviewReport(String contentId, String assignmentRef, String userId)
 			throws QueueException, ReportException {
