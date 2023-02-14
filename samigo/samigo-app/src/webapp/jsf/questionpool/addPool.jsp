@@ -45,9 +45,9 @@ function textCounter(field, maxlimit) {
 
 
  <h:form id="questionpool">
-<h3 class="insColor insBak insBor">
-<h:outputText value="#{questionPoolMessages.add_p}"/>
-</h3>
+    <div class="page-header">
+         <h1 class="insColor insBak insBor"><h:outputText value="#{questionPoolMessages.add_p}"/></h1>
+    </div>
 <h:messages styleClass="sak-banner-error" rendered="#{! empty facesContext.maximumSeverity}" layout="table"/>
 <p>
     <h:outputText value="#{questionPoolMessages.add_p_required}"/>

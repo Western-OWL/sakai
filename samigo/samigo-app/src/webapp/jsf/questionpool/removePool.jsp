@@ -37,12 +37,14 @@
             <!-- content... -->
             <div class="portletBody">
                 <h:form id="removePoolForm">
-                    <h3 style="insColor insBak"><h:outputText value="#{questionPoolMessages.rm_p_confirm}" /></h3>
+                    <div class="page-header">
+                        <h1><h:outputText value="#{questionPoolMessages.rm_p_confirm}" /></h1>
+                    </div>
                     <div class="sak-banner-warn">
                         <h:outputText value="#{questionPoolMessages.remove_sure_p}" />
                     </div>
                     <div class="tier1">
-                        <h4><h:outputText value="#{questionPoolMessages.p_names}" /></h4>
+                        <h2><h:outputText value="#{questionPoolMessages.p_names}" /></h2>
                         <t:dataList layout="unorderedList" value="#{questionpool.poolsToDelete}" var="pool">
                             <h:outputText value="#{pool.displayName}" escape="false" />
                         </t:dataList>

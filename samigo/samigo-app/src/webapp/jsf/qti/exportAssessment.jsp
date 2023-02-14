@@ -38,10 +38,9 @@
  <!-- content... -->
  <div class="tier1">
  <h:form id="exportAssessmentForm">
-  <h:outputText escape="false"
-      value="<input type='hidden' name='assessmentId' value='#{param.exportAssessmentId}'" />
-  <h3 style="insColor insBak"><h:outputText  value="#{authorImportExport.export_a}" /></h3>
-  <div class="validation">
+  <h:inputHidden id="assessmentId" value="#{param.exportAssessmentId}" />
+  <div class="page-header"><h1><h:outputText value="#{authorImportExport.export_a}" /></h1></div>
+  <div class="sak-banner-info">
         <h:outputText value="#{authorImportExport.export_instructions}" escape="false" />
   </div>
    <h:panelGrid columns="2" rendered="false">
@@ -54,14 +53,11 @@
      </h:selectOneRadio>
    </h:panelGrid>
   <p class="act">
-    <h:commandButton value="#{authorImportExport.export_action}" type="submit" action="#{xml.getOutcome}"
-        immediate="true" >
-        <f:param name="assessmentId" value="lastModifiedDate"/>
-
+    <h:commandButton value="#{authorImportExport.export_action}" type="submit" styleClass="active" action="#{xml.getOutcome}" immediate="true" >
+      <f:param name="assessmentId" value="lastModifiedDate"/>
       <f:actionListener type="org.sakaiproject.tool.assessment.ui.listener.author.ExportAssessmentListener" />
     </h:commandButton>
-   <h:commandButton value="#{commonMessages.cancel_action}" type="reset"
-     onclick="window.close()" style="act" action="author" />
+   <h:commandButton value="#{commonMessages.cancel_action}" type="reset" onclick="window.close()" style="act" action="author" />
   </p>
  </h:form>
  </div>

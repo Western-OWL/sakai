@@ -130,7 +130,7 @@
     <%@ include file="/jsf/author/item/attachment.jsp" %>
 
     <!-- 3 ANSWER -->
-    <div class="tier2">
+    <div>
         <div class="form-group row">
             <h:outputLabel value="#{authorMessages.answer} " styleClass="col-md-4 col-lg-2 form-control-label"/>
             <div class="col-md-6">

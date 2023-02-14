@@ -22,25 +22,23 @@
   <%@ include file="/jsf/section-activity/sectionActivityHeadings.jsp" %>
   
   <div class="page-header">
- 	<h1>
-      <h:outputText value="#{sectionActivityMessages.section_activity_report_colon}"/>
-      <small>
-        <h:outputText value="#{sectionActivity.selectedUserDisplayName}"/>
-      </small>
-    </h1>
+ 	<h1><h:outputText value="#{sectionActivityMessages.section_activity_report_colon} #{sectionActivity.selectedUserDisplayName}"/></h1>
   </div>
 
-  <h:panelGroup layout="block" styleClass="form-group">
- 		 <h:outputLabel value="#{sectionActivityMessages.view_student}" />
- 		 <h:outputText escape="false" value="&#160;" />			
- 		 <h:selectOneMenu value="#{sectionActivity.selectedUser}" id="studentName" required="true" onchange="document.forms[0].submit();">
-      	 	 <f:selectItems value="#{sectionActivity.displayNamesList}" />  
-      	 	 <f:valueChangeListener type="org.sakaiproject.tool.assessment.ui.listener.author.SectionActivityListener" />  
-    	 </h:selectOneMenu>
-  </h:panelGroup>	 
-  <br/>
-  <div class="tier1">
-   <h:dataTable styleClass="table table-striped" value="#{sectionActivity.sectionActivityDataList}" var="pageData">
+  <h:panelGroup layout="block" styleClass="sakai-table-toolBar">
+      <div class="sakai-table-filterContainer">
+          <div class="sakai-table-viewFilter">
+            <h:outputLabel value="#{sectionActivityMessages.view_student}" for="studentName" />
+            <h:selectOneMenu value="#{sectionActivity.selectedUser}" id="studentName" required="true" onchange="document.forms[0].submit();">
+                <f:selectItems value="#{sectionActivity.displayNamesList}" />
+                <f:valueChangeListener type="org.sakaiproject.tool.assessment.ui.listener.author.SectionActivityListener" />
+            </h:selectOneMenu>
+          </div>
+      </div>
+  </h:panelGroup>
+
+  <div class="table-responsive">
+   <h:dataTable styleClass="table table-hover table-striped table-bordered" value="#{sectionActivity.sectionActivityDataList}" var="pageData">
 	 <!-- Title.. -->
 	 <h:column rendered="#{sectionActivity.sortType != 'assessmentName'}">
 	  <f:facet name="header">

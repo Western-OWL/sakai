@@ -76,6 +76,7 @@ table{
 		label
 		{
 			margin: 0 4px 0 0;
+			white-space: nowrap;
 		}
 	}
 	.sakai-table-viewFilter, .sakai-table-searchFilter
@@ -91,11 +92,12 @@ table{
 	{
 		@include flex-grow(1);
 
-		.sakai-table-searchFilter-searchField
+		.sakai-table-searchFilter-searchField, input[type="search"]
 		{
 			margin-right: 4px;
 			width: 200px;
 			@include flex-grow(1);
+			align-self: stretch;	// make the search field the same height as the buttons
 		}
 
 		input[type=button], input[type=submit],

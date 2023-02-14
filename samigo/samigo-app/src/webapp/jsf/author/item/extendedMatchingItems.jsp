@@ -558,8 +558,7 @@
 			<!-- METADATA -->
 			<h:panelGroup rendered="#{itemauthor.showMetadata == 'true'}"
 				styleClass="longtext">
-				<h:outputLabel value="Metadata" />
-				<br />
+				<h2><h:outputText value="Metadata"/></h2>
 
 				<h:panelGrid columns="2" columnClasses="shorttext">
 					<h:outputLabel for="obj" value="#{authorMessages.objective}" />

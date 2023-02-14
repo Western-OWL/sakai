@@ -20,17 +20,15 @@
         <body onload="<%= request.getAttribute("html.body.onload") %>">
             <div class="portletBody">
                 <h:form id="transferPoolInputUser">
-                    <h:messages infoClass="validation" warnClass="validation" errorClass="validation" fatalClass="validation"/>
-
-                    <h3>
-                        <h:outputText value="#{questionPoolMessages.transfer_pool_ownership}" />
-                    </h3>
-                    <p></p>
-                    <div class="tier2">
+                     <div class="page-header">
+                        <h1><h:outputText value="#{questionPoolMessages.transfer_pool_ownership}" /></h1>
+                    </div>
+                    <div class="instruction">
                         <h:outputText value="#{questionPoolMessages.transfer_pool_input_user}" />
                     </div>
-                    <p></p>
-                    <div class="tier3">
+                    <h:messages infoClass="sak-banner-info" warnClass="sak-banner-warn" errorClass="sak-banner-error" fatalClass="sak-banner-error"/>
+                    <div>
+                        <h:outputLabel value="#{questionPoolMessages.transfer_pool_user_label}&nbsp;" for="owneruserId" escape="false" />
                         <h:inputText id="owneruserId" value="#{questionpool.ownerId}" />
                     </div>
 
@@ -39,7 +37,7 @@
                             value="#{questionPoolMessages.tranfer_pool_continue}" action="#{questionpool.transferPoolInputUserContinue}" styleClass="active"
                             onclick="SPNR.disableControlsAndSpin(this, null);"/>
                         <h:commandButton accesskey="#{questionPoolMessages.a_transfer_back}" id="transferpoolSubmit2" immediate="true"
-                            value="#{questionPoolMessages.transfer_pool_back}" action="#{questionpool.transferPoolInputUserBack}" styleClass="active"
+                            value="#{questionPoolMessages.transfer_pool_back}" action="#{questionpool.transferPoolInputUserBack}"
                             onclick="SPNR.disableControlsAndSpin(this, null);"/>
                         <h:commandButton accesskey="#{questionPoolMessages.a_cancel}" id="transferpoolCancel" value="#{questionPoolMessages.transfer_pool_cancel}" 
                             action="#{questionpool.cancelTransferPool}" immediate="true" onclick="SPNR.disableControlsAndSpin(this, null);"/>

@@ -178,9 +178,7 @@
 
     <!-- METADATA -->
     <h:panelGroup rendered="#{itemauthor.showMetadata == 'true'}" styleClass="longtext">
-        <div class="form-group row">
-            <h:outputLabel for="questionFeedbackIncorrect" value="Metadata" styleClass="col-md-12 form-control-label"/>
-        </div>
+        <h2><h:outputText value="Metadata"/></h2>
         <div class="form-group row">
             <h:outputLabel for="obj" value="#{authorMessages.objective}" styleClass="col-md-2 form-control-label"/>
             <div class="col-md-5">

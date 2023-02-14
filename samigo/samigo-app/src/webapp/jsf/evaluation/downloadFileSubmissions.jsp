@@ -88,30 +88,21 @@
   <%@ include file="/jsf/evaluation/evaluationHeadings.jsp" %>
 
     <h:panelGroup layout="block" styleClass="page-header">
-      <h1>
-        <h:outputText value="#{evaluationMessages.title_download_file_submissions}#{evaluationMessages.column} " escape="false"/>
-        <small><h:outputText value="(#{totalScores.assessmentName}) " escape="false"/></small>
-      </h1>
-  </h:panelGroup>
+      <h1><h:outputText value="#{totalScores.assessmentName}  #{evaluationMessages.dash} #{evaluationMessages.title_download_file_submissions}" escape="false"/></h1>
+    </h:panelGroup>
 
   <!-- EVALUATION SUBMENU -->
   <%@ include file="/jsf/evaluation/evaluationSubmenu.jsp" %>
 
-  <f:verbatim><div class="tier1"></f:verbatim>
-  <h:messages infoClass="sak-banner-info" warnClass="sak-banner-warn" errorClass="sak-banner-error" fatalClass="sak-banner-error"/>
-  
-  <h:outputText value="#{evaluationMessages.download_responses_to}" escape="false"/>
-  <f:verbatim></div></f:verbatim>
-  
-  <f:verbatim><div style="margin-left: 30px;"></f:verbatim>
-  <h:panelGrid columns="1">
-  <h:outputLink title="#{evaluationMessages.select_all}" onclick="toggleChecked()" value="#" rendered="#{downloadFileSubmissions.fileUploadQuestionListSize > 1}">
-          <h:outputText value="#{evaluationMessages.select_all}" />        
-  </h:outputLink>
-  </h:panelGrid>
-  <f:verbatim></div></f:verbatim>
-  
-  <f:verbatim><div style="margin-left: 24px;"></f:verbatim>
+  <fieldset>
+    <legend><h:outputText value="#{evaluationMessages.download_responses_to}" escape="false"/></legend>
+    <h:messages infoClass="sak-banner-info" warnClass="sak-banner-warn" errorClass="sak-banner-error" fatalClass="sak-banner-error"/>
+
+  <div  class="tier1">
+    <h:outputLink onclick="toggleChecked()" value="#" rendered="#{downloadFileSubmissions.fileUploadQuestionListSize > 1}">
+        <h:outputText value="#{evaluationMessages.select_all}" />
+    </h:outputLink>
+
   <h:dataTable value="#{downloadFileSubmissions.fileUploadQuestionList}" var="question" columnClasses="downloanQuestionCheckbox,downloanQuestionDescription">
     <h:column>
       <h:selectManyCheckbox value="" id="questionCheckbox" rendered="#{downloadFileSubmissions.fileUploadQuestionListSize > 1}">
@@ -126,34 +117,26 @@
       </h:panelGrid>
     </h:column>
   </h:dataTable>
-  <f:verbatim></div></f:verbatim>
 
-  <f:verbatim><div style="margin-left: 2px;"></f:verbatim>
   	 <h:panelGrid border="0">
       <h:selectOneRadio id="siteSection" layout="pagedirection" value="#{downloadFileSubmissions.firstTargetSelected}" onclick="showHideReleaseSections();"
         required="true" rendered="#{downloadFileSubmissions.availableSectionSize > 0 }">
         <f:selectItems value="#{downloadFileSubmissions.siteSectionItems}" />
       </h:selectOneRadio>
     </h:panelGrid>
-  <f:verbatim></div></f:verbatim>
     
-  <f:verbatim><div class="allSections" style="margin-left: 24px;"></f:verbatim>
-  <h:selectManyCheckbox id="sectionsForSite" layout="pagedirection" value="#{downloadFileSubmissions.sectionsSelected}" rendered="#{downloadFileSubmissions.availableSectionSize > 1 }">
+  <div class="allSections tier2">
+    <h:selectManyCheckbox id="sectionsForSite" layout="pagedirection" value="#{downloadFileSubmissions.sectionsSelected}" rendered="#{downloadFileSubmissions.availableSectionSize > 1 }">
      <f:selectItems value="#{downloadFileSubmissions.availableSectionItems}" />
     </h:selectManyCheckbox>
-  <f:verbatim></div></f:verbatim>
+  </div>
   
-    <f:verbatim><div class="tier1"></f:verbatim> 
-<p class="act">
-
-   <%-- <h:commandButton value="#{evaluationMessages.save_exit}" action="author"/> --%> 
-   <h:commandButton	value="#{evaluationMessages.download}" actionListener="#{downloadFileSubmissions.downloadFiles}" styleClass="active" />
-   
-</p>
-<f:verbatim></div></f:verbatim>
+    <p class="act">
+       <h:commandButton	value="#{evaluationMessages.download}" actionListener="#{downloadFileSubmissions.downloadFiles}" styleClass="active" />
+    </p>
+  </div>
+  </fieldset>
 </h:form>
-
-</div>
   <!-- end content -->
       </body>
     </html>

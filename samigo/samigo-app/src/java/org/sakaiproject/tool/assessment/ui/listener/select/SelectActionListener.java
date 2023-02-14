@@ -59,6 +59,7 @@ import org.sakaiproject.tool.assessment.ui.bean.shared.PersonBean;
 import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
 import org.sakaiproject.tool.assessment.util.BeanSort;
 import org.sakaiproject.tool.assessment.util.ExtendedTimeDeliveryService;
+import org.sakaiproject.tool.assessment.util.ExtendedTimeDeliveryServiceInfo;
 import org.sakaiproject.util.ResourceLoader;
 
 /**
@@ -576,10 +577,11 @@ public class SelectActionListener implements ActionListener {
     Map<Long, StudentGradingSummaryData> numberRetakeHash = gradingService.getNumberRetakeHash(AgentFacade.getAgentString());
     Map<Long, Integer> actualNumberRetake = gradingService.getActualNumberRetakeHash(AgentFacade.getAgentString());
     ExtendedTimeDeliveryService extendedTimeDeliveryService;
+    ExtendedTimeDeliveryServiceInfo etdsInfo = new ExtendedTimeDeliveryServiceInfo(AgentFacade.getAgentString());
     for (int i = 0; i < assessmentList.size(); i++) {
       PublishedAssessmentFacade f = (PublishedAssessmentFacade)assessmentList.get(i);
 			// Handle extended time info
-			extendedTimeDeliveryService = new ExtendedTimeDeliveryService(f);
+			extendedTimeDeliveryService = new ExtendedTimeDeliveryService(f, etdsInfo);
 			if (extendedTimeDeliveryService.hasExtendedTime()) {
 				f.setStartDate(extendedTimeDeliveryService.getStartDate());
 				f.setDueDate(extendedTimeDeliveryService.getDueDate());

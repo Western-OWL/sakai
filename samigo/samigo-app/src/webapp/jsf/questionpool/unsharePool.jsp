@@ -36,15 +36,17 @@
 <!-- content... -->
  <div class="portletBody">
  <h:form id="removePoolForm">
-      <h3 style="insColor insBak"> <h:outputText  value="#{questionPoolMessages.us_p_confirm}" /> </h3>
+    <div class="page-header">
+      <h1><h:outputText  value="#{questionPoolMessages.us_p_confirm}" /></h1>
+    </div>
    <h:panelGrid cellpadding="5" cellspacing="3">
      <h:panelGroup>
-      <f:verbatim><div class="validation"></f:verbatim>
+      <f:verbatim><div class="sak-banner-warn"></f:verbatim>
          <h:outputText value="#{questionPoolMessages.unshare_sure_p}" />
        <f:verbatim></div></f:verbatim>
      </h:panelGroup>
      <div class="tier1">
-       <h3><h:outputText value="#{questionPoolMessages.p_name}"/></h3>
+       <h2><h:outputText value="#{questionPoolMessages.p_name}"/></h2>
        <h:dataTable id ="table" value="#{questionpool.poolToUnshare}"
     var="pool" >
  	 <h:column>
@@ -60,8 +62,6 @@
      <h:commandButton id="cancel" style="act" value="#{commonMessages.cancel_action}" action="poolList">
 	    <f:actionListener type="org.sakaiproject.tool.assessment.ui.listener.questionpool.QuestionPoolListener" />
       </h:commandButton>
-
-
  </p>
 
  </h:form>

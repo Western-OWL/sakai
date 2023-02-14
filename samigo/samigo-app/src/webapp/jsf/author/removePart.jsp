@@ -39,14 +39,13 @@
  <!-- content... -->
 
  <h:form>
-   <h3> <h:outputText  value="#{authorMessages.remove_p_conf}" /></h3>
-   <h:panelGrid cellpadding="6" cellspacing="4">
-     <h:panelGroup>
-      <f:verbatim><div class="validation"></f:verbatim>
-     <h:outputText value="#{authorMessages.choose_rem}" />
-     <f:verbatim></div></f:verbatim>
-     </h:panelGroup>
-     <h:panelGrid columns="1">
+   <div class="page-header">
+     <h1><h:outputText  value="#{authorMessages.remove_p_conf}" /></h1>
+   </div>
+   <p class="instruction">
+       <h:outputText value="#{authorMessages.choose_rem}" />
+   </p>
+   <h:panelGrid columns="1">
        <h:selectOneRadio value="#{sectionBean.removeAllQuestions}" layout="pageDirection">
          <f:selectItem itemValue="1"
            itemLabel="#{authorMessages.rem_p_all}" />
@@ -54,14 +53,13 @@
            itemLabel="#{authorMessages.rem_p_only}" />
        </h:selectOneRadio>
        <h:panelGroup>
-         <f:verbatim>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</f:verbatim>
-         <h:selectOneMenu id="sectionId" value="#{sectionBean.destSectionId}" >
+         <h:selectOneMenu id="sectionId" value="#{sectionBean.destSectionId}" styleClass="tier2">
            <f:selectItem itemValue="" itemLabel="#{authorMessages.select_one}"/>
            <f:selectItems value="#{assessmentBean.otherSectionList}" />
          </h:selectOneMenu>
        </h:panelGroup>
      </h:panelGrid>
- </h:panelGrid>
+
    <p class="act">
       <h:commandButton type="submit" value="#{commonMessages.remove_action}" action="removePart" styleClass="active" onclick="SPNR.disableControlsAndSpin( this, null );" >
         <f:actionListener type="org.sakaiproject.tool.assessment.ui.listener.author.RemovePartListener" />

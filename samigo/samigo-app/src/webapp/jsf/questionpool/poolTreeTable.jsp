@@ -20,7 +20,7 @@
 --%>
 -->
 <div class="table-responsive">
-  <h:dataTable styleClass="table table-striped" id="TreeTable" value="#{questionpool.qpools}" var="pool">
+  <h:dataTable styleClass="table table-hover table-striped table-bordered" id="TreeTable" value="#{questionpool.qpools}" var="pool">
     <h:column id="col1">
 
      <f:facet name="header">
@@ -47,11 +47,11 @@
      </f:facet>
 <h:panelGroup styleClass="tier#{questionpool.tree.currentLevel}"  id="firstcolumn">
 <h:inputHidden id="rowid" value="#{questionpool.tree.currentObjectHTMLId}"/>
-<h:outputLink  title="#{questionPoolMessages.t_toggletree}" id="parenttogglelink"  onclick="toggleRows(this)" onkeypress="toggleRows(this)" value="#" styleClass="treefolder" rendered="#{questionpool.tree.hasChildList}" >
-    <h:graphicImage id="spacer_for_mozilla" style="border:0" height="14" width="5" value="/images/delivery/spacer.gif" />
+<h:outputLink id="parenttogglelink"  onclick="toggleRows(this);return false;" onkeypress="toggleRows(this);return false;" value="#" styleClass="treefolder" rendered="#{questionpool.tree.hasChildList}" >
+    <span class="sr-only"><h:outputText value="#{questionPoolMessages.t_toggletree}" /></span>
 </h:outputLink>
 <h:panelGroup styleClass="treedoc" rendered="#{questionpool.tree.hasNoChildList}" >
-    <h:graphicImage id="spacer_for_mozilla1" style="border:0" width="5" height="14"  value="/images/delivery/spacer.gif" />
+    <span></span>
 </h:panelGroup>
 
 <h:commandLink title="#{questionPoolMessages.t_editPool}" id="editlink" immediate="true" action="#{questionpool.editPool}" rendered="#{authorization.editOwnQuestionPool}">
@@ -69,7 +69,6 @@
 </h:panelGroup>
 
 <br/>
-<h:graphicImage id="spacer" style="border:0" width="30" height="14" value="/images/delivery/spacer.gif" />
  <span class="itemAction">
  <!-- Add Pool -->
  <h:commandLink title="#{questionPoolMessages.t_addSubpool}" rendered="#{questionpool.importToAuthoring != 'true' && authorization.createQuestionPool && pool.ownerId==questionpool.agentId}"  styleClass="tier#{questionpool.tree.currentLevel}" id="addlink" immediate="true" action="#{questionpool.addPool}">

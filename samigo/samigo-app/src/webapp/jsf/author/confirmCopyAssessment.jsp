@@ -36,22 +36,23 @@
       <body onload="<%= request.getAttribute("html.body.onload") %>">
   <!-- content... -->
  <div class="portletBody">
-  <h3><h:outputText value="#{authorMessages.copy_assessment_heading_conf}"/></h3>
+  <div class="page-header">
+    <h1><h:outputText value="#{authorMessages.copy_assessment_heading_conf}"/></h1>
+  </div>
  <h:form id="CopyAssessmentForm">
-     <div class="validation tier1">
+     <div class="sak-banner-warn">
        <h:outputText value="#{authorMessages.copy_assessment_conf_info_1}#{assessmentBean.title}#{authorMessages.copy_assessment_conf_info_2}" />
      </div>
-       <p class="act">
+     <p class="act">
        <h:commandButton id="copy" value="#{commonMessages.action_duplicate}" type="submit" styleClass="active" action="author" >
          <f:actionListener type="org.sakaiproject.tool.assessment.ui.listener.author.CopyAssessmentListener" />
          <f:actionListener type="org.sakaiproject.tool.assessment.ui.listener.author.AuthorActionListener" />
        </h:commandButton>
 
-       <h:commandButton value="#{commonMessages.cancel_action}" type="submit" style="act" action="author" >
+       <h:commandButton value="#{commonMessages.cancel_action}" type="submit" action="author" >
           <f:actionListener type="org.sakaiproject.tool.assessment.ui.listener.author.AuthorActionListener" />
        </h:commandButton>
-
-       </p>
+     </p>
  </h:form>
   <!-- end content -->
 </div>

@@ -20,7 +20,7 @@
 --%>
 -->
 <!-- ASSESSMENT ATTACHMENTS -->
-<h:panelGrid border="0">
+<h:panelGrid styleClass="attachmentsTableContainer">
   <h:panelGroup rendered="#{description.hasAssessmentGradingAttachment}">
     <h:dataTable value="#{description.assessmentGradingAttachmentList}" var="attach">
       <h:column>

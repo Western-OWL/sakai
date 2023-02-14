@@ -62,10 +62,7 @@ $Id$
   <%@ include file="/jsf/evaluation/evaluationHeadings.jsp" %>
   
   <div class="page-header">
-    <h1>
-      <h:outputText value="#{evaluationMessages.sub_status}#{evaluationMessages.column} " escape="false"/>
-      <small><h:outputText value="#{totalScores.assessmentName} " escape="false"/></small>
-    </h1>
+    <h1><h:outputText value="#{totalScores.assessmentName} #{evaluationMessages.dash} #{evaluationMessages.sub_status} " escape="false"/></h1>
   </div>
 
   <!-- EVALUATION SUBMENU -->
@@ -76,41 +73,36 @@ $Id$
   <sakai:flowState bean="#{submissionStatus}" />
 
   <h:panelGroup rendered="#{!totalScores.hasRandomDrawPart}">
-    <h:outputText value="<h2>#{evaluationMessages.max_score_poss}<small>: #{totalScores.maxScore}</small></h2>" escape="false"/>
+    <h:outputText value="<h2>#{evaluationMessages.max_score_poss}: #{totalScores.maxScore}</h2>" escape="false"/>
   </h:panelGroup>
 
-  <h:panelGroup styleClass="row" layout="block">
-	<h:panelGroup styleClass="col-md-6" layout="block">
-	  <div class="form-group row">
-        <h:outputLabel styleClass="col-md-2" value="#{evaluationMessages.view}" rendered="#{totalScores.availableSectionSize > 0}" />
+  <h:panelGroup styleClass="sakai-table-toolBar" layout="block">
+	<h:panelGroup styleClass="sakai-table-filterContainer" layout="block">
+	  <div class="sakai-table-viewFilter">
+        <h:outputLabel value="#{evaluationMessages.view}" rendered="#{totalScores.availableSectionSize > 0}" for="sectionpicker" />
         <!-- SECTION AWARE -->
-        <h:outputLabel styleClass="col-md-2" value="#{evaluationMessages.view}&nbsp;#{evaluationMessages.all_sections}" escape="false" rendered="#{totalScores.availableSectionSize < 1}"/>
-        <div class="col-md-10">
+        <h:outputLabel value="#{evaluationMessages.view}&nbsp;#{evaluationMessages.all_sections}" escape="false" rendered="#{totalScores.availableSectionSize < 1}" for="sectionpicker" />
      	  <h:selectOneMenu value="#{submissionStatus.selectedSectionFilterValue}" id="sectionpicker" required="true" onchange="document.forms[0].submit();" rendered="#{totalScores.availableSectionSize >= 1}">
             <f:selectItems value="#{totalScores.sectionFilterSelectItems}"/>
             <f:valueChangeListener type="org.sakaiproject.tool.assessment.ui.listener.evaluation.SubmissionStatusListener"/>
           </h:selectOneMenu>
-        </div>
       </div>
 	
-	  <h:panelGroup styleClass="form-group row search-box" layout="block">
-	    <h:outputLabel styleClass="col-md-2" value="#{evaluationMessages.search}"/>
-        <div class="col-md-10">
+	  <h:panelGroup styleClass="sakai-table-searchFilter" layout="block">
+	    <h:outputLabel value="#{evaluationMessages.search}" for="searchString" />
+        <div class="sakai-table-searchFilterControls">
 			<h:inputText
 				id="searchString"
 				value="#{submissionStatus.searchString}"
 				onfocus="clearIfDefaultString(this, '#{evaluationMessages.search_default_student_search_string}')"
-				onkeypress="return submitOnEnter(event, 'editTotalResults:searchSubmitButton');"/>
-			<h:outputText value="&nbsp;" escape="false" />
+				onkeypress="return submitOnEnter(event, 'editTotalResults:searchSubmitButton');"
+				styleClass="sakai-table-searchFilter-searchField" />
 			<h:commandButton actionListener="#{submissionStatus.search}" value="#{evaluationMessages.search_find}" id="searchSubmitButton" />
-			<h:outputText value="&nbsp;" escape="false" />
 			<h:commandButton actionListener="#{submissionStatus.clear}" value="#{evaluationMessages.search_clear}"/>
 	    </div>
 	  </h:panelGroup>
     </h:panelGroup>
-	<div class="pager-holder col-md-6" style="text-align: right">
 	  <sakai:pager id="pager" totalItems="#{submissionStatus.dataRows}" firstItem="#{submissionStatus.firstRow}" pageSize="#{submissionStatus.maxDisplayedRows}" pageSizes="5,10,20,50,100,200" textStatus="#{evaluationMessages.paging_status}" />
-	</div>
   </h:panelGroup>
 
   <!-- STUDENT RESPONSES AND GRADING -->

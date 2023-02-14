@@ -36,9 +36,11 @@
       <body onload="<%= request.getAttribute("html.body.onload") %>">
   <!-- content... -->
  <div class="portletBody">
-  <h3><h:outputText value="#{authorMessages.edit_published_assessment_error}"/></h3>
+    <div class="page-header">
+     <h1><h:outputText value="#{authorMessages.edit_published_assessment_error}"/></h1>
+    </div>
  <h:form id="retractAssessmentForm">
-     <div class="validation tier1">
+     <div class="sak-banner-error">
        <h:outputText value="#{authorMessages.edit_published_assessment_error_info}" />
      </div>
        <p class="act">

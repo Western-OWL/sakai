@@ -54,27 +54,18 @@
   <%@ include file="/jsf/evaluation/evaluationHeadings.jsp" %>
 
   <h:panelGroup layout="block" styleClass="page-header">
-    <h1>
-      <h:outputText value="#{commonMessages.export_action}#{evaluationMessages.column} " escape="false"/>
-      <small><h:outputText value="#{exportResponses.assessmentName} " escape="false"/></small>
-    </h1>
+    <h1><h:outputText value="#{exportResponses.assessmentName} #{evaluationMessages.dash} #{commonMessages.export_action}" escape="false"/></h1>
   </h:panelGroup>
 
   <!-- EVALUATION SUBMENU -->
   <%@ include file="/jsf/evaluation/evaluationSubmenu.jsp" %>
 
-<div class="tier1">
-<h:panelGrid columns="1">
-<h:panelGroup>
-<h:outputText value="#{evaluationMessages.export_msg}"/>
-</h:panelGroup>
-<h:outputText value=" "/>
-<h:outputText value=" "/>
-<h:panelGroup>
-<h:commandButton actionListener="#{exportResponses.exportExcel}" value="#{commonMessages.export_action}" id="exportButton" />
-</h:panelGroup>
-</h:panelGrid>
-</div>
+  <h:panelGroup styleClass="instruction" layout="block">
+    <h:outputText value="#{evaluationMessages.export_msg}"/>
+  </h:panelGroup>
+  <div class="act">
+    <h:commandButton styleClass="active" actionListener="#{exportResponses.exportExcel}" value="#{commonMessages.export_action}" id="exportButton" />
+  </div>
 </h:form>
 
 </div>

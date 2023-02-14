@@ -93,7 +93,7 @@
         <f:selectItem itemValue="true" itemLabel="#{authorMessages.yes}" />
         <f:selectItem itemValue="false" itemLabel="#{authorMessages.no}" />
       </t:selectOneRadio>
-      <ul class="item-score">
+      <ul class="item-score samigo-radio">
         <li><t:radio renderLogicalId="true" for="itemScore" index="0" /></li> 
         <li><t:radio renderLogicalId="true" for="itemScore" index="1" /></li> 
       </ul>
@@ -194,9 +194,7 @@
 
 
 <h:panelGroup rendered="#{itemauthor.showMetadata == 'true'}" styleClass="longtext">
-<h:outputLabel value="Metadata"/><br/>
-
-
+<h2><h:outputText value="Metadata"/></h2>
 <h:panelGrid columns="2" columnClasses="shorttext">
 <h:outputLabel for="obj" value="#{authorMessages.objective}" />
   <h:inputText size="30" id="obj" value="#{itemauthor.currentItem.objective}" />

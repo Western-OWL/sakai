@@ -17,6 +17,7 @@
 
 package org.sakaiproject.tool.assessment.facade;
 
+import java.util.Collection;
 import org.sakaiproject.tool.assessment.data.dao.assessment.ExtendedTime;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.AssessmentBaseIfc;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.PublishedAssessmentIfc;
@@ -28,16 +29,19 @@ import java.util.List;
  */
 public interface ExtendedTimeQueriesAPI {
     // Hibernate Named Queries
-    String QUERY_GET_ENTRIES_FOR_ASSESSMENT = "getEntriesForAss";
-    String QUERY_GET_ENTRIES_FOR_PUBLISHED  = "getEntriesForPub";
-    String QUERY_GET_ENTRY_FOR_PUB_N_USER   = "getEntriesForPubNUser";
-    String QUERY_GET_ENTRY_FOR_PUB_N_GROUP  = "getEntriesForPubNGroup";
+    String QUERY_GET_ENTRIES_FOR_ASSESSMENT        = "getEntriesForAss";
+    String QUERY_GET_ENTRIES_FOR_PUBLISHED         = "getEntriesForPub";
+    String QUERY_GET_ENTRY_FOR_PUB_N_USER          = "getEntriesForPubNUser";
+    String QUERY_GET_ENTRY_FOR_PUB_N_GROUP         = "getEntriesForPubNGroup";
+    String QUERY_GET_ENTRIES_FOR_PUB_N_GROUPS      = "getEntriesForPubNGroups";
+    String QUERY_GET_ENTRIES_FOR_PUB_USER_N_GROUPS = "getEntriesForPubNUserOrGroups";
 
     // Hibernate Object Fields
     String ASSESSMENT_ID                    = "assessmentId";
     String PUBLISHED_ID                     = "publishedId";
     String USER_ID                          = "userId";
     String GROUP                            = "groupId";
+    String GROUPS                           = "groupIDs";
 
     /**
      *
@@ -68,6 +72,15 @@ public interface ExtendedTimeQueriesAPI {
      * @return
      */
     ExtendedTime getEntryForPubAndGroup(PublishedAssessmentIfc pub, String groupId);
+
+    /**
+     *
+     * @param pub
+     * @param userId
+     * @param groupIDs
+     * @return
+     */
+    List<ExtendedTime> getEntriesForPubAndUserOrGroups(PublishedAssessmentIfc pub, String userId, Collection<String> groupIDs);
 
     /**
      *

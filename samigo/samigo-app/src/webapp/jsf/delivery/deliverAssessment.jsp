@@ -296,14 +296,14 @@ document.links[newindex].onclick();
         <h:outputText value="#{deliveryMessages.p} #{part.number} #{deliveryMessages.of} #{part.numParts}" />
         <h:outputText value=" #{deliveryMessages.dash} #{part.nonDefaultText}" escape="false" rendered="#{! empty part.nonDefaultText}"/>
         <span class="badge"><h:outputText value="#{part.pointsDisplayString} #{deliveryMessages.splash} #{part.roundedMaxPoints} #{deliveryMessages.pt}" rendered="#{delivery.actionString=='reviewAssessment'}"/></span>
-    </h4>
-    <h4 class="tier1">
+    </h2>
+    <h2 class="tier1">
         <small class="part-text">
             <h:outputText value="#{part.description}" escape="false">
               <f:converter converterId="org.sakaiproject.tool.assessment.jsf.convert.SecureContentWrapper" />
             </h:outputText>
         </small>
-    </h4>
+    </h2>
 
   <!-- PART ATTACHMENTS -->
   <%@ include file="/jsf/delivery/part_attachment.jsp" %>

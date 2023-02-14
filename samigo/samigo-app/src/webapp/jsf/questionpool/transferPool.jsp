@@ -29,22 +29,17 @@
             <!-- content... -->
             <div class="portletBody">
                 <h:form id="transferPool">
-                    <h:messages infoClass="validation" warnClass="validation" errorClass="validation" fatalClass="validation"/>
-
-                    <h3>
-                        <h:outputText value="#{questionPoolMessages.transfer_pool_ownership}"/>
-                    </h3>
+                    <div class="page-header">
+                        <h1><h:outputText value="#{questionPoolMessages.transfer_pool_ownership}"/></h1>
+                    </div>
                     <h:inputHidden id="checkAll" value="" />
                     <h:inputHidden id="disabledCheckboxes" value="" />
 
-                    <br/>
-                    <div class="tier2">
+                    <h:messages infoClass="sak-banner-info" warnClass="sak-banner-warn" errorClass="sak-banner-error" fatalClass="sak-banner-error"/>
+                    <div>
                         <h:selectBooleanCheckbox id="checkAllCheckbox" onclick="checkAllCheckboxes(this);updateButtonStatusOnCheck(document.getElementById('transferPool:transferpoolSubmit'), document.getElementById('transferPool')); " value="#{questionpool.checkAll}" />
-                        <h:outputText value="#{questionPoolMessages.transfer_pool_select_all}" />
-                    </div>
-
-                    <div class="longtext tier2">
-                            <%@ include file="/jsf/questionpool/transferPoolTree.jsp" %>
+                        <h:outputLabel for="checkAllCheckbox" value="&nbsp;#{questionPoolMessages.transfer_pool_select_all}" escape="false" />
+                        <%@ include file="/jsf/questionpool/transferPoolTree.jsp" %>
                     </div>
 
                     <p class="act">

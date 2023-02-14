@@ -100,9 +100,9 @@ function saveTime()
 <h:inputHidden id="showTimeWarning" value="#{delivery.showTimeWarning}"/>   
 
 <!-- HEADING -->
-<h3 style="insColor insBak">
-   <h:outputText value="#{deliveryMessages.submission_warning}" escape="false"/>
-</h3>
+<div class="page-header">
+    <h1><h:outputText value="#{deliveryMessages.submission_warning}" escape="false"/></h1>
+</div>
 
 
 <!-- HEADING -->
@@ -199,13 +199,6 @@ function saveTime()
               && delivery.navigation eq '1'}"  
     onclick="pauseTiming='false'" onkeypress="pauseTiming='false'" 
     disabled="#{delivery.actionString=='previewAssessment'}" />
-
-<!-- DONE BUTTON FOR PREVIEW -->
-<h:panelGroup rendered="#{delivery.actionString=='previewAssessment'}">
-  <h:commandButton type="submit" value="#{deliveryMessages.exit_preview}"
-     action="#{person.cleanResourceIdListInPreview}"
-     onclick="return returnToHostUrl(\"#{delivery.selectURL}\");"/>
-</h:panelGroup>
 
 </h:form>
 <!-- end content -->

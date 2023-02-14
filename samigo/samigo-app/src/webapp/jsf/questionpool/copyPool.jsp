@@ -61,11 +61,12 @@
 <h:form id="copyPool">
 <h:messages styleClass="sak-banner-error" rendered="#{! empty facesContext.maximumSeverity}" layout="table"/>
  
-<h3>
-<h:outputText rendered="#{questionpool.actionType == 'pool'}" value="#{questionPoolMessages.copy_p}"/>
-<h:outputText rendered="#{questionpool.actionType == 'item'}" value="#{questionPoolMessages.copy_q}"/>
-</h3>
-
+<div class="page-header">
+    <h1>
+        <h:outputText rendered="#{questionpool.actionType == 'pool'}" value="#{questionPoolMessages.copy_p}"/>
+        <h:outputText rendered="#{questionpool.actionType == 'item'}" value="#{questionPoolMessages.copy_q}"/>
+    </h1>
+</div>
 
 <div class="tier1">
 <h:outputText value="#{questionPoolMessages.sel_dest_copy} "/>

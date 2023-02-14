@@ -30,7 +30,7 @@
 
 
 <h:dataTable id="TreeTable" value="#{questionpool.copyQpools}"
-     var="pool" cellpadding="0" cellspacing="0" styleClass="listHier" >
+     var="pool" cellpadding="0" cellspacing="0" styleClass="table table-hover table-striped table-bordered" >
   
 
     <h:column  id="radiocol">
