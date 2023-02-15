@@ -38,7 +38,6 @@ import org.jgroups.Message;
 import org.jgroups.Receiver;
 import org.jgroups.View;
 import org.jgroups.jmx.JmxConfigurator;
-import org.sakaiproject.component.api.ComponentManager;
 import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.email.api.EmailService;
 import org.sakaiproject.entitybroker.DeveloperHelperService;
@@ -155,6 +154,8 @@ public final class PCServiceEntityProvider extends AbstractEntityProvider implem
 
     private String serverName;
 
+    private String globalToggle;
+
     public void init() {
     	
         service = serverConfigurationService.getString("ui.service","Sakai");
@@ -168,6 +169,8 @@ public final class PCServiceEntityProvider extends AbstractEntityProvider implem
         showSiteUsers = serverConfigurationService.getBoolean("portal.chat.showSiteUsers", true);
         
         isVideoEnabled = serverConfigurationService.getBoolean("portal.chat.video", true);
+
+        globalToggle = serverConfigurationService.getString("portal.neochat", "never");
 
         if (isVideoEnabled) {
             String [] servers = serverConfigurationService.getStrings("portal.chat.video.servers");
@@ -275,12 +278,19 @@ public final class PCServiceEntityProvider extends AbstractEntityProvider implem
 		return new UserMessage();
 	}
 
+    private void checkGlobalToggle() {
+        if ("never".equals(globalToggle)) {
+            throw new SecurityException("You are not authorized to use this service.");
+        }
+    }
+
     /**
      * New messages come in here. The recipient is indicated by the parameter 'to'.
      */
 	public String createEntity(EntityReference ref, Object entity, Map<String, Object> params) {
 
         log.debug("createEntity");
+        checkGlobalToggle();
 
 		final User currentUser = userDirectoryService.getCurrentUser();
 		final User anon = userDirectoryService.getAnonymousUser();
@@ -467,6 +477,7 @@ public final class PCServiceEntityProvider extends AbstractEntityProvider implem
 	public Map<String,Object> handleLatestData(EntityReference ref, Map<String,Object> params) {
 		
 		log.debug("handleLatestData");
+		checkGlobalToggle();
 
 		User currentUser = userDirectoryService.getCurrentUser();
 		User anon = userDirectoryService.getAnonymousUser();
@@ -619,6 +630,7 @@ public final class PCServiceEntityProvider extends AbstractEntityProvider implem
 	@EntityCustomAction(action = "ping", viewKey = EntityView.VIEW_SHOW)
 	public String handlePing(EntityReference ref) {
 
+		checkGlobalToggle();
 		User currentUser = userDirectoryService.getCurrentUser();
 		User anon = userDirectoryService.getAnonymousUser();
 		
@@ -643,6 +655,7 @@ public final class PCServiceEntityProvider extends AbstractEntityProvider implem
 	@EntityCustomAction(action = "servers", viewKey = EntityView.VIEW_SHOW)
 	public Map<String,Object> handleServers(EntityReference ref) {
 
+		checkGlobalToggle();
 		final User currentUser = userDirectoryService.getCurrentUser();
 		final User anon = userDirectoryService.getAnonymousUser();
 		
