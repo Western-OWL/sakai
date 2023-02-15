@@ -618,6 +618,8 @@ public class ErrorReporter
 					request.getContentType()).append("\n");
 			sb.append(rb.getString("bugreport.request.contextpath")).append(
 					request.getContextPath()).append("\n");
+			sb.append(rb.getString("bugreport.request.localname")).append(
+					request.getLocalName()).append("\n");
 			sb.append(rb.getString("bugreport.request.method")).append(
 					request.getMethod()).append("\n");
 			sb.append(rb.getString("bugreport.request.pathinfo")).append(
