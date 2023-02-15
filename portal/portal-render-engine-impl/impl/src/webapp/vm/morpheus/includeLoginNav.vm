@@ -134,11 +134,13 @@
                                     </div>
                                 </li>
 
+                                #if (${displayMyConnectionsOption})
                                 <li class="Mrphs-userNav__submenuitem Mrphs-userNav__submenuitem-indented">
                                     <a href="javascript:;" id="Mrphs-userNav__submenuitem--connections" aria-haspopup="dialog">
                                         <span>${rloader.sit_connections}</span>
                                     </a>
                                 </li>
+                                #end ## END of if (${displayMyConnectionsOption})
 
                                     #if (${tabsSites.calendarToolUrl})
             

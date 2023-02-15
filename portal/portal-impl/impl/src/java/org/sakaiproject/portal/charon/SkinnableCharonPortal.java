@@ -1841,8 +1841,7 @@ public class SkinnableCharonPortal extends HttpServlet implements Portal
 			String loginUserDispId = null;
 			String loginUserId = null;
 			String loginUserFirstName = null;
-			boolean displayUserloginInfo = ServerConfigurationService.
-			getBoolean("display.userlogin.info", true);
+			boolean displayUserloginInfo = ServerConfigurationService.getBoolean("display.userlogin.info", true);
 
 			// check for the top.login (where the login fields are present
 			// instead
@@ -1987,6 +1986,7 @@ public class SkinnableCharonPortal extends HttpServlet implements Portal
 				rcontext.put("loginUserId", loginUserId);
 			}
 			rcontext.put("displayUserloginInfo", displayUserloginInfo && loginUserDispId != null);
+			rcontext.put("displayMyConnectionsOption", ServerConfigurationService.getBoolean("display.connections.manager", true));
 		}
 	}
 
