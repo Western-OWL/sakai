@@ -463,7 +463,17 @@ public class ErrorReporter
 				out.println("<div class=\"portletBody\">");
 			}
 			out.println("<h3>" + rb.getString("bugreport.error") + "</h3>");
-			out.println("<p>" + rb.getString("bugreport.statement") + "<br /><br /></p>");
+			out.println("<p>" + rb.getString("bugreport.statement") + "<br /></p>");
+
+			// Print support details
+			out.println("<h4>" + rb.getString("bugreport.supportdetails.header") + "</h4>");
+			out.println("<p>");
+			String serverName = ServerConfigurationService.getServerId();
+			out.println(rb.getFormattedMessage("bugreport.supportdetails.servername", serverName) + "<br />");
+			out.println(rb.getFormattedMessage("bugreport.supportdetails.servertime", time) + "<br />");
+			out.println(rb.getFormattedMessage("bugreport.supportdetails.referencecode", bugId));
+			out.println("<br />");
+			out.println("</p>");
 
 			if (isAuthenticated) {
 				out.println("<h4>" + rb.getString("bugreport.sendtitle") + "</h4>");
