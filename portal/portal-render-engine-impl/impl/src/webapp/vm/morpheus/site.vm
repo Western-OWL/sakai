@@ -262,7 +262,9 @@
                 </div>
             </div>
         </div>
-        #parse("/vm/morpheus/connection-manager.vm")
+            #if (${displayMyConnectionsOption})
+                #parse("/vm/morpheus/connection-manager.vm")
+            #end ## END of if (${displayMyConnectionsOption})
         #end
         <div id="maximised-indicator">
             <div>
