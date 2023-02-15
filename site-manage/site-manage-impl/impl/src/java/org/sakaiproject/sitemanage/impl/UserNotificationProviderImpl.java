@@ -20,6 +20,7 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Locale;
 import java.util.Date;
+import java.util.Map;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -498,5 +499,14 @@ public class UserNotificationProviderImpl implements UserNotificationProvider {
 			String message_body = rb.getFormattedMessage("java.siteImport.confirmation", new Object[]{siteTitle, link});
 			emailService.send(getSetupRequestEmailAddress(), toEmail, message_subject, message_body, headerTo, replyTo, null);
 		}
+	}
+
+	/*
+	 * OWL-4187 - This method is not called when performing Site Info -> Import from Site (for both merge and replace).
+	 * It is implemented here as a re-route to notifySiteImportCompleted() purely for compilation purposes (UserNotificationProvider).
+	 * The code for Site Info -> Import from Site exists in ETSUserNotificationProviderImpl.notifySiteImportCompletedWithErrors()
+	 */
+	public void notifySiteImportCompletedWithErrors(String toEmail, Locale locale, String siteId, String siteTitle, Map<String, List<String>> toolSiteErrors){
+		notifySiteImportCompleted(toEmail, locale, siteId, siteTitle);
 	}
 }
