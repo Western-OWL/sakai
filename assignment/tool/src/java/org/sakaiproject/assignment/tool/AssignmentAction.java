@@ -61,7 +61,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URLDecoder;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
@@ -244,7 +243,6 @@ import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.tool.api.ToolSession;
 import org.sakaiproject.tool.api.Placement;
 import org.sakaiproject.user.api.CandidateDetailProvider;
-import org.sakaiproject.user.api.Preferences;
 import org.sakaiproject.user.api.PreferencesService;
 import org.sakaiproject.user.api.User;
 import org.sakaiproject.user.api.UserDirectoryService;
@@ -4111,21 +4109,22 @@ public class AssignmentAction extends PagedResourceActionII {
 
         String template = (String) getContext(data).get("template");
 
-        boolean useSakaiGrader = serverConfigurationService.getBoolean("assignment.usegraderbydefault", true);
-        Preferences prefs = preferencesService.getPreferences(sessionManager.getCurrentSessionUserId());
-        ResourceProperties props = prefs.getProperties("viewpreferences");
-        if (props != null) {
-            try {
-                String assignmentsViewPrefs = (String) props.getProperty("assignments");
-                if (assignmentsViewPrefs != null) {
-                    ObjectMapper m = new ObjectMapper();
-                    Map<String, Object> prefsMap = m.readValue(URLDecoder.decode(assignmentsViewPrefs, "UTF-8"), Map.class);
-                    useSakaiGrader = (Boolean) prefsMap.get("usegrader");
-                }
-            } catch (Exception e) {
-                log.error("Failed to parse assignments view preferences", e);
-            }
-        }
+        boolean useSakaiGrader = false;/*serverConfigurationService.getBoolean("assignment.usegraderbydefault", true);*/
+
+//        Preferences prefs = preferencesService.getPreferences(sessionManager.getCurrentSessionUserId());
+//        ResourceProperties props = prefs.getProperties("viewpreferences");
+//        if (props != null) {
+//            try {
+//                String assignmentsViewPrefs = (String) props.getProperty("assignments");
+//                if (assignmentsViewPrefs != null) {
+//                    ObjectMapper m = new ObjectMapper();
+//                    Map<String, Object> prefsMap = m.readValue(URLDecoder.decode(assignmentsViewPrefs, "UTF-8"), Map.class);
+//                    useSakaiGrader = (Boolean) prefsMap.get("usegrader");
+//                }
+//            } catch (Exception e) {
+//                log.error("Failed to parse assignments view preferences", e);
+//            }
+//        }
 
         if (useSakaiGrader) {
             return template + TEMPLATE_INSTRUCTOR_GRADE_SUBMISSION_WITH_GRADER;

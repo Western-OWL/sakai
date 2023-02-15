@@ -3,7 +3,7 @@
 #set( $H = '-' )
 <script>includeLatestJQuery('assignments');</script>
 #javascript("/library/js/lang-datepicker/lang-datepicker.js")
-<script type="module" src="/webcomponents/grader/grader-toggle.js" />
+## <script type="module" src="/webcomponents/grader/grader-toggle.js" />
 
 <script>
 function printView(url) {
@@ -33,9 +33,9 @@ function printView(url) {
 			</small>
 			</h1>
 		</div>
-		<div>
+		#*<div>
 			<grader-toggle #if(!$useGraderByDefault)unchecked-by-default#end tool="assignments"></grader-toggle>
-		</div>
+		</div>*#
 	</div>
 
 	#if ($alertMessage)<div class="sak-banner-error"><strong>$tlang.getString("gen.alert")</strong> $alertMessage</div>#end
