@@ -49,7 +49,7 @@ public interface SiteManageService {
      * @param importTools the tools selected to be imported
      * @param cleanup     true if content should be removed before the tool is copied
      */
-    void importToolsIntoSite(Site site, List<String> toolIds, Map<String, List<String>> importTools, Map<String, List<String>> toolOptions, boolean cleanup);
+    Map<String, List<String>> importToolsIntoSite(Site site, List<String> toolIds, Map<String, List<String>> importTools, Map<String, List<String>> toolOptions, boolean cleanup);
 
     /**
      * Copy tool content from old site

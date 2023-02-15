@@ -17,6 +17,7 @@ package org.sakaiproject.sitemanage.api;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import org.sakaiproject.user.api.User;
 import org.sakaiproject.site.api.Site;
@@ -127,4 +128,14 @@ public interface UserNotificationProvider {
 	 * @param siteTitle
 	 */
 	public void notifySiteImportCompleted(String toEmail, Locale locale, String siteId, String siteTitle);
+
+	/**
+	 * Notifies user when the course site import completed with errors.
+	 * @param toEmail
+	 * @param locale
+	 * @param siteId
+	 * @param siteTitle
+	 * @param toolSiteErrors list of site IDs which produced errors for the given tool ID (key)
+	 */
+	public void notifySiteImportCompletedWithErrors(String toEmail, Locale locale, String siteId, String siteTitle, Map<String, List<String>> toolSiteErrors);
 }

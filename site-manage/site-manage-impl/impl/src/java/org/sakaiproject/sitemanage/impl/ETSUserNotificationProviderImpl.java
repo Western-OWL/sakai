@@ -24,19 +24,26 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Locale;
+import java.util.stream.Collectors;
+import lombok.Setter;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.email.api.EmailService;
 import org.sakaiproject.emailtemplateservice.api.RenderedTemplate;
 import org.sakaiproject.emailtemplateservice.api.EmailTemplateService;
 import org.sakaiproject.entitybroker.DeveloperHelperService;
+import org.sakaiproject.exception.IdUnusedException;
 import org.sakaiproject.site.api.Site;
+import org.sakaiproject.site.api.SiteService;
 import org.sakaiproject.sitemanage.api.UserNotificationProvider;
+import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.user.api.User;
 import org.sakaiproject.user.api.UserDirectoryService;
 import org.sakaiproject.util.ResourceLoader;
+import org.springframework.util.CollectionUtils;
 
 @Slf4j
 public class ETSUserNotificationProviderImpl implements UserNotificationProvider {
@@ -65,36 +72,23 @@ public class ETSUserNotificationProviderImpl implements UserNotificationProvider
 	private static final String SITE_IMPORT_EMAIL_TEMPLATE_VAR_WORKSITE 	= "worksiteName";
 	private static final String SITE_IMPORT_EMAIL_TEMPLATE_VAR_LINK 		= "linkToWorksite";
 	private static final String SITE_IMPORT_EMAIL_TEMPLATE_VAR_INSTITUTION 	= "institution";
+	private static final String SITE_IMPORT_ERRORS_EMAIL_TEMPLATE_FILE_NAME = "notifySiteImportMixedResults.xml";
+	private static final String SITE_IMPORT_ERRORS_EMAIL_TEMPLATE_KEY 		= "sitemanage.siteImport.errors";
+	private static final String SITE_IMPORT_ERRORS_EMAIL_TEMPLATE_VAR_ERRORS= "listOfErrors";
 	private static final String SAK_PROP_UI_INSTITUTION						= "ui.institution";
 
 	// email template sent during site join; see JoinSIteDelegate class in kernel
 	private static final String JOIN_EMAIL_TEMPLATE_FILE_NAME = "joinNotification.xml";
 	private static final String JOIN_EMAIL_TEMPLATE_KEY = "sitemanage.joinNotification";
 	
-	private EmailService emailService;
-	public void setEmailService(EmailService es) {
-		emailService = es;
-	}
-	
-	private ServerConfigurationService serverConfigurationService;
-	public void setServerConfigurationService(ServerConfigurationService scs) {
-		serverConfigurationService = scs;
-	}
-	
-	private UserDirectoryService userDirectoryService;
-	public void setUserDirectoryService(UserDirectoryService uds) {
-		userDirectoryService = uds;
-	}
-	
-	private EmailTemplateService emailTemplateService;
-	public void setEmailTemplateService(EmailTemplateService ets) {
-		emailTemplateService = ets;
-	}
-	
-	private DeveloperHelperService developerHelperService;
-	public void setDeveloperHelperService(DeveloperHelperService dhs) {
-		this.developerHelperService = dhs;
-	}
+
+	@Setter private EmailService emailService;
+	@Setter private ServerConfigurationService serverConfigurationService;
+	@Setter private UserDirectoryService userDirectoryService;
+	@Setter private EmailTemplateService emailTemplateService;
+	@Setter private DeveloperHelperService developerHelperService;
+	@Setter private ToolManager toolManager;
+	@Setter private SiteService siteService;
 
 	public void init() {
 		log.info("init()");
@@ -109,6 +103,7 @@ public class ETSUserNotificationProviderImpl implements UserNotificationProvider
 		emailTemplateService.importTemplateFromXmlFile(loader.getResourceAsStream("notifySiteCreation.xml"), NOTIFY_SITE_CREATION);
 		emailTemplateService.importTemplateFromXmlFile(loader.getResourceAsStream("notifySiteCreationConfirmation.xml"), NOTIFY_SITE_CREATION_CONFIRMATION);
 		emailTemplateService.importTemplateFromXmlFile(loader.getResourceAsStream(SITE_IMPORT_EMAIL_TEMPLATE_FILE_NAME), SITE_IMPORT_EMAIL_TEMPLATE_KEY);
+		emailTemplateService.importTemplateFromXmlFile(loader.getResourceAsStream(SITE_IMPORT_ERRORS_EMAIL_TEMPLATE_FILE_NAME), SITE_IMPORT_ERRORS_EMAIL_TEMPLATE_KEY);
 		emailTemplateService.importTemplateFromXmlFile(loader.getResourceAsStream(JOIN_EMAIL_TEMPLATE_FILE_NAME), JOIN_EMAIL_TEMPLATE_KEY);
 	}
 	
@@ -458,6 +453,49 @@ public class ETSUserNotificationProviderImpl implements UserNotificationProvider
 			String replyTo = toEmail;
 			emailTemplateServiceSend(SITE_IMPORT_EMAIL_TEMPLATE_KEY, locale, userDirectoryService.getCurrentUser(), getSetupRequestEmailAddress(),
 					toEmail, headerTo, replyTo, replacementValues);
+		}
+	}
+
+	public void notifySiteImportCompletedWithErrors(String toEmail, Locale locale, String siteId, String siteTitle, Map<String, List<String>> toolSiteErrors){
+		if (StringUtils.isNotBlank(toEmail)) {
+
+			// Create the map of replacement values
+			Map<String, Object> replacementValues = new HashMap<>();
+			replacementValues.put(SITE_IMPORT_EMAIL_TEMPLATE_VAR_WORKSITE, siteTitle);
+			replacementValues.put(SITE_IMPORT_EMAIL_TEMPLATE_VAR_LINK, developerHelperService.getLocationReferenceURL(SITE_REF_PREFIX + siteId));
+			replacementValues.put(SITE_IMPORT_EMAIL_TEMPLATE_VAR_INSTITUTION, serverConfigurationService.getString(SAK_PROP_UI_INSTITUTION));
+
+			// Build the list of tool-site combos which may have failed, ex:
+			// "* Assignments (Site Title 1, Site Title 2)"
+			if (!CollectionUtils.isEmpty(toolSiteErrors)) {
+				StringBuilder sb = new StringBuilder();
+				for (String toolID : toolSiteErrors.keySet()) {
+					List<String> siteIDs = toolSiteErrors.get(toolID);
+					List<String> siteTitles = siteIDs.stream().map(this::getSiteTitle).filter(title -> StringUtils.isNotBlank(title)).collect(Collectors.toList());
+					if (!CollectionUtils.isEmpty(siteTitles)) {
+						sb.append("* ").append(toolManager.getTool(toolID).getTitle()).append(" (").append(String.join(", ", siteTitles)).append(")");
+					}
+				}
+
+				replacementValues.put(SITE_IMPORT_ERRORS_EMAIL_TEMPLATE_VAR_ERRORS, sb.toString());
+			}
+
+			// Use the email template service to send the email
+			emailTemplateServiceSend(SITE_IMPORT_ERRORS_EMAIL_TEMPLATE_KEY, locale, userDirectoryService.getCurrentUser(), getSetupRequestEmailAddress(),
+					toEmail, toEmail, toEmail, replacementValues);
+		}
+	}
+
+	/**
+	 * Utility method to get site title for a given site ID.
+	 * @param siteID the ID of the site in question
+	 * @return the title of the site, or empty string if the site doesn't exist
+	 */
+	private String getSiteTitle(String siteID) {
+		try {
+			return siteService.getSite(siteID).getTitle();
+		} catch (IdUnusedException ex) {
+			return "";
 		}
 	}
 }
