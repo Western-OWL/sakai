@@ -30,6 +30,37 @@
 		min-width: 100%;
 		padding-right: 0.5em;
 	}
+
+	// Tool Order page
+	#page-order-body {
+
+		.item_edit_box_confirm {
+			display: flex;
+			align-items: center;
+
+			a {
+				margin-right: $standard-spacing;
+
+				span
+				{
+					font-size: 0;		// hide alternative text
+
+					&::before {
+						font-size: 16px;	// show icon
+					}
+				}
+
+				.glyphicon-ok-sign {
+					color: var(--successBanner-color);		// green
+				}
+
+				.glyphicon-remove-sign {
+					color: var(--errorBanner-color); 		// red
+				}
+			}
+		}
+	}
+
 	#date-manager-form {
 		.panel-heading {
 			padding: 0;

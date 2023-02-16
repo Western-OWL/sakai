@@ -33,6 +33,10 @@
 							<ul class="sortable" id="reorder-list">
 								<li rsf:id="page-row:" id="content:::page-row::" class="sortable_item reorder-element grab_cursor" tabindex="0" onmousedown="grabbing(this);" onmouseup="grab(this)">
 									<div rsf:id="tool-icon"></div>
+									<div class="item_flags_box">
+										<span rsf:id="page-hidden-flag" class="item-hidden-flag glyphicon glyphicon-eye-close" title="Page is hidden from normal users"></span>
+										<span rsf:id="page-locked-flag" class="item-locked-flag glyphicon glyphicon-lock"  title="Page is disabled for normal users"></span>
+									</div>
 									<div class="item_edit_box" style="display: none;">
 										<div>
 											<label rsf:id="page-name-label"for="page-name-input">Title</label>
@@ -43,16 +47,14 @@
 											<input rsf:id="page-config-input" id="page-config-input" class="new_config" ></input>
 											<a href="#" onclick="doBrowseLocalContent(this)" rsf:id="browse-link">Browse</a>
 										</div>
-										<a href="#" rsf:id="save-edit-link" onclick="doSaveEdit(this); return false;" title="Save Changes To This Page" alt="Save">
-											<img src="../images/accept.gif" alt="Save changes" /></a>
-										<a href="#" rsf:id="cancel-edit-link" onclick="doCancelEdit(this); return false;" title="Cancel Editing This Page" alt="Cancel">
-											<img src="../images/cancel.gif" alt="Cancel changes" /></a>
+										<div class="item_edit_box_confirm">
+											<a href="#" rsf:id="save-edit-link" onclick="doSaveEdit(this); return false;" title="Save Changes To This Page" alt="Save">
+												<span class="glyphicon glyphicon-ok-sign">Save changes</span></a>
+											<a href="#" rsf:id="cancel-edit-link" onclick="doCancelEdit(this); return false;" title="Cancel Editing This Page" alt="Cancel">
+												<span class="glyphicon glyphicon-remove-sign">Cancel changes</span></a>
+										</div>
 									</div>
 									<div class="item_label_box" rsf:id="page-name"></div>
-									<div class="item_flags_box">
-										<span rsf:id="page-hidden-flag" class="item-hidden-flag glyphicon glyphicon-eye-close" title="Page is hidden from normal users"></span>
-										<span rsf:id="page-locked-flag" class="item-locked-flag glyphicon glyphicon-lock"  title="Page is disabled for normal users"></span>
-									</div>
 									<div class="item_control_box dropdown">
 										<a data-target="#" href="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
 											<span class="glyphicon glyphicon-cog"></span>
