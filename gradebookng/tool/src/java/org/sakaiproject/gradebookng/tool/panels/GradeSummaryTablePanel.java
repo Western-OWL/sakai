@@ -59,6 +59,7 @@ import org.sakaiproject.rubrics.api.RubricsConstants;
 import org.sakaiproject.rubrics.api.beans.AssociationTransferBean;
 
 import lombok.extern.slf4j.Slf4j;
+import org.sakaiproject.tool.gradebook.Gradebook;
 
 @Slf4j
 public class GradeSummaryTablePanel extends BasePanel implements IAjaxIndicatorAware {
@@ -108,9 +109,10 @@ public class GradeSummaryTablePanel extends BasePanel implements IAjaxIndicatorA
 		final ModalWindow compareGradesWindow = new ModalWindow("compareGradesWindow");
 		addOrReplace(compareGradesWindow);
 
+		final Gradebook gradebook = getGradebook();
 		if (getPage() instanceof GradebookPage) {
 			final GradebookPage page = (GradebookPage) getPage();
-			final GradebookUiSettings settings = page.getUiSettings();
+			final GradebookUiSettings settings = page.getUiSettings(gradebook);
 			this.isGroupedByCategory = settings.isGradeSummaryGroupedByCategory();
 		}
 
@@ -131,7 +133,7 @@ public class GradeSummaryTablePanel extends BasePanel implements IAjaxIndicatorA
 			public void onClick(final AjaxRequestTarget target) {
 				if (getPage() instanceof GradebookPage) {
 					final GradebookPage page = (GradebookPage) getPage();
-					final GradebookUiSettings settings = page.getUiSettings();
+					final GradebookUiSettings settings = page.getUiSettings(gradebook);
 					settings.setGradeSummaryGroupedByCategory(!settings.isGradeSummaryGroupedByCategory());
 				}
 
@@ -366,7 +368,7 @@ public class GradeSummaryTablePanel extends BasePanel implements IAjaxIndicatorA
 							sakaiRubricButton.add(AttributeModifier.append("evaluated-item-id", assignment.getId() + "." + studentUuid));
 							sakaiRubricButton.setVisible(false);
 
-							addInstructorAttributeOrHide(sakaiRubricButton, assignment, studentUuid, showingStudentView);
+							addInstructorAttributeOrHide(sakaiRubricButton, assignment, studentUuid, showingStudentView, gradeInfo);
 
 							Optional<AssociationTransferBean> optAssociation
 								= rubricsService.getAssociationForToolAndItem(RubricsConstants.RBCS_TOOL_GRADEBOOKNG, assignment.getId().toString(), getCurrentSiteId());
@@ -391,7 +393,7 @@ public class GradeSummaryTablePanel extends BasePanel implements IAjaxIndicatorA
 							sakaiRubricButton.add(AttributeModifier.append("site-id", getCurrentSiteId()));
 							sakaiRubricButton.setVisible(false);
 
-							addInstructorAttributeOrHide(sakaiRubricButton, assignment, studentUuid, showingStudentView);
+							addInstructorAttributeOrHide(sakaiRubricButton, assignment, studentUuid, showingStudentView, gradeInfo);
 
 							Optional<AssociationTransferBean> optAssociation
 								= rubricsService.getAssociationForToolAndItem(RubricsConstants.RBCS_TOOL_GRADEBOOKNG, assignment.getId().toString(), getCurrentSiteId());
@@ -485,16 +487,13 @@ public class GradeSummaryTablePanel extends BasePanel implements IAjaxIndicatorA
 		});
 	}
 
-	private void addInstructorAttributeOrHide(WebMarkupContainer sakaiRubricButton, Assignment assignment, String studentId, boolean showingStudentView) {
+	private void addInstructorAttributeOrHide(WebMarkupContainer sakaiRubricButton, Assignment assignment, String studentId, boolean showingStudentView, final GbGradeInfo gradeInfo) {
 
 		if (!showingStudentView && (GradeSummaryTablePanel.this.getUserRole() == GbRole.INSTRUCTOR
 					|| GradeSummaryTablePanel.this.getUserRole() == GbRole.TA)) {
 			sakaiRubricButton.add(AttributeModifier.append("instructor", true));
-		} else {
-			GradeDefinition gradeDefinition = businessService.getGradeForStudentForItem(studentId, assignment.getId());
-			if (assignment.isExternallyMaintained() && gradeDefinition.getGrade() == null) {
-				sakaiRubricButton.add(AttributeModifier.replace("force-preview", true));
-			}
+		} else if (assignment.isExternallyMaintained() && gradeInfo.getGrade() == null) {
+			sakaiRubricButton.add(AttributeModifier.replace("force-preview", true));
 		}
 	}
 

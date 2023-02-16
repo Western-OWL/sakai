@@ -302,9 +302,12 @@ public class GradebookExternalAssessmentServiceImpl extends BaseHibernateManager
 		log.info("External assessment removed from gradebookUid={}, externalId={} by userUid={}", gradebookUid, externalId, getUserUid());
 	}
 
-	private GradebookAssignment getExternalAssignment(final String gradebookUid, final String externalId)
-			throws GradebookNotFoundException {
-		final Gradebook gradebook = getGradebook(gradebookUid);
+	private GradebookAssignment getExternalAssignment(final String gradebookUid, final String externalId) throws GradebookNotFoundException {
+		return getExternalAssignment(getGradebook(gradebookUid), externalId);
+	}
+
+	private GradebookAssignment getExternalAssignment(final Object gb, final String externalId) {
+		final Gradebook gradebook = (Gradebook) gb;
 
 		final HibernateCallback<GradebookAssignment> hc = session -> (GradebookAssignment) session
 				.createQuery("from GradebookAssignment as asn where asn.gradebook = :gradebook and asn.externalId = :externalid")
@@ -511,17 +514,22 @@ public class GradebookExternalAssessmentServiceImpl extends BaseHibernateManager
 	}
 
 	@Override
-	public boolean isExternalAssignmentGrouped(final String gradebookUid, final String externalId)
-			throws GradebookNotFoundException {
+	public boolean isExternalAssignmentGrouped(final String gradebookUid, final String externalId) throws GradebookNotFoundException {
+		return isExternalAssignmentGrouped(getGradebook(gradebookUid), externalId);
+	}
+
+	@Override
+	public boolean isExternalAssignmentGrouped(final Object gb, final String externalId) {
+		final Gradebook gradebook = (Gradebook) gb;
 		// SAK-19668
-		final GradebookAssignment assignment = getExternalAssignment(gradebookUid, externalId);
+		final GradebookAssignment assignment = getExternalAssignment(gradebook, externalId);
 		// If we check all available providers for an existing, externally maintained assignment
 		// and none manage it, return false since grouping is the outlier case and all items
 		// showed for all users until the 2.9 release.
 		boolean result = false;
 		boolean providerResponded = false;
 		if (assignment == null) {
-			log.info("No assignment found for external assignment check: gradebookUid=" + gradebookUid + ", externalId=" + externalId);
+			log.info("No assignment found for external assignment check: gradebookUid=" + gradebook.getUid() + ", externalId=" + externalId);
 		} else {
 			for (final ExternalAssignmentProvider provider : getExternalAssignmentProviders().values()) {
 				if (provider.isAssignmentDefined(assignment.getExternalAppName(), externalId)) {
@@ -534,10 +542,15 @@ public class GradebookExternalAssessmentServiceImpl extends BaseHibernateManager
 	}
 
 	@Override
-	public boolean isExternalAssignmentVisible(final String gradebookUid, final String externalId, final String userId)
-			throws GradebookNotFoundException {
+	public boolean isExternalAssignmentVisible(final String gradebookUid, final String externalId, final String userId) throws GradebookNotFoundException {
+		return isExternalAssignmentVisible(getGradebook(gradebookUid), externalId, userId);
+	}
+
+	@Override
+	public boolean isExternalAssignmentVisible(final Object gb, final String externalId, final String userId) {
+		final Gradebook gradebook = (Gradebook) gb;
 		// SAK-19668
-		final GradebookAssignment assignment = getExternalAssignment(gradebookUid, externalId);
+		final GradebookAssignment assignment = getExternalAssignment(gradebook, externalId);
 		// If we check all available providers for an existing, externally maintained assignment
 		// and none manage it, assume that it should be visible. This matches the pre-2.9 behavior
 		// when a provider is not implemented to handle the assignment. Also, any provider that
@@ -545,7 +558,7 @@ public class GradebookExternalAssessmentServiceImpl extends BaseHibernateManager
 		boolean result = false;
 		boolean providerResponded = false;
 		if (assignment == null) {
-			log.info("No assignment found for external assignment check: gradebookUid=" + gradebookUid + ", externalId=" + externalId);
+			log.info("No assignment found for external assignment check: gradebookUid=" + gradebook.getUid() + ", externalId=" + externalId);
 		} else {
 			for (final ExternalAssignmentProvider provider : getExternalAssignmentProviders().values()) {
 				if (provider.isAssignmentDefined(assignment.getExternalAppName(), externalId)) {

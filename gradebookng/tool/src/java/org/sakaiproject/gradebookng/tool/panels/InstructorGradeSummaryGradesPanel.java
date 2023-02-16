@@ -102,7 +102,7 @@ public class InstructorGradeSummaryGradesPanel extends BasePanel {
 				.buildGradeMatrix(
 						assignments,
 						new ArrayList<>(Arrays.asList(userId)), // needs to support #remove
-						gradebookPage.getUiSettings())
+						gradebookPage.getUiSettings(gradebook))
 				.get(0);
 		final Map<Long, Double> categoryAverages = studentGradeInfo.getCategoryAverages();
 		final Map<Long, GbGradeInfo> grades = studentGradeInfo.getGrades();

@@ -254,6 +254,15 @@ public interface GradebookExternalAssessmentService {
 
 	/**
 	 * Check with the appropriate external service if a specific assignment is
+	 * available only to groups.
+	 *
+	 * @param gradebook The gradebook's unique identifier
+	 * @param externalId The external assessment's external identifier
+	 */
+	public boolean isExternalAssignmentGrouped(Object gradebook, String externalId);
+
+	/**
+	 * Check with the appropriate external service if a specific assignment is
 	 * available to a specific user (i.e., the user is in an appropriate group).
 	 * Note that this method will return true if the assignment exists in the
 	 * gradebook and is marked as externally maintained while no provider
@@ -266,6 +275,20 @@ public interface GradebookExternalAssessmentService {
 	 */
 	public boolean isExternalAssignmentVisible(String gradebookUid, String externalId, String userId)
 		throws GradebookNotFoundException;
+
+	/**
+	 * Check with the appropriate external service if a specific assignment is
+	 * available to a specific user (i.e., the user is in an appropriate group).
+	 * Note that this method will return true if the assignment exists in the
+	 * gradebook and is marked as externally maintained while no provider
+	 * recognizes it; this is to maintain a safer default (no change from the
+	 * 2.8 release) for tools that have not implemented a provider.
+	 *
+	 * @param gradebook The gradebook's unique identifier
+	 * @param externalId The external assessment's external identifier
+	 * @param userId The user ID to check
+	 */
+	public boolean isExternalAssignmentVisible(Object gradebook, String externalId, String userId);
 
 	/**
 	 * Retrieve all assignments for a gradebook that are marked as externally
