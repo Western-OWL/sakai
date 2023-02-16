@@ -39,6 +39,7 @@ package org.sakaiproject.component.gradebook;
  import java.math.BigDecimal;
  import java.util.ArrayList;
  import java.util.Collection;
+import java.util.Collections;
  import java.util.Date;
  import java.util.HashMap;
  import java.util.HashSet;
@@ -90,6 +91,7 @@ package org.sakaiproject.component.gradebook;
  import org.springframework.orm.hibernate5.support.HibernateDaoSupport;
 
  import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 
 
  /**
@@ -235,6 +237,20 @@ public abstract class BaseHibernateManager extends HibernateDaoSupport {
                 .setParameter("assignmentid", assignmentId)
                 .setParameter("gradebookuid", gradebookUid)
                 .uniqueResult();
+	}
+
+	protected List<GradebookAssignment> getAssignmentsWithoutStats(final String gradebookUid, final List<Long> assignmentIds) throws HibernateException {
+
+		// Hibernate is dumb and will explode if you try to set the param to an empty list
+		if (CollectionUtils.isEmpty(assignmentIds)) {
+			return Collections.emptyList();
+		}
+
+		return getSessionFactory().getCurrentSession()
+				.createQuery("from GradebookAssignment as asn where asn.id in :assignmentIds and asn.gradebook.uid = :gradebookUid and asn.removed is false")
+				.setParameterList("assignmentIds", assignmentIds)
+				.setString("gradebookUid", gradebookUid)
+				.list();
 	}
 	
 	protected GradebookAssignment getAssignmentById(final Long assignmentId) throws HibernateException {
@@ -1231,6 +1247,23 @@ public abstract class BaseHibernateManager extends HibernateDaoSupport {
     	return getHibernateTemplate().execute(hc);
     }
 
+	/**
+	 * Gets all comments for the specified students on the specified assignments.
+	 * Results are not ordered.
+	 */
+	public List<Comment> getCommentsForStudentsForItems(Collection<String> studentIds, List<Long> assignmentIds) {
+		if (assignmentIds == null || assignmentIds.isEmpty() || studentIds == null || studentIds.isEmpty()) {
+			return new ArrayList<>(0);
+		}
+
+		HibernateCallback<List<Comment>> hc = session -> session.createCriteria(Comment.class)
+			.add(HibernateCriterionUtils.CriterionInRestrictionSplitter("gradableObject.id", assignmentIds))
+			.add(HibernateCriterionUtils.CriterionInRestrictionSplitter("studentId", studentIds))
+			.list();
+
+		return getHibernateTemplate().execute(hc);
+	}
+
     protected Map<String, Set<GradebookAssignment>> getVisibleExternalAssignments(final Gradebook gradebook, final Collection<String> studentIds, final List<GradebookAssignment> assignments) {
         final String gradebookUid = gradebook.getUid();
         final Map<String, List<String>> allExternals = this.externalAssessmentService.getVisibleExternalAssignments(gradebookUid, studentIds);
@@ -1356,10 +1389,14 @@ public abstract class BaseHibernateManager extends HibernateDaoSupport {
 	}
 
 	public CommentDefinition getAssignmentScoreComment(final String gradebookUid, final Long assignmentId, final String studentUid) throws GradebookNotFoundException, AssessmentNotFoundException {
+		final GradebookAssignment assignment = getAssignmentWithoutStats(gradebookUid, assignmentId);
+		return getAssignmentScoreComment(gradebookUid, assignmentId, studentUid, assignment);
+	}
+
+	public CommentDefinition getAssignmentScoreComment(final String gradebookUid, final Long assignmentId, final String studentUid, final GradebookAssignment assignment) throws AssessmentNotFoundException {
 		if (gradebookUid == null || assignmentId == null || studentUid == null) {
 			throw new IllegalArgumentException("null parameter passed to getAssignmentScoreComment. Values are gradebookUid:" + gradebookUid + " assignmentId:" + assignmentId + " studentUid:"+ studentUid);
 		}
-		final GradebookAssignment assignment = getAssignmentWithoutStats(gradebookUid, assignmentId);
 		if (assignment == null) {
 			throw new AssessmentNotFoundException("There is no assignmentId " + assignmentId + " for gradebookUid " + gradebookUid);
 		}

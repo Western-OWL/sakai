@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -80,7 +81,7 @@ public class StudentGradeSummaryGradesPanel extends BasePanel {
 		this.categoriesEnabled = this.configuredCategoryType != GbCategoryType.NO_CATEGORY;
 		this.isAssignmentsDisplayed = gradebook.isAssignmentsDisplayed();
 
-		final GradebookInformation settings = getSettings();
+		final GradebookInformation settings = getSettings(gradebook);
 		this.courseGradeStatsEnabled = settings.isCourseGradeStatsDisplayed();
 
 		setOutputMarkupId(true);
@@ -104,9 +105,9 @@ public class StudentGradeSummaryGradesPanel extends BasePanel {
 				this.businessService.getShowCalculatedGrade());
 
 		// build up table data
-		final Map<Long, GbGradeInfo> grades = this.businessService.getGradesForStudent(userId);
+		final Map<Long, GbGradeInfo> grades = this.businessService.getGradesForStudent(userId, gradebook.getUid(), gradebook);
 		final SortType sortedBy = this.isGroupedByCategory ? SortType.SORT_BY_CATEGORY : SortType.SORT_BY_SORTING;
-		final List<Assignment> assignments = this.businessService.getGradebookAssignmentsForStudent(userId, sortedBy);
+		final List<Assignment> assignments = this.businessService.getGradebookAssignmentsForStudent(userId, sortedBy, gradebook);
 
 		final List<String> categoryNames = new ArrayList<>();
 		final Map<String, List<Assignment>> categoryNamesToAssignments = new HashMap<>();
@@ -134,21 +135,14 @@ public class StudentGradeSummaryGradesPanel extends BasePanel {
 				}
 			}
 			// get the category scores and mark any dropped items
-			for (final String catName : categoryNamesToAssignments.keySet()) {
-				if (catName.equals(getString(GradebookPage.UNCATEGORISED))) {
-					continue;
-				}
+			final List<Long> catIds = categoryNamesToAssignments.entrySet().stream()
+					.filter(e -> !e.getKey().equals(getString(GradebookPage.UNCATEGORISED)) && !e.getValue().isEmpty())
+					.map(e -> e.getValue().get(0).getCategoryId()).filter(Objects::nonNull)
+					.collect(Collectors.toList());
+			businessService.getCategoryScoresForStudent(catIds, userId, false, gradebook).entrySet().stream() // Dont include non-released items in the category calc
+					.forEach(e -> e.getValue().ifPresent(avg -> storeAvgAndMarkIfDropped(avg, e.getKey(), categoryAverages, grades)));
 
-				final List<Assignment> catItems = categoryNamesToAssignments.get(catName);
-				if (!catItems.isEmpty()) {
-					final Long catId = catItems.get(0).getCategoryId();
-					if (catId != null) {
-						this.businessService.getCategoryScoreForStudent(catId, userId, false) // Dont include non-released items in the category calc
-							.ifPresent(avg -> storeAvgAndMarkIfDropped(avg, catId, categoryAverages, grades));
-					}
-				}
-			}
-			categoriesMap = this.businessService.getGradebookCategoriesForStudent(userId).stream()
+			categoriesMap = this.businessService.getGradebookCategoriesForStudent(userId, gradebook).stream()
 				.collect(Collectors.toMap(cat -> cat.getName(), cat -> cat));
 		}
 
@@ -196,7 +190,7 @@ public class StudentGradeSummaryGradesPanel extends BasePanel {
 		addOrReplace(courseGradePanel);
 
 		// course grade, via the formatter
-		final CourseGrade courseGrade = this.businessService.getCourseGrade(userId);
+		final CourseGrade courseGrade = this.businessService.getCourseGrade(userId, gradebook);
 
 		courseGradePanel.addOrReplace(new Label("courseGrade", courseGradeFormatter.format(courseGrade)).setEscapeModelStrings(false));
 

@@ -181,6 +181,17 @@ public interface GradebookService extends EntityProducer {
 	public boolean isUserAbleToViewItemForStudent(String gradebookUid, Long assignmentId, String studentUid);
 
 	/**
+	 * Check to see if the current user is allowed to view the given item for the given student in the given gradebook. This will give
+	 * clients a chance to avoid a security exception.
+	 *
+	 * @param gradebook
+	 * @param assignmentId
+	 * @param studentUid
+	 * @return
+	 */
+	public boolean isUserAbleToViewItemForStudent(Object gradebook, Long assignmentId, String studentUid);
+	
+	/**
 	 * Check to see if current user may grade or view the given student for the given item in the given gradebook. Returns string
 	 * representation of function per GradebookService vars (view/grade) or null if no permission
 	 *
@@ -204,6 +215,12 @@ public interface GradebookService extends EntityProducer {
 	 */
 	public List<Assignment> getAssignments(String gradebookUid, SortType sortBy)
 			throws GradebookNotFoundException;
+
+	/**
+	 * @return Returns a list of Assignment objects describing the assignments that are currently defined in the given gradebook, sorted by
+	 *         the given sort type.
+	 */
+	public List<Assignment> getAssignments(Object gradebook, SortType sortBy);
 
 	/**
 	 * Get an assignment based on its id
@@ -282,6 +299,30 @@ public interface GradebookService extends EntityProducer {
 			throws GradebookNotFoundException, AssessmentNotFoundException;
 
 	/**
+	 *
+	 * @param gradebook
+	 * @param assignmentId
+	 * @param studentUid
+	 * @return Returns a GradeDefinition for the student, respecting the grade entry type for the gradebook (ie in %, letter grade, or
+	 *         points format). Returns null if no grade
+	 * @throws GradebookNotFoundException
+	 * @throws AssessmentNotFoundException
+	 */
+	public GradeDefinition getGradeDefinitionForStudentForItem(Object gradebook, Long assignmentId, String studentUid) throws AssessmentNotFoundException;
+
+	/**
+	 *
+	 * @param gradebook
+	 * @param assignmentIds
+	 * @param studentUid
+	 * @return Returns a Map of assignment ID -> GradeDefinition for the student, respecting the grade entry type for the gradebook (ie in %, letter grade, or
+	 *         points format). Returns null if no grade
+	 * @throws GradebookNotFoundException
+	 * @throws AssessmentNotFoundException
+	 */
+	public  Map<Long, GradeDefinition> getGradeDefinitionsForStudentForItems(Object gradebook, List<Long> assignmentIds, String studentUid) throws AssessmentNotFoundException;
+	
+	/**
 	 * Get the comment (if any) currently provided for the given combination of student and assignment.
 	 *
 	 * @param gradebookUid
@@ -350,6 +391,15 @@ public interface GradebookService extends EntityProducer {
 	public GradebookInformation getGradebookInformation(String gradebookUid);
 
 	/**
+	 *
+	 * @param gradebook
+	 * @return a {@link GradebookInformation} object that contains information about this Gradebook that may be useful to consumers outside
+	 *         the Gradebook tool
+	 *
+	 */
+	public GradebookInformation getGradebookInformation(Object gradebook);
+
+	/**
 	 * Removes an assignment from a gradebook. The assignment should not be deleted, but the assignment and all grade records associated
 	 * with the assignment should be ignored by the application. A removed assignment should not count toward the total number of points in
 	 * the gradebook.
@@ -382,6 +432,16 @@ public interface GradebookService extends EntityProducer {
 	 * @throws GradebookNotFoundException
 	 */
 	public List<CategoryDefinition> getCategoryDefinitions(String gradebookUid);
+
+	/**
+	 * Get the categories for the given gradebook
+	 *
+	 * @param gradebook
+	 * @return {@link CategoryDefinition}s for the categories defined for the given gradebook. Returns an empty list if the gradebook does
+	 *         not have categories.
+	 * @throws GradebookNotFoundException
+	 */
+	public List<CategoryDefinition> getCategoryDefinitions(Object gradebook);
 
 	/**
 	 * remove category from gradebook
@@ -433,6 +493,17 @@ public interface GradebookService extends EntityProducer {
 	 *         have grading privileges but does have viewOwnGrades perm, will return all released gb items.
 	 */
 	public List<Assignment> getViewableAssignmentsForCurrentUser(String gradebookUid, SortType sortBy);
+
+	/**
+	 *
+	 * @param gradebook
+	 * @param sortBy
+	 * @return list of gb items that the current user is authorized to view sorted by the provided SortType. If user has gradeAll
+	 *         permission, returns all gb items. If user has gradeSection perm with no grader permissions, returns all gb items. If user has
+	 *         gradeSection with grader perms, returns only the items that the current user is authorized to view or grade. If user does not
+	 *         have grading privileges but does have viewOwnGrades perm, will return all released gb items.
+	 */
+	public List<Assignment> getViewableAssignmentsForCurrentUser(Object gradebook, SortType sortBy);
 
 	/**
 	 *
@@ -547,6 +618,21 @@ public interface GradebookService extends EntityProducer {
 	 * @throws SecurityException if the current user is not authorized to view or grade a student in the passed list
 	 */
 	public List<GradeDefinition> getGradesForStudentsForItem(String gradebookUid, Long assignmentId, List<String> studentIds);
+
+	/**
+	 * Gets a map of students IDs to their associated grades. Results contain comments.
+	 * Results filter out any grades that the current user is not authorized to view.
+	 *
+	 * @param gradebookUid
+	 * @param studentIds
+	 * @param assignments
+	 * @return a mapping of the specified studentIds to a map of assignmentIds to their GradeDefinitions (populated with comments) for the specified assignmentIds
+	 * @throws GradebookSecurityException if the current user has no grading authorization in the specified gradebook
+	 * @throws IllegalArgumentException if any assignments do not belong to the specified gradebook
+	 */
+	public Map<String, Map<Long, GradeDefinition>> getGradesForStudentsForItems(String gradebookUid, List<String> studentIds, List<Assignment> assignments);
+
+	public Map<String, Map<Long, GradeDefinition>> getGradesForStudentsForItems(Object gradebook, List<String> studentIds, List<Assignment> assignments);
 
 	/**
 	 * This method gets grades for multiple gradebook items with emphasis on performance. This is particularly useful for reporting tools
@@ -819,6 +905,15 @@ public interface GradebookService extends EntityProducer {
 	CourseGrade getCourseGradeForStudent(String gradebookUid, String userUuid);
 
 	/**
+	 * Get the course grade for a student
+	 *
+	 * @param gradebook
+	 * @param userUuid uuid of the user
+	 * @return The {@link CourseGrade} for the student
+	 */
+	CourseGrade getCourseGradeForStudent(Object gradebook, String userUuid);
+
+	/**
 	 * Get the course grade for a list of students
 	 *
 	 * @param gradebookUid
@@ -826,6 +921,15 @@ public interface GradebookService extends EntityProducer {
 	 * @return a Map of {@link CourseGrade} for the students. Key is the student uuid.
 	 */
 	Map<String, CourseGrade> getCourseGradeForStudents(String gradebookUid, List<String> userUuids);
+
+	/**
+	 * Get the course grade for a list of students
+	 *
+	 * @param gradebook
+	 * @param userUuids uuids of the users
+	 * @return a Map of {@link CourseGrade} for the students. Key is the student uuid.
+	 */
+	Map<String, CourseGrade> getCourseGradeForStudents(Object gradebook, List<String> userUuids);
 
 	/**
 	 * Get the course grade for a list of students using the given grading schema
@@ -838,6 +942,16 @@ public interface GradebookService extends EntityProducer {
 	Map<String, CourseGrade> getCourseGradeForStudents(String gradebookUid, List<String> userUuids, Map<String, Double> schema);
 
 	/**
+	 * Get the course grade for a list of students using the given grading schema
+	 *
+	 * @param gradebook
+	 * @param userUuids uuids of the users
+	 * @param schema the grading schema (bottom percents) to use in the calculation
+	 * @return a Map of {@link CourseGrade} for the students. Key is the student uuid.
+	 */
+	Map<String, CourseGrade> getCourseGradeForStudents(Object gradebook, List<String> userUuids, Map<String, Double> schema);
+
+	/**
 	 * Get a list of CourseSections that the current user has access to in the given gradebook. This is a combination of sections and groups
 	 * and is permission filtered.
 	 *
@@ -846,6 +960,8 @@ public interface GradebookService extends EntityProducer {
 	 */
 	@SuppressWarnings("rawtypes")
 	List getViewableSections(String gradebookUid);
+
+	List getViewableSections(Object gradebook);
 
 	/**
 	 * Update the settings for this gradebook

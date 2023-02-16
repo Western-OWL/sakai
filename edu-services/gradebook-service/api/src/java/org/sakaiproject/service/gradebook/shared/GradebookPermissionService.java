@@ -137,7 +137,21 @@ public interface GradebookPermissionService
 	   * @return Map of item IDs with grade/view as function value
 	   */
 		 public Map getAvailableItemsForStudent(Long gradebookId, String userId, String studentId, Collection courseSections) throws IllegalArgumentException;
-	 
+
+	/**
+   * Get a map of itemId/permission(grade/view) of a student for a grader that he can grade
+   * or view for gradebook.
+   * (For a student's roster page)
+   *
+   * @param gradebook Gradebook
+   * @param userId grader ID
+   * @param studentId student ID
+   * @param courseSections List of course sections for current site
+   * @throws IllegalArgumentException
+   * @return Map of item IDs with grade/view as function value
+   */
+	public Map getAvailableItemsForStudent(Object gradebook, String userId, String studentId, Collection courseSections) throws IllegalArgumentException;
+
 	  /**
 	   * Get a map of map for students whose IDs are in studentIds with id as key and another map
 	   * as value: itemId/permission(grade/view) for a grader that he can grade
@@ -168,6 +182,7 @@ public interface GradebookPermissionService
 	   */
 	 public Map getAvailableItemsForStudents(String gradebookUid, String userId, List studentIds, Collection courseSections) throws IllegalArgumentException;
 
+	 public Map getAvailableItemsForStudents(Object gradebook, String userId, List studentIds, Collection courseSections) throws IllegalArgumentException;
 	 
 	 /**
 	  * Get a map with student IDs as key and view/grade as value for their course grade.
@@ -213,6 +228,14 @@ public interface GradebookPermissionService
 	 public List getGraderPermissionsForUser(String gradebookUid, String userId);
 
 	 /**
+	  * Get all Permission records associated with this user and gradebook
+	  * @param gradebook
+	  * @param userId
+	  * @return List of Permission records for user and gradebook
+	  */
+	 public List getGraderPermissionsForUser(Object gradebook, String userId);
+
+	 /**
 	  * Get all group ids associated with groups that contain at least one member
 	  * that the user is authorized to view/grade
 	  * @param gradebookId
@@ -231,6 +254,16 @@ public interface GradebookPermissionService
 	  * @return List of group ids that user has some authorization to view
 	  */
 	 public List<String> getViewableGroupsForUser(String gradebookUid, String userId, List<String> groupIds);
+
+	 /**
+	  * Get all group ids associated with groups that contain at least one member
+	  * that the user is authorized to view/grade
+	  * @param gradebook
+	  * @param userId
+	  * @param groupIds
+	  * @return List of group ids that user has some authorization to view
+	  */
+	 public List<String> getViewableGroupsForUser(Object gradebook, String userId, List<String> groupIds);
 	 
 	 /**
 	  * Get a unique list of students that the current user has grader permissions to view in some capacity
@@ -260,6 +293,15 @@ public interface GradebookPermissionService
 	  * @return
 	  */
 	 public List<PermissionDefinition> getPermissionsForUser(final String gradebookUid, final String userId);
+
+	 /**
+	  * Get the grader specific permissions for the given user
+	  *
+	  * @param gradebook
+	  * @param userId
+	  * @return
+	  */
+	 public List<PermissionDefinition> getPermissionsForUser(final Object gradebook, final String userId);
 	 
 	 /**
 	  * Update the set of grader specific permissions for the given user
@@ -293,4 +335,6 @@ public interface GradebookPermissionService
 	  * @return list of {@link org.sakaiproject.service.gradebook.shared.PermissionDefinition PermissionDefinitions} or empty list if none
 	  */	
 	 public List<PermissionDefinition> getRealmsPermissionsForUser(String userUuid,String siteId, Role role);
+
+	 Object getGB(final String uid) throws GradebookNotFoundException;
 }

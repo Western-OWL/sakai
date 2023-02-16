@@ -39,9 +39,11 @@ public interface Authz {
 	public boolean isUserAbleToViewOwnGrades(String gradebookUid);
 	public boolean isUserAbleToViewStudentNumbers(String gradebookUid);
 	public boolean isUserHasGraderPermissions(String gradebookUid);
+	public boolean isUserHasGraderPermissions(Object gradebook);
 	public boolean isUserHasGraderPermissions(Long gradebookId);
 	public boolean isUserHasGraderPermissions(Long gradebookId, String userUid);
 	public boolean isUserHasGraderPermissions(String gradebookUid, String userUid);
+	public boolean isUserHasGraderPermissions(Object gradebook, String userUid);
 
 	/**
 	 * 
@@ -62,6 +64,16 @@ public interface Authz {
 	 * 		first checks for special grader perms. if none, uses default perms
 	 */
 	public boolean isUserAbleToViewItemForStudent(String gradebookUid, Long itemId, String studentUid)  throws IllegalArgumentException;
+
+	/**
+	 *
+	 * @param gradebook
+	 * @param itemId
+	 * @param studentUid
+	 * @return is user authorized to view this gradebook item for this student?
+	 * 		first checks for special grader perms. if none, uses default perms
+	 */
+	public boolean isUserAbleToViewItemForStudent(Object gradebook, Long itemId, String studentUid)  throws IllegalArgumentException;
 	
 	/**
 	 * @param gradebookUid
@@ -75,6 +87,13 @@ public interface Authz {
 	 * @return all CourseSections that the current user may view or grade
 	 */
 	public List getViewableSections(String gradebookUid);
+
+	/**
+	 *
+	 * @param gradebook
+	 * @return all CourseSections that the current user may view or grade
+	 */
+	public List getViewableSections(Object gradebook);
 	
 	/**
 	 * @param gradebookUid
@@ -138,7 +157,9 @@ public interface Authz {
 	 * 			authorized to view/grade
 	 */
 	public Map findMatchingEnrollmentsForViewableItems(String gradebookUid, List allGbItems, String optionalSearchString, String optionalSectionUid);
-	
+
+	public Map findMatchingEnrollmentsForViewableItems(Object gradebook, List allGbItems, String optionalSearchString, String optionalSectionUid);
+
 	/**
 	 * 
 	 * @param gradebookUid

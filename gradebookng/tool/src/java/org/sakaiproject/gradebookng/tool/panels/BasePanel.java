@@ -130,6 +130,10 @@ public abstract class BasePanel extends Panel {
 		return this.businessService.getGradebookSettings();
 	}
 
+	protected GradebookInformation getSettings(Gradebook gradebook) {
+		return this.businessService.getGradebookSettings(gradebook);
+	}
+
 	/**
 	 * Get the Rubric request parameters
 	 *
