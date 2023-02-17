@@ -10,10 +10,6 @@
             <sakai-search page-size="${portalSearchPageSize}"></sakai-search>
             #end
 
-            #if ($viewAsStudentLink)
-                #parse("/vm/morpheus/snippets/roleSwitch-snippet.vm")
-            #end ## END of IF ($viewAsStudentLink)
-
             #if (${useBullhornAlerts})
             <div class="Mrphs-sitesNav__menuitem portal-bullhorns-buttons">
                 <a id="Mrphs-bullhorn" href="javascript:void(0);" title="${rloader.sit_academic_bullhorn_title}" aria-haspopup="true" aria-expanded="false">

@@ -1033,3 +1033,67 @@ body {
 		}
 	}
 }
+
+#roleSwitch {
+	white-space: nowrap;
+
+	#roleSwitchAnchor, #roleSwitchDropDown {
+		display: flex;
+		align-items: center;
+		width: 100%;
+		margin: 0;
+		padding: $standard-spacing $standard-spacing $standard-spacing calc(#{$standard-spacing} + #{$standard-space}); // to equal the left border of the tools
+		text-align: left;
+
+		i {
+			font-size: 16px;
+			color: var(--tool-menu-item-icon-color);
+		}
+	}
+
+	#roleSwitchDropDown select {
+		margin-left: $standard-spacing;
+	}
+
+	#roleSwitchAnchor {
+		text-decoration: none;
+		text-transform: capitalize; 	// standardizes the capitalization of the first letter of each word, regardless of role name (e.g. "access" becomes "Access")
+
+		&:focus {
+			outline-offset: -#{$focus-outline-width};	// to match the width of the default link focus to fit in the tool's link container
+		}
+
+		&:hover, &:active {
+			span {
+				display: flex;
+				align-items: center;
+				text-decoration: underline;
+			}
+		}
+
+		span {
+			line-height: 2;		// to match the height of the dropdown
+		}
+
+		&.#{$namespace}roleSwitch__exit {
+			background-color: var(--swapped-view-primary);
+			color: #fff !important;
+			border-radius: 0;
+
+			i {
+				color: #fff;
+			}
+
+			&:hover {
+				box-shadow: none;
+			}
+		}
+		&.#{$namespace}roleSwitch__link {
+			margin-left: -2px; // for some reason the link is too far right in this case
+		}
+	}
+}
+.#{$namespace}toolMenu-collapsed #toolMenu #roleSwitchAnchor.Mrphs-roleSwitch__exit:hover .Mrphs-toolsNav__menuitem--title, .Mrphs-toolMenu-collapsed #toolMenu #roleSwitchAnchor.Mrphs-roleSwitch__exit:focus .Mrphs-toolsNav__menuitem--title {
+	background-color: var(--sakai-color-red--darker-2);	// to override the normal collapsed .Mrphs-toolsNav__menuitem--title
+}
+
