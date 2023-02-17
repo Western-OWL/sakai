@@ -66,6 +66,9 @@
 			<h2 class="skip" tabindex="-1" id="totoolmenu">${rloader.sit_toolshead}</h2>
 
 			<ul>
+			#if ($viewAsStudentLink)
+				#parse("/vm/morpheus/snippets/roleSwitch-snippet.vm")
+			#end ## END of IF ($viewAsStudentLink)
 			#set( $categoryMap = {})
 			#set( $categoryList = [])
 	
