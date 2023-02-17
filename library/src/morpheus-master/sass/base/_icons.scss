@@ -38,24 +38,24 @@
     sakai-emailtemplateservice : ( extend : fa-envelope ),
     sakai-feedback : ( extend : fa-paper-plane-o ),
     sakai-forums : ( extend : fa-comments ),
-    sakai-gradebook-tool : ( extend : fa-book ),
-    sakai-gradebookng : ( extend : fa-book ),
+//    sakai-gradebook-tool : ( extend : fa-book ),
+//    sakai-gradebookng : ( extend : fa-book ),
     sakai-help : ( extend : fa-question-circle ),
-    sakai-home : ( extend : fa-list-ul ),
+//    sakai-home : ( extend : fa-list-ul ),
     sakai-iframe : ( extend : fa-globe ),
-    sakai-iframe-site : ( extend : fa-list-ul ),
-    sakai-summary-calendar: ( extend : fa-list-ul),
-    sakai-synoptic-announcement: ( extend : fa-list-ul),
-    sakai-synoptic-chat: ( extend : fa-list-ul),
-    sakai-synoptic-messagecenter: ( extend : fa-list-ul),
-    sakai-lessonbuildertool : ( extend : fa-file-text-o ),
+//    sakai-iframe-site : ( extend : fa-list-ul ),
+//    sakai-summary-calendar: ( extend : fa-list-ul),
+//    sakai-synoptic-announcement: ( extend : fa-list-ul),
+//    sakai-synoptic-chat: ( extend : fa-list-ul),
+//    sakai-synoptic-messagecenter: ( extend : fa-list-ul),
+//    sakai-lessonbuildertool : ( extend : fa-file-text-o ),
     sakai-mailbox : ( extend : fa-envelope-o ),
     sakai-mailtool : ( extend : fa-envelope-o ),
     sakai-membership : ( extend : fa-users ),
     sakai-memory : ( extend : fa-hdd-o ),
     sakai-message-bundle-manager : ( extend : fa-gear ),
     sakai-messages : ( extend : fa-inbox ),
-    sakai-motd : ( extend : fa-list-ul ),
+//    sakai-motd : ( extend : fa-list-ul ),
     sakai-news : ( extend : fa-rss ),
     sakai-oauth : ( extend : fa-key ),
     sakai-oauth-admin : ( extend : fa-key ),
@@ -69,7 +69,7 @@
     sakai-realms : ( extend : fa-sitemap ),
     sakai-resetpass : ( extend : fa-user ),
     sakai-resources : ( extend : fa-folder-open ),
-    sakai-rubrics : (extend :fa-table ),
+//    sakai-rubrics : (extend :fa-table ),
     sakai-rwiki : ( extend : fa-edit ),
     sakai-samigo : ( extend : fa-check-square-o ),
     sakai-schedule : ( extend : fa-calendar ),
@@ -105,8 +105,8 @@
     sakai-attendance : ( extend : fa-hand-paper-o ),
     sakai-blogwow : ( extend : fa-pencil-square-o ),
     sakai-clog : ( extend : fa-pencil-square-o ),
-    sakai-scorm-tool : ( extend : fa-file-archive-o ),
-    sakai-scorm-singlepackage-tool : ( extend : fa-file-archive-o ),
+    //sakai-scorm-tool : ( extend : fa-file-archive-o ),
+    //sakai-scorm-singlepackage-tool : ( extend : fa-file-archive-o ),
 
     // other icons
     check : ( extend : fa-check ),
@@ -119,6 +119,48 @@
     subsite : ( extend : fa-level-up ),
     subsites-list : ( extend : fa-level-down ),
     add-tool : ( extend : fa-plus ),
+
+    // OWL-specific icons
+
+    //// OWL core tool overrides:
+    // gradebook: change from book to spreadsheet/table
+    sakai-gradebook-tool : ( extend : fa-table ),
+    sakai-gradebookng : ( extend : fa-table ),
+    // lessons: change from page to book
+    sakai-lessonbuildertool : ( extend : fa-book ),
+    // overview: change from list-ul to list-alt
+    sakai-home : ( extend : fa-list-alt ),
+    sakai-iframe-site : ( extend : fa-list-alt ),
+    sakai-motd : ( extend : fa-list-alt ),
+    sakai-summary-calendar: ( extend : fa-list-alt),
+    sakai-synoptic-announcement: ( extend : fa-list-alt),
+    sakai-synoptic-chat: ( extend : fa-list-alt),
+    sakai-synoptic-messagecenter: ( extend : fa-list-alt),
+    // scorm: change from file archive to puzzle piece
+    sakai-scorm-tool : ( extend : fa-puzzle-piece ),
+    sakai-scorm-singlepackage-tool : ( extend : fa-puzzle-piece ),
+
+    //// OWL core tool overrides needed:
+    // rubrics: change from spreadsheet/table to th-list
+    sakai-rubrics : (extend :fa-th-large ),
+    // samigo: change from confusing check-square-o to ???
+    // chat: change from comments-o (used by VoiceThread)
+    // commons: change from fa-university/fa-institution/fa-bank (used by EZProxy)
+
+    // contextual help: changed .fa-question to .fa-question-o for &--help-popup in modules/tool_base.scss because of extend
+
+    //// OWL custom tools:
+    // ezproxy: set to fa-university (also used by Commons)
+    sakai-ezproxy : ( extend : fa-university ),
+    // research guides: set to fa-globe
+    sakai-researchguideslti : ( extend : fa-globe ),
+
+    //// LTI tools using these icons: ////
+    // collaborate: fa-angle-double-right
+    // course readings: fa-globe
+    // iclicer: fa-play
+    // voicethread: fa-comments-o (same as Chat)
+    // zoom: fa-video-camera
   );
 
 
@@ -140,6 +182,7 @@
 
 @if $skin-with-icons {
   [class*="icon-sakai--"] {
+    @extend .fa-fw;
     @extend .fa-lg;
     @extend .fa;
   }
