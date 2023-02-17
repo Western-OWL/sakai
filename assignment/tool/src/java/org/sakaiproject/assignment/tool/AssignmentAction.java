@@ -1434,7 +1434,7 @@ public class AssignmentAction extends PagedResourceActionII {
             case MODE_INSTRUCTOR_GRADE_SUBMISSION:
                 context.put("site", s);
                 context.put("allowAddAssignment", allowAddAssignment);
-                context.put("showStudentPhoto", serverConfigurationService.getBoolean("assignment.show.official.photo", true));
+                context.put("showStudentPhoto", serverConfigurationService.getBoolean("assignment.show.official.photo", false));
                 if (allowGradeSubmission != null && (Boolean) allowGradeSubmission) {
                     // build the context for the instructor's grade submission
                     template = build_instructor_grade_submission_context(portlet, context, data, state);

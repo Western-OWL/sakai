@@ -9,7 +9,7 @@
 	#navBarOnClick( $allowAddAssignment $withGrade $allowGradeSubmission $allowAddAssignment $allowRecoverAssignment $allowAllGroups $assignmentscheck $allowUpdateSite $enableViewOption $view "gradeForm" "" )
 	## confirmation
 	#if ($!gradingDone)
-		<div class="success">
+		<div class="sak-banner-success">
 			#if($view_only)
 				#if($itemRemoved)
 					$!tlang.getString("peerassessment.removed")
@@ -36,10 +36,8 @@
 		<input type="hidden" name="submissionId" id="submissionId" value="$submissionReference" />
 		
 		<div class="navPanel">
-		   <div class="viewNav highlight"
-		         style="width:70%;line-height:1.4em">
-				 		
-				<h3>
+		   <div class="page-header">
+				<h1>
 					$formattedText.escapeHtml($!assignment.title)
 					#assignmentIcons($assignment)
 					<span class="highlight"> -
@@ -60,12 +58,11 @@
 						$tlang.getFormattedMessage("peerassessment.peerReviewDueDateWithDate", $!service.getUsersLocalDateTimeString($!assignment.PeerAssessmentPeriodDate))
 					#end
 					</span>
-				</h3>
-				#if(!$view_only)
-					<strong> $tlang.getString("grading.reminder")</strong>
-					$tlang.getString("grading.reminder.body")
-				#end
+				</h1>
 		   </div>
+		#if(!$view_only)
+		   <div class="sak-banner-info"><strong> $tlang.getString("grading.reminder")</strong> $tlang.getString("grading.reminder.body")</div>
+		#end
 			<div class="itemNav highlightPanel" style="float:right;text-align:right;clear:right">
 				## prev button
 				<input type="button" name="prevsubmission1" class="prevsubmission" value="$tlang.getString("nav.prev")" #if (!$!goPTButton) disabled="disabled" #end onclick="ASN.submitForm( 'gradeForm', 'prevsubmission_review', '$formattedText.escapeUrl($submissionReference)', null ); return false;"/>

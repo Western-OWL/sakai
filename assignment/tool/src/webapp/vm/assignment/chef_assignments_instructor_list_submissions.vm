@@ -23,15 +23,7 @@ function printView(url) {
     #navBarHREF( $allowAddAssignment $withGrade $allowGradeSubmission $allowAddAssignment $allowRecoverAssignment $allowAllGroups $assignmentscheck $allowUpdateSite $enableViewOption $view "" )
 	<div id="assignment-header">
 		<div class="page-header">
-			<h1>
-			$formattedText.escapeHtml($assignment.Title)
-			<small>
-			#if ($!assignment.IsGroup )
-				<i class="fa fa-users" aria-hidden="true" title="$tlang.getString('gen.groupassignment')"></i>
-			#end
-			  - $tlang.getString('gen.subm2')
-			</small>
-			</h1>
+		<h1>#assignmentIcons($!assignment) $formattedText.escapeHtml($assignment.Title)<small> - $tlang.getString('gen.subm2')</small></h1>
 		</div>
 		#*<div>
 			<grader-toggle #if(!$useGraderByDefault)unchecked-by-default#end tool="assignments"></grader-toggle>

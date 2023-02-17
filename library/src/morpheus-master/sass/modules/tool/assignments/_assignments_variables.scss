@@ -1,3 +1,5 @@
 //Assignments variables
 
-$assignments-disclosure-bg: var(--infoBanner-bgcolor);
+$assignments-disclosure-bg: var(--sakai-background-color-2);
+$assignments-disclosure-border: 1px solid var(--sakai-border-color) !default;
+$assignments-disclosure-border-hover: 1px solid var(--button-hover-border-color) !default;
