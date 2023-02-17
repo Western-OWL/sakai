@@ -35,6 +35,8 @@ body.is-logged-out{
 		height: $banner-height;
 		background: var(--top-header-background);
 		text-align: center;
+		z-index: 1000;		// needed for Safari when account menu is open
+
 		@media #{$phone}{
 			display: inline-block;
 		}
