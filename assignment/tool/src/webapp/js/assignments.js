@@ -334,7 +334,7 @@ ASN.setupToggleAreas = function(toggler, togglee, openInit, speed){
         ASN.resizeFrame();
     }
     $('.' + toggler).click(function(){
-        $(this).next('.' + togglee).fadeToggle(speed);
+        $(this).next('.' + togglee).slideToggle(speed);
         $(this).find('.expand').toggle();
         $(this).find('.collapse').toggle();
         ASN.resizeFrame();

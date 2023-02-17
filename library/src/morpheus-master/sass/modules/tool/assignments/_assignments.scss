@@ -2,6 +2,11 @@
 
 .#{$namespace}sakai-assignment-grades {
 
+	.page-header small {
+		font-size: 1em;
+		font-weight: normal;
+	}
+
   .checkbox-label {
     margin-left: 20px;
   }
@@ -47,8 +52,7 @@
 	}
 
 	#gradeOverridePanel{
-		margin-left: 50px;
-		width:100%;
+		margin-left: 2em;
 		background-color: var(--tool-background-color);
 		.row-override:nth-child(odd){
 			background: var(--sakai-color-gray--lighter-7);
@@ -82,8 +86,12 @@
 	}
 
 	#sendFeedbackPanel, #allowResubmissionPanel{
+		margin-bottom: $standard-spacing;
+
 		.discTria{
-			font-weight: bold;
+			margin-bottom: 0;
+			padding: 0;
+			border: $assignments-disclosure-border;
 			background-color: $assignments-disclosure-bg;
 
 			a {
@@ -92,44 +100,98 @@
 		}
 	}
 
-	// Styles for navigators in Grading Student Screen
-	.leftColumn{
-		float: left;
-		display: table-cell;
-		width: 40%;
+	#sendFeedbackPanelContent, #allowResubmissionPanelContent {
+		padding: $standard-spacing;
+		border: $assignments-disclosure-border;
+		border-top: 0 none;
+	}
 
-		.instruction.textPanelFooter{
-			margin-top: 0.5em;
+	// Styles for navigators in Grading Student Screen
+	.gradingTopBar, .gradingBottomBar {
+		display: flex;
+		flex-direction: row-reverse;
+		flex-wrap: wrap;
+		align-items: flex-start;
+		justify-content: space-between;
+		margin-bottom: $standard-spacing;
+	}
+	
+	.gradingBottomBar {
+		flex-direction: row;
+	}
+
+	.submissionDetails {
+		margin-right: auto; // push it to the left
+		
+		table {
+			margin-right: $standard-spacing;
 		}
 	}
 
-	.centreColumn {
-		display: table-cell;
-		width: 20%;
+	#subsOnlyContainer{
+		display: block;
 		text-align: center;
 
-		#subsOnlyContainer{
-			display: block;
-			text-align: center;
-			margin-top: 0.5em;
+		label {
+			margin-bottom: 0;
+			font-weight: normal;
 		}
 	}
 
-	.rightColumn {
-		display: table-cell;
-		width: 40%;
-		text-align: right;
+	/* start SAK-29314 */
+	.navigator {
+		display: flex;
+		flex-wrap: wrap-reverse;
+		flex-grow: 2;
+		justify-content: flex-end;
+		margin-bottom: $standard-spacing;
 
-		.instruction.textPanelFooter{
-			margin-top: 0.5em;
+		fieldset.roundedBorder {
+			flex-grow: 2;
+			border: 1px solid #c8c8c8;
+			border-radius: 3px;
+			padding: $standard-spacing;
+			max-width: $break-small-end;
+
+			legend {
+				padding: 0 $standard-space;
+				background: #fff;
+				color: #444444;
+				font-size: 1.1em;
+				font-weight: normal;
+			}
 		}
 	}
 
-	.leftColumn, .rightColumn, .centreColumn{
-		@media #{$phone}{
-			display:block;
-			width: 100%;
-			text-align:center;
+	.navigatorContainer {
+		display: flex;
+		justify-content: center;
+		
+		input, button {
+			margin: $standard-space $standard-space 0 0;
+		}
+		
+		.small.text-muted {
+			margin: $standard-space 0 0 0;
+		}
+
+		.leftColumn, .rightColumn, .centreColumn{
+			display: flex;
+			align-items: flex-start;
+			flex-wrap: wrap;
+		}
+
+		.leftColumn{
+			justify-content: flex-end;
+			flex-wrap: wrap-reverse;
+		}
+
+		.centreColumn {
+			justify-content: center;
+		}
+
+		.rightColumn {
+			justify-content: flex-start;
 		}
 	}
 
@@ -145,24 +207,27 @@
 	}
 
 	.toggleAnchor {
-	  border: 1px solid $assignments-disclosure-bg;
-	  background: $assignments-disclosure-bg  !important;
-	  color: var(--infoBanner-color); 
-	  padding: 5px !important;
+	  border: $assignments-disclosure-border;
+	  background: $assignments-disclosure-bg;
+	  padding: $standard-spacing;
 	  cursor: pointer;
-	  margin-bottom: 0;
+	  margin: $standard-spacing 0;
+	  font-size: 1em;
+	  font-weight: normal;
+	  color: $link-color;
+
 	  &:hover {
-	    border: 1px solid var(--infoBanner-bordercolor);
+	    border: $assignments-disclosure-border-hover;
 	  }
 	}
 
 	.toggleAnchorOpen {
 	  &:hover {
-	    border: 1px solid var(--infoBanner-bordercolor);
+	    border: $assignments-disclosure-border-hover;
 	  }
-	  border: 1px solid $assignments-disclosure-bg;
-	  background: $assignments-disclosure-bg !important;
-	  padding: 5px !important;
+	  border: $assignments-disclosure-border;
+	  background: $assignments-disclosure-bg;
+	  padding: $standard-spacing;
 	  cursor: pointer;
 	}
 
@@ -177,14 +242,31 @@
 	}
 
 	.discTria > a {
-	  text-decoration: none !important;
+	  display: block;
+    padding: $standard-spacing;
+    text-decoration: none !important;
 	}
+  
+  #assignamentInstructionPanel {
+    .discTria {
+      padding: 0;
+      margin-bottom: 0;
+      border: $assignments-disclosure-border;
+      background-color: $assignments-disclosure-bg;
+    }
+    
+    #assignamentInstructionPanelContent {
+      padding: $standard-spacing;
+      border: $assignments-disclosure-border;
+      border-top: 0 none;
+    }
+  }
 
 	.toggledContent {
-	  margin: 0;
-	  border: 2px solid $assignments-disclosure-bg;
+	  margin: -#{$standard-spacing} 0 $standard-spacing 0;
+	  border: $assignments-disclosure-border;
 	  border-top: none;
-	  padding: 1em;
+	  padding: $standard-spacing;
 	  h4 {
 	    color: var(--sakai-text-color-1) !important;
 	    width: 40em;
@@ -192,6 +274,23 @@
 	    padding: .3em 0;
 	    border-bottom: 2px solid var(--sakai-border-color);
 	  }
+	}
+
+	.assignmentSubmissionContainer {
+		margin-bottom: $standard-spacing;
+		padding: $standard-spacing;
+		border: $assignments-disclosure-border;
+	}
+	
+	.assignmentSubmissionGradeContainer {
+		padding: $standard-spacing;
+		width: max-content;
+		border: $assignments-disclosure-border;
+		background-color: $assignments-disclosure-bg;
+		
+		.shorttext, .shorttext > label {
+			margin: 0;
+		}
 	}
 
 	.smallCol {
@@ -208,6 +307,13 @@
 
 	.highLightBlock {
 	  background: var(--sakai-background-color-3);
+	}
+
+	.tab-content {
+	  margin-bottom: $standard-spacing;
+	  padding: $standard-spacing;
+	  border: $assignments-disclosure-border;
+	  border-top: 0 none;
 	}
 
 	.popupMessage {
@@ -319,25 +425,6 @@
 	  color: var(--sakai-text-color-disabled);
 	}
 
-	/* start SAK-29314 */
-
-	.navigator {
-	  width: 100%;
-	  display: table;
-	  fieldset.roundedBorder {
-	    border: 2px solid var(--sakai-border-color);
-	    border-radius: 5px;
-	    padding: 1em;
-	    margin-bottom: 1em;
-	    legend {
-	      padding-left: 6px;
-	      padding-right: 6px;
-	      background: var(--sakai-background-color-1);
-	      color: var(--sakai-text-color-2);
-	    }
-	  }
-	}
-
 	td.specialLink a {
 	  &:link, &:visited {
 	    color: var(--link-color);
@@ -349,8 +436,6 @@
 	  line-height: 1.4em;
 	  padding: 3px;
 	}
-
-	/* end SAK-29314 */
 
 	select.selectSet {
 	  display: none;
@@ -608,8 +693,8 @@
 		border: 1px solid var(--sakai-border-color);
 		float: left;
 		height: 80px;
-		padding: 5px 0px;
-		margin: 0.8em $standard-spacing 0 0;
+		padding: 0px;
+		margin: 0 $standard-spacing 0 0;
 		width: 80px;
 	}
 
