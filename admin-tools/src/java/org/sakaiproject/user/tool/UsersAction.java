@@ -973,14 +973,7 @@ public class UsersAction extends PagedResourceActionII
 		}
 
 		// cleanup
-		state.removeAttribute("user");
-		state.removeAttribute("newuser");
-		state.removeAttribute("new");
-		state.removeAttribute("valueEid");
-		state.removeAttribute("valueFirstName");
-		state.removeAttribute("valueLastName");
-		state.removeAttribute("valueEmail");
-		state.removeAttribute("valueType");
+		cleanState(state);
 
 		// return to main mode
 		state.removeAttribute("mode");
@@ -1017,6 +1010,17 @@ public class UsersAction extends PagedResourceActionII
 
 	} // doSave
 
+	private void cleanState(SessionState state) {
+		state.removeAttribute("user");
+		state.removeAttribute("newuser");
+		state.removeAttribute("new");
+		state.removeAttribute("valueEid");
+		state.removeAttribute("valueFirstName");
+		state.removeAttribute("valueLastName");
+		state.removeAttribute("valueEmail");
+		state.removeAttribute("valueType");
+	}
+
 	/**
 	 * doCancel called when "eventSubmit_doCancel" is in the request parameters to cancel user edits
 	 */
@@ -1052,14 +1056,7 @@ public class UsersAction extends PagedResourceActionII
 		}
 
 		// cleanup
-		state.removeAttribute("user");
-		state.removeAttribute("newuser");
-		state.removeAttribute("new");
-		state.removeAttribute("valueEid");
-		state.removeAttribute("valueFirstName");
-		state.removeAttribute("valueLastName");
-		state.removeAttribute("valueEmail");
-		state.removeAttribute("valueType");
+		cleanState(state);
 
 		// return to main mode
 		state.removeAttribute("mode");
@@ -1159,14 +1156,7 @@ public class UsersAction extends PagedResourceActionII
 		}
 
 		// cleanup
-		state.removeAttribute("user");
-		state.removeAttribute("newuser");
-		state.removeAttribute("new");
-                state.removeAttribute("valueEid");
-                state.removeAttribute("valueFirstName");
-                state.removeAttribute("valueLastName");
-                state.removeAttribute("valueEmail");
-                state.removeAttribute("valueType");
+		cleanState(state);
 
 		// go to main mode
 		state.removeAttribute("mode");
@@ -1480,7 +1470,14 @@ public class UsersAction extends PagedResourceActionII
 			}
 			catch (UserAlreadyDefinedException e)
 			{
-				addAlert(state, rb.getString("useact.theuseid1"));
+				if (validateWithAccountValidator) {
+					// Don't reveal which email addresses exist in the system; provide the same UX whether the user exists or not
+					cleanState(state);
+					state.setAttribute(STATE_SUCCESS_MESSAGE, rb.getFormattedMessage("email.validation.success", email));
+				}
+				else {
+					addAlert(state, rb.getString("useact.theuseid1"));
+				}
 				return false;
 			}
 			catch (UserIdInvalidException e)
