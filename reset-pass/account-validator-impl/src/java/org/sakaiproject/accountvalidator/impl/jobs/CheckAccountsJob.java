@@ -20,6 +20,7 @@
 package org.sakaiproject.accountvalidator.impl.jobs;
 
 import java.util.List;
+import java.util.Optional;
 
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -49,8 +50,12 @@ public class CheckAccountsJob implements Job {
 				if ("guest".equals(u.getType())) {
 					if (!validationLogic.isAccountValidated(u.getReference())){
 						log.info("found unvalidated account: " + u.getEid() + "(" + u.getId() + ")");
-						ValidationAccount va = validationLogic.createValidationAccount(u.getReference(), ValidationAccount.ACCOUNT_STATUS_LEGACY);
-						log.info("sent validation token of " + va.getValidationToken());
+						Optional<ValidationAccount> va = validationLogic.createValidationAccount(u.getReference(), ValidationAccount.ACCOUNT_STATUS_LEGACY);
+						if (va.isPresent()) {
+							log.info("sent validation token of " + va.get().getValidationToken());
+						} else {
+							log.info("The account for user {0} is not managed by Sakai", u.getEid());
+						}
 					}
 				}
 			}

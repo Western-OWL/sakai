@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -86,6 +87,8 @@ public class ValidationLogicImpl implements ValidationLogic {
 
 	private static final String MAX_PASSWORD_RESET_MINUTES = "accountValidator.maxPasswordResetMinutes";
 	private static final int MAX_PASSWORD_RESET_MINUTES_DEFAULT = 60;
+	private static final String SAK_PROP_VALIDATE_ANY = "accountValidator.validate.anyAccountType";
+	private static final String SAK_PROP_VALIDATE_ACCOUNT_TYPES = "accountValidator.validate.accountTypes";
 
 	private static ResourceLoader rl = new ResourceLoader();
 
@@ -245,44 +248,48 @@ public class ValidationLogicImpl implements ValidationLogic {
 		return new ArrayList<>();
 	}
 
-	public ValidationAccount createValidationAccount(String userRef) {
+	public Optional<ValidationAccount> createValidationAccount(String userRef) {
 		return createValidationAccount(userRef, false);
 	}
 
-	public ValidationAccount createValidationAccount(String UserId, boolean newAccount) {
+	public Optional<ValidationAccount> createValidationAccount(String userId, boolean newAccount) {
 		
 		Integer status = ValidationAccount.ACCOUNT_STATUS_EXISITING;
 		if (newAccount) {
 			status = ValidationAccount.ACCOUNT_STATUS_NEW;
 		}
 		
-		return createValidationAccount(UserId, status);
-	}
-	
-	public ValidationAccount createValidationAccount(String userRef, String newUserId) {
-		ValidationAccount account = new ValidationAccount();
-		account.setUserId(userRef);
-		account.setValidationToken(idManager.createUuid());
-		account.setValidationsSent(1);
-		account.setAccountStatus(ValidationAccount.ACCOUNT_STATUS_USERID_UPDATE);
-		if(StringUtils.isNotBlank(newUserId)){
-			account.setEid(newUserId);
-		}
-		sendEmailTemplate(account, newUserId);
-		account = saveValidationAccount(account);
-		return account;
+		return createValidationAccount(userId, status);
 	}
 
-	public ValidationAccount createValidationAccount(String userRef,
+	public Optional<ValidationAccount> createValidationAccount(String userId, String newUserEid) {
+		Optional<ValidationAccount> ova = prepareValidationAccount(userId);
+		if (!ova.isPresent()) {
+			return ova;
+		}
+		ValidationAccount account = ova.get();
+		account.setValidationsSent(1);
+		account.setAccountStatus(ValidationAccount.ACCOUNT_STATUS_USERID_UPDATE);
+		if(StringUtils.isNotBlank(newUserEid)){
+			account.setEid(newUserEid);
+		}
+		sendEmailTemplate(account, newUserEid);
+		saveValidationAccount(account);
+		return ova;
+	}
+
+	public Optional<ValidationAccount> createValidationAccount(String userId,
 			Integer accountStatus) {
-		log.debug("createValidationAccount(" + userRef + ", " + accountStatus);
+		log.debug("createValidationAccount(" + userId + ", " + accountStatus);
 		
 		
 		//TODO creating a new Validation should clear old ones for the user
 		
-		ValidationAccount v = new ValidationAccount();
-		v.setUserId(userRef);
-		v.setValidationToken(idManager.createUuid());
+		Optional<ValidationAccount> ova = prepareValidationAccount(userId);
+		if (!ova.isPresent()) {
+			return ova;
+		}
+		ValidationAccount v = ova.get();
 		v.setValidationsSent(1);
 		
 		if (accountStatus == null) {
@@ -292,8 +299,57 @@ public class ValidationLogicImpl implements ValidationLogic {
 		}
 		sendEmailTemplate(v, null);
 		
-		v = saveValidationAccount(v);
-		return v;
+		saveValidationAccount(v);
+		return ova;
+	}
+
+	/**
+	 * Initializes a ValidationAccount for the specified user
+	 * @return Optional wrapping a ValidationAccount for the specified user, or
+	 * empty if the user's account is not to be validated by Sakai
+	 */
+	private Optional<ValidationAccount> prepareValidationAccount(String userId) {
+		if (!isUserAccepted(userId)) {
+			return Optional.empty();
+		}
+
+		ValidationAccount va = new ValidationAccount();
+		va.setUserId(userId);
+		va.setValidationToken(idManager.createUuid());
+		return Optional.of(va);
+	}
+
+	/**
+	 * Determine if the user's account is to be validated by Sakai
+	 */
+	private boolean isUserAccepted(String userId)
+	{
+		if (serverConfigurationService.getBoolean(SAK_PROP_VALIDATE_ANY, true)) {
+			return true;
+		}
+
+		String[] acceptedAccountTypes = serverConfigurationService.getStrings(SAK_PROP_VALIDATE_ACCOUNT_TYPES);
+		if (acceptedAccountTypes == null || acceptedAccountTypes.length == 0) {
+			// Deny all roles
+			return false;
+		}
+
+		try {
+			String userAccountType = userDirectoryService.getUser(userId).getType();
+			if (userAccountType == null) {
+				// There may be a use case for this - match on String literal "null"
+				userAccountType = "null";
+			}
+			for (String acceptedAccountType : acceptedAccountTypes) {
+				if (StringUtils.equalsIgnoreCase(userAccountType, acceptedAccountType)) {
+					return true;
+				}
+			}
+		} catch (UserNotDefinedException e) {
+			log.warn("Could not prepare ValidationAccount for user " + userId, e);
+		}
+
+		return false;
 	}
 
 	private String getFormattedExpirationMinutes() {
@@ -304,7 +360,7 @@ public class ValidationLogicImpl implements ValidationLogic {
 	}
 
 	//Set other details for ValidationAccount and save
-	private ValidationAccount saveValidationAccount(ValidationAccount account){
+	private void saveValidationAccount(ValidationAccount account){
 		account.setValidationSent(new Date());
 		account.setStatus(ValidationAccount.STATUS_SENT);
 		String userId = EntityReference.getIdFromRef(account.getUserId());
@@ -336,7 +392,6 @@ public class ValidationLogicImpl implements ValidationLogic {
 			log.error("No User found for the id " + e.getMessage());
 		}
 		dao.save(account);
-		return account;
 	}
 
 	/**
