@@ -131,4 +131,16 @@ public class ContentReviewItemDao extends HibernateCommonDao<ContentReviewItem> 
 
 		return Optional.ofNullable((ContentReviewItem) c.uniqueResult());
 	}
+
+	public boolean itemsExistForSiteAndTaskId(String siteId, String taskId)
+	{
+		Criteria c = sessionFactory.getCurrentSession()
+				.createCriteria(ContentReviewItem.class)
+				.add(Restrictions.eq("taskId", taskId))
+				.add(Restrictions.eq("siteId", siteId))
+				.setMaxResults(1);
+
+		List result = c.list();
+		return result != null && !result.isEmpty();
+	}
 }
