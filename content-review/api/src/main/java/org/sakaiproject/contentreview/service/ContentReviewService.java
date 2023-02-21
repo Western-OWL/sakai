@@ -431,4 +431,11 @@ public interface ContentReviewService {
 	 * Flag to determine whether the service accepts submissions on behalf of users
 	 */
 	public boolean allowSubmissionsOnBehalf();
+
+
+	/**
+	 * Returns true if and only if items exist for this siteId and taskId.
+	 * This does not filter items by provider.
+	 */
+	public boolean itemsExistForSiteAndTaskId(String siteId, String taskId);
 }

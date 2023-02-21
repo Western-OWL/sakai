@@ -284,4 +284,13 @@ public class ContentReviewQueueServiceImpl implements ContentReviewQueueService 
 
 		return itemDao.findByContentId(contentId);
 	}
+
+	@Override
+	@Transactional
+	public boolean itemsExistForSiteAndTaskId(String siteId, String taskId)
+	{
+		Objects.requireNonNull(siteId);
+		Objects.requireNonNull(taskId);
+		return itemDao.itemsExistForSiteAndTaskId(siteId, taskId);
+	}
 }

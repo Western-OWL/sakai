@@ -34,8 +34,10 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -4692,6 +4694,16 @@ public class AssignmentServiceImpl implements AssignmentService, EntityTransferr
     }
 
     @Override
+    public String getUsersLocalDateString(Instant date) {
+        if (date == null) return "";
+        ZoneId zone = userTimeService.getLocalTimeZone().toZoneId();
+        DateTimeFormatter df = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
+                                                .withZone(zone)
+                                                .withLocale(resourceLoader.getLocale());
+        return df.format(date);
+    }
+
+    @Override
     public String getUsersLocalDateTimeStringFromProperties(String date){
         if (date == null){
             return null;
@@ -4737,6 +4749,35 @@ public class AssignmentServiceImpl implements AssignmentService, EntityTransferr
             }
         }
         return reviewResults;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean contentItemsMustBeReQueued(String siteId, String taskId, Collection<AssignmentSubmission> submissions)
+    {
+        if (!contentReviewService.itemsExistForSiteAndTaskId(siteId, taskId))
+        {
+            // Short circuit
+            return false;
+        }
+
+        for (AssignmentSubmission submission : submissions)
+        {
+            List<ContentResource> contentResources = getAllAcceptableAttachments(submission);
+            for (ContentResource cr : contentResources)
+            {
+                // Returns an item from the current provider if possible; only returns another item if there is no item using the current provider.
+                ContentReviewItem cri = contentReviewService.getContentReviewItemByContentId(cr.getId());
+                if (cri != null && !contentReviewService.getProviderId().equals(cri.getProviderId()))
+                {
+                    // We have an attachment associated only with a content-review item on an old provider; this attachment will be requeued.
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public List<ContentReviewResult> getSortedContentReviewResults(AssignmentSubmission s){

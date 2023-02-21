@@ -796,9 +796,20 @@ public interface AssignmentService extends EntityProducer {
 
     String getUsersLocalDateTimeString(Instant date);
 
+    String getUsersLocalDateString(Instant date);
+
     String getUsersLocalDateTimeStringFromProperties(String date);
 
     public List<ContentReviewResult> getContentReviewResults(AssignmentSubmission submission);
+
+    /**
+     * When editing an assignment containing submissions whose attachments are associated with a content-review service that is no longer in use, the attachments will be re-queued against the new content-review service. This method determines if this will be the case, so that we can provide accurate messaging to instructors as they edit an assignment.
+     * @param siteId
+     * @param taskId
+     * @param submissions the list of submissions
+     * @return true if there are no submissions containing an attachment that is associated only with an unused content-review provider.
+     */
+    public boolean contentItemsMustBeReQueued(String siteId, String taskId, Collection<AssignmentSubmission> submissions);
 
     public List<ContentReviewResult> getSortedContentReviewResults(AssignmentSubmission submission);
 

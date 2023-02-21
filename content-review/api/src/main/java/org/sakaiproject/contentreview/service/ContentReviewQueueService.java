@@ -187,4 +187,11 @@ public interface ContentReviewQueueService {
 	 * @return the ContentReviewItem associated with the specified id
 	 */
 	 Optional<ContentReviewItem> getItemByContentId(String contentId);
+
+
+	/**
+	 * Returns true if and only if items exist for this siteId and taskId.
+	 * This does not filter items by provider.
+	 */
+	public boolean itemsExistForSiteAndTaskId(String siteId, String taskId);
 }

@@ -599,6 +599,7 @@
 	.contentReviewDisclosure {
 		position: relative;
 		display: flex;
+		flex-wrap: wrap;
 		margin-right: $standard-space;
 		align-items: baseline;
 	}
@@ -607,14 +608,17 @@
 		outline-offset: -1px;
 	}
 
+	.contentReviewReport {
+		margin-right: $standard-space;
+	}
+
 	.contentReviewMessage {
 		position: relative;
-		border: 1px solid;
+		border: $assignments-disclosure-border;
 		border-radius: 5px;
-		margin: 7px 24px 4px 24px;
+		margin: 4px 14px;
 		padding: 4px 8px;
-		background-color: $assignments-disclosure-bg;
-		border-color: $assignments-disclosure-bg;
+		background-color: var(--sakai-background-color-1);
 		color: var(--sakai-primary-color-1);
 
 		&::before {
@@ -625,7 +629,7 @@
 			width: $standard-spacing;
 			height: $standard-spacing;
 			border: 7px solid transparent;
-			border-bottom-color: $assignments-disclosure-bg;
+			border-bottom-color: var(--sakai-border-color);
 		}
 	}
 

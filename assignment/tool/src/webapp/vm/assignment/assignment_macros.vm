@@ -459,11 +459,11 @@
 			#set ($props = $reviewResult.getContentResource().Properties)
 			#set ($hasLink = !$reviewResult.getReviewReport().equals("Error"))
 			#set ($reviewScore = $reviewResult.getReviewScore())
+			#if ($hasLink)
+				<a class="contentReviewReport" href="$reviewResult.getReviewReport()" target="_blank" rel="noreferrer">
+			#end
 			<span class="reportIcon">
-				#if ($hasLink)
-					<a href="$reviewResult.getReviewReport()" target="_blank" rel="noreferrer">
-				#end
-				<set ($titleText = false)
+				#set ($titleText = false)
 				#if (!$hasLink)
 					#if ($reviewResult.isPending())
 						#set($titleText = $tlang.getString('content_review.disclosure.pending'))
@@ -474,15 +474,21 @@
 					#set($titleText = $tlang.getString('review.viewreport'))
 				#end
 				<span class="$reviewResult.getReviewIconCssClass()" #if ($titleText) title="$titleText" #end></span>
-				#if ($hasLink)
-					</a>
-				#end
 			</span>
 			#if ($hasLink)
 				#if ($reviewScore >= 0)
 					$tlang.getFormattedMessage("content_review.score.display", $reviewScore)
+					#set($dateReportReceived = $!service.getUsersLocalDateString($!reviewResult.getDateReportReceived()))
+					#if($dateReportReceived)
+						#set($lastUpdated = $tlang.getString("review.lastUpdated"))
+						<span class="contentReview_lastUpated" title="$lastUpdated">
+							($dateReportReceived)
+						</span>
+					#end 
+					</a>
 					$tlang.getString("content_review.delimiter")
 				#else
++					</a>
 					## leave the score blank
 				#end
 			#else
