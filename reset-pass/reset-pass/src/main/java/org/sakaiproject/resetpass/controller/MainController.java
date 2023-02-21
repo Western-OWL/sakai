@@ -343,6 +343,7 @@ public class MainController {
             } else {
                 errorMsgs = toolPropWrongType;
             }
+            log.warn("Attempt to reset password for invalid domain denied; email={}", email);
         }
 
         // All checks have passed successfully
@@ -357,12 +358,12 @@ public class MainController {
         Collection<User> c = this.userDirectoryService.findUsersByEmail(email.trim());
 
         if (CollectionUtils.isEmpty(c) && StringUtils.isNotBlank(email)) {
-            log.debug("no such email: {}", email);
+            log.warn("No such email: {}", email);
             exceptionMsg = true;
 
         } else if (c.size() > 1) {
             // Email is tied to more than one user, null out the user and transfer to next page
-            log.warn("more than one account with email: {}", email);
+            log.warn("More than one account with provided email address, aborting: {}", email);
             exceptionMsg = true;
         }
 
@@ -371,7 +372,7 @@ public class MainController {
             User user = (User) c.iterator().next();
 
             if (securityService.isSuperUser(user.getId())) {
-                log.warn("tryng to change superuser password");
+                log.warn("Attempt to change admin password with email, aborting: {}", email);
                 exceptionMsg = true;
             }
         }
