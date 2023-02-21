@@ -211,12 +211,22 @@ public class ValidationLogicImpl implements ValidationLogic {
 				Calendar cal = new GregorianCalendar();
 				va.setValidationReceived(cal.getTime());
 				dao.save(va);
+				log.warn("Password Reset token accessed, but is expired; userId={}, token={}", va.getUserId(), va.getValidationToken());
 				return true;
 			}
 		}
 
 		// perhaps accountValidator.maxPasswordResetMinutes wasn't set, in which case a quartz job may have invalidated the token
-		return ValidationAccount.STATUS_EXPIRED.equals(va.getStatus());
+		boolean isExpired = ValidationAccount.STATUS_EXPIRED.equals(va.getStatus());
+		if (isExpired)
+		{
+			log.warn("Token accessed, but is expired; userId={}, token={}", va.getUserId(), va.getValidationToken());
+		}
+		else
+		{
+			log.info("Token accessed, valid; userId={}, token={}", va.getUserId(), va.getValidationToken());
+		}
+		return isExpired;
 	}
 
 	public ValidationAccount getVaLidationAcountByUserId(String userId) {
@@ -314,8 +324,10 @@ public class ValidationLogicImpl implements ValidationLogic {
 		}
 
 		ValidationAccount va = new ValidationAccount();
+		String validationToken = idManager.createUuid();
 		va.setUserId(userId);
-		va.setValidationToken(idManager.createUuid());
+		va.setValidationToken(validationToken);
+		log.info("ValidationToken granted; userID={}, token={}", userId, validationToken);
 		return Optional.of(va);
 	}
 
@@ -331,6 +343,7 @@ public class ValidationLogicImpl implements ValidationLogic {
 		String[] acceptedAccountTypes = serverConfigurationService.getStrings(SAK_PROP_VALIDATE_ACCOUNT_TYPES);
 		if (acceptedAccountTypes == null || acceptedAccountTypes.length == 0) {
 			// Deny all roles
+			log.warn("Token requested, but accountValidator.validate.accountTypes is null/empty; request denied: userID={}", userId);
 			return false;
 		}
 
@@ -345,8 +358,10 @@ public class ValidationLogicImpl implements ValidationLogic {
 					return true;
 				}
 			}
+
+			log.warn("Token requested, but user account type is not allowed; request denied: userID={}, accountType={}", userId, userAccountType);
 		} catch (UserNotDefinedException e) {
-			log.warn("Could not prepare ValidationAccount for user " + userId, e);
+			log.warn("Could not prepare ValidationAccount, user not found: {}", userId, e);
 		}
 
 		return false;
