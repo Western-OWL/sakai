@@ -21,6 +21,7 @@ package org.sakaiproject.accountvalidator.logic;
 
 
 import java.util.List;
+import java.util.Optional;
 
 import org.sakaiproject.accountvalidator.model.ValidationAccount;
 /**
@@ -73,33 +74,33 @@ public interface ValidationLogic {
 	/**
 	 * Create a new validation request for a user
 	 * @param UserId
-	 * @return
+	 * @return Optional wrapping the validation account for this user, or empty if the user account is not managed by Sakai.
 	 */
-	public ValidationAccount createValidationAccount(String UserId);
+	public Optional<ValidationAccount> createValidationAccount(String userId);
 	
 	/**
-	 *  Create a new Validation account
-	 * @param UserId
+	 * Create a new Validation account
+	 * @param userId
 	 * @param newAccount is this a new user
-	 * @return
+	 * @return Optional wrapping the validation account for this user, or empty if the user account is not managed by Sakai.
 	 */
-	public ValidationAccount createValidationAccount(String UserId, boolean newAccount);
+	public Optional<ValidationAccount> createValidationAccount(String userId, boolean newAccount);
 	
 
 	/**
-	 *  Create a new validation Validation account
-	 * @param userRef existing userId
-	 * @param newUserId is the new id which the user wants to have as userId
-	 * @return
+	 * Create a new validation Validation account
+	 * @param userId existing userId
+	 * @param newUserEid is the new id which the user wants to have as userEid
+	 * @return Optional wrapping the validation account for this user, or empty if the user account is not managed by Sakai.
 	 */
-	public ValidationAccount createValidationAccount(String userRef,String newUserId);
+	public Optional<ValidationAccount> createValidationAccount(String userId, String newUserEid);
 	/**
 	 * Create a validation token for an account of a given status
-	 * @param UserId
+	 * @param userId
 	 * @param accountStatus
-	 * @return
+	 * @return Optional wrapping the validation account for this user, or empty if the user account is not managed by Sakai.
 	 */
-	public ValidationAccount createValidationAccount(String UserId, Integer accountStatus);
+	public Optional<ValidationAccount> createValidationAccount(String userId, Integer accountStatus);
 	
 	/**
 	 * Merge 2 accounts the memberships of the first will be moved to the second
