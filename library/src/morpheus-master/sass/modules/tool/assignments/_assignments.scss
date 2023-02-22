@@ -2,6 +2,10 @@
 
 .#{$namespace}sakai-assignment-grades {
 
+	.comment-highlight {
+		color: var(--sakai-color-red--lighter-2);
+	}
+
 	.page-header small {
 		font-size: 1em;
 		font-weight: normal;

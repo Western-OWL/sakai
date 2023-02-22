@@ -1217,7 +1217,7 @@ public class AssignmentAction extends PagedResourceActionII {
         int pos = -1;
 
         while ((pos = buf.indexOf("{{")) != -1) {
-            buf.replace(pos, pos + "{{".length(), "<span class='highlight'>");
+            buf.replace(pos, pos + "{{".length(), "<span class='highlight comment-highlight'>");
         }
 
         while ((pos = buf.indexOf("}}")) != -1) {
