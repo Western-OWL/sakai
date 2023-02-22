@@ -320,6 +320,23 @@ jQuery.fn.fadeToggle = function(speed, easing, callback) {
     return this.animate({opacity: 'toggle'}, speed, easing, callback);
 };
 
+// True if the event is a click, 'space', or 'enter' key.
+ASN.isClickOrKeydown = function(event) {
+    if(event.type === 'click') {
+        return true;
+    }
+    else if(event.type === 'keydown') {
+        var code = event.charCode || event.keyCode;
+        if ((code === 32) || (code === 13))
+        {
+            // Prevent scrolling on space bar
+            event.preventDefault();
+            return true;
+        }
+    }
+    return false;
+}
+
 ASN.setupToggleAreas = function(toggler, togglee, openInit, speed){
     // toggler=class of click target
     // togglee=class of container to expand
@@ -333,11 +350,19 @@ ASN.setupToggleAreas = function(toggler, togglee, openInit, speed){
         $('.collapse').hide();
         ASN.resizeFrame();
     }
-    $('.' + toggler).click(function(){
-        $(this).next('.' + togglee).slideToggle(speed);
-        $(this).find('.expand').toggle();
-        $(this).find('.collapse').toggle();
-        ASN.resizeFrame();
+    $('.' + toggler).on('click keydown', function(event){
+        if (ASN.isClickOrKeydown(event)) {
+            $(this).next('.' + togglee).slideToggle(speed);
+            $(this).find('.expand').toggle();
+            $(this).find('.collapse').toggle();
+
+            // flip aria-expanded
+            var expanded = $(this).attr('aria-expanded') !== 'true';
+            $(this).attr('aria-expanded', expanded);
+            $(this).next('.' + togglee).attr('aria-expanded', expanded);
+
+            ASN.resizeFrame();
+        }
     });
 };
 
