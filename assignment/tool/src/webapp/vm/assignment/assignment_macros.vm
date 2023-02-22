@@ -470,7 +470,7 @@
 					#else
 						#set($titleText = $tlang.getString('content_review.disclosure.error'))
 					#end
-				#elseif ($reviewScore > 0)
+				#elseif ($reviewScore >= 0)
 					#set($titleText = $tlang.getString('review.viewreport'))
 				#end
 				<span class="$reviewResult.getReviewIconCssClass()" #if ($titleText) title="$titleText" #end></span>
