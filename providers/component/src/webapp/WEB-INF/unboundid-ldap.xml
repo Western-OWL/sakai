@@ -4,11 +4,12 @@
     xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
 	<bean id="org.sakaiproject.user.api.UserDirectoryProvider"
-		class="org.sakaiproject.unboundid.UnboundidDirectoryProvider" init-method="init"
+		class="org.sakaiproject.unboundid.UnboundidDirectoryProvider.provider1" init-method="init"
 		destroy-method="destroy">
 
 		<property name="securityService" ref="org.sakaiproject.authz.api.SecurityService"/>
 		<property name="memoryService" ref="org.sakaiproject.memory.api.MemoryService"/>
+		<property name="serverConfigurationService" ref="org.sakaiproject.component.api.ServerConfigurationService"/>
 		
 		<!-- Required. Uses Unboundid SingleServerSet by default. Easy to modify code to use FailoverServerSet or RoundRobinServerSet. -->
 		<property name="ldapHost">
@@ -22,7 +23,7 @@
 			connection is usually on 636 -->
 		<property name="ldapPort">
 			<list>
-				<value>389</value>
+				<value>636</value>
 			</list>
 		</property>
 
@@ -39,15 +40,15 @@
 
 		<!-- Optional. Enables/disables secure LDAP connections.
 			defaults to UnboundidDirectoryProvider.DEFAULT_IS_SECURE_CONNECTION (false) -->
-		<!-- property name="secureConnection">
-			<value>false</value>
-		</property -->
+		<property name="secureConnection">
+			<value>true</value>
+		</property>
 
 		<!-- Optional. Indicate if connection allocation should
 			implicitly bind as ${ldapUser}. Defaults to false -->
-		<!-- property name="autoBind">
-			<value>false</value>
-		</property -->
+		<property name="autoBind">
+			<value>true</value>
+		</property>
 
 		<!-- Optional, but usually specified. Base DN for directory searches. -->
 		<property name="basePath">
@@ -244,16 +245,15 @@
 		AttributeMappingConstants.DEFAULT_ATTR_MAPPINGS. -->
 		<property name="attributeMappings">
 			<map>
-<!--
-				<entry key="aid"><value>krb5PrincipalName</value></entry>
--->
-				<entry key="login"><value>uid</value></entry>         
-				<entry key="firstName"><value>givenName</value></entry> 
+				<!--<entry key="aid"><value>krb5PrincipalName</value></entry>-->
+				<entry key="login"><value>LOGIN GOES HERE</value></entry>
+				<entry key="firstName"><value>givenName</value></entry>
 				<entry key="preferredFirstName"><value>preferredName</value></entry>
-				<entry key="lastName"><value>sn</value></entry> 
-				<entry key="email"><value>mail</value></entry>  
-				<entry key="groupMembership"><value>groupMembership</value></entry>   
-				<entry key="jpegPhoto"><value>jpegPhoto</value></entry>   
+				<entry key="lastName"><value>sn</value></entry>
+				<entry key="email"><value>EMAIL GOES HERE</value></entry>
+				<entry key="NUMBER KEY GOES HERE"><value>NUMBER VALUE GOES HERE</value></entry>
+				<entry key="groupMembership"><value>GROUP MEMBERSHIP GOES HERE</value></entry>
+				<entry key="jpegPhoto"><value>jpegPhoto</value></entry>
 			</map>
 		</property>
 		
@@ -268,8 +268,8 @@
 		on LDAP attributes. Defaults to an instance of EmptyStringUserTypeMapper -->
 		<property name="userTypeMapper">
 			<!-- Select one of the following beans -->
-			<ref bean="org.sakaiproject.unboundid.EmptyStringUserTypeMapper" />
-			<!-- ref bean="org.sakaiproject.unboundid.EntryAttributeToUserTypeMapper" /-->
+			<!-- ref bean="org.sakaiproject.unboundid.EmptyStringUserTypeMapper" /-->
+			<ref bean="org.sakaiproject.unboundid.EntryAttributeToUserTypeMapper" />
 			<!-- ref bean="org.sakaiproject.unboundid.EntryContainerRdnToUserTypeMapper" /-->
 			<!-- ref bean="org.sakaiproject.unboundid.StringUserTypeMapper" /-->
 		</property>
@@ -309,12 +309,11 @@
 		<!-- Optional. If not present or empty, behavior is
 		determined by the value of returnLiteralAttributeValueIfNoMapping
 		(see below). -->
-		<!-- property name="attributeValueToSakaiUserTypeMap">
+		<property name="attributeValueToSakaiUserTypeMap">
 			<map>
-				<entry key="faculty"><value>faculty</value></entry> 
-				<entry key="students"><value>student</value></entry> 
+				<!-- MAP GOES HERE -->
 			</map>
-		</property -->
+		</property>
 				
 		<!-- Required. The logical name of the LDAP attribute which
 		defines Sakai users' types. Value should be a key into the 

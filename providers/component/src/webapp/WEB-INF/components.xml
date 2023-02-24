@@ -29,9 +29,12 @@
 	<util:map id="org.sakaiproject.coursemanagement.GroupProviderConfiguration">
 		<entry key="siteRoleResolutionOrder">
 			<list>
+				<value>Grade Admin</value>
+				<value>Course Coordinator</value>
 				<value>Instructor</value>
 				<value>Teaching Assistant</value>
 				<value>Student</value>
+				<value>Auditor</value>
 			</list>
 		</entry>
 		<entry key="officialInstructorToSiteRole" value="Instructor"/>
@@ -43,9 +46,12 @@
 		</entry>
 		<entry key="sectionRoleToSiteRole">
 			<map>
+				<entry key="GA" value="Grade Admin"/>
+				<entry key="CC" value="Course Coordinator"/>
 				<entry key="I" value="Instructor"/>
 				<entry key="GSI" value="Teaching Assistant"/>
 				<entry key="S" value="Student"/>
+				<entry key="A" value="Auditor"/>
 			</map>
 		</entry>
 		<entry key="courseOfferingRoleToSiteRole">
@@ -157,7 +163,7 @@
 -->
 
 <!-- Uncomment and configure to use the UnboundidDirectoryProvider -->
-	<!--  import resource="unboundid-ldap.xml" / -->
+	<!--<import resource="unboundid-ldap.xml" />-->
 
 <!-- Uncomment and configure to use the Candidate Details Provider -->  
 	<!--  import resource="candidate-details.xml"/ -->
@@ -176,28 +182,33 @@
 	</bean>
 -->
 
-<!-- Uncomment and configure to use the Federating UserDirectoryProvider.
+<!-- Uncomment and configure to use the Federating UserDirectoryProvider. -->
 
-   <bean
-  		id="org.sakaiproject.user.api.UserDirectoryProvider"
-  		class="org.sakaiproject.provider.user.FilterUserDirectoryProvider"
-  		init-method="init" destroy-method="destroy">
-  		<property name="myProvider">
-  			<ref bean="org.sakaiproject.user.api.UserDirectoryProvider.provider1" />
-  		</property>
-  		<property name="nextProvider">
-  			<ref bean="org.sakaiproject.user.api.UserDirectoryProvider.chain1" />
-  		</property>
-  	</bean>
-  	<bean
-  		id="org.sakaiproject.user.api.UserDirectoryProvider.chain1"
-  		class="org.sakaiproject.provider.user.FilterUserDirectoryProvider"
-  		init-method="init" destroy-method="destroy">
-  		<property name="myProvider">
-  			<ref bean="org.sakaiproject.user.api.UserDirectoryProvider.provider2" />
-  		</property>
-  	</bean>
- -->
+	<!--<bean
+		id="org.sakaiproject.user.api.UserDirectoryProvider"
+		class="org.sakaiproject.provider.user.FilterUserDirectoryProvider"
+		init-method="init" destroy-method="destroy">
+		<property name="myProvider">
+			<ref bean="org.sakaiproject.user.api.UserDirectoryProvider.provider1" />
+		</property>
+		<property name="nextProvider">
+			<ref bean="org.sakaiproject.user.api.UserDirectoryProvider.chain1" />
+		</property>
+	</bean>
+	<bean
+		id="org.sakaiproject.user.api.UserDirectoryProvider.chain1"
+		class="org.sakaiproject.provider.user.FilterUserDirectoryProvider"
+		init-method="init" destroy-method="destroy">
+		<property name="myProvider">
+			<ref bean="org.sakaiproject.user.api.UserDirectoryProvider.provider2" />
+		</property>
+	</bean>
+	<bean id="org.sakaiproject.user.api.UserDirectoryProvider.provider2"
+		class="ca.uwo.destinyone.DestinyOneUserDirectoryProvider"
+		init-method="init"
+		destroy-method="destroy">
+		<property name="serverConfigurationService" ref="org.sakaiproject.component.api.ServerConfigurationService" />
+	</bean>-->
 
 	<bean id="org.sakaiproject.user.detail.ValueEncryptionUtilities"
 		  class="org.sakaiproject.user.detail.ValueEncryptionUtilities"

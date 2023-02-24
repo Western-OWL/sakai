@@ -62,10 +62,13 @@ import com.unboundid.ldap.sdk.SearchScope;
 import com.unboundid.ldap.sdk.ServerSet;
 import com.unboundid.ldap.sdk.SimpleBindRequest;
 import com.unboundid.ldap.sdk.SingleServerSet;
+import com.unboundid.ldap.sdk.migrate.ldapjdk.LDAPAttribute;
 import com.unboundid.ldap.sdk.migrate.ldapjdk.LDAPConnection;
 import com.unboundid.ldap.sdk.migrate.ldapjdk.LDAPEntry;
 import com.unboundid.ldap.sdk.migrate.ldapjdk.LDAPException;
 import com.unboundid.util.ssl.SSLUtil;
+import org.apache.commons.lang3.ArrayUtils;
+import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.memory.api.Cache;
 
 /**
@@ -92,7 +95,7 @@ public class UnboundidDirectoryProvider implements UserDirectoryProvider, LdapCo
 	public static final boolean DEFAULT_IS_SECURE_CONNECTION = false;
 
 	/**  Default LDAP access timeout in milliseconds */
-	public static final int DEFAULT_OPERATION_TIMEOUT_MILLIS = 9000;
+	public static final int DEFAULT_OPERATION_TIMEOUT_MILLIS = 30000;
 
 	/** Default referral following behavior */
 	public static final boolean DEFAULT_IS_FOLLOW_REFERRALS = false;
@@ -134,6 +137,26 @@ public class UnboundidDirectoryProvider implements UserDirectoryProvider, LdapCo
 	public static final boolean DEFAULT_ALLOW_GET_EXTERNAL = true;
 	
 	public static final boolean DEFAULT_AUTHENTICATE_WITH_PROVIDER_FIRST = false;
+
+	/* Begin authorize by attribute variables  --plukasew */
+
+	// sakai.properties names
+	private static final String AUTHORIZE_BY_ATTRIBUTE_ENABLED_SAKAI_PROPERTY = "unboundid.authorizeByAttribute.enabled";
+	private static final String AUTHORIZE_BY_ATTRIBUTE_NAME_SAKAI_PROPERTY = "unboundid.authorizeByAttribute.attributeName";
+	private static final String AUTHORIZE_BY_ATTRIBUTE_VALUES_SAKAI_PROPERTY = "unboundid.authorizeByAttribute.restrictedValues";
+
+	@Getter @Setter private ServerConfigurationService serverConfigurationService;
+
+	// toggle switch for authorization by attribute (disabled if not set)
+	private boolean authorizeByAttributeEnabled;
+
+	// name of attribute to authorize on
+	private String authorizeByAttributeName;
+
+	// restricted values (postive match any of these values will cause authentication/authorization to fail )
+	private List<String> authorizeByAttributeRestrictedValues;
+
+	/* End authorize by attribute variables */
 
 	/** LDAP host address */
 	private String[] ldapHost;
@@ -287,6 +310,11 @@ public class UnboundidDirectoryProvider implements UserDirectoryProvider, LdapCo
 
 		createConnectionPool();
 		initLdapAttributeMapper();
+
+		// authorization by attribute variable init  --plukasew
+		authorizeByAttributeEnabled = serverConfigurationService.getBoolean(AUTHORIZE_BY_ATTRIBUTE_ENABLED_SAKAI_PROPERTY, false);
+		authorizeByAttributeName = serverConfigurationService.getString(AUTHORIZE_BY_ATTRIBUTE_NAME_SAKAI_PROPERTY, "");
+		authorizeByAttributeRestrictedValues = Arrays.asList(ArrayUtils.nullToEmpty(serverConfigurationService.getStrings(AUTHORIZE_BY_ATTRIBUTE_VALUES_SAKAI_PROPERTY)));
 	}
 
         /**
@@ -476,6 +504,70 @@ public class UnboundidDirectoryProvider implements UserDirectoryProvider, LdapCo
 			lc = connectionPool.getConnection();
 			BindResult bindResult = lc.bind(endUserDN, password);
 			if(bindResult.getResultCode().equals(ResultCode.SUCCESS)) {
+
+				/* Begin authorization by attribute check   --plukasew */
+				if (authorizeByAttributeEnabled)
+				{
+					log.debug("authenticateUser(): authorization by attribute: checking {} for restricted values.", authorizeByAttributeName);
+					if (connectionPool == null && !createConnectionPool())
+					{
+						log.warn("No LDAP connection pool available: unable to search for: [userLogin = {}][bind dn [{}]", userLogin, endUserDN);
+					}
+					else
+					{
+						SearchResult result = null;
+						try
+						{
+							String filter = ldapAttributeMapper.getFindUserByEidFilter(userLogin);
+							DereferencePolicy dr = isSearchAliases() ? DereferencePolicy.ALWAYS : DereferencePolicy.NEVER;
+							result = connectionPool.search(endUserDN, searchScope, dr, maxResultSize, operationTimeout, false, filter, authorizeByAttributeName);
+						}
+						catch(LDAPSearchException e)
+						{
+							if (e.getResultCode().equals(ResultCode.SIZE_LIMIT_EXCEEDED))
+							{
+								// We still want results even though we hit the max. Just take what we were able to get.
+								result = e.getSearchResult();
+								log.warn("Hit ResultCode.SIZE_LIMIT_EXCEEDED: {}", e.getDiagnosticMessage());
+							}
+							else
+							{
+								throw e;
+							}
+						}
+
+						List<SearchResultEntry> searchResults = result.getSearchEntries();
+						for (SearchResultEntry sre : searchResults)
+						{
+							LDAPEntry entry = new LDAPEntry(sre);
+							if (entry != null)
+							{
+								LDAPAttribute restrictedAttribute = entry.getAttribute(authorizeByAttributeName);
+								if (restrictedAttribute != null)
+								{
+									// ldap attribute could be multi-value, so check them all
+									String[] restrictedValues = restrictedAttribute.getStringValueArray();
+									if (restrictedValues != null)
+									{
+										List<String> values = Arrays.asList(restrictedValues);
+										for (String value : values)
+										{
+											if (authorizeByAttributeRestrictedValues.contains(value))
+											{
+												AuthorizationByAttributeFailedException abafe = new AuthorizationByAttributeFailedException("Authorization check failed.");
+												abafe.setAttributeName(authorizeByAttributeName);
+												abafe.setAttributeValue(value);
+												throw abafe;
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+				/* End restricted attribute check */
+
 				log.info("Authenticated {} ({}) from LDAP in {} ms", userLogin, endUserDN, System.currentTimeMillis() - start);
 				return true;
 			}
@@ -494,7 +586,14 @@ public class UnboundidDirectoryProvider implements UserDirectoryProvider, LdapCo
 						+ userLogin + "][result code = " + e.getResultCode().toString() + 
 						"][error message = "+ e.getExceptionMessage() + "]", e);
 			}
-		} catch ( Exception e ) {
+		}
+		catch (AuthorizationByAttributeFailedException abafe)
+		{
+			log.warn("authenticateUser(): authorization by attribute failed [userLogin = {}][attribute = {}][value = {}]",
+					 userLogin, abafe.getAttributeName(), abafe.getAttributeValue());
+			return false;
+		}
+		catch ( Exception e ) {
 			throw new RuntimeException(
 					"authenticateUser(): Exception during authentication attempt [userLogin = "
 					+ userLogin + "]", e);
@@ -656,8 +755,8 @@ public class UnboundidDirectoryProvider implements UserDirectoryProvider, LdapCo
 		int maxQuerySize = getMaxObjectsToQueryFor();
 		UserEdit userEdit = null;
 		
-		HashMap<String, UserEdit> usersToSearchInLDAP = new HashMap<String, UserEdit>();
-		List<UserEdit> usersToRemove = new ArrayList<UserEdit>();
+		HashMap<String, UserEdit> usersToSearchInLDAP = new HashMap<>();
+		List<UserEdit> usersToRemove = new ArrayList<>();
 		try {
 			int cnt = 0;
 			for ( Iterator<UserEdit> userEdits = users.iterator(); userEdits.hasNext(); ) {
@@ -861,7 +960,6 @@ public class UnboundidDirectoryProvider implements UserDirectoryProvider, LdapCo
 	 * @see #getUserByEid(String, LDAPConnection)
 	 * @see LdapAttributeMapper#getUserBindDn(LdapUserData)
 	 * @param eid the user's Sakai EID
-	 * @param conn an optional {@link LDAPConnection}
 	 * @return the user's bindable DN or null if no matching directory entry
 	 * @throws LDAPException if the directory query exits with an error
 	 */
@@ -999,7 +1097,7 @@ public class UnboundidDirectoryProvider implements UserDirectoryProvider, LdapCo
 
 			List<SearchResultEntry> searchResults = searchResult.getSearchEntries();
 			
-			List<LdapUserData> mappedResults = new ArrayList<LdapUserData>();
+			List<LdapUserData> mappedResults = new ArrayList<>();
 			int resultCnt = 0;
 			for (SearchResultEntry sre : searchResults) {
 				LDAPEntry entry = new LDAPEntry(sre);
@@ -1578,7 +1676,7 @@ public class UnboundidDirectoryProvider implements UserDirectoryProvider, LdapCo
 		}
 		
 		String filter = ldapAttributeMapper.getFindUserByCrossAttributeSearchFilter(criteria);
-		List<UserEdit> users = new ArrayList<UserEdit>();
+		List<UserEdit> users = new ArrayList<>();
 		
 		try {
 			//no limit to the number of search results, use the LDAP server's settings.
@@ -1614,7 +1712,7 @@ public class UnboundidDirectoryProvider implements UserDirectoryProvider, LdapCo
 	@SuppressWarnings("rawtypes")
     public Collection findUsersByEmail(String email, UserFactory factory) {
 
-		List<User> users = new ArrayList<User>();
+		List<User> users = new ArrayList<>();
 
                 if (!allowSearchExternal) {
                         log.debug("External search is disabled");
