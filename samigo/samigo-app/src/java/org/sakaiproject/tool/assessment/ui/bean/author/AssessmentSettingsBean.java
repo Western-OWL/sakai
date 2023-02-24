@@ -375,7 +375,7 @@ public class AssessmentSettingsBean extends SpringBeanAutowiringSupport implemen
         if (accessControl.getHonorPledge() != null) {
           this.honorPledge = accessControl.getHonorPledge();
         } else {
-          this.honorPledge = true;
+          this.honorPledge = false;
         }
         // default to unlimited if control value is null
         if (accessControl.getUnlimitedSubmissions()!=null && !accessControl.getUnlimitedSubmissions()){
