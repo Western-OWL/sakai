@@ -3,8 +3,8 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-	<bean id="org.sakaiproject.user.api.UserDirectoryProvider"
-		class="org.sakaiproject.unboundid.UnboundidDirectoryProvider.provider1" init-method="init"
+	<bean id="org.sakaiproject.user.api.UserDirectoryProvider.provider1"
+		class="org.sakaiproject.unboundid.UnboundidDirectoryProvider" init-method="init"
 		destroy-method="destroy">
 
 		<property name="securityService" ref="org.sakaiproject.authz.api.SecurityService"/>
