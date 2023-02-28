@@ -535,9 +535,7 @@ ASN.checkEnableRestore = function()
     }
 
     document.getElementById( "btnRestore" ).disabled = !selected;
-    document.getElementById( "btnRestore" ).className = (selected ? "active" : "" );
     document.getElementById( "btnHardRemove" ).disabled = !selected;
-    document.getElementById( "btnHardRemove" ).className = (selected ? "active" : "" );
 };
 
 ASN.toggleResubmitTimePanel = function()
