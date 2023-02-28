@@ -170,7 +170,6 @@ import org.sakaiproject.time.api.UserTimeService;
 import org.sakaiproject.timesheet.api.TimeSheetEntry;
 import org.sakaiproject.timesheet.api.TimeSheetService;
 import org.sakaiproject.tool.api.SessionManager;
-import org.sakaiproject.tool.api.Tool;
 import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.user.api.CandidateDetailProvider;
 import org.sakaiproject.user.api.User;
@@ -4140,8 +4139,13 @@ public class AssignmentServiceImpl implements AssignmentService, EntityTransferr
                     nAssignment.setAllowAttachments(oAssignment.getAllowAttachments());
                     nAssignment.setHonorPledge(oAssignment.getHonorPledge());
                     nAssignment.setIndividuallyGraded(oAssignment.getIndividuallyGraded());
-                    nAssignment.setMaxGradePoint(oAssignment.getMaxGradePoint());
-                    nAssignment.setScaleFactor(oAssignment.getScaleFactor());
+
+                    // Always use the default scale factor going forward
+                    Integer defaultScaleFactor = getScaleFactor();
+                    Integer oScaleFactor = oAssignment.getScaleFactor();
+                    nAssignment.setMaxGradePoint(defaultScaleFactor * oAssignment.getMaxGradePoint() / oScaleFactor);
+                    nAssignment.setScaleFactor(defaultScaleFactor);
+
                     nAssignment.setReleaseGrades(oAssignment.getReleaseGrades());
                     nAssignment.setEstimateRequired(oAssignment.getEstimateRequired());
                     nAssignment.setEstimate(oAssignment.getEstimate());
