@@ -665,6 +665,21 @@
 		-webkit-flex-wrap: wrap;
 		flex-wrap: wrap;
 		grader-toggle { margin-left: 20px; }
+
+		.listNav {
+			display: flex;
+			flex-wrap: wrap;
+
+			& > a {
+				margin-right: $standard-spacing;
+				padding-right: $standard-spacing;
+				border-right: 1px solid #ddd;
+
+				&:last-of-type {
+					border-right: 0;
+				}
+			}
+		}
 	}
 
 	#honor-pledge-agreement {
