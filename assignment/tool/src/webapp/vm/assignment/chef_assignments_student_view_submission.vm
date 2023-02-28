@@ -540,7 +540,7 @@ $(document).ready(function(){
 									$tlang.getString("gen.theassall4")
 								#end
 							#end
-							#if ($plagiarismNote)
+							#if ($plagiarismNote && $assignment.ContentReview)
 								<p>
 									<img alt="$reviewIndicator" title="$reviewIndicator" src="/library/image/silk/rosette.png" class="assignmentRosette"/>
 									<em>
@@ -561,7 +561,7 @@ $(document).ready(function(){
 									</em>
 								</p>
 							#end
-							#if ($plagiarismEULALink)
+							#if ($plagiarismEULALink && $assignment.ContentReview)
 								<p class="checkbox highlightPanel form-required">
 									<label for="$name_plagiarism_eula_agreement">
 										#if ($value_plagiarism_eula_agreement.equals("true"))
@@ -642,7 +642,7 @@ $(document).ready(function(){
 					</p>
 				#end	
 				#if (($submissionType == 2) || ($submissionType == 5))
-					#if ($plagiarismNote)
+					#if ($plagiarismNote && $assignment.ContentReview)
 						<p>
 							<img alt="$reviewIndicator" title="$reviewIndicator" src="/library/image/silk/rosette.png" class="assignmentRosette"/>
 							<em>

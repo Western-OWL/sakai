@@ -173,7 +173,7 @@
 	#end
 
     <form id="addSubmissionForm" name="addSubmissionForm" action="#toolForm("AssignmentAction")" method="post" onsubmit="return true;">
-	    #if ($plagiarismNote)
+	    #if ($plagiarismNote && $assignment.ContentReview)
 			<p>
 				<img alt="$reviewIndicator" title="$reviewIndicator" src="/library/image/silk/rosette.png" class="assignmentRosette"/>
 				<em>
@@ -194,7 +194,7 @@
 				</em>
 			</p>
 		#end
-		#if ($plagiarismEULALink)
+		#if ($plagiarismEULALink && $assignment.ContentReview)
 			<p class="checkbox highlightPanel form-required">
 				<label for="$name_plagiarism_eula_agreement">
 					#if ($value_plagiarism_eula_agreement.equals("true"))
