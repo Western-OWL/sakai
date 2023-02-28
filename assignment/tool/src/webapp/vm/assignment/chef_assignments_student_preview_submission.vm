@@ -145,7 +145,7 @@
 				<input type="hidden" name="submit_on_behalf_of" id="submit_on_behalf_of" value="$student.id" />		
 			</p>
 		#end
-	    #if ($plagiarismNote)
+	    #if ($plagiarismNote && $assignment.ContentReview)
 			<p>
 				<img alt="$reviewIndicator" title="$reviewIndicator" src="/library/image/silk/rosette.png" class="assignmentRosette"/>
 				<em>
@@ -166,7 +166,7 @@
 				</em>
 			</p>
 		#end
-		#if ($plagiarismEULALink)
+		#if ($plagiarismEULALink && $assignment.ContentReview)
 			<p class="checkbox highlightPanel form-required">
 				<label for="$name_plagiarism_eula_agreement">
 					#if ($value_plagiarism_eula_agreement.equals("true"))
