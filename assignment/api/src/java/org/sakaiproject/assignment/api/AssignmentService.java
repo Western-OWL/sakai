@@ -679,6 +679,13 @@ public interface AssignmentService extends EntityProducer {
     public String getDeepLink(String context, String assignmentId, String userId) throws Exception;
 
     /**
+     * Gets a link to the doViewAssignment URL, useful to mass email students, etc.
+     * Use getDeepLink if linking within an existing session.
+     * @param site is optional - it saves a siteService.getSite(...) call if supplied.
+     */
+    public String getDoViewAssignmentLink(String context, String assignmentId, Optional<Site> site) throws Exception;
+
+    /**
      * get csv separator for exporting to CSV. It can be a comma or point configured through
      * csv.separator sakai property
      *
