@@ -374,7 +374,10 @@
 												#if ($service.canSubmit($assignment))
 													## if assignment honor pledge is enabled and the student hasn't agreed
 													#if ($assignment.HonorPledge && !$submission.HonorPledge)
-                                                        <a name="asnActionLink" href="#toolLinkParam("AssignmentAction" "doView_assignment_honorPledge" "assignmentReference=$formattedText.escapeUrl($assignmentReference)")" title="$formattedText.escapeHtml($!assignment.Title)">$formattedText.escapeHtml($assignment.Title)</a>
+														<strong>
+															<a name="asnActionLink" href="#toolLinkParam("AssignmentAction" "doView_assignment_honorPledge" "assignmentReference=$formattedText.escapeUrl($assignmentReference)")" title="$formattedText.escapeHtml($!assignment.Title)">$formattedText.escapeHtml($assignment.Title)</a>
+															#assignmentIcons($assignment)
+														</strong>
 													#else
 														## go to view submission page when (1) submission has been returned and allow for resubmit;(2)submission has not been posted yet.
 														<strong>
