@@ -2787,12 +2787,7 @@ public class AssignmentServiceImpl implements AssignmentService, EntityTransferr
                             + AssignmentReferenceReckoner.reckoner().context(context).id(assignmentId).reckon().getReference()
                             + "&panel=Main&sakai_action=doGrade_assignment";
                 } else if (allowAddAssignment) {
-                    return serverConfigurationService.getPortalUrl()
-                            + "/directtool/"
-                            + fromTool.getId()
-                            + "?assignmentId="
-                            + AssignmentReferenceReckoner.reckoner().context(context).id(assignmentId).reckon().getReference()
-                            + "&panel=Main&sakai_action=doView_assignment";
+                    return getDoViewAssignmentLink(context, assignmentId, Optional.of(site));
                 } else if (allowSubmitAssignment) {
                     String sakaiAction = "doView_submission";
                     if(a.getHonorPledge()) {
@@ -2831,6 +2826,19 @@ public class AssignmentServiceImpl implements AssignmentService, EntityTransferr
         boolean allowGradeAssignment = permissionCheck(SECURE_GRADE_ASSIGNMENT_SUBMISSION, resourceString, userId);
 
         return getDeepLinkWithPermissions(context, assignmentId, allowReadAssignment, allowAddAssignment, allowSubmitAssignment, allowGradeAssignment);
+    }
+
+    @Override
+    public String getDoViewAssignmentLink(String context, String assignmentId, Optional<Site> optSite) throws Exception {
+        Site site = optSite.orElse(siteService.getSite(context));
+        // site id
+        ToolConfiguration fromTool = site.getToolForCommonId("sakai.assignment.grades");
+        return serverConfigurationService.getPortalUrl()
+                + "/directtool/"
+                + fromTool.getId()
+                + "?assignmentId="
+                + AssignmentReferenceReckoner.reckoner().context(context).id(assignmentId).reckon().getReference()
+                + "&panel=Main&sakai_action=doView_assignment";
     }
 
     @Override
@@ -4611,15 +4619,6 @@ public class AssignmentServiceImpl implements AssignmentService, EntityTransferr
             return;
         }
 
-        if (released && StringUtils.equals(AssignmentConstants.ASSIGNMENT_RELEASEGRADE_NOTIFICATION_EACH, assignmentProperties.get(AssignmentConstants.ASSIGNMENT_RELEASEGRADE_NOTIFICATION_VALUE))) {
-            // send email to every submitters
-            if (!filteredUsers.isEmpty()) {
-                // send the message immediately
-                userMessagingService.message(filteredUsers,
-                        Message.builder().tool(AssignmentConstants.TOOL_ID).type("releasegrade").build(),
-                        Arrays.asList(new MessageMedium[] {MessageMedium.EMAIL}), emailUtil.getReleaseGradeReplacements(assignment, siteId), NotificationService.NOTI_REQUIRED);
-            }
-        }
         if (StringUtils.isNotBlank(resubmitNumber) && StringUtils.equals(AssignmentConstants.ASSIGNMENT_RELEASERESUBMISSION_NOTIFICATION_EACH, assignmentProperties.get(AssignmentConstants.ASSIGNMENT_RELEASERESUBMISSION_NOTIFICATION_VALUE))) {
             // send email to every submitters
             if (!filteredUsers.isEmpty()) {
@@ -4627,6 +4626,15 @@ public class AssignmentServiceImpl implements AssignmentService, EntityTransferr
                 userMessagingService.message(filteredUsers,
                         Message.builder().tool(AssignmentConstants.TOOL_ID).type("releaseresubmission").build(),
                         Arrays.asList(new MessageMedium[] {MessageMedium.EMAIL}), emailUtil.getReleaseResubmissionReplacements(submission), NotificationService.NOTI_REQUIRED);
+            }
+        }
+        else if (released && StringUtils.equals(AssignmentConstants.ASSIGNMENT_RELEASEGRADE_NOTIFICATION_EACH, assignmentProperties.get(AssignmentConstants.ASSIGNMENT_RELEASEGRADE_NOTIFICATION_VALUE))) {
+            // send email to every submitters
+            if (!filteredUsers.isEmpty()) {
+                // send the message immediately
+                userMessagingService.message(filteredUsers,
+                        Message.builder().tool(AssignmentConstants.TOOL_ID).type("releasegrade").build(),
+                        Arrays.asList(new MessageMedium[] {MessageMedium.EMAIL}), emailUtil.getReleaseGradeReplacements(assignment, siteId), NotificationService.NOTI_REQUIRED);
             }
         }
     }

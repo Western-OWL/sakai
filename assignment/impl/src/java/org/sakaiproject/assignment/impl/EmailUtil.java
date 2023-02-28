@@ -63,10 +63,19 @@ public class EmailUtil {
         Map<String, Object> map = new HashMap<>();
         try {
             Site site = siteService.getSite(siteId);
-            map.put("siteTitle", site.getTitle());
+
+            String assignmentUrl = getAssignmentUrl(a, Optional.of(site));
+            String siteTitle = site.getTitle();
+
+            String siteTitleLink = "<a href=\"" + assignmentUrl + "\">" + siteTitle + "</a>";
+            String assignmentUrlLink = "<a href=\"" + assignmentUrl + "\">" + assignmentUrl + "</a>";
+
+            map.put("siteTitle", siteTitle);
             map.put("siteUrl", site.getUrl());
             map.put("assignmentTitle", a.getTitle());
-            map.put("assignmentUrl", getAssignmentUrl(a));
+            map.put("assignmentUrl", assignmentUrl);
+            map.put("siteTitleLink", siteTitleLink);
+            map.put("assignmentUrlLink", assignmentUrlLink);
             map.put("bundle", resourceLoader);
         } catch (Exception e) {
             log.warn("Failed to get email replacements", e);
@@ -82,8 +91,11 @@ public class EmailUtil {
         String context = assignment.getContext();
         boolean isAnon = assignmentService.assignmentUsesAnonymousGrading(assignment);
 
+        Optional<Site> optSite = Optional.empty();
+
         try {
             Site site = siteService.getSite(context);
+            optSite = Optional.of(site);
             replacements.put("siteTitle", site.getTitle());
             replacements.put("siteUrl", site.getUrl());
         } catch (Exception e) {
@@ -93,7 +105,7 @@ public class EmailUtil {
         }
 
         replacements.put("assignmentTitle", assignment.getTitle());
-        replacements.put("assignmentUrl", getAssignmentUrl(assignment));
+        replacements.put("assignmentUrl", getAssignmentUrl(assignment, optSite));
         replacements.put("hideDueDate", assignment.getHideDueDate());
         if(!assignment.getHideDueDate()) {
             replacements.put("dueDate", assignmentService.getUsersLocalDateTimeString(assignment.getDueDate()));
@@ -173,15 +185,21 @@ public class EmailUtil {
         Assignment assignment = submission.getAssignment();
         String context = assignment.getContext();
 
+        String siteTitle;
+        String siteUrl;
+        Optional<Site> optSite = Optional.empty();
         try {
             Site site = siteService.getSite(context);
-            replacements.put("siteTitle", site.getTitle());
-            replacements.put("siteUrl", site.getUrl());
+            optSite = Optional.of(site);
+            siteTitle = site.getTitle();
+            siteUrl = site.getUrl();
         } catch (Exception e) {
             log.warn("Can't get site with id = {}, {}", context, e.getMessage());
-            replacements.put("siteTitle", resourceLoader.getFormattedMessage("cannotfin_site", context));
-            replacements.put("siteUrl", "");
+            siteTitle = resourceLoader.getFormattedMessage("cannotfin_site", context);
+            siteUrl = "";
         }
+        replacements.put("siteTitle", siteTitle);
+        replacements.put("siteUrl", siteUrl);
 
         //Get the actual person that submitted, for a group submission just get the first person from that group (This is why the array is used)
         String userId = null;
@@ -191,29 +209,25 @@ public class EmailUtil {
             }
         }
 
-        String linkToToolInSite = "<a href=\"" + getAssignmentUrl(assignment) + "\">" + replacements.get("siteTitle") + "</a>";
-        replacements.put("assignmentUrl", linkToToolInSite);
+        String assignmentUrl = getAssignmentUrl(assignment, optSite);
+        String siteTitleLink = "<a href=\"" + assignmentUrl + "\">" + siteTitle + "</a>";
+        String assignmentUrlLink = "<a href=\"" + assignmentUrl + "\">" + assignmentUrl + "</a>";
+
         replacements.put("assignmentTitle", assignment.getTitle());
+        replacements.put("assignmentUrl", assignmentUrl);
+        replacements.put("siteTitleLink", siteTitleLink);
+        replacements.put("assignmentUrlLink", assignmentUrlLink);
         replacements.put("canSubmit", assignmentService.canSubmit(assignment, userId));
         replacements.put("bundle", resourceLoader);
 
         return replacements;
     }
 
-    private String getAssignmentUrl(Assignment assignment) {
+    private String getAssignmentUrl(Assignment assignment, Optional<Site> site) {
 
-        String ref = AssignmentReferenceReckoner.reckoner()
-                        .id(assignment.getId())
-                        .context(assignment.getContext())
-                        .subtype("a")
-                        .reckon()
-                        .getReference();
-
-        Optional<String> url = entityManager.getUrl(ref, Entity.UrlType.PORTAL);
-
-        if (url.isPresent()) {
-            return url.get();
-        } else {
+        try{
+            return assignmentService.getDoViewAssignmentLink(assignment.getContext(), assignment.getId(), site);
+        } catch (Exception e) {
             log.warn("Failed to get url for assignment {}", assignment.getId());
             return "";
         }
