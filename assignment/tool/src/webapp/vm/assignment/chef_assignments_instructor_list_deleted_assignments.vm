@@ -68,7 +68,7 @@
 			</div>
 		#if ($!allowRecoverAssignment)
 			<p class="act">
-				<input type="submit" id="btnRestore" name="eventSubmit_doRestore_confirm_assignment" value="$tlang.getString("restoreSelected")" accesskey="s" disabled="disabled" />
+				<input type="submit" id="btnRestore" class="active" name="eventSubmit_doRestore_confirm_assignment" value="$tlang.getString("restoreSelected")" accesskey="s" disabled="disabled" />
 				<input type="submit" id="btnHardRemove" name="eventSubmit_doHardRemove_confirm_assignment" value="$tlang.getString("hardRemoveSelected")" accesskey="s" disabled="disabled" />
 			</p>
 		#end
