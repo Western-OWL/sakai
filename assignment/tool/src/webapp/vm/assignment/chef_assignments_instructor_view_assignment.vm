@@ -19,9 +19,11 @@
 			</ul
 		#end
 	#end
-	<h3>
-		$tlang.getString("viewassig.viewass1")
-	</h3>
+	<div class="page-header">
+		<h1>
+			$tlang.getString("viewassig.viewass1")
+		</h1>
+	</div>
 	#if ($alertMessage)<div class="sak-banner-error"><strong>$tlang.getString("gen.alert")</strong> $alertMessage</div>#end
 		#if ($allowAddAssignment && !$hideAssignmentFlag)
 		## show assignment content
@@ -214,14 +216,10 @@
 				</td>
 			</tr>
 		</table>
-		<h4>
-			$tlang.getString("gen.assinf")
-		</h4>
-		<div class="textPanel">					
-			#if ($assignment.Instructions)
-				$formattedText.escapeHtmlFormattedText($assignment.Instructions)
-			#end
-		</div>
+		#if ($assignment.Instructions && !$assignment.Instructions.isEmpty())
+			<h4>$tlang.getString("gen.assinf")</h4>
+			<div class="textPanel">$formattedText.escapeHtmlFormattedText($assignment.Instructions)</div>
+		#end
 
 		## Assignment attachments
 		#attachmentFragment($assignment.Attachments $attachmentReferences $decoratedUrlMap false)
@@ -248,7 +246,7 @@
 				$tlang.getString("gen.stuvieof") "$formattedText.escapeHtml($assignment.title)"
 				</a>
 			</p>
-			<div class="inopPanel">
+			<div class="borderPanel">
 				<table class ="itemSummary" cellspacing="0" cellpadding ="0" summary="$tlang.getString("gen.viewasstablesummary")">
 					<tr>
 						<th>
@@ -350,12 +348,10 @@
 						</tr>
 					#end
 				</table>
-				<h4>
-					$tlang.getString("gen.assinf")
-				</h4>	
-				#if ($!assignment.Instructions)
-					<div class="textPanel">$formattedText.escapeHtmlFormattedText($!assignment.Instructions)</div>
-				#end
+			#if ($assignment.Instructions && !$assignment.Instructions.isEmpty())
+				<h4>$tlang.getString("gen.assinf")</h4>
+				<div class="textPanel">$formattedText.escapeHtmlFormattedText($!assignment.Instructions)</div>
+			#end
 
 				## Student Assignment attachments
 				#attachmentFragment($assignment.Attachments $attachmentReferences $decoratedUrlMap)

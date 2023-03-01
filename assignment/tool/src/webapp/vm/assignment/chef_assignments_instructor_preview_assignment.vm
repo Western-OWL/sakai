@@ -1,9 +1,9 @@
 <!-- start: chef_assignments_instructor_preview_assignment.vm  -->
 <div class="portletBody">
 	#navBarHREF( $allowAddAssignment $withGrade $allowGradeSubmission $allowAddAssignment $allowRecoverAssignment $allowAllGroups $assignmentscheck $allowUpdateSite $enableViewOption $view "" )
-	<h3>
-		$tlang.getString("prevassig.preass")
-	</h3>
+	<div class="page-header">
+		<h1>$tlang.getString("prevassig.preass")</h1>
+	</div>
 	
 		#if ($alertMessage)<div class="sak-banner-error"><strong>$tlang.getString("gen.alert")</strong> $alertMessage</div>#end
 		<form id="previewAssignmentsForm" name="previewAssignmentsForm" action="#toolForm("AssignmentAction")" method="post" onsubmit="return true;">

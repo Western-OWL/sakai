@@ -7,16 +7,14 @@
         </div>
         <div class="clear"></div>
     #else
-        <h3>
-            $tlang.getString('assignment.title')
-            $formattedText.escapeHtml($!assignment.Title)
-            #assignmentIcons($assignment)
-        </h3>
+        <div class="page-header">
+            <h1>$formattedText.escapeHtml($!assignment.Title) #assignmentIcons($assignment)</h1>
+        </div>
 
         #progressBar($statusMap)
 
         <div class="jumbotron" id="honor-pledge-agreement">
-            <h4>$tlang.getString("gen.hpa.title")</h4>
+            <h2>$tlang.getString("gen.hpa.title")</h2>
             <p>$!honorPledgeText</p>
         </div>
     #end

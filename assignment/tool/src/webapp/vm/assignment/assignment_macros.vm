@@ -355,7 +355,7 @@
 ## macro for rendering attachment ui
 #macro( attachmentFragment $attachmentsSet $attachmentReferencesMap $decoratedUrlMap $forSubmission )
     #if (!$forSubmission)
-        <h4>$tlang.getString("gen.addres2")</h4>
+        <h3>$tlang.getString("gen.addres2")</h3>
     #end
     #if ($attachmentsSet)
         #set ($size = $attachmentsSet.size())
@@ -369,13 +369,13 @@
             </p>
         #else
             #if ($forSubmission)
-                <h4>
+                <h3>
                     #if ($submissionType == 5)
         				$tlang.getString("gen.att.single")
 			        #else
                         $tlang.getString("gen.att")
                     #end
-                </h4>
+                </h3>
             #end
             <ul class="attachList">
                 #foreach ($attachmentReference in $attachmentsSet)

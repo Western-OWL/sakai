@@ -56,12 +56,9 @@
                 </td>
             </tr>
         </table>
-        <h4>
-            $tlang.getString("gen.instr")
-        </h4>
         #if ($assignment.Instructions && !$assignment.Instructions.isEmpty())
+            <h4>$tlang.getString("gen.instr")</h4>
             <div class="textPanel">$formattedText.escapeHtmlFormattedText($assignment.Instructions)</div>
-        #else
         #end
 
         ## Assignment Attachments
