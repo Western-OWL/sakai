@@ -2916,8 +2916,8 @@ public class FilePickerAction extends PagedResourceHelperAction
 		}
 		else if (url.indexOf ("://") == -1)
 		{
-			// if it's missing the transport, add http://
-			url = "http://" + url;
+			// if it's missing the transport, add https://
+			url = "https://" + url;
 		}
 
 		if(!url.equals(NULL_STRING))
@@ -2939,9 +2939,9 @@ public class FilePickerAction extends PagedResourceHelperAction
 					if(matcher.matches())
 					{
 						// if URL has "unknown" protocol, check remaider with
-						// "http" protocol and accept input if that validates.
+						// "https" protocol and accept input if that validates.
 						@SuppressWarnings("unused")
-						URL test = new URL("http://" + matcher.group(2));
+						URL test = new URL("https://" + matcher.group(2));
 					}
 					else
 					{

@@ -70,7 +70,7 @@
 							#else
 								#set( $toolbaritemCount=$toolbaritemCount + 1)
 								<li #if ($toolbaritemCount ==1) class="firstToolBarItem" #end>
-									<span class="externalLink $prevItemWasField $current">#if(!$item.IsCurrent)<a href="$item.Url" title="$item.AccessibilityLabel" target="_blank">#end$item.Title#if(!$item.IsCurrent)</a>#end</span>
+									<span class="externalLink $prevItemWasField $current">#if(!$item.IsCurrent)<a href="$item.Url" title="$item.AccessibilityLabel" target="_blank" rel="noreferrer">#end$item.Title#if(!$item.IsCurrent)</a>#end</span>
 								</li>	
 							#end
 							#set ($formItem=0)

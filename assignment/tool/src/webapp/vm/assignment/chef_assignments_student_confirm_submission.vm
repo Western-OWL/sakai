@@ -206,7 +206,7 @@
 					#else
 						<input id="$name_plagiarism_eula_agreement" type="checkbox" name="$name_plagiarism_eula_agreement" value="true"/>
 					#end
-					$tlang.getString("review.eula.agreement")&nbsp;<a href="$plagiarismEULALink" target="_blank">$tlang.getString("review.eula")</a>
+					$tlang.getString("review.eula.agreement")&nbsp;<a href="$plagiarismEULALink" target="_blank" rel="noreferrer">$tlang.getString("review.eula")</a>
 				</label>
 			</p>
 			<input type="hidden" name="$name_check_plagiarism_eula_agreement" aria-label="$name_check_plagiarism_eula_agreement" id="$name_check_plagiarism_eula_agreement" value="true" checked="checked"/>
