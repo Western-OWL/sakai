@@ -119,6 +119,9 @@
                     <div class="col-md-10 col-sm-12">
                         <div class="itemSummaryValue">
                             $!service.getUsersLocalDateTimeString($!submission.DateSubmitted)
+                            #if ($!submission.DateSubmitted && $submission.DateSubmitted.isAfter($assignment.DueDate))
+                                <span class="highlight">$tlang.getString("gen.late2")</span>
+                            #end
                         </div>
                     </div>
                 </div>
