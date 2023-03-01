@@ -32,7 +32,7 @@ ASN_SVS.undoCancel = function()
 {
 	var submitPanel = document.getElementById("submitPanel");
 	var confirmationDialogue = document.getElementById("confirmationDialogue");
-	submitPanel.style.display = "block";
+	submitPanel.style.display = "flex";
 	confirmationDialogue.style.display = "none";
 };
 

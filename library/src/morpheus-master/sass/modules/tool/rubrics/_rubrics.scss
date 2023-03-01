@@ -236,7 +236,7 @@
 
     sakai-rubric-criterion-preview {
         display: block;
-        padding-bottom: 20px;
+        padding-bottom: 15px;
     }
 
     .container {
@@ -246,12 +246,12 @@
 
         > a {
             text-decoration: none;
-            padding: 1px 7px 6px;
+            padding: 10px 14px;
             font-weight: bold;
-            font-size: 18px;
+            font-size: 24px;
             background: $rubrics-empty-bg;
             border: $rubrics-lightbox-border-size solid $rubrics-lightbox-border-color;
-            border-radius: 30px;
+            border-radius: 6px;
             display: block;
             line-height: 1;
             position: absolute;

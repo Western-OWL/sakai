@@ -44,21 +44,25 @@
             </ul>
         #end
     #end
-    <h3>$formattedText.escapeHtml($assignment.Title)
-        #if ($!assignment.IsGroup)
-            <span> - $tlang.getString("gen.groupassignment") </span>
-        #end
-        #if ($submission)
-            #set($submissionId = $submission.Id)
-        #end
-        <span class="highlight"> - $!service.getSubmissionStatus($!submissionId, true)</span>
-    </h3>
+    <div class="page-header">
+        <h1>$formattedText.escapeHtml($assignment.Title)
+            #if ($!assignment.IsGroup)
+                <span> - $tlang.getString("gen.groupassignment") </span>
+            #end
+            #if ($submission)
+                #set($submissionId = $submission.Id)
+            #end
+            <span class="highlight"> - $!service.getSubmissionStatus($!submissionId, true)</span>
+        </h1>
+    </div>
     #if (!$!nonElectronicType)
         #progressBar($!service.getProgressBarStatus($!submission))
     #end
     #if ($alertMessage)
         <div class="sak-banner-error"><strong>$tlang.getString("gen.alert")</strong> $alertMessage</div>
     #end
+
+    <h2>$tlang.getString("gen.assdet")</h2>
 
     #set($submitTime=false)
     #set($submitTime=$submission.DateSubmitted)
@@ -218,16 +222,15 @@
 ##        <div id="report" style='display:none'>$submission.getReviewReport()</div>
 ##    #end
 
-    <h4>
-        $tlang.getString("gen.instr")
-    </h4>
-
-    #if ($assignment.Instructions && $!assignment.Instructions.length() > 0)
-        <div class="textPanel borderPanel">$formattedText.escapeHtmlFormattedText($!assignment.Instructions)</div>
+    #if ($assignment.Instructions && !$assignment.Instructions.isEmpty())
+        <h3>$tlang.getString("gen.instr")</h3>
+        <div class="textPanel">$formattedText.escapeHtmlFormattedText($!assignment.Instructions)</div>
     #end
 
     ## Assignment Attachments
-    #attachmentFragment($assignment.Attachments $assignmentAttachmentReferences $decoratedUrlMap false)
+    #if ($assignment.Attachments.size() > 0)
+        #attachmentFragment($assignment.Attachments $assignmentAttachmentReferences $decoratedUrlMap false)
+    #end
 
     #supplementItems($!allowViewModelAnswer $!allowReadAssignmentNoteItem $!allowViewAllPurposeItem $!assignmentModelAnswerItem $!assignmentNoteItem $!assignmentAllPurposeItem)
  
@@ -244,19 +247,19 @@
         #if (($submission.Graded && $submission.GradeReleased) || $submission.Returned)
             ## show feedback text when submission is released or returned
             #if ($!submission.FeedbackText && ($submission.FeedbackText.length() > 0))
-                <h5>$tlang.getString("gen.orisub2")</h5>
+                <h2>$tlang.getString("gen.orisub2")</h2>
                 <div class="textPanel borderPanel">$cheffeedbackhelper.escapeAssignmentFeedback($submission.FeedbackText)</div>
             #else
                 #set ($text = $submission.SubmittedText)
                 #if ($!text && $text.length() > 0)
-                    <h4>$tlang.getString("gen.orisub")</h4>
+                    <h2>$tlang.getString("gen.orisub")</h2>
                     <div class="textPanel borderPanel">$submission.SubmittedText</div>
                 #end
             #end
         #else
             #set ($text = $submission.SubmittedText)
             #if ($!text && $text.length() > 0)
-                <h4>$tlang.getString("gen.orisub")</h4>
+                <h2>$tlang.getString("gen.orisub")</h2>
                 <div class="textPanel borderPanel">$submission.SubmittedText</div>
             #end
         #end
@@ -279,14 +282,14 @@
             #if ($size < 1)
                 $tlang.getString("gen.noattsubmitted")
             #else
-                <h4>
+                <h2>
                     #if ($assignment.TypeOfSubmission.ordinal() == 5)
                         $tlang.getString("gen.stuatt.single")
                     #else
                         $tlang.getString("gen.stuatt")
                     #end
-                </h4>
-                <div class="textPanel borderPanel">
+                </h2>
+                <div class="textPanel">
                     <ul class="attachList indnt1">
                         #foreach ($attachmentReference in $attachments)
                             #set ($reference = false)
@@ -331,8 +334,8 @@
     #if (($submission.Graded && $submission.GradeReleased) || $submission.Returned)
     ## show feedback comment and feedback comment when submission is released or returned
         #if (($!submission.FeedbackComment) && ($submission.FeedbackComment.length() > 0))
-            <h5>$tlang.getString("gen.addinst")</h5>
-            <div class="textPanel borderPanel">$formattedText.escapeHtmlFormattedText($submission.FeedbackComment)</div>
+            <h3>$tlang.getString("gen.addinst")</h3>
+            <div class="textPanel">$formattedText.escapeHtmlFormattedText($submission.FeedbackComment)</div>
         #end
 
         #if ($!prevFeedbackComment)
@@ -352,13 +355,13 @@
             <h3>$tlang.getString("gen.peerReviews")</h3>
             <div id="accordion">
                 #foreach($review in $peerReviews)
-                    <h5>$review.assessorDisplayName</h5>
+                    <h4>$review.assessorDisplayName</h4>
                     <div>
                         $tlang.getFormattedMessage("gen.score.display", $review.getScoreDisplay())
                         <br/>
                         #if($!review.getComment() && $review.getComment().length()>0)
                             <b>$tlang.getString("gen.comments")</b>
-                            <div class="textPanel borderPanel">$formattedText.escapeHtmlFormattedText($review.getComment())</div>
+                            <div class="textPanel">$formattedText.escapeHtmlFormattedText($review.getComment())</div>
                         #end
                         #if ($review.getAttachmentRefList())
                             <ul class="attachList">

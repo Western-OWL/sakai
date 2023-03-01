@@ -2,9 +2,9 @@
 #set ($submissionType = $assignment.TypeOfSubmission)
 #set($allowUpdateAssignment=$!service.allowUpdateAssignment($assignmentReference))
 <div class="portletBody">
-		<h3>
-		$tlang.getString("viewassig.viewass1") 	
-	</h3>
+	<div class="page-header">
+		<h1>$tlang.getString("viewassig.viewass1")</h1>
+	</div>
 	#if ($alertMessage)<div class="sak-banner-error"><strong>$tlang.getString("gen.alert")</strong> $alertMessage</div>#end
 		#if (!$hideAssignmentFlag)
 		<p class="discTria">
@@ -143,14 +143,10 @@
 				</td>
 			</tr>
 		</table>
-		<h4>
-			$tlang.getString("gen.assinf")
-		</h4>
-		<p>					
-			#if ($assignment.Instructions.length()>0)
-				$formattedText.escapeHtmlFormattedText($assignment.Instructions)
-			#end
-		</p>
+	#if ($assignment.Instructions && !$assignment.Instructions.isEmpty())
+		<h4>$tlang.getString("gen.assinf")</h4>
+		<p>$formattedText.escapeHtmlFormattedText($assignment.Instructions)</p>
+	#end
 		## assignment attachment
 		#attachmentFragment($assignment.Attachments $assignmentAttachmentReferences $!decoratedUrlMap false)
 

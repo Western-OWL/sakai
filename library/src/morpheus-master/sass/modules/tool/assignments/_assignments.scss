@@ -159,8 +159,8 @@
 
 			legend {
 				padding: 0 $standard-space;
-				background: #fff;
-				color: #444444;
+				background: var(--sakai-background-color-1);
+				color: var(--sakai-text-color-1);
 				font-size: 1.1em;
 				font-weight: normal;
 			}
@@ -207,6 +207,9 @@
 			font-size: 0.9em;
 			line-height: 1;
 			padding: 0.5em 0 0.5em 2.5em;
+		}
+		&.assignmentsList th {
+			background-color: var(--sakai-background-color-4);
 		}
 	}
 
@@ -683,9 +686,10 @@
 	}
 
 	#honor-pledge-agreement {
-		h4 {
+		h2 {
 			font-size: $jumbotron-heading-font-size;
 			margin: 0 0 0.5em 0;
+			padding: 0;
 		}
 		margin-bottom: 0;
 	}
@@ -707,6 +711,10 @@
 		.active {
 			background-color: var(--progress-bar-bg);
 		}
+	}
+
+	.itemSummary.container-fluid .itemSummaryHeader {
+		white-space: normal;
 	}
 
 	.student-picture {

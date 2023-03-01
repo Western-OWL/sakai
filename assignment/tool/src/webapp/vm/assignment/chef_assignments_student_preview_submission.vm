@@ -1,8 +1,8 @@
 <!-- start: chef_assignments_student_preview_submission.vm -->
 <div class="portletBody">
-    <h3>
-        $tlang.getString("gen.assig")<span class="highlight"> - $tlang.getString("gen.pre")</span>
-    </h3>
+    <div class="page-header">
+        <h1>$tlang.getString("gen.subm")<span class="highlight"> - $tlang.getString("gen.pre")</span></h3>
+    </div>
 
     #progressBar($!service.getProgressBarStatus($!submission))
 
