@@ -1211,6 +1211,9 @@ public class AssignmentEntityProvider extends AbstractEntityProvider implements 
 
     @EntityCustomAction(action = "itemSubmission", viewKey = EntityView.VIEW_LIST)
     public List<SimpleSubmission> getSubmission(EntityView view, Map<String, Object> params) {
+
+		checkTimeSheet();
+
         String userId = sessionManager.getCurrentSessionUserId();
 
         if (StringUtils.isBlank(userId)) {
