@@ -568,7 +568,7 @@ $(document).ready(function(){
 										#else
 											<input id="$name_plagiarism_eula_agreement" type="checkbox" name="$name_plagiarism_eula_agreement" value="true"/>
 										#end
-										$tlang.getString("review.eula.agreement")&nbsp;<a href="$plagiarismEULALink" target="_blank">$tlang.getString("review.eula")</a>
+										$tlang.getString("review.eula.agreement")&nbsp;<a href="$plagiarismEULALink" target="_blank" rel="noreferrer">$tlang.getString("review.eula")</a>
 									</label>
 								</p>
 								<input type="hidden" name="$name_check_plagiarism_eula_agreement" id="$name_check_plagiarism_eula_agreement" value="true" checked="checked"/>
@@ -742,7 +742,7 @@ $(document).ready(function(){
 											#else
 												<img src = "#imageLink($contentTypeImageService.getContentTypeImage($props.getProperty($props.NamePropContentType)))" border="0" alt="$tlang.getString("gen.filatt")" />
 											#end
-											<a href="$attachment.Url" target="_blank">$formattedText.escapeHtml($props.getPropertyFormatted($props.NamePropDisplayName))</a>						
+											<a href="$attachment.Url" target="_blank" rel="noreferrer">$formattedText.escapeHtml($props.getPropertyFormatted($props.NamePropDisplayName))</a>
 										</td>
 										<td>
 											#propertyDetails($props)
@@ -885,7 +885,7 @@ $(document).ready(function(){
 											#else
 												<img src = "#imageLink($contentTYpeImageService.getContentTypeImage($props.getProperty($props.NamePropContentType)))" border="0" alt="$tlang.getString("gen.filatt")" />
 											#end
-											<a href="$attachment.Url" target="_blank">$formattedText.escapeHtml($props.getPropertyFormatted($props.NamePropDisplayName))</a>
+											<a href="$attachment.Url" target="_blank" rel="noreferrer">$formattedText.escapeHtml($props.getPropertyFormatted($props.NamePropDisplayName))</a>
 										</td>
 										<td>
 											#propertyDetails($props)
@@ -951,7 +951,7 @@ $(document).ready(function(){
 											#else
 												<img src = "#imageLink($contentTypeImageService.getContentTypeImage($props.getProperty($props.NamePropContentType)))" border="0" alt="$tlang.getString("gen.filatt")" />
 											#end
-											<a href="$attachment.Url" target="_blank">$formattedText.escapeHtml($props.getPropertyFormatted($props.NamePropDisplayName))</a>						
+											<a href="$attachment.Url" target="_blank" rel="noreferrer">$formattedText.escapeHtml($props.getPropertyFormatted($props.NamePropDisplayName))</a>
 											#propertyDetails($props)
 										</li>
 									#end
@@ -1069,7 +1069,7 @@ $(document).ready(function(){
 									#else
 										<img src = "#imageLink($contentTypeImageService.getContentTypeImage($props.getProperty($props.NamePropContentType)))" border="0" alt="$tlang.getString("gen.filatt")" />
 									#end
-									<a href="$attachment.Url" target="_blank">$formattedText.escapeHtml($props.getPropertyFormatted($props.NamePropDisplayName))</a>						
+									<a href="$attachment.Url" target="_blank" rel="noreferrer">$formattedText.escapeHtml($props.getPropertyFormatted($props.NamePropDisplayName))</a>
 									#propertyDetails($props)
 								</li>
 							#end

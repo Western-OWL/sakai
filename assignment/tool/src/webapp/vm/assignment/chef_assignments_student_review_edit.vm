@@ -144,7 +144,7 @@
 												#else
 													<img src = "#imageLink($contentTypeImageService.getContentTypeImage($props.getProperty($props.NamePropContentType)))" border="0" alt="$tlang.getString("gen.filatt")" />
 												#end
-												<a href="$reference.Url" target="_blank">$formattedText.escapeHtml($props.getPropertyFormatted($props.NamePropDisplayName))</a>
+												<a href="$reference.Url" target="_blank" rel="noreferrer">$formattedText.escapeHtml($props.getPropertyFormatted($props.NamePropDisplayName))</a>
 												#propertyDetails($props)
 											</li>
 										#end
@@ -238,7 +238,7 @@
 										#else
                                             <img src = "#imageLink($contentTypeImageService.getContentTypeImage($props.getProperty($props.NamePropContentType)))" border="0" alt="$tlang.getString("gen.filatt")" />
 										#end
-                                        <a href="$attachment.Url" target="_blank">$formattedText.escapeHtml($props.getPropertyFormatted($props.NamePropDisplayName))</a>
+                                        <a href="$attachment.Url" target="_blank" rel="noreferrer">$formattedText.escapeHtml($props.getPropertyFormatted($props.NamePropDisplayName))</a>
                                     </td>
                                     <td>
 										#propertyDetails($props)
@@ -302,9 +302,9 @@
                                     <img src = "#imageLink($contentTypeImageService.getContentTypeImage($props.getProperty($props.NamePropContentType)))" border="0" alt="$tlang.getString("gen.filatt")" />
 								#end
 								#if ($decoratedUrlMap)
-                                    <a href="$decoratedUrlMap.get($attachment.Url)" target="_blank">$formattedText.escapeHtml($props.getPropertyFormatted($props.NamePropDisplayName))</a>
+                                    <a href="$decoratedUrlMap.get($attachment.Url)" target="_blank" rel="noreferrer">$formattedText.escapeHtml($props.getPropertyFormatted($props.NamePropDisplayName))</a>
 								#else
-                                    <a href="$attachment.Url" target="_blank">$formattedText.escapeHtml($props.getPropertyFormatted($props.NamePropDisplayName))</a>
+                                    <a href="$attachment.Url" target="_blank" rel="noreferrer">$formattedText.escapeHtml($props.getPropertyFormatted($props.NamePropDisplayName))</a>
 								#end
 								#propertyDetails($props)
                             </li>
