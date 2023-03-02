@@ -18,7 +18,7 @@
                 <div class="xloginMessage">${xloginChoice}&nbsp;<a href="${loginContainerUrl}">${containerText}</a></div>
             #end
             #if (${notify})
-        		<div class="alertMessage" role="alert">${notify}</div>
+                <div class="sak-banner-error" role="alert">${notify}</div>
         	#end
     		<fieldset>	
     			<label for="eid">${loginEidWording}</label>
@@ -28,12 +28,12 @@
     			#if (${loginAdvice})
     				<aside>${loginAdvice}</aside>
     			#end
-    			<p class="buttons">
+    			<p class="buttons act">
     			#if (${doCancel})
-    				<input name="submit" type="submit" id="submit" class="loginsubmit" value="${loginWording}"/>
+    				<input name="submit" type="submit" id="submit" class="loginsubmit active" value="${loginWording}"/>
     				<input name="cancel" type="submit" class="loginsubmit" value="${cancelWording}"/>
     			#else
-    				<input name="submit" type="submit" id="submit" value="${loginWording}"/>
+    				<input name="submit" type="submit" id="submit" class="active" value="${loginWording}"/>
     			#end
     			</p>
     			#if (${passwordResetUrl})
