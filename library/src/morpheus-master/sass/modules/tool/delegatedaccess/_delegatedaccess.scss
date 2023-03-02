@@ -23,9 +23,7 @@
 	}
 		
 	.inputForm{
-		-webkit-border-radius: 5px;
-		-moz-border-radius: 5px;
-		border-radius: 5px;
+		@include border-radius(5px);
 		background: none repeat scroll 0 0 var(--sakai-background-color-2);
 		padding: 0.3em;
 	}

@@ -16,7 +16,7 @@ $gray-base:              #000;
 // $gray-light:             lighten($gray-base, 46.7%) // #777
 $gray-lighter:           lighten($gray-base, 93.5%); // #eee
 
-// $brand-primary:         darken(#428bca, 6.5%) // #337ab7
+ $brand-primary:         #4f2683; // originally: darken(#428bca, 6.5%) // #337ab7
 // $brand-success:         #5cb85c
 // $brand-info:            #5bc0de
 // $brand-warning:         #f0ad4e
@@ -474,21 +474,21 @@ $nav-tabs-active-link-hover-border-color:   var(--tool-tab-background-color);
 //
 //##
 
-// $pagination-color:                     var(--link-color)
-// $pagination-bg:                        #fff
-// $pagination-border:                    #ddd
+$pagination-color:                     var(--link-color);
+$pagination-bg:                        var(--button-background);
+$pagination-border:                    var(--button-border-color);
 
-// $pagination-hover-color:               var(--link-hover-color)
-// $pagination-hover-bg:                  $gray-lighter
-// $pagination-hover-border:              #ddd
+$pagination-hover-color:               var(--button-hover-text-color);
+$pagination-hover-bg:                  var(--button-hover-background);
+$pagination-hover-border:              var(--button-hover-border-color);
 
-// $pagination-active-color:              #fff
-// $pagination-active-bg:                 $brand-primary
-// $pagination-active-border:             $brand-primary
+$pagination-active-color:              var(--button-active-text-color);
+$pagination-active-bg:                 var(--button-active-background);
+$pagination-active-border:             var(--button-active-border-color);
 
-// $pagination-disabled-color:            $gray-light
-// $pagination-disabled-bg:               #fff
-// $pagination-disabled-border:           #ddd
+$pagination-disabled-color:            var(--button-disabled-text-color);
+$pagination-disabled-bg:               var(--button-disabled-background);
+$pagination-disabled-border:           var(--button-disabled-border-color);
 
 
 //== Pager

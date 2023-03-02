@@ -59,7 +59,7 @@ table.listHier.checkGrid th {
 .checkGrid tr.evenrow td {
   background: var(--sakai-background-color-1);
 }
-.checkGrid td.active {
+.checkGrid tr td.active {
   background: var(--sakai-active-color-1);
 }
 .checkGrid .rowHover,
@@ -70,9 +70,14 @@ table.listHier.checkGrid th {
 .checkGrid tr.evenrow td:hover,
 .checkGrid tr.evenrow td.rowHover {
   background: var(--sakai-active-color-2);
+
+  a {
+      color: var(--sakai-text-color-inverted);
+  }
 }
+.checkGrid td.permissionDescription:hover a,
 .checkGrid td.permissionDescription a:hover {
-  color: var(--sakai-text-color-2);
+  color: var(--sakai-text-color-inverted);
 }
 div#groupSelector {
   margin-top: 0.5em;

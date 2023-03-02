@@ -44,7 +44,7 @@
     // Here, we reduce the opacity of the default logo to make 
     // it fit in better with dark theme.
     // Suggested: decimal .7 and .9
-    --logo-opacity: .7;
+    // --logo-opacity: .7;
 
     // Primary branding color. 
     // Suggested: Your institution's main branding color.
@@ -110,7 +110,7 @@
     // Suggested: An alterate branding color distinct from
     // what you select for --sakai-primary-color-1
     // Used in new user tutorial, user profile image border
-    --sakai-secondary-color-1: var(--sakai-color-blue--lighter-2);
+    --sakai-secondary-color-1: var(--sakai-color-orange);
 
     // Tertiary branding color. 
     // Suggested: A third branding color distinct from
@@ -133,7 +133,7 @@
 
     // Default: A much lighter shade of --sakai-primary-color-1
     // Used as text color of active site in favorites, active tool in toolmenu
-    --sakai-text-color-3: var(--sakai-brand--lighter-6);
+    --sakai-text-color-3: var(--sakai-color-gray--lighter-6);
 
     // Default: A slightly lighter shade of --sakai-text-color-1
     // Used to reduce attention of text
@@ -160,6 +160,16 @@
     --link-active-color: var(--sakai-text-color-2);
     --link-hover-color: var(--sakai-text-color-2);
     --link-visited-color: var(--sakai-color-purple--lighter-2);
+
+    --tool-menu-item-selected-text-color: var(--sakai-text-color-3);
+    --sites-nav-menu-item-selected-color: var(--sakai-text-color-3);
+
+    // Default (non-primary) button design:
+    --button-text-color: var(--sakai-text-color-2);
+    --button-background: var(--sakai-passive-color-1);
+
+    --radio-button-background: radial-gradient(circle at center, var(--button-primary-background) 0%, var(--button-primary-background) 40%, var(--sakai-text-color-1) 50%, var(--sakai-text-color-1) 55%, var(--button-primary-background) 60%, var(--button-primary-background) 100%);
+
     // Information (info) banner
     --infoBanner-bordercolor: var(--sakai-color-blue--darker-4);
     --infoBanner-bgcolor: var(--sakai-color-blue--darker-6);
@@ -182,7 +192,6 @@
     --timer-bar-medium-bg: var(--sakai-color-orange--darker-1);
 
     --progress-bar-bg: var(--sakai-color-blue--darker-5);
-    --footer-PoweredBy-bg: var(--sakai-color-gray--darker-1);
     --sakai-hightlight-color: var(--sakai-color-red--lighter-6)
 
     // Dashboard

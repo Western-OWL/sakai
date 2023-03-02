@@ -104,6 +104,10 @@ input, textarea{
 	font-family: $font-family;
 	font-size: 	 $default-font-size;
 	max-width: 100%;
+
+	&:focus-visible {
+		outline: $focus-outline-width $focus-outline-style var(--focus-outline-color);
+	}
 }
 
 input[type="text"], input[type="search"], textarea {
@@ -168,7 +172,7 @@ input[type="checkbox"], input[type="radio"]{
 	vertical-align: sub;
 	margin: 2px 0 0 0;
 	@include appearance(none);
-	&:focus
+	&:focus, &:focus-visible
 	{
 		box-shadow: 0px 0px $focus-outline-width $focus-outline-width var(--focus-outline-color);
 		outline: 0 none; // to override Bootstrap
@@ -204,7 +208,7 @@ input[type="radio"]{
 	@include border-radius(24px);
 	&:checked{
 		background: var(--button-primary-background); // fallback support
-		background: radial-gradient(circle at center, var(--button-primary-background) 0%, var(--button-primary-background) 48%, var(--sakai-background-color-1) 58%);
+		background: var(--radio-button-background);
 	}
 }
 

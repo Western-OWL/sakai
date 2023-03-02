@@ -351,6 +351,10 @@
 
 	div.dataTables_paginate.paging_simple_numbers {
 		display: flex;
+
+		a {
+			text-decoration: none;
+		}
 	}
 
 	.samigo-dataTable-footer {

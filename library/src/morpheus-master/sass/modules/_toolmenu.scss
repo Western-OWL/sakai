@@ -1064,6 +1064,9 @@ body {
 		}
 
 		&:hover, &:active {
+			background-color: var(--tool-menu-item-background-color);
+			box-shadow: none;
+
 			span {
 				display: flex;
 				align-items: center;

@@ -886,7 +886,9 @@ blockquote p {
 	border-color: transparent;
 }
 .ui-datepicker .ui-datepicker-calendar .ui-state-default.ui-state-hover {
-	background: var(--sakai-active-color-1);
+	background: var(--button-hover-background);
+	border-color: var(--button-hover-border-color);
+	color: var(--button-hover-text-color);
 }
 
 .ui-datepicker .ui-datepicker-calendar .ui-state-default.ui-state-highlight {
@@ -894,11 +896,13 @@ blockquote p {
 	background: var(--sakai-color-gold--lighter-7);
 }
 .ui-datepicker .ui-datepicker-calendar .ui-state-default.ui-state-active {
-	background: var(--sakai-active-color-3);
+	background: var(--button-active-background);
+	border-color: var(--button-active-border-color);
+	color: var(--button-active-text-color);
 }
 .ui-datepicker .ui-datepicker-calendar .ui-state-default.ui-state-active.ui-state-highlight {
-	background: var(--sakai-active-color-3);
-	color: var(--sakai-text-color-3);
+	background: var(--button-primary-background);
+	color: var(--sakai-text-color-inverted);
 }
 .ui-datepicker .ui-datepicker-calendar .ui-state-disabled.ui-datepicker-unselectable {
 	background: var(--sakai-background-color-1);

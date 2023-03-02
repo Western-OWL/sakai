@@ -9,3 +9,8 @@
 		}
 	}
 }
+.pasystem-banner-alert-toggle-list-item {
+	margin-right: $top-header-item-spacing;
+	padding-right: $top-header-item-spacing;
+	border-right: $top-header-separators-thickness solid var(--topNav-border-color);
+}

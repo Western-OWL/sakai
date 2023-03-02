@@ -315,7 +315,7 @@ body.is-logged-out{
 			align-self: stretch;
 			margin: 0 1em 0 0;
 			padding: 0.25em;
-			border-radius: 0;
+			@include border-radius(3px);
 
 			@media #{$phone}{
 				width: 40%;
@@ -324,10 +324,8 @@ body.is-logged-out{
 			}
 		}
 		#submit{
-			margin: 0;
-			padding: 0.4em 1em;
-			font-size: $default-font-size;
 			position: relative;
+			@include sakai_primary_button();
 
 			@media #{$phone}
 			{
@@ -500,10 +498,7 @@ body.is-logged-out{
 	#loginLinks{
 		font-family: $header-font-family;
 		list-style: none;
-		margin-left: $top-header-item-spacing;
 		padding: 0;
-		padding-left: $top-header-item-spacing;
-		border-left: $top-header-separators-thickness solid var(--topNav-border-color);
 		@include display-flex;
 		@include align-items(center);
 
@@ -625,12 +620,6 @@ body.is-logged-out{
 	}
 }
 
-/* because #loginLinks appears on the Gateway page when two log-in links are available (e.g. for CAS), the following applies only when you are logged in: */
-.is-maximized #loginLinks
-{
-	border-left: $top-header-separators-thickness solid var(--topNav-border-color);
-}
-
 .#{$namespace}sitesNav__menu{
 	list-style: none;
 	padding: 0 0 0 0;
@@ -671,9 +660,9 @@ body.is-logged-out{
 .view-all-sites-btn{
 	position: relative;
 	display: inline-block;
-	margin-left: $top-header-item-spacing;
-	padding-left: $top-header-item-spacing;
-	border-left: $top-header-separators-thickness solid var(--topNav-border-color);
+	margin-right: $top-header-item-spacing;
+	padding-right: $top-header-item-spacing;
+	border-right: $top-header-separators-thickness solid var(--topNav-border-color);
 
 	@media #{$phone}{
 		display: none;
@@ -682,7 +671,7 @@ body.is-logged-out{
 
 .view-all-sites-btn a{
 	text-decoration: none;
-	&:hover, &:active
+	&:hover, &:active, &:focus
 	{
 		text-decoration: none;
 		color: var(--topNav-text-color);
@@ -708,7 +697,6 @@ body.is-logged-out{
 }
 .all-sites-label {
 	display: $top-header-text-display;
-	margin-left: $standard-space;
 }
 .all-sites-icon
 {
@@ -847,7 +835,7 @@ body.is-logged-out{
 			
 			.#{$namespace}sitesNav__submenu {
 				position: absolute;
-				padding: $standard-spacing 0;
+				padding: $standard-spacing 0 0 0;
 				top: $sites-nav-submenu-top;
 				left: 0;
 				z-index: 99;
@@ -859,6 +847,8 @@ body.is-logged-out{
 				background: var(--sites-nav-menu-item-background);
 				box-shadow: 0 5px 5px -3px rgba(0,0,0,.6);
 				border-radius: 0 $sites-nav-menu-item-border-radius $sites-nav-menu-item-border-radius $sites-nav-menu-item-border-radius;
+				overflow: hidden;
+
 				.#{$namespace}sitesNav__submenuitem {
 					display: block;
 					// border: 0px none;

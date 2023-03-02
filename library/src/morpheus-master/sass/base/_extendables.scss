@@ -201,8 +201,8 @@ input::placeholder {
 		background-image: none;
 	}
 	
-	&:focus {
-		box-shadow: 0px 0px $focus-outline-width $focus-outline-width var(--focus-outline-color);
+	&:focus, &:focus-visible {
+		outline: $focus-outline-width $focus-outline-style var(--focus-outline-color);
 	}
 	
 	&[disabled="disabled"],&[disabled],&[disabled="true"] {
