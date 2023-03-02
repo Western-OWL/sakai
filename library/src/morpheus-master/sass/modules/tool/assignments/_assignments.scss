@@ -97,10 +97,6 @@
 			padding: 0;
 			border: $assignments-disclosure-border;
 			background-color: $assignments-disclosure-bg;
-
-			a {
-				color: var(--infoBanner-color);
-			}
 		}
 	}
 
@@ -221,7 +217,7 @@
 	  margin: $standard-spacing 0;
 	  font-size: 1em;
 	  font-weight: normal;
-	  color: $link-color;
+	  color: var(--link-color);
 
 	  &:hover {
 	    border: $assignments-disclosure-border-hover;
@@ -239,7 +235,8 @@
 	}
 
 	a.toggleAnchor {
-	  display: block;
+	  display: flex;
+	  align-items: center;
 	  text-decoration: none !important;
 	  > {
 	    h3, h4 {
