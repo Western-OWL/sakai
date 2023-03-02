@@ -28,6 +28,23 @@ ASN_INE.canEnableGroupAsnOption = function()
 	return groupsExist && isNewAsn;
 };
 
+ASN_INE.handleAssignToChange = function()
+{
+	ASN_INE.validateGroupSelection();
+	ASN_INE.handleAssignToChangeForPeerAssessment();
+
+	const groupAssignRadio = document.getElementById("groupAssignment");
+	const groupMembershipLockedMsg = document.getElementById("msgGroupMembershipLocked");
+	if (groupAssignRadio.checked)
+	{
+		ASN_INE.show(groupMembershipLockedMsg);
+	}
+	else
+	{
+		ASN_INE.hide(groupMembershipLockedMsg);
+	}
+};
+
 /**
  * Validates the state of the group selection, disabling the submit buttons if the Assign To
  * section indicates groups are in use but no groups have been selected
