@@ -402,7 +402,7 @@ public class AssignmentEntityProvider extends AbstractEntityProvider implements 
             throw new EntityNotFoundException("No access to site: " + siteId, siteId);
         }
 
-        assignmentService.getAssignmentsForContext(siteId).stream().map(SimpleAssignment::new).forEach(rv::add);
+        assignmentService.getAssignmentsForContext(siteId).stream().filter(a -> canViewAssignment(a)).map(this::sanitized).forEach(rv::add);
         return rv;
     }
 
@@ -422,7 +422,7 @@ public class AssignmentEntityProvider extends AbstractEntityProvider implements 
         // get all assignments from each site
         for (Site site : sites) {
             String siteId = site.getId();
-            assignmentService.getAssignmentsForContext(siteId).stream().map(SimpleAssignment::new).forEach(rv::add);
+            assignmentService.getAssignmentsForContext(siteId).stream().filter(a -> canViewAssignment(a)).map(this::sanitized).forEach(rv::add);
         }
 
         return rv;
@@ -446,7 +446,8 @@ public class AssignmentEntityProvider extends AbstractEntityProvider implements 
         } catch (PermissionException e) {
             throw new EntityNotFoundException("No access to assignment: " + assignmentId, assignmentId);
         }
-        return new SimpleAssignment(a, true);
+
+        return sanitized(a);
     }
 
     @EntityCustomAction(action = "addTimeSheet", viewKey = EntityView.VIEW_NEW)
@@ -1182,6 +1183,9 @@ public class AssignmentEntityProvider extends AbstractEntityProvider implements 
         AssignmentSubmission as = null;
         try {
             as = assignmentService.getSubmission(submissionId);
+			if (!canGrade(as.getAssignment())) {
+				throw new EntityException("Forbidden", "", HttpServletResponse.SC_FORBIDDEN);
+			}
             as.getFeedbackAttachments().remove(ref);
             assignmentService.updateSubmission(as);
         } catch (IdUnusedException iue) {
@@ -1496,6 +1500,118 @@ public class AssignmentEntityProvider extends AbstractEntityProvider implements 
         String reference = AssignmentReferenceReckoner.reckoner().assignment(assignment).reckon().getReference();
         return assignmentService.allowGradeSubmission(reference);
     }
+	
+	private boolean canAdd(Assignment assignment)
+	{
+		return assignmentService.allowAddAssignment(assignment.getContext());
+	}
+
+	private boolean canUpdate(Assignment assignment)
+	{
+		String reference = AssignmentReferenceReckoner.reckoner().assignment(assignment).reckon().getReference();
+		return assignmentService.allowUpdateAssignment(reference);
+	}
+
+	private boolean canViewAssignment(Assignment a) {
+        try {
+            assignmentService.getAssignment(a.getId());
+            return true;
+        } catch (IdUnusedException | PermissionException e) {
+            return false;
+        }
+    }
+
+	private SimpleAssignment sanitized(Assignment a)
+	{
+		SimpleAssignment sa = new SimpleAssignment(a);
+
+		boolean isStudent = !canGrade(a) && !canAdd(a) && !canUpdate(a);
+
+		// 1. hidden due date
+		if (Boolean.TRUE.equals(a.getHideDueDate()) && isStudent)
+		{
+			sa.setCloseTime(Instant.EPOCH);
+			sa.setCloseTimeString("");
+			sa.setDropDeadTime(Instant.EPOCH);
+			sa.setDropDeadTimeString("");
+			sa.setDueTime(Instant.EPOCH);
+			sa.setDueTimeString("");
+			sa.getSubmissions().stream().forEach(s -> s.setAssignmentCloseTime(Instant.EPOCH));
+		}
+
+		// 2. model answer
+		// we don't have a submission in this context so we have to replicate some of the service logic here
+		// to provide the model answer to students only if we are certain it is permitted
+		if (isStudent)
+		{
+			AssignmentModelAnswerItem m = assignmentSupplementItemService.getModelAnswer(a.getId());
+			Integer showTo = m == null ? null : m.getShowTo();
+			if (showTo == null || showTo == AssignmentConstants.MODEL_ANSWER_SHOW_TO_STUDENT_AFTER_SUBMIT
+					|| showTo == AssignmentConstants.MODEL_ANSWER_SHOW_TO_STUDENT_AFTER_GRADE_RETURN
+					|| (showTo == AssignmentConstants.MODEL_ANSWER_SHOW_TO_STUDENT_AFTER_ACCEPT_UTIL && a.getCloseDate().isAfter(Instant.now())))
+			{
+				sa.setModelAnswerText("");
+			}
+		}
+
+		// 3. private note
+		if (!assignmentSupplementItemService.canReadNoteItem(a, a.getContext()))
+		{
+			sa.setPrivateNoteText("");
+		}
+
+		// 4. all purpose item
+		if (!canUpdate(a) && !assignmentSupplementItemService.canViewAllPurposeItem(a))
+		{
+			sa.setAllPurposeItemText("");
+		}
+
+		// 5. gb integration
+		if (isStudent)
+		{
+			sa.setGradebookItemId(-1L);
+			sa.setGradebookItemName("");
+		}
+
+		// 6. asn author
+		if (isStudent)
+		{
+			sa.setAuthor("");
+			sa.setAuthorLastModified(""); // this contains an author uuid, not a date
+		}
+
+		// 7. groups
+		// remove released to groups
+		// sub group title for group id in submission
+		// remove user uuids for submitters
+		// remove grades from submitters that aren't the current user
+		if (isStudent)
+		{
+			sa.setGroups(Collections.emptyList());
+			String curUser = getCheckedCurrentUser();
+			for (SimpleSubmission s : sa.getSubmissions())
+			{
+				String groupId = StringUtils.trimToEmpty(s.getGroupId());
+				if (!groupId.isEmpty())
+				{
+					Group g = siteService.findGroup(groupId);
+					String groupTitle = g != null ? g.getTitle() : "";
+					s.setGroupId(groupTitle);
+				}
+				s.getSubmitters().stream().forEach(u ->
+				{
+					if (!curUser.equals(u.getId()))
+					{
+						u.setGrade("");
+						u.setOverridden(false);
+					}
+					u.setId("");
+				});
+			}
+		}
+
+		return sa;
+	}
 
     @Getter
     public class DecoratedAttachment implements Comparable<Object> {
@@ -1839,8 +1955,8 @@ public class AssignmentEntityProvider extends AbstractEntityProvider implements 
             Set<String> activeSubmitters = site.getUsersIsAllowed(SECURE_ADD_ASSIGNMENT_SUBMISSION);
 
             if (hydrate) {
+                this.submissions = new ArrayList<>();
                 if (canGrade(a) && a.getSubmissions().stream().findAny().isPresent()) {
-                    this.submissions = new ArrayList<>();
                     this.submissions = a.getSubmissions().stream().map(ss -> {
                         try {
                             return new SimpleSubmission(ss, this, activeSubmitters);
@@ -1859,7 +1975,6 @@ public class AssignmentEntityProvider extends AbstractEntityProvider implements 
 
                     if (as != null) {
                         try {
-                            this.submissions = new ArrayList<>();
                             this.submissions.add(new SimpleSubmission(as, this, activeSubmitters));
                         } catch (Exception e) {
                             log.error("Exception while creating SimpleSubmission", e);
@@ -1898,6 +2013,7 @@ public class AssignmentEntityProvider extends AbstractEntityProvider implements 
             } else {
                 this.displayName = ass.getSubmission().getId() + " " + rb.getString("grading.anonymous.title");
                 this.sortName = this.displayName;
+				this.id = "";
             }
         }
     }
