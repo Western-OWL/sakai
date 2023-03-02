@@ -31,7 +31,7 @@
     // predefined with gray, blue, teal, gold, green, orange,
     // purple, and red palettes available for you to use.
     // More info about defineColorHSL in sass/themes/_base.scss
-    @include defineColorHSL(--sakai-brand, 203, 76%, 25%);
+    @include defineColorHSL(--sakai-brand, 266, 55%, 33%);
     /////////////////////////////////////////////////////////////
 
     /////////////////////////////////////////////////////////////
@@ -42,11 +42,11 @@
     /////////////////////////////////////////////////////////////
 
     // Logo
-    --logo: url(#{$skin-path}images/logo-jewel.png);
-    --logo-height: 36px;
-    --logo-width: 126px;
+    --logo: url('data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+CjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAxNi4wLjMsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT4KPHN2ZyB4bWxuczpkYz0iaHR0cDovL3B1cmwub3JnL2RjL2VsZW1lbnRzLzEuMS8iIHhtbG5zOmNjPSJodHRwOi8vY3JlYXRpdmVjb21tb25zLm9yZy9ucyMiIHhtbG5zOnJkZj0iaHR0cDovL3d3dy53My5vcmcvMTk5OS8wMi8yMi1yZGYtc3ludGF4LW5zIyIgeG1sbnM6c3ZnPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczpzb2RpcG9kaT0iaHR0cDovL3NvZGlwb2RpLnNvdXJjZWZvcmdlLm5ldC9EVEQvc29kaXBvZGktMC5kdGQiIHhtbG5zOmlua3NjYXBlPSJodHRwOi8vd3d3Lmlua3NjYXBlLm9yZy9uYW1lc3BhY2VzL2lua3NjYXBlIiB2ZXJzaW9uPSIxLjEiIGlkPSJMYXllcl8xIiB4PSIwcHgiIHk9IjBweCIgd2lkdGg9IjExNS44Njc2MyIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDExNS44Njc2MyAzOS45OTk5OTgiIGVuYWJsZS1iYWNrZ3JvdW5kPSJuZXcgMCAwIDY0MC44MzkgMjY3LjMzMyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSIgaW5rc2NhcGU6dmVyc2lvbj0iMC45MSByMTM3MjUiIHNvZGlwb2RpOmRvY25hbWU9Im93bEVtYmxlbVdpdGhUZXh0LXNtYWxsLnN2ZyIgaW5rc2NhcGU6ZXhwb3J0LWZpbGVuYW1lPSIvVXNlcnMvc2hhd24vRG9jdW1lbnRzL1dvcmsvUHJvamVjdHMvT1dML0JyYW5kaW5nL1NraW5zL09XTC9PV0wgTG9nbyAtIDIwMTcvb3dsRW1ibGVtV2l0aFRleHRTbWFsbC5wbmciIGlua3NjYXBlOmV4cG9ydC14ZHBpPSI5MCIgaW5rc2NhcGU6ZXhwb3J0LXlkcGk9IjkwIj48bWV0YWRhdGEgaWQ9Im1ldGFkYXRhNDciPjxyZGY6UkRGPjxjYzpXb3JrIHJkZjphYm91dD0iIj48ZGM6Zm9ybWF0PmltYWdlL3N2Zyt4bWw8L2RjOmZvcm1hdD48ZGM6dHlwZSByZGY6cmVzb3VyY2U9Imh0dHA6Ly9wdXJsLm9yZy9kYy9kY21pdHlwZS9TdGlsbEltYWdlIi8+PGRjOnRpdGxlLz48L2NjOldvcms+PC9yZGY6UkRGPjwvbWV0YWRhdGE+PGRlZnMgaWQ9ImRlZnM0NSIvPjxzb2RpcG9kaTpuYW1lZHZpZXcgcGFnZWNvbG9yPSIjZmZmZmZmIiBib3JkZXJjb2xvcj0iIzY2NjY2NiIgYm9yZGVyb3BhY2l0eT0iMSIgb2JqZWN0dG9sZXJhbmNlPSIxMCIgZ3JpZHRvbGVyYW5jZT0iMTAiIGd1aWRldG9sZXJhbmNlPSIxMCIgaW5rc2NhcGU6cGFnZW9wYWNpdHk9IjAiIGlua3NjYXBlOnBhZ2VzaGFkb3c9IjIiIGlua3NjYXBlOndpbmRvdy13aWR0aD0iMTgwNCIgaW5rc2NhcGU6d2luZG93LWhlaWdodD0iMTEyMyIgaWQ9Im5hbWVkdmlldzQzIiBzaG93Z3JpZD0iZmFsc2UiIGZpdC1tYXJnaW4tdG9wPSIwIiBmaXQtbWFyZ2luLWxlZnQ9IjAiIGZpdC1tYXJnaW4tcmlnaHQ9IjAiIGZpdC1tYXJnaW4tYm90dG9tPSIwIiBpbmtzY2FwZTp6b29tPSI1LjY1Njg1NDIiIGlua3NjYXBlOmN4PSI0My45MDE2OTUiIGlua3NjYXBlOmN5PSIyLjQzMzI1NTUiIGlua3NjYXBlOndpbmRvdy14PSIwIiBpbmtzY2FwZTp3aW5kb3cteT0iMjIiIGlua3NjYXBlOndpbmRvdy1tYXhpbWl6ZWQ9IjAiIGlua3NjYXBlOmN1cnJlbnQtbGF5ZXI9IkxheWVyXzEiLz48ZyBpZD0iZzMiIHRyYW5zZm9ybT0ibWF0cml4KDAuMTk4MDk5MzQsMCwwLDAuMTk4MDk5MzQsLTYuOTc3NDY0OSwtNi4wOTE1NzIyKSI+PHBhdGggc3R5bGU9ImZpbGw6I2ZmZmZmZjtzdHJva2U6IzAwMDAwMDtzdHJva2Utd2lkdGg6NS4yMjQ1MDAxODtzdHJva2UtbWl0ZXJsaW1pdDoxMDtzdHJva2Utb3BhY2l0eToxIiBpbmtzY2FwZTpjb25uZWN0b3ItY3VydmF0dXJlPSIwIiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiIGQ9Im0gNjE3LjUwMiwxMTUuMDk0IC0wLjAxMiwtNzAuMyBjIC0xOC4xOTEsLTYuNDMgLTQ2Ljc0MywtMTAuNTkgLTc4Ljk0NCwtMTAuNTkgLTMxLjU4MywwIC01OS42OTgsNC4xMzggLTc3Ljg4MiwxMC41OSBsIC0wLjAwOCw3MS4zMiBjIDAsMTAuNTEyIC0wLjQ3NiwyOS4xMiA5LjA4Miw1MS40MDEgMTEuODY5LDI3LjY2NSAzNC44NDQsNDguNDY0IDY3LjYzMyw2MS41MDQgbCAxLjcwNCwwLjY5NiAxLjY4NywtMC42OTEgYyAzMi44MTMsLTEzLjA0NSA1NS43ODksLTMzLjg0NSA2Ny42NTgsLTYxLjUxIDkuNTYyLC0yMi4yNzggOS4wODIsLTQyLjMzOSA5LjA4MiwtNTIuNDIgeiIgaWQ9InBhdGg1Ii8+PHBhdGggc3R5bGU9ImZpbGw6IzRmMjY4MyIgaW5rc2NhcGU6Y29ubmVjdG9yLWN1cnZhdHVyZT0iMCIgZD0ibSA1OTguMTYsOTkuOTA3IGMgMC4wNzcsMS4wODIgLTEuNjgyLDMuMjc4IC0yLjE4Miw0LjEyNSAtMi4xOTksMy43MjEgLTQuNzExLDcuMjgyIC03LjUzNCwxMC41NTcgLTkuNjg1LDExLjIzNyAtMjIuODU0LDE2LjQ5NyAtMzYuMTMsMjIuMjYxIC04LjAzOCwzLjQ5MiAtMTcuOTEzLDcuMTY4IC0yNC44MSwxMi42NjUgLTE0LjE0NCwxMS4yNjcgLTIwLjg1OCwyNy4zMzEgLTEzLjc4OSw0NC43OCAwLDAgMTAuNjQ2LDcuMjMxIDI1LjM2MywxMy40OTggMTBlLTQsMCA2OC45MSwtMTQuMjY4IDU5LjA4MiwtMTA3Ljg4NiB6IiBpZD0icGF0aDkiLz48cGF0aCBzdHlsZT0iZmlsbDojNGYyNjgzIiBpbmtzY2FwZTpjb25uZWN0b3ItY3VydmF0dXJlPSIwIiBkPSJtIDUwNi45NTUsODQuMzc3IGMgOC42MTEsNC4wODcgMTYuNDc5LDkuOTM2IDIyLjY5MSwxNy4xNDkgMi41MDIsMi45MDUgOS40MzYsMTYuNzM3IDkuNDM2LDIxLjA0IDAsLTQuMzAzIDYuOTM0LC0xOC4xMzUgOS40MzQsLTIxLjA0IDYuMjEzLC03LjIxMyAxNC4wODEsLTEzLjA2MyAyMi42OTIsLTE3LjE0OSA3LjIxNiwtMy40MjUgMjMuMzgyLC0zLjQzOSAyNy4zODYsLTExLjU0MyBsIC0wLjAwMSwtNi4yNSBjIC0xMy44MDgsLTQuODUyIC0zNS40NzcsLTcuOTkzIC01OS45MTcsLTcuOTkzIC0yMy45NjksMCAtNDUuMzA3LDMuMTI0IC01OS4xMDgsNy45OTMgbCAwLDYuMjQ3IGMgNC4wMDMsOC4xMDcgMjAuMTcxLDguMTIxIDI3LjM4NywxMS41NDYgeiIgaWQ9InBhdGgxMSIvPjxnIGlkPSJnMTMiPjxjaXJjbGUgc3R5bGU9ImZpbGw6IzRmMjY4MyIgY3g9IjUxNS4yMzkwMSIgY3k9Ijk5LjkwNjk5OCIgcj0iMTkuMDI4IiBpZD0iY2lyY2xlMTUiLz48L2c+PGNpcmNsZSBzdHlsZT0iZmlsbDojZmZmZmZmIiBjeD0iNTE5LjA0OTAxIiBjeT0iOTAuOTY2MDAzIiByPSI0LjYyMjAwMDIiIGlkPSJjaXJjbGUxOSIvPjxjaXJjbGUgc3R5bGU9ImZpbGw6IzRmMjY4MyIgY3g9IjU2My4xNzEwMiIgY3k9Ijk5LjkwNjk5OCIgcj0iMTkuMDI4IiBpZD0iY2lyY2xlMjEiLz48Y2lyY2xlIHN0eWxlPSJmaWxsOiNmZmZmZmYiIGN4PSI1NjYuOTgxOTkiIGN5PSI5MC45NjYwMDMiIHI9IjQuNjIwOTk5OCIgaWQ9ImNpcmNsZTI1Ii8+PHBvbHlsaW5lIHN0eWxlPSJmaWxsOiM0ZjI2ODMiIHBvaW50cz0iNTAyLjUzNyw2Ny4xNDcgNDc5LjU2OCw0Ny41MDggNDc5LjU2OCw3MC4wMDcgICIgaWQ9InBvbHlsaW5lMjciLz48cG9seWxpbmUgc3R5bGU9ImZpbGw6IzRmMjY4MyIgcG9pbnRzPSI1NzUuNjI1LDY3LjE0NyA1OTguNTk0LDQ3LjUwOCA1OTguNTk0LDcwLjAwNyAgIiBpZD0icG9seWxpbmUyOSIvPjwvZz48ZyBpZD0iZzMxIiB0cmFuc2Zvcm09Im1hdHJpeCgwLjE5ODA5OTM0LDAsMCwwLjE5ODA5OTM0LC02Ljk3NzQ2NDksLTYuMDkxNTcyMikiPjxwYXRoIHN0eWxlPSJmaWxsOiNmZmZmZmY7c3Ryb2tlOiMwMDAwMDA7c3Ryb2tlLXdpZHRoOjUuODk5ODk5OTY7c3Ryb2tlLW1pdGVybGltaXQ6MTA7c3Ryb2tlLW9wYWNpdHk6MSIgaW5rc2NhcGU6Y29ubmVjdG9yLWN1cnZhdHVyZT0iMCIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiBkPSJtIDM4LjE3MiwxMzEuODM4IGMgMCwtNzAuOTUxIDI3LjI2OCwtOTguMTM4IDY2LjE4MywtOTguMTM4IDM4LjY0OCwwIDY1LjkxNywyNy4xODcgNjUuOTE3LDk4LjEzOCAwLDcwLjk1NCAtMjcuMjY5LDk3Ljg4MSAtNjUuOTE3LDk3Ljg4MSAtMzguOTE2LDAgLTY2LjE4MywtMjYuOTI3IC02Ni4xODMsLTk3Ljg4MSB6IG0gODYuMDM2LDAgYyAwLC00MS4xNzMgLTQuNzY0LC01OC43NzkgLTE5Ljg1NCwtNTguNzc5IC0xNS4zNTQsMCAtMjAuMTIxLDE3LjYwNiAtMjAuMTIxLDU4Ljc3OSAwLDQxLjE3MyA0Ljc2Nyw1OS44MTQgMjAuMTIxLDU5LjgxNCAxNS4wOSwwIDE5Ljg1NCwtMTguNjQxIDE5Ljg1NCwtNTkuODE0IHoiIGlkPSJwYXRoMzMiLz48cGF0aCBzdHlsZT0iZmlsbDojZmZmZmZmO3N0cm9rZTojMDAwMDAwO3N0cm9rZS13aWR0aDo1Ljg5OTg5OTk2O3N0cm9rZS1taXRlcmxpbWl0OjEwO3N0cm9rZS1vcGFjaXR5OjEiIGlua3NjYXBlOmNvbm5lY3Rvci1jdXJ2YXR1cmU9IjAiIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIgZD0ibSAxNTguODkxLDM2LjAzMSA0My45NDMsMCA3LjQxNCw1NS45MzIgYyAyLjY0NiwxOS42NzkgNS4wMywzNS43MzMgNy4xNDcsNjIuNDAzIGwgMS4wNjEsMCBjIDIuOTEsLTI1LjM3NiA1LjI5MiwtNDIuNDY1IDguMjAzLC02Mi40MDMgbCA3Ljk0NCwtNTUuOTMyIDM2LjI2OCwwIDcuOTQsNTUuNDEyIGMgMy4xNzcsMjEuMjMzIDYuMDg5LDM4LjMyNCA4LjQ3Miw2Mi45MjQgbCAxLjA2LDAgYyAxLjg1MywtMjQuNiA0LjIzNSwtNDIuMjA4IDYuODgzLC02MS42MjcgbCA3LjY3NSwtNTYuNzA4IDM4LjY1NCwwIC0zNC4xNTMsMTkyLjEzNCAtMzguOTEyLDAgLTE3LjczOCwtMTEzLjE2MSAtMS4wNiwwIC0xNy43MzgsMTEzLjE2MSAtMzguOTExLDAgLTM0LjE1MiwtMTkyLjEzNSB6IiBpZD0icGF0aDM1Ii8+PHBhdGggc3R5bGU9ImZpbGw6I2ZmZmZmZjtzdHJva2U6IzAwMDAwMDtzdHJva2Utd2lkdGg6NS44OTk4OTk5NjtzdHJva2UtbWl0ZXJsaW1pdDoxMDtzdHJva2Utb3BhY2l0eToxIiBpbmtzY2FwZTpjb25uZWN0b3ItY3VydmF0dXJlPSIwIiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiIGQ9Im0gMzQ2LjU4OCwzNi4wMzEgNDUuNTMxLDAgMCwxNTUuMTAzIDUxLjg4NiwwIDAsMzYuNTEzIC05Ny40MTcsMCAwLC0xOTEuNjE2IHoiIGlkPSJwYXRoMzciLz48L2c+PC9zdmc+');
+    --logo-height: 40px;
+    --logo-width: 120px;
     --logo-opacity: 1;
-    --logo-background-color: var(--sakai-primary-color-1);
+    --logo-background-color: transparent;
 
     // Primary branding color. 
     // Suggested: Your institution's main branding color.
@@ -66,15 +66,15 @@
     // Suggested: A light tint of your institution's main branding color.
     // Used to highlight active/current site in favorites and active/current tool in toolmenu
     // Commonly used with white background color with white text color.
-    --sakai-active-color-1: var(--sakai-brand--lighter-6);
+    --sakai-active-color-1: var(--sakai-brand);
 
     // Default: A slightly darker shade of --sakai-active-color-1
     // Used for hover effects and higher contrast with --sakai-text-color-3
-    --sakai-active-color-2: var(--sakai-brand--lighter-5);
+    --sakai-active-color-2: var(--sakai-brand--darker-2);
 
     // Default: A slightly darker shade of --sakai-active-color-2
     // Used for active, focus, selected effects with --sakai-text-color-3
-    --sakai-active-color-3: var(--sakai-brand--lighter-4);
+    --sakai-active-color-3: var(--sakai-brand--darker-4);
 
     // Default: A very light tint of gray. 
     // Suggested: --sakai-color-gray--lighter-6.
@@ -133,7 +133,7 @@
     // Suggested: An alterate branding color distinct from
     // what you select for --sakai-primary-color-1
     // Used in href, new user tutorial, user profile image border
-    --sakai-secondary-color-1: var(--sakai-color-blue--darker-2);
+    --sakai-secondary-color-1: var(--sakai-color-orange);
 
     // Tertiary branding color. 
     // Suggested: A third branding color distinct from
@@ -197,11 +197,11 @@
     --tool-tab-background-color: var(--tool-menu-background-color);
     --tool-tab-border-color: var(--sakai-border-color);
     --tool-tab-hover-text-color: var(--sakai-text-color-3);
-    --tool-tab-hover-background-color: var(--sakai-background-color-3);
+    --tool-tab-hover-background-color: var(--sakai-background-color-2);
     --tool-tab-hover-highlight-color: var(--sakai-active-color-2);
     --tool-tab-active-text-color: var(--sakai-text-color-3);
     --tool-tab-active-background-color: var(--sakai-background-color-1);
-    --tool-tab-active-highlight-color:var(--sakai-active-color-3);
+    --tool-tab-active-highlight-color:var(--sakai-active-color-1);
 
     --top-header-background: var(--sakai-color-gray--darker-7);
     --top-header-profile-border-color-top: var(--sakai-secondary-color-1);
@@ -227,7 +227,7 @@
 
     // Default (non-primary) button design:
     --button-text-color: var(--sakai-text-color-2);
-    --button-background: var(--sakai-passive-color-1);
+    --button-background: linear-gradient(#fff, #f9f9f9);
     --button-border-color: var(--sakai-passive-color-2);
     --button-shadow: none;
     // hover and focus states:
@@ -262,6 +262,8 @@
     --button-primary-active-background: var(--sakai-primary-color-3);
     --button-primary-active-border-color: var(--button-primary-active-background);
     --button-primary-active-shadow: var(--elevation-4dp);
+
+    --radio-button-background: radial-gradient(circle at center, var(--button-primary-background) 0%, var(--button-primary-background) 48%, var(--sakai-background-color-1) 58%);
 
     --instruction-color: var(--sakai-text-color-disabled);
 
@@ -312,7 +314,7 @@
     --sites-nav-submenu-border-color: transparent;
     --sites-nav-submenu-background: var(--sites-nav-menu-item-background);
     --sites-nav-submenu-item-color: var(--sites-nav-menu-item-color);
-    --sites-nav-submenu-item-divider-color: var(--sites-nav-submenu-item-color);
+    --sites-nav-submenu-item-divider-color: var(--sakai-passive-color-3);
     // Hover
     --sites-nav-submenu-item-hover-background: var(--sites-nav-menu-item-hover-background);
     --sites-nav-submenu-item-hover-color: var(--sites-nav-menu-item-hover-color);
@@ -322,7 +324,7 @@
     /* End Default state */
     /* Active/Current site */
     --sites-nav-menu-item-selected-background: var(--sakai-active-color-1);
-    --sites-nav-menu-item-selected-color: var(--sakai-text-color-3);
+    --sites-nav-menu-item-selected-color: var(--sakai-color-white);
     --sites-nav-menu-item-selected-border-color: var(--sites-nav-menu-item-selected-background);
     // Hover
     --sites-nav-menu-item-selected-hover-background: var(--sakai-active-color-2);
@@ -341,8 +343,8 @@
     --sites-nav-submenu-item-selected-divider-color: var(--sites-nav-menu-item-selected-color);
     // Hover
     --sites-nav-submenu-item-selected-hover-background: var(--sites-nav-menu-item-selected-hover-background);
-    --sites-nav-submenu-item-selected-hover-color: var(--sites-nav-menu-item-selected-hover-color);
-    --sites-nav-submenu-item-selected-hover-icon-color: var(--sites-nav-menu-item-selected-hover-color);
+    --sites-nav-submenu-item-selected-hover-color: var(--sites-nav-menu-item-selected-color);
+    --sites-nav-submenu-item-selected-hover-icon-color: var(--sites-nav-submenu-item-selected-hover-color);
     // Active
     --sites-nav-submenu-item-selected-active-background: var(--sites-nav-menu-item-selected-active-background);
     /* End Favorites */
@@ -371,7 +373,7 @@
     --all-sites-button-star-full-color: var(--sakai-color-gold);
     --all-sites-button-star-empty-color: var(--sakai-text-color-1);
 
-    --all-sites-button-selected-text-color: var(--sakai-text-color-3);
+    --all-sites-button-selected-text-color: var(--sakai-color-white);
     --all-sites-button-selected-background-color: var(--sakai-active-color-1);
     --all-sites-button-selected-border-color: var(--all-sites-button-selected-background-color);
     --all-sites-button-selected-dropdown-color: var(--all-sites-button-selected-text-color);
@@ -430,16 +432,16 @@
     --tool-menu-item-hidden-active-icon-color: var(--tool-menu-item-active-icon-color);
     --tool-menu-item-hidden-active-background-color: var(--tool-menu-item-active-background-color);
     //Selected - normal state
-    --tool-menu-item-selected-text-color: var(--sakai-text-color-3);
-    --tool-menu-item-selected-icon-color: var(--sakai-text-color-3);
+    --tool-menu-item-selected-text-color: var(--sakai-color-white);
+    --tool-menu-item-selected-icon-color: var(--tool-menu-item-selected-text-color);
     --tool-menu-item-selected-background-color: var(--sakai-active-color-1);
     //Selected - hover
     --tool-menu-item-selected-hover-text-color: var(--tool-menu-item-selected-text-color);
-    --tool-menu-item-selected-hover-icon-color: var(--tool-menu-item-selected-icon-color);
+    --tool-menu-item-selected-hover-icon-color: var(--tool-menu-item-selected-hover-text-color);
     --tool-menu-item-selected-hover-background-color: var(--sakai-active-color-2);
     //Selected - active
     --tool-menu-item-selected-active-text-color: var(--tool-menu-item-selected-text-color);
-    --tool-menu-item-selected-active-icon-color: var(--tool-menu-item-selected-icon-color);
+    --tool-menu-item-selected-active-icon-color: var(--tool-menu-item-selected-active-text-color);
     --tool-menu-item-selected-active-background-color: var(--sakai-active-color-3);
     //Tool menu collapse button - normal state
     --tool-menu-collapse-text-color: var(--tool-menu-item-text-color);
@@ -518,9 +520,9 @@
     --divider-shadow-fixed: 0 1px 0 var(--tool-border-color);
 
     --overview-portlet-shadow: var(--elevation-2dp);
-    --overview-portlet-title-background-color: var(--tool-tab-background-color);
+    --overview-portlet-title-background-color: var(--sakai-background-color-2);
 
-    --focus-outline-color: var(--sakai-color-blue--lighter-3);
+    --focus-outline-color: var(--sakai-color-gray);
 
     // Dashboard
     --sakai-dashboard-widget-bg-color: var(--sakai-background-color-1);

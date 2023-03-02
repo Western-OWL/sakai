@@ -568,10 +568,7 @@
 			    right: 30px;
 			    top: 1px;
 			    background: var(--sakai-user-status-online);
-			    -moz-border-radius: 3px;
-			    -webkit-border-radius: 3px;
-			    -khtml-border-radius: 3px;
-			    border-radius: 3px;
+			    @include border-radius(3px);
 			}
 			&__message--new{
 				@extend .sakai-colorize--sakai-color-red--darker-2;
@@ -621,9 +618,7 @@
 				&message{
 					position: relative;
 					padding: 0px;
-					-webkit-border-radius: 5px;
-					-moz-border-radius: 5px;
-					border-radius: 3px;
+					@include border-radius(3px);
 					border: 1px solid transparent;
 					display: inline-block;
 					width: 80%;

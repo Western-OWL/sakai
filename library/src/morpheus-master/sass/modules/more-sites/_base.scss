@@ -417,6 +417,16 @@ ul.favoriteSiteList {
 			border-color: var(--all-sites-button-selected-border-color);
 			border-radius: $all-sites-button-selected-border-radius;
 
+			&:hover, &:focus {
+				background: var(--all-sites-button-selected-background-color);
+				border-color: var(--all-sites-button-selected-border-color);
+				color: var(--all-sites-button-selected-text-color);
+			}
+
+			.fav-title > a {
+				color: var(--all-sites-button-selected-text-color);
+			}
+
 			.toolMenus {
 				color: var(--all-sites-button-selected-dropdown-color);
 			}

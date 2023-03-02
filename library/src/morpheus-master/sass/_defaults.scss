@@ -60,9 +60,9 @@ $tool-tab-text-transform:                                 none !default;
 $tool-tab-text-letter-spacing:                            normal !default;
 $tool-tab-active-text-size:                               12px !default;
 
-$top-header-separators-thickness: 0px !default;
+$top-header-separators-thickness: 1px !default;
 $top-header-item-spacing: calc(#{$standard-spacing} / 2) !default;
-$top-header-text-display: none !default;
+$top-header-text-display: initial !default;
 $top-header-icon-size: calc(#{$standard-spacing} * 2) !default;
 $top-header-sites-padding-top: 6px !default;
 $top-header-profile-border-thickness: 2px !default;
@@ -233,8 +233,8 @@ $footer-font-size: 12px;
 // Overview page column widths. Total to add up to 96% as the columns have a margin.
 $col1of2-width: 48% !default;
 
-$overview-portlet-border: none !default;
-$overview-portlet-border-radius: $button-radius !default;
+$overview-portlet-border: 1px solid var(--sakai-border-color) !default;
+$overview-portlet-border-radius: $standard-spacing $standard-spacing 0 0 !default;
 
 
 /* focus styles for all control elements (e.g. buttons, form controls, links, etc) */

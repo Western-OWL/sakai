@@ -38,6 +38,7 @@
 			@include justify-content(space-between);
 			background-color: var(--overview-portlet-title-background-color);
 			border-bottom: $overview-portlet-border;
+			border-radius: $overview-portlet-border-radius;
 			padding: $standard-spacing;
 		}
 

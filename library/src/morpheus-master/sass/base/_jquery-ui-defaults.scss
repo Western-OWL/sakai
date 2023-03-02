@@ -68,7 +68,7 @@
     html .ui-button.ui-state-disabled:hover,
     html .ui-button.ui-state-disabled:active {
         border: 1px solid var(--button-border-color);
-        background: var(--button-background);
+        background: var(--sakai-background-color-1);
         font-weight: normal;
         color: var(--button-text-color);
     }
@@ -268,12 +268,12 @@
     }
   
     .ui-state-default.ui-slider-handle {
-        background: var(--button-text-color);
-        border: var(--button-text-color);
+        background: var(--button-background);
+        border: 1px solid var(--button-border-color);
     }
 
     .ui-widget.ui-slider {
-        border: 1px solid var(--button-background);
+        border: 1px solid var(--button-border-color);
         background: var(--button-background);
     }
     .ui-button .ui-icon {

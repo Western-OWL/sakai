@@ -21,10 +21,6 @@
 			@include display-flex;
 			@include align-items(center);
 		}
-		
-		.todayButton {
-			margin: 0 $standard-space;
-		}
 	}
 
 	.calLeft 

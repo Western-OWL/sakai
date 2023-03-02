@@ -47,6 +47,8 @@
 	}
 	
 	.#{$namespace}footer--project {
+		display: flex;
+		align-items: center;
 		margin-left: auto;		// pushes this element to the right, especially during wrapping
 		
 		@media #{$tablet} {
@@ -65,6 +67,13 @@
 		}
 	}
 	
+	.Mrphs-footer--poweredby__image {
+		box-sizing: content-box;		// so width only controls the image's size
+		width: 60px;
+		margin-right: -16px;			// to compensate for extra footer padding
+		padding: 0 16px;				// to center image for focus outline
+}
+
 	.#{$namespace}footer--details {
 		position: relative;				// to align the details panel to
 		
