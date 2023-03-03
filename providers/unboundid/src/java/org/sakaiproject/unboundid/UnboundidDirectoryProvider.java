@@ -62,7 +62,6 @@ import com.unboundid.ldap.sdk.SearchScope;
 import com.unboundid.ldap.sdk.ServerSet;
 import com.unboundid.ldap.sdk.SimpleBindRequest;
 import com.unboundid.ldap.sdk.SingleServerSet;
-import com.unboundid.ldap.sdk.migrate.ldapjdk.LDAPAttribute;
 import com.unboundid.ldap.sdk.migrate.ldapjdk.LDAPConnection;
 import com.unboundid.ldap.sdk.migrate.ldapjdk.LDAPEntry;
 import com.unboundid.ldap.sdk.migrate.ldapjdk.LDAPException;
@@ -488,12 +487,33 @@ public class UnboundidDirectoryProvider implements UserDirectoryProvider, LdapCo
 		{
 			long start = System.currentTimeMillis();
 
-			// look up the end-user's DN, which could be nested at some 
-			// arbitrary depth below getBasePath().
-			// TODO: optimization opportunity if user entries are 
-			// directly below getBasePath()
-			final String endUserDN = lookupUserBindDn(userLogin);
+			// Get the user data
+			final LdapUserData userData = getLdapUserData(userLogin);
+			if( userData == null )
+			{
+				log.debug( "authenticateUser(): failed to get LDAP user data for login [userLogin = {}], returning false", userLogin );
+				return false;
+			}
+			else if( authorizeByAttributeEnabled )
+			{
+				// Authorization by attribute check
+				log.debug( "authenticateUser(): authorization by attribute: checking {} for restricted values.", authorizeByAttributeName );
 
+				String groupMembership = userData.getProperties().getProperty( authorizeByAttributeName );
+				if( StringUtils.isNotBlank( groupMembership ) && authorizeByAttributeRestrictedValues.contains( groupMembership ) )
+				{
+					AuthorizationByAttributeFailedException abafe = new AuthorizationByAttributeFailedException( "Authorization check failed." );
+					abafe.setAttributeName( authorizeByAttributeName );
+					abafe.setAttributeValue( groupMembership );
+					throw abafe;
+				}
+			}
+
+			// look up the end-user's DN, which could be nested at some
+			// arbitrary depth below getBasePath().
+			// TODO: optimization opportunity if user entries are
+			// directly below getBasePath()
+			final String endUserDN = lookupUserBindDn(userData);
 			if ( endUserDN == null ) {
 				log.debug("authenticateUser(): failed to find bind dn for login [userLogin = {}], returning false", userLogin);
 				return false;
@@ -504,69 +524,6 @@ public class UnboundidDirectoryProvider implements UserDirectoryProvider, LdapCo
 			lc = connectionPool.getConnection();
 			BindResult bindResult = lc.bind(endUserDN, password);
 			if(bindResult.getResultCode().equals(ResultCode.SUCCESS)) {
-
-				/* Begin authorization by attribute check   --plukasew */
-				if (authorizeByAttributeEnabled)
-				{
-					log.debug("authenticateUser(): authorization by attribute: checking {} for restricted values.", authorizeByAttributeName);
-					if (connectionPool == null && !createConnectionPool())
-					{
-						log.warn("No LDAP connection pool available: unable to search for: [userLogin = {}][bind dn [{}]", userLogin, endUserDN);
-					}
-					else
-					{
-						SearchResult result = null;
-						try
-						{
-							String filter = ldapAttributeMapper.getFindUserByEidFilter(userLogin);
-							DereferencePolicy dr = isSearchAliases() ? DereferencePolicy.ALWAYS : DereferencePolicy.NEVER;
-							result = connectionPool.search(endUserDN, searchScope, dr, maxResultSize, operationTimeout, false, filter, authorizeByAttributeName);
-						}
-						catch(LDAPSearchException e)
-						{
-							if (e.getResultCode().equals(ResultCode.SIZE_LIMIT_EXCEEDED))
-							{
-								// We still want results even though we hit the max. Just take what we were able to get.
-								result = e.getSearchResult();
-								log.warn("Hit ResultCode.SIZE_LIMIT_EXCEEDED: {}", e.getDiagnosticMessage());
-							}
-							else
-							{
-								throw e;
-							}
-						}
-
-						List<SearchResultEntry> searchResults = result.getSearchEntries();
-						for (SearchResultEntry sre : searchResults)
-						{
-							LDAPEntry entry = new LDAPEntry(sre);
-							if (entry != null)
-							{
-								LDAPAttribute restrictedAttribute = entry.getAttribute(authorizeByAttributeName);
-								if (restrictedAttribute != null)
-								{
-									// ldap attribute could be multi-value, so check them all
-									String[] restrictedValues = restrictedAttribute.getStringValueArray();
-									if (restrictedValues != null)
-									{
-										List<String> values = Arrays.asList(restrictedValues);
-										for (String value : values)
-										{
-											if (authorizeByAttributeRestrictedValues.contains(value))
-											{
-												AuthorizationByAttributeFailedException abafe = new AuthorizationByAttributeFailedException("Authorization check failed.");
-												abafe.setAttributeName(authorizeByAttributeName);
-												abafe.setAttributeValue(value);
-												throw abafe;
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-				/* End restricted attribute check */
 
 				log.info("Authenticated {} ({}) from LDAP in {} ms", userLogin, endUserDN, System.currentTimeMillis() - start);
 				return true;
@@ -963,10 +920,24 @@ public class UnboundidDirectoryProvider implements UserDirectoryProvider, LdapCo
 	 * @return the user's bindable DN or null if no matching directory entry
 	 * @throws LDAPException if the directory query exits with an error
 	 */
-	protected String lookupUserBindDn(String eid) 
+	protected String lookupUserBindDn(LdapUserData foundUserData)
 	throws LDAPException {
 
-			log.debug("lookupUserEntryDN(): [eid = {}]", eid);
+		if ( foundUserData == null ) {
+			log.debug("lookupUserBindDn(): foundUserData is null, can't perform user bind lookup");
+			return null;
+		}
+		return ldapAttributeMapper.getUserBindDn(foundUserData);
+	}
+
+	/**
+	 *
+	 * @param eid
+	 * @return
+	 * @throws LDAPException
+	 */
+	protected LdapUserData getLdapUserData(String eid) throws LDAPException {
+		log.debug("getLdapUserData(): [eid = {}]", eid);
 
 		LdapUserData foundUserData;
 		if (enableAid) {
@@ -979,8 +950,8 @@ public class UnboundidDirectoryProvider implements UserDirectoryProvider, LdapCo
 			log.debug("lookupUserEntryDN(): no directory entried found [eid = {}]", eid);
 			return null;
 		}
-		return ldapAttributeMapper.getUserBindDn(foundUserData);
 
+		return foundUserData;
 	}
 
 
