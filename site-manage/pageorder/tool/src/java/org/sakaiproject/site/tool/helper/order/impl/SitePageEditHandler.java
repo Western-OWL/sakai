@@ -593,6 +593,11 @@ public class SitePageEditHandler {
                     }
 
                 }
+
+                // Force "portal-visibility: false" for sitestats
+                if ("sakai.sitestats".equals(toolId)) {
+                    visibility = "false";
+                }
                 roleConfig.setProperty(ToolManager.PORTAL_VISIBLE, visibility);
 
                 placement.save();
@@ -619,6 +624,11 @@ public class SitePageEditHandler {
                 // e.g., dropbox.own and dropbox.maintain, grab the first in list only.
                 if (enabled && permissions.size() > 1) {
                     permissions = Collections.singletonList(permissions.get(0));
+                }
+
+                // Do not add any permissions when making the statistics tool visible (which shouldn't be possible anyway)
+                if (enabled && "sakai.sitestats".equals(page.getTools().get(0).getToolId())) {
+                    permissions = Collections.emptyList();
                 }
 
                 Set<Role> roles = getRolesWithout(authzGroup, SiteService.SECURE_UPDATE_SITE);
