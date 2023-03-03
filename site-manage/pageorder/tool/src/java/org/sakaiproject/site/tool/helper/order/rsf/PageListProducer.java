@@ -155,27 +155,33 @@ public class PageListProducer
                 }
 
                 // No point showing visibility links if the page is locked.
+                boolean isToolSiteStats = "sakai-sitestats".equals(toolId);
                 if (handler.allowsHide(page) && handler.isEnabled(page)) {
                     param.viewID = PageEditProducer.VIEW_ID;
-                    if (handler.isVisible(page)) {
+                    boolean isToolPortalVisible = handler.isVisible(page);
+                    if (isToolPortalVisible) {
                         param.visible = "false";
                         fullyDecorate(UIInternalLink.make(pagerow, "hide-link", param),
                             UIMessage.make("page_hide", pageTitle));
-                        
-                        param.visible = "true";
-                        fullyDecorate(UIInternalLink.make(pagerow, "show-link-off", param),
-                            UIMessage.make("page_show", pageTitle));
+
+                        if (!isToolSiteStats) {
+                            param.visible = "true";
+                            fullyDecorate(UIInternalLink.make(pagerow, "show-link-off", param),
+                                UIMessage.make("page_show", pageTitle));
+                        }
                     } else {
-                        param.visible = "true";
-                        fullyDecorate(UIInternalLink.make(pagerow, "show-link", param),
-                            UIMessage.make("page_show", pageTitle));
-                     
+                        if (!isToolSiteStats) {
+                            param.visible = "true";
+                            fullyDecorate(UIInternalLink.make(pagerow, "show-link", param),
+                                UIMessage.make("page_show", pageTitle));
+                        }
+
                         param.visible = "false";
                         fullyDecorate(UIInternalLink.make(pagerow, "hide-link-off", param),
                             UIMessage.make("page_hide", pageTitle));
                     }
                     UIOutput hiddenFlag = UIOutput.make(pagerow, "page-hidden-flag");
-                    hiddenFlag.decorate(new UIFreeAttributeDecorator("style", handler.isVisible(page) ? "display: none" : "display: block"));
+                    hiddenFlag.decorate(new UIFreeAttributeDecorator("style", isToolPortalVisible ? "display: none" : "display: block"));
                     hiddenFlag.decorate(new UITooltipDecorator(UIMessage.make("page_hidden_flag")));
                 }
                 
@@ -188,16 +194,20 @@ public class PageListProducer
                         param.enabled = "false";
                         fullyDecorate(UIInternalLink.make(pagerow, "disable-link", param),
                             UIMessage.make("page_disable", pageTitle));
-                        
-                        param.enabled = "true";
-                        fullyDecorate(UIInternalLink.make(pagerow, "enable-link-off", param),
-                            UIMessage.make("page_enable", pageTitle));
+
+                        if (!isToolSiteStats) {
+                            param.enabled = "true";
+                            fullyDecorate(UIInternalLink.make(pagerow, "enable-link-off", param),
+                                UIMessage.make("page_enable", pageTitle));
+                        }
                     }
                     else {
-                        param.enabled = "true";
-                        fullyDecorate(UIInternalLink.make(pagerow, "enable-link", param),
-                            UIMessage.make("page_enable", pageTitle));
-                     
+                        if (!isToolSiteStats) {
+                            param.enabled = "true";
+                            fullyDecorate(UIInternalLink.make(pagerow, "enable-link", param),
+                                UIMessage.make("page_enable", pageTitle));
+                        }
+
                         param.enabled = "false";
                         fullyDecorate(UIInternalLink.make(pagerow, "disable-link-off", param),
                             UIMessage.make("page_disable", pageTitle));
