@@ -142,9 +142,9 @@
 		     indicates that the connection used to process that request may no longer
 		     be valid. May help with networks that close idle connections
 		     Defaults to UnboundidDirectoryProvider.DEFAULT_RETRY_FAILED_OPERATIONS_DUE_TO_INVALID_CONNECTIONS (false) -->
-		<!-- property name="retryFailedOperationsDueToInvalidConnections">
-			<value>false</value>
-		</property -->
+		<property name="retryFailedOperationsDueToInvalidConnections">
+			<value>true</value>
+		</property>
 
 		<!-- Specifies the length of time in milliseconds between periodic background
 			health checks against the available connections in this pool.
