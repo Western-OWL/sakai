@@ -143,13 +143,15 @@ public class CandidateDetailProviderImpl implements CandidateDetailProvider {
 
 		try {
 			String studentNumber = user.getProperties().getProperty(USER_PROP_STUDENT_NUMBER);
+			if (StringUtils.isBlank(studentNumber)) {
+				return Optional.empty();
+			}
+
 			if (serverConfigurationService.getBoolean(PROP_ENCRYPT_NUMERIC_ID, true)) {
 				studentNumber = encryptionUtilities.decrypt(studentNumber);
 			}
-				
-			if (StringUtils.isNotBlank(studentNumber)) {
-				return Optional.of(studentNumber);
-			}
+
+			return Optional.ofNullable(studentNumber);
 		} catch (Exception e) {
 			log.warn("Error getting studentNumber for {}", user.getId(), e);
 		}
