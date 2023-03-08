@@ -29,11 +29,11 @@
                         </util:map>
                     </constructor-arg>
                 </bean>
-                <bean class="org.sakaiproject.user.detail.FallbackDetailProvider" init-method="init">
+                <!--<bean class="org.sakaiproject.user.detail.FallbackDetailProvider" init-method="init">
                     <property name="siteService" ref="org.sakaiproject.site.api.SiteService"/>
                     <property name="serverConfigurationService" ref="org.sakaiproject.component.api.ServerConfigurationService"/>
                     <property name="toolManager" ref="org.sakaiproject.tool.api.ToolManager"/>
-                </bean>
+                </bean>-->
             </util:list>
         </property>
     </bean>
