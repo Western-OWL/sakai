@@ -76,7 +76,6 @@ function getSelectedType(qtiUrl, cpUrl, emtUrl, e2mt){
         <h:outputText value="#{authorImportExport.markup_text_note}" escape="true" />
 		<br />
       </p>
-      <div class="sak-banner-warn"><h:outputText value="#{authorImportExport.importExport_warningHeader}" escape="false" /></div>
       <p class="sak-banner-warn"><h:outputText value="#{authorImportExport.importExport_warning1}" escape="false" /></p>
       <p class="sak-banner-warn"><h:outputText value="#{authorImportExport.importExport_warning2}" escape="false" /></p>
       <p class="sak-banner-warn"><h:outputText value="#{authorImportExport.cp_message}"/></p>
@@ -93,7 +92,7 @@ function getSelectedType(qtiUrl, cpUrl, emtUrl, e2mt){
      	<t:radio renderLogicalId="true" for="exportType" index="1" />
      	<t:radio renderLogicalId="true" for="exportType" index="2" />
      </h:panelGrid>
-    </<fieldset>>
+    </fieldset>
     <div class="act">
      <%-- activates the valueChangeListener --%>
      <h:commandButton value="#{authorImportExport.export}" type="submit"
