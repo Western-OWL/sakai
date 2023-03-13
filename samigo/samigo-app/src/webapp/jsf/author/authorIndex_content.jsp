@@ -635,7 +635,7 @@
                 </h:commandLink>
             </div>
             <h:panelGroup styleClass="sak-banner-warn" layout="block" rendered="#{author.isAnyAssessmentRetractForEdit == true && author.allAssessments.size() > 0}">
-                <h:outputText id="assessment-retracted" value="#{authorFrontDoorMessages.retracted_for_edit}" styleClass="sak-banner-red-warn" />
+                <h:outputText id="assessment-retracted" value="#{authorFrontDoorMessages.retracted_for_edit}" />
             </h:panelGroup>
         </div>
     </h:form>
