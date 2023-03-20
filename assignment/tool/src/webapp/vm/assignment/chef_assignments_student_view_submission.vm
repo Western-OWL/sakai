@@ -70,7 +70,7 @@ $(document).ready(function(){
 			<div class="page-header">
 				<h1>$formattedText.escapeHtml($assignment.Title)
 					<span class="highlight">
-						 - $!service.getSubmissionStatus($submission.Id, false)
+						 - $!service.getSubmissionStatus($submission.Id, true)
 					</span>
 				</h1>
 			</div>
@@ -220,7 +220,7 @@ $(document).ready(function(){
 					<div class="col-md-10 col-sm-12">
 						<div class="itemSummaryValue">
 							#if ($!submission)
-								$!service.getSubmissionStatus($submission.Id, false)
+								$!service.getSubmissionStatus($submission.Id, true)
 							#else
 								$tlang.getString("gen.notsta")
 							#end

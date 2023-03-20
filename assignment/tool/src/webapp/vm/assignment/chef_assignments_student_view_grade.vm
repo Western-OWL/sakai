@@ -52,7 +52,7 @@
             #if ($submission)
                 #set($submissionId = $submission.Id)
             #end
-            <span class="highlight"> - $!service.getSubmissionStatus($!submissionId, false)</span>
+            <span class="highlight"> - $!service.getSubmissionStatus($!submissionId, true)</span>
         </h1>
     </div>
     #if (!$!nonElectronicType)

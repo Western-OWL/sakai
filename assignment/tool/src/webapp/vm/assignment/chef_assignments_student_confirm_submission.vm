@@ -85,7 +85,7 @@
                 <div class="col-md-10 col-sm-12">
                     <div class="itemSummaryValue">
                     #if ($!submission)
-						$!service.getSubmissionStatus($!submission.Id, false)
+						$!service.getSubmissionStatus($!submission.Id, true)
 					#else
                         $tlang.getString("gen.notsta")
                     #end
