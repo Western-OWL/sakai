@@ -1808,9 +1808,7 @@ public class AssignmentServiceImpl implements AssignmentService, EntityTransferr
                 canGrade = allowGradeSubmission(assignmentReference);
 
                 if (submission.getDateSubmitted() != null) {
-                    submitTime = returnFormattedDate ?
-                            userTimeService.dateTimeFormat(submission.getDateSubmitted(), null, null) :
-                            submission.getDateSubmitted().toString();
+                    submitTime = returnFormattedDate ? getUsersLocalDateTimeString(submission.getDateSubmitted()) : submission.getDateSubmitted().toString();
                 }
             }
         } catch (PermissionException e) {
