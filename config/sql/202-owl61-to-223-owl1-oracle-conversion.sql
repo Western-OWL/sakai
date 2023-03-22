@@ -42,6 +42,8 @@ CREATE SEQUENCE BULLHORN_ALERTS_S MINVALUE 1 MAXVALUE 99999999999999999999999999
 -- clear unchanged bundle properties
 DELETE from SAKAI_MESSAGE_BUNDLE where PROP_VALUE is NULL;
 
+-- OWL cleanup required before the constraint is added
+UPDATE CONTENTREVIEW_ITEM SET PROVIDERID = -2 WHERE ID = 174531;
 -- this constraint may have been missed, it is ok if this line fails just comment it out
 ALTER TABLE CONTENTREVIEW_ITEM ADD CONSTRAINT UK_8dngr1v68kkv4u11c1nvrjj1l UNIQUE (PROVIDERID, CONTENTID);
 
@@ -835,7 +837,7 @@ ALTER TABLE rbc_criterion_ratings DROP CONSTRAINT FKd03estm381c26jhsq4wd44vwx;
 ALTER TABLE rbc_evaluation DROP CONSTRAINT FKem9md18gcni93xqa5ijykty8e;
 ALTER TABLE rbc_rubric_criterions DROP CONSTRAINT FKilhg1u02m1765ltp3253wp7hn;
 ALTER TABLE rbc_rubric_criterions DROP CONSTRAINT FKt5dmnek3q7syuqck0uk9rw2hg;
-ALTER TABLE rbc_criterion_ratings DROP KEY UK_funjjd0xkrmm5x300r7i4la83;
+ALTER TABLE rbc_criterion_ratings DROP CONSTRAINT UK_funjjd0xkrmm5x300r7i4la83;
 
 ALTER TABLE rbc_criterion DROP COLUMN created;
 ALTER TABLE rbc_rating DROP COLUMN created;
