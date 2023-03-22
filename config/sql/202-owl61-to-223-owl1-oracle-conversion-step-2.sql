@@ -3,6 +3,8 @@
 -----------------------------------------------------------------------
 
 -- You must run the poll order backfill job before running this script --
+-- OWL: clean up remaining orphaned rows after backfill job runs
+UPDATE POLL_OPTION SET OPTION_ORDER = 1 WHERE OPTION_ORDER IS NULL;
 ALTER TABLE POLL_OPTION MODIFY OPTION_ORDER NUMBER(10, 0) NOT NULL;
 
 -- once the SAK-46178 conversion is run successfully then the following tables can be dropped
