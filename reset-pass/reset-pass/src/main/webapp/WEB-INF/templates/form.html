@@ -10,14 +10,16 @@
         <div class="sak-banner-info hidden" id="email-sent-msg"></div>
 
         <div th:if="${placement != null}" id="instructions">
-            <p class="sak-banner-info" th:if="${placement.getConfig().getProperty('instructions') != ''}" th:text="${placement.getConfig().getProperty('instructions')}">Instructions from tool properties</p>
+            <p th:if="${placement.getConfig().getProperty('instructions') != ''}" th:utext="${placement.getConfig().getProperty('instructions')}">Instructions from tool properties</p>
         </div>
         <div th:unless="${placement != null}" id="instructions">
             <p class="sak-banner-info" th:text="#{mainText(${uiService})}">This password service is only available for guest users on {0}.</p>
         </div>
 
         <div class="sak-banner-info" id="instructionInfo" th:text="${explanation}">Upon submission, an email will be sent to you containing a link where you can securely set your password. You will have 1 hour before this link expires.</div>
-        <div class="sak-banner-error hidden" id="error-msg">Error message</div>
+        <div class="sak-banner-error hidden" id="error-msg">
+            <p th:if="${placement.getConfig().getProperty('wrongtype') != ''}" th:utext="${placement.getConfig().getProperty('wrongtype')}">Error message</p>
+        </div>
 
         <form id="emailForm">
             <div  class="row">
@@ -97,16 +99,14 @@
                             emailSentMsg.classList.add("hidden");
                             supportMsg.classList.add("hidden");
                             errorMsg.classList.remove("hidden");
-                            var message = response.error_msg;
-                            errorMsg.textContent = message;
                         }
 
-                        if (response.exception_msg !== undefined) {
+                        if (response.success_msg !== undefined) {
                             infoMsg.classList.add("hidden");
                             instructionsBtn.classList.add("hidden");
                             errorMsg.classList.add("hidden");
                             emailSentMsg.classList.remove("hidden");
-                            var message = response.exception_msg;
+                            var message = response.success_msg;
                             emailSentMsg.innerHTML = message;
                         }
 
