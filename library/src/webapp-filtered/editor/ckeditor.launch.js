@@ -244,7 +244,7 @@ sakai.editor.editors.ckeditor.launch = function(targetId, config, w, h) {
         //imageUploadUrl: directUploadUrl,
         sakaiDropdownToolbar: true,
         toolbarCanCollapse: true,
-        toolbarStartupExpanded: false,
+        toolbarStartupExpanded: true, // OWL: start expanded by default
         sakaiOpenLink: true,
         extraPlugins: [
             //These plugins are included in the ckeditor4 webjar
