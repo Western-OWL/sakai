@@ -55,6 +55,7 @@ import org.sakaiproject.tool.assessment.ui.bean.author.AssessmentSettingsBean;
 import org.sakaiproject.tool.assessment.ui.bean.author.AuthorBean;
 import org.sakaiproject.tool.assessment.ui.bean.authz.AuthorizationBean;
 import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
+import org.sakaiproject.tool.assessment.util.FacesMessenger;
 import org.sakaiproject.tool.assessment.util.TextFormat;
 import org.sakaiproject.tool.assessment.util.TimeLimitValidator;
 import org.sakaiproject.util.api.FormattedText;
@@ -67,7 +68,7 @@ import org.sakaiproject.util.api.FormattedText;
  */
 @Slf4j
 public class SaveAssessmentSettingsListener
-    implements ActionListener
+    implements ActionListener, FacesMessenger
 {
   private static final GradebookServiceHelper gbsHelper = IntegrationContextFactory.getInstance().getGradebookServiceHelper();
   private static final boolean integrated = IntegrationContextFactory.getInstance().isIntegrated();
@@ -91,27 +92,27 @@ public class SaveAssessmentSettingsListener
     // check if name is empty
     if(assessmentName!=null &&(assessmentName.trim()).equals("")){
      	String nameEmpty_err=ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AssessmentSettingsMessages","assessmentName_empty");
-	context.addMessage(null,new FacesMessage(nameEmpty_err));
+	error(context, nameEmpty_err);
 	error=true;
     }
 
     // check if name is unique 
     if(!assessmentService.assessmentTitleIsUnique(assessmentId,assessmentName,false)){
 	String nameUnique_err=ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AssessmentSettingsMessages","assessmentName_error");
-	context.addMessage(null,new FacesMessage(nameUnique_err));
+	error(context, nameUnique_err);
 	error=true;
     }
     
     // check if start date is valid
     if(!assessmentSettings.getIsValidStartDate()){
     	String startDateErr = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.GeneralMessages","invalid_start_date");
-    	context.addMessage(null,new FacesMessage(startDateErr));
+    	error(context, startDateErr);
     	error=true;
     }
     // check if due date is valid
     if(!assessmentSettings.getIsValidDueDate()){
     	String dueDateErr = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.GeneralMessages","invalid_due_date");
-    	context.addMessage(null,new FacesMessage(dueDateErr));
+    	error(context, dueDateErr);
     	error=true;
     }
 
@@ -122,21 +123,21 @@ public class SaveAssessmentSettingsListener
 
     if(assessmentSettings.getDueDate() == null && assessmentSettings.getRetractDate() != null && AssessmentAccessControlIfc.ACCEPT_LATE_SUBMISSION.toString().equals(assessmentSettings.getLateHandling())){
         String dueDateErr = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AssessmentSettingsMessages", "due_null_with_retract_date");
-        context.addMessage(null,new FacesMessage(dueDateErr));
+        error(context, dueDateErr);
         error = true;
     }
 
     // check if late submission date is valid
     if(!assessmentSettings.getIsValidRetractDate()){
     	String retractDateErr = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.GeneralMessages","invalid_retrack_date");
-    	context.addMessage(null,new FacesMessage(retractDateErr));
+    	error(context, retractDateErr);
     	error=true;
     }
 
     // check that retract is after due and due is not null
     if (!assessmentSettings.getIsRetractAfterDue()) {
     	String retractDateErr = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AssessmentSettingsMessages", "retract_earlier_than_due");
-    	context.addMessage(null, new FacesMessage(retractDateErr));
+    	error(context, retractDateErr);
     	error = true;
     }
 
@@ -155,7 +156,7 @@ public class SaveAssessmentSettingsListener
     	String[] groupsAuthorized = assessmentSettings.getGroupsAuthorizedToSave(); //getGroupsAuthorized();
     	if (groupsAuthorized == null || groupsAuthorized.length == 0) {
     		String releaseGroupError = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.GeneralMessages","choose_one_group");
-        	context.addMessage(null,new FacesMessage(releaseGroupError));
+        	error(context, releaseGroupError);
         	error=true;
         	assessmentSettings.setNoGroupSelectedError(true);
     	}
@@ -188,9 +189,9 @@ public class SaveAssessmentSettingsListener
 		log.warn("Expecting Boolean or String true/false for hasTimeAssessment, got: " + time + ", exception: " + ex.getMessage());
 	}
     if((isTime) &&((assessmentSettings.getTimeLimit().intValue())==0)){
-	String time_err=ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AssessmentSettingsMessages","timeSelect_error");
-	context.addMessage(null,new FacesMessage(time_err));
-        error=true;
+		String time_err=ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AssessmentSettingsMessages","timeSelect_error");
+		error(context, time_err);
+		error=true;
     }
     
     String ipString = assessmentSettings.getIpAddresses().trim().replace(" ", "");
@@ -211,8 +212,7 @@ public class SaveAssessmentSettingsListener
 	if(ipErr){
 	    error=true;
 	    String  ip_err=ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AssessmentSettingsMessages","ip_error");
-	    context.addMessage(null,new FacesMessage(ip_err));
-
+	    error(context, ip_err);
 	}
 
 	String unlimitedSubmissions = assessmentSettings.getUnlimitedSubmissions();
@@ -227,7 +227,7 @@ public class SaveAssessmentSettingsListener
 		catch (RuntimeException e){
 			error=true;
 			String  submission_err = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AssessmentSettingsMessages","submissions_allowed_error");
-			context.addMessage(null,new FacesMessage(submission_err));
+			error(context, submission_err);
 		}
 	}
 	
@@ -244,7 +244,7 @@ public class SaveAssessmentSettingsListener
 		catch (RuntimeException e){
 			error=true;
 			String  submission_err = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AssessmentSettingsMessages","averag_grading_single_submission");
-			context.addMessage(null,new FacesMessage(submission_err));
+			error(context, submission_err);
 		}
 	}
 		
@@ -253,19 +253,19 @@ public class SaveAssessmentSettingsListener
     	if (StringUtils.isBlank(assessmentSettings.getFeedbackDateString())) {
     		error=true;
     		String  date_err=ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AssessmentSettingsMessages","date_error");
-    		context.addMessage(null,new FacesMessage(date_err));
+    		error(context, date_err);
     	}
     	else {
     		if(StringUtils.isNotBlank(assessmentSettings.getFeedbackEndDateString()) && assessmentSettings.getFeedbackDate().after(assessmentSettings.getFeedbackEndDate())){
                 String feedbackDateErr = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.GeneralMessages","invalid_feedback_ranges");
-                context.addMessage(null,new FacesMessage(feedbackDateErr));
+                error(context, feedbackDateErr);
                 error=true;
             }
     	}
 
     	if(!assessmentSettings.getIsValidFeedbackDate()){
         	String feedbackDateErr = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.GeneralMessages","invalid_feedback_date");
-        	context.addMessage(null,new FacesMessage(feedbackDateErr));
+        	error(context, feedbackDateErr);
         	error=true;
         }
 
@@ -288,7 +288,7 @@ public class SaveAssessmentSettingsListener
 		if(scoreThresholdEnabled && scoreThresholdError){
 			error = true;
 			String str_err = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AssessmentSettingsMessages","feedback_score_threshold_required");
-			context.addMessage(null,new FacesMessage(str_err));
+			error(context, str_err);
 		}
     }
     
@@ -308,7 +308,7 @@ public class SaveAssessmentSettingsListener
     				if ( ! (( c >= 'a' && c <= 'z' ) || ( c >= 'A' && c <= 'Z' ) || ( c >= '0' && c <= '9' )) ) {
     					error = true;
     					String  submission_err = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AssessmentSettingsMessages","exit_password_error");
-    					context.addMessage(null,new FacesMessage(submission_err));
+    					error(context, submission_err);
     					break;
     				}
     			}					
@@ -337,7 +337,7 @@ public class SaveAssessmentSettingsListener
 					case INVALID_CHARS:
 						String gbTitleWarn = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AuthorMessages","gradebook_exception_title_invalid_warn");
 						String titleWarning = MessageFormat.format( gbTitleWarn, new Object[] { draftLabel + " - " + title} );
-						context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_WARN, titleWarning, null));
+						warn(context, titleWarning);
 						break;
 					case DUPLICATE_TITLE:
 						// this could be a false positive with the published copy of this quiz if we are editing the working copy, so check for that
@@ -350,7 +350,7 @@ public class SaveAssessmentSettingsListener
 						if (!falsePositive) {
 							String gbConflictWarn = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AssessmentSettingsMessages", "gbConflict_warn");
 							String conflictWarning = MessageFormat.format( gbConflictWarn, new Object[] { draftLabel + " - " + title} );
-							context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_WARN, conflictWarning, null));
+							warn(context, conflictWarning);
 						}
 						break;
 				}
@@ -359,7 +359,7 @@ public class SaveAssessmentSettingsListener
 				// we've already confirmed the Gradebook exists so something very strange is likely going on with the false positive check
 				log.error("Unexpected error validating assessment title '{}'", assessmentSettings.getTitle(), e);
 				String unexpected = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AssessmentSettingsMessages","unexpectedTitleValidationWarn");
-				context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_WARN, unexpected, null));
+				warn(context, unexpected);
 			}
 		}
 	}

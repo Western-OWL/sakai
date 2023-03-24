@@ -98,7 +98,7 @@ public class RepublishAssessmentListener implements ActionListener {
 				throw new AbortProcessingException("Gradebook item with same title already exists.");
 			case INVALID_CHARS: // should not be possible at this stage but we'll handle it anyway just in case
 				String gbTitleError=ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AuthorMessages","gradebook_exception_title_invalid");
-				context.addMessage(null,new FacesMessage(FacesMessage.SEVERITY_WARN, gbTitleError, null));
+				context.addMessage(null,new FacesMessage(FacesMessage.SEVERITY_ERROR, gbTitleError, null));
 				throw new AbortProcessingException("Title contains invalid characters for Gradebook item.");
 		}
 
