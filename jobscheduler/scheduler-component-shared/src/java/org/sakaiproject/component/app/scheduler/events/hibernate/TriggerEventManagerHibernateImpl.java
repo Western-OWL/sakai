@@ -21,6 +21,8 @@ import java.util.List;
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
+import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
@@ -43,6 +45,8 @@ import org.springframework.transaction.annotation.Transactional;
  */
 public class TriggerEventManagerHibernateImpl extends HibernateDaoSupport implements TriggerEventManager
 {
+    private static final String SCHEDULED_INVOCATION_NAME_PREFIX = "Scheduled Invocation:";
+
     @Override
     @Transactional
     public TriggerEvent createTriggerEvent(TRIGGER_EVENT_TYPE type, JobKey jobKey, TriggerKey triggerKey, Date time, String message) {
@@ -61,7 +65,7 @@ public class TriggerEventManagerHibernateImpl extends HibernateDaoSupport implem
         event.setServerId(serverId);
 
         if (GROUP_NAME.equals(jobKey.getGroup())) {
-            event.setJobName("Scheduled Invocation: " + jobKey.getName());
+            event.setJobName(SCHEDULED_INVOCATION_NAME_PREFIX + " " + jobKey.getName());
         } else {
             event.setJobName(jobKey.getName());
         }
@@ -142,7 +146,23 @@ public class TriggerEventManagerHibernateImpl extends HibernateDaoSupport implem
         }
         if (jobs != null && !jobs.isEmpty())
         {
-            criteria.add(Restrictions.in("jobName", jobs));
+            if (jobs.contains(SCHEDULED_INVOCATION_NAME_PREFIX))
+            {
+                Criterion jobNameLike = Restrictions.like("jobName", SCHEDULED_INVOCATION_NAME_PREFIX, MatchMode.START);
+                if (jobs.size() == 1)
+                {
+                    criteria.add(jobNameLike);
+                }
+                else
+                {
+                    jobs.remove(SCHEDULED_INVOCATION_NAME_PREFIX);
+                    criteria.add(Restrictions.or(jobNameLike, Restrictions.in("jobName", jobs)));
+                }
+            }
+            else
+            {
+                criteria.add(Restrictions.in("jobName", jobs));
+            }
         }
         if (triggerName != null)
         {
