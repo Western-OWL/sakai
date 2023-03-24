@@ -433,7 +433,7 @@
 
     <!-- LATE HANDLING -->
     <h:panelGroup rendered="#{publishedSettings.valueMap.lateHandling_isInstructorEditable==true}">
-      <div class="row">
+      <div class="row form-group">
         <h:outputLabel styleClass="col-md-2 form-control-label" value="#{assessmentSettingsMessages.late_accept}" />
         <div class="col-md-10">
         <t:selectOneRadio id="lateHandling" value="#{publishedSettings.lateHandling}" onclick="checkLastHandling();" layout="spread">

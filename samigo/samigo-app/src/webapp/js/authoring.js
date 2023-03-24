@@ -562,27 +562,14 @@ function checkTimedRadio(){
 
         if(timelimitEnabled == 'true') {
                 //timelimit enabled
-                hourSelect.show();
-                minuteSelect.show();
-                hourLabel.show();
-                minuteLabel.show();
-                secondLabel.show();
-                if(firstLabel.text().indexOf(dot) == -1) {
-                    firstLabel.text(firstLabel.text() + dot);
-                    firstLabel.after('<span id="timedSpace"> </span>');
-                }
+                hourSelect[0].disabled = false;
+                minuteSelect[0].disabled = false;
         }
         else if(timelimitEnabled == 'false') {
                 //timelimit disabled
-                hourSelect.hide();
-                minuteSelect.hide();
-                hourLabel.hide();
-                minuteLabel.hide();
-                secondLabel.hide();
-                if(firstLabel.text().indexOf(dot) > -1) {
-                    firstLabel.text(firstLabel.text().substring(0, firstLabel.text().indexOf(dot)));
-                    $("#timedSpace").remove();
-                }
+                hourSelect[0].disabled = true;
+                minuteSelect[0].disabled = true;
+
                 //set hour and min to 0
                 hourSelect[0].options.selectedIndex = 0;
                 minuteSelect[0].options.selectedIndex = 0;
