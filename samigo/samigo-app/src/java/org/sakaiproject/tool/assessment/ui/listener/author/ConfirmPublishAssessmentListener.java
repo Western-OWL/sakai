@@ -56,6 +56,7 @@ import org.sakaiproject.tool.assessment.ui.bean.author.AuthorBean;
 import org.sakaiproject.tool.assessment.ui.bean.author.PublishRepublishNotificationBean;
 import org.sakaiproject.tool.assessment.ui.bean.authz.AuthorizationBean;
 import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
+import org.sakaiproject.tool.assessment.util.FacesMessenger;
 import org.sakaiproject.tool.assessment.util.TextFormat;
 import org.sakaiproject.tool.assessment.util.TimeLimitValidator;
 import org.sakaiproject.util.api.FormattedText;
@@ -68,7 +69,7 @@ import org.sakaiproject.util.api.FormattedText;
  */
 @Slf4j
 public class ConfirmPublishAssessmentListener
-    implements ActionListener {
+    implements ActionListener, FacesMessenger {
 
   //private static ContextUtil cu;
   private static final GradebookServiceHelper gbsHelper =
@@ -96,7 +97,7 @@ public class ConfirmPublishAssessmentListener
     AuthorizationBean authzBean = (AuthorizationBean) ContextUtil.lookupBean("authorization");
     if (!authzBean.isUserAllowedToPublishAssessment(assessmentId, assessment.getCreatedBy(), false)) {
         String err=ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AuthorMessages", "denied_publish_assessment_error");
-        context.addMessage(null,new FacesMessage(err));
+        error(context, err);
         assessmentSettings.setOutcomePublish("editAssessmentSettings");
         author.setIsErrorInSettings(true);
         return;
@@ -114,31 +115,31 @@ public class ConfirmPublishAssessmentListener
     String assessmentName = TextFormat.convertPlaintextToFormattedTextNoHighUnicode(assessmentSettings.getTitle());
     if(assessmentName!=null &&(assessmentName.trim()).equals("")){
      	String nameEmpty_err=ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AssessmentSettingsMessages","assessmentName_empty");
-	context.addMessage(null,new FacesMessage(nameEmpty_err));
+	error(context, nameEmpty_err);
 	error=true;
     }
     if(!assessmentService.assessmentTitleIsUnique(assessmentId,assessmentName,false)){
       String nameUnique_err=ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AssessmentSettingsMessages","assessmentName_error");
-      context.addMessage(null,new FacesMessage(nameUnique_err));
+      error(context, nameUnique_err);
       error=true;
     }
     
  // check if start date is valid
     if(!assessmentSettings.getIsValidStartDate()){
     	String startDateErr = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.GeneralMessages","invalid_start_date");
-    	context.addMessage(null,new FacesMessage(startDateErr));
+    	error(context, startDateErr);
     	error=true;
     }
     // check if due date is valid
     if(!assessmentSettings.getIsValidDueDate()){
     	String dueDateErr = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.GeneralMessages","invalid_due_date");
-    	context.addMessage(null,new FacesMessage(dueDateErr));
+    	error(context, dueDateErr);
     	error=true;
     }
     // check if late submission date is valid
     if(!assessmentSettings.getIsValidRetractDate()){
     	String retractDateErr = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.GeneralMessages","invalid_retrack_date");
-    	context.addMessage(null,new FacesMessage(retractDateErr));
+    	error(context, retractDateErr);
     	error=true;
     }
     
@@ -152,7 +153,7 @@ public class ConfirmPublishAssessmentListener
     if ((dueDate != null && startDate != null && dueDate.before(startDate)) ||
     	(dueDate != null && startDate == null && dueDate.before(new Date()))) {
     	String dateError1 = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AssessmentSettingsMessages","due_earlier_than_avaliable");
-    	context.addMessage(null,new FacesMessage(FacesMessage.SEVERITY_WARN, dateError1, null));
+    	error(context, dateError1);
     	error=true;
     	assessmentSettings.setStartDate(new Date());
     }
@@ -160,21 +161,21 @@ public class ConfirmPublishAssessmentListener
 	    if ((retractDate != null && startDate != null && retractDate.before(startDate)) ||
 	        (retractDate != null && startDate == null && retractDate.before(new Date()))) {
 	    	String dateError2 = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AssessmentSettingsMessages","retract_earlier_than_avaliable");
-	    	context.addMessage(null,new FacesMessage(FacesMessage.SEVERITY_WARN, dateError2, null));
+	    	error(context, dateError2);
 	    	error=true;
 	    	isRetractEarlierThanAvaliable = true;
 	    	assessmentSettings.setStartDate(new Date());
 	    }
 	    if (!isRetractEarlierThanAvaliable && (retractDate != null && dueDate != null && retractDate.before(dueDate))) {
 	    	String dateError3 = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AssessmentSettingsMessages","retract_earlier_than_due");
-	    	context.addMessage(null,new FacesMessage(FacesMessage.SEVERITY_WARN, dateError3, null));
+	    	error(context, dateError3);
 	    	error=true;
 	    }
     }
 
 	if(dueDate != null && startDate != null && dueDate.equals(startDate)) {
 		String dateError4 = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AssessmentSettingsMessages", "due_same_as_available");
-		context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_WARN, dateError4, null));
+		error(context, dateError4);
 		error=true;
 	}
 
@@ -193,7 +194,7 @@ public class ConfirmPublishAssessmentListener
     if (assessmentSettings.getDueDate() == null && assessmentSettings.getLateHandling() != null && AssessmentAccessControlIfc.ACCEPT_LATE_SUBMISSION.toString().equals(assessmentSettings.getLateHandling()) &&
         assessmentSettings.getRetractDate() !=null){
         String noDueDate = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AssessmentSettingsMessages","due_null_with_retract_date");
-        context.addMessage(null,new FacesMessage(FacesMessage.SEVERITY_WARN, noDueDate, null));
+        error(context, noDueDate);
         error=true;
     }
 
@@ -211,7 +212,7 @@ public class ConfirmPublishAssessmentListener
         if (assessmentSettings.getLateHandling() != null && AssessmentAccessControlIfc.NOT_ACCEPT_LATE_SUBMISSION.toString().equals(assessmentSettings.getLateHandling()) &&
                 dueDate == null && autoSubmitEnabled) {
             String dateError4 = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AssessmentSettingsMessages", "due_required_with_auto_submit");
-            context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_WARN, dateError4, null));
+            error(context, dateError4);
             error = true;
         }
 
@@ -219,7 +220,7 @@ public class ConfirmPublishAssessmentListener
         if (assessmentSettings.getLateHandling() != null && AssessmentAccessControlIfc.ACCEPT_LATE_SUBMISSION.toString().equals(assessmentSettings.getLateHandling()) &&
                 retractDate == null && autoSubmitEnabled) {
             String dateError4 = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AssessmentSettingsMessages", "retract_required_with_auto_submit");
-            context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_WARN, dateError4, null));
+            error(context, dateError4);
             error = true;
         }
     }
@@ -229,7 +230,7 @@ public class ConfirmPublishAssessmentListener
     		String[] groupsAuthorized = assessmentSettings.getGroupsAuthorized(); //getGroupsAuthorized();
     		if (groupsAuthorized == null || groupsAuthorized.length == 0) {
     			String releaseGroupError = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.GeneralMessages","choose_one_group");
-    			context.addMessage(null,new FacesMessage(releaseGroupError));
+    			error(context, releaseGroupError);
     			error=true;
     			assessmentSettings.setNoGroupSelectedError(true);
     		}
@@ -264,7 +265,7 @@ public class ConfirmPublishAssessmentListener
 
     	if ((isTime) &&((assessmentSettings.getTimeLimit())==0)){
     		String time_err=ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AssessmentSettingsMessages","timeSelect_error");
-    		context.addMessage(null,new FacesMessage(time_err));
+    		error(context, time_err);
     		error=true;
     	}
     	boolean ipErr=false;
@@ -285,7 +286,7 @@ public class ConfirmPublishAssessmentListener
     	if(ipErr){
     		error=true;
     		String  ip_err=ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AssessmentSettingsMessages","ip_error");
-    		context.addMessage(null,new FacesMessage(ip_err));
+    		error(context, ip_err);
     	}
 
     	String unlimitedSubmissions = assessmentSettings.getUnlimitedSubmissions();
@@ -300,7 +301,7 @@ public class ConfirmPublishAssessmentListener
     		catch (RuntimeException e){
     			error=true;
     			String  submission_err = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AssessmentSettingsMessages","submissions_allowed_error");
-    			context.addMessage(null,new FacesMessage(submission_err));
+    			error(context, submission_err);
     		}
     	}
 
@@ -316,7 +317,7 @@ public class ConfirmPublishAssessmentListener
     		catch (RuntimeException e){
     			error=true;
     			String  submission_err = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AssessmentSettingsMessages","averag_grading_single_submission");
-    			context.addMessage(null,new FacesMessage(submission_err));
+    			error(context, submission_err);
     		}
     	}
 
@@ -325,20 +326,20 @@ public class ConfirmPublishAssessmentListener
 			if(StringUtils.isBlank(assessmentSettings.getFeedbackDateString())){
 				error=true;
 				String date_err=ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AssessmentSettingsMessages","date_error");
-				context.addMessage(null,new FacesMessage(date_err));
+				error(context, date_err);
 			}
 			else {
 				// TODO this logic should be refactored
 				if(StringUtils.isNotBlank(assessmentSettings.getFeedbackEndDateString()) && assessmentSettings.getFeedbackDate().after(assessmentSettings.getFeedbackEndDate())){
 					String feedbackDateErr = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.GeneralMessages","invalid_feedback_ranges");
-					context.addMessage(null,new FacesMessage(feedbackDateErr));
+					error(context, feedbackDateErr);
 					error=true;
 				}
 			}
 
 			if(!assessmentSettings.getIsValidFeedbackDate()){
 				String feedbackDateErr = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.GeneralMessages","invalid_feedback_date");
-				context.addMessage(null,new FacesMessage(feedbackDateErr));
+				error(context, feedbackDateErr);
 				error=true;
 			}
 
@@ -361,7 +362,7 @@ public class ConfirmPublishAssessmentListener
 			if(scoreThresholdEnabled && scoreThresholdError){
 				error = true;
 				String str_err = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AssessmentSettingsMessages","feedback_score_threshold_required");
-				context.addMessage(null,new FacesMessage(str_err));
+				error(context, str_err);
 			}
 		}
     }
@@ -370,7 +371,7 @@ public class ConfirmPublishAssessmentListener
     		String[] groupsAuthorized = assessmentSettings.getGroupsAuthorized(); //populate groupsAuthorized;
     		if (groupsAuthorized == null || groupsAuthorized.length == 0) {
     			String releaseGroupError = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.GeneralMessages","choose_release_to");
-    			context.addMessage(null,new FacesMessage(releaseGroupError));
+    			error(context, releaseGroupError);
     			error=true;
     			assessmentSettings.setNoGroupSelectedError(true);
     		}
@@ -386,7 +387,7 @@ public class ConfirmPublishAssessmentListener
  	    if(assessmentBean.getTotalScore()<=0)
 		{
  	    	String gb_err=ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AuthorMessages", "gradebook_exception_min_points");
-            context.addMessage(null, new FacesMessage(gb_err));
+            error(context, gb_err);
             error=true;
 		}
 	}
@@ -404,12 +405,12 @@ public class ConfirmPublishAssessmentListener
         switch(result) {
             case DUPLICATE_TITLE:
                 String gbConflict_error=ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AssessmentSettingsMessages","gbConflict_error");
-                context.addMessage(null,new FacesMessage(FacesMessage.SEVERITY_ERROR, gbConflict_error, null));
+                error(context, gbConflict_error);
                 error=true;
                 break;
             case INVALID_CHARS:
                 String gbTitleError=ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AuthorMessages","gradebook_exception_title_invalid");
-                context.addMessage(null,new FacesMessage(FacesMessage.SEVERITY_WARN, gbTitleError, null));
+                error(context, gbTitleError);
                 error=true;
                 break;
         }
@@ -477,7 +478,7 @@ public class ConfirmPublishAssessmentListener
     PublishedAssessmentService publishedService = new PublishedAssessmentService();
     if ( !publishedService.publishedAssessmentTitleIsUnique(assessmentId,assessmentName)){
       String err=ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AssessmentSettingsMessages","published_assessment_title_not_unique_error");
-      context.addMessage(null,new FacesMessage(err));
+      error(context, err);
       assessmentSettings.setOutcomePublish("editAssessmentSettings");
       author.setIsErrorInSettings(true);
       return;

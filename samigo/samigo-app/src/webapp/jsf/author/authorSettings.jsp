@@ -221,22 +221,8 @@
       </a>
   </div>
   <br/>
-  
-  <h:dataTable value="#{assessmentSettings.errorMessages}" var="message" styleClass="sak-banner-error" rendered="#{assessmentSettings.renderErrorMessage}">
-  	<h:column>
-  	  <h:outputText value="#{message.detail}"/>
-  	</h:column>
-  </h:dataTable>
-  <h:dataTable value="#{assessmentSettings.warnMessages}" var="message" styleClass="sak-banner-warn" rendered="#{assessmentSettings.renderWarnMessage}">
-  	<h:column>
-  	  <h:outputText value="#{message.detail}"/>
-  	</h:column>
-  </h:dataTable>
-  <h:dataTable value="#{assessmentSettings.infoMessages}" var="message" styleClass="sak-banner-info" rendered="#{assessmentSettings.renderInfoMessage}">
-  	<h:column>
-  	  <h:outputText value="#{message.detail}"/>
-  	</h:column>
-  </h:dataTable>
+
+  <%@ include file="/jsf/author/inc/settingsFeedbackBanners.jspf" %>
 
 <div class="tier1" id="jqueryui-accordion">
 

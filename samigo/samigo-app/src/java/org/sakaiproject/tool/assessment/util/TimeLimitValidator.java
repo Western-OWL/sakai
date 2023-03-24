@@ -69,7 +69,7 @@ public class TimeLimitValidator
         if( !availableLongerThanTimer && StringUtils.isNotBlank( messageBundle ) && StringUtils.isNotBlank( messageKey ) && context != null )
         {
             String errorMsg = ContextUtil.getLocalizedString( messageBundle, messageKey );
-            context.addMessage( null, new FacesMessage( FacesMessage.SEVERITY_WARN, errorMsg, null ) );
+            context.addMessage( null, new FacesMessage( FacesMessage.SEVERITY_ERROR, errorMsg, null ) );
         }
 
         return availableLongerThanTimer;

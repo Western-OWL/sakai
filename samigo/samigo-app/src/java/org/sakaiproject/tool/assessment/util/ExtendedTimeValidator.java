@@ -245,7 +245,7 @@ public class ExtendedTimeValidator
     private void addError( String errorKey, ExtendedTime entry, FacesContext context )
     {
         String errorMsg = getError( errorKey, entry );
-        context.addMessage( null, new FacesMessage( FacesMessage.SEVERITY_WARN, errorMsg, null ) );
+        context.addMessage( null, new FacesMessage( FacesMessage.SEVERITY_ERROR, errorMsg, null ) );
         valid = false;
     }
 
@@ -271,7 +271,7 @@ public class ExtendedTimeValidator
      */
     private void addWarn( String messageKey, ExtendedTime entry, FacesContext context ) {
         String errorMsg = getError( messageKey, entry );
-        context.addMessage( null, new FacesMessage( FacesMessage.SEVERITY_INFO, errorMsg, null ) );
+        context.addMessage( null, new FacesMessage( FacesMessage.SEVERITY_WARN, errorMsg, null ) );
     }
 
     /**
