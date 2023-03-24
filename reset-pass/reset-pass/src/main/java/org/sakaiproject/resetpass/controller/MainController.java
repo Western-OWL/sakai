@@ -156,11 +156,14 @@ public class MainController {
             supportEmail = serverConfigurationService.getString("mail.support", "");
         }
 
-        String exceptionMessage = messageSource.getMessage("confirm.validate", new String[]{serverConfigurationService.getString("ui.service", "Sakai"), requestString}, userLocale);
-        String errorMsg = this.validateErrors(requestString);
-        boolean exceptionMsg = this.validateExceptions(requestString);
+        String successMessage = messageSource.getMessage("confirm.validate", new String[]{serverConfigurationService.getString("ui.service", "Sakai"), requestString}, userLocale);
+        String errorWithEmailAddress = validateEmail(requestString);
+        boolean errorWithUser = false;
+        if (errorWithEmailAddress == null) {
+            errorWithUser = validateUser(requestString);
+        }
 
-        if (errorMsg == null && !exceptionMsg) {
+        if (errorWithEmailAddress == null && !errorWithUser) {
             jsonResponse.put("email_sent_msg", emailSentMessage);
             processAction(requestString);
             
@@ -169,8 +172,10 @@ public class MainController {
                 jsonResponse.put("support_mail", supportEmail);
             }
 
-        } else if (exceptionMsg){
-            jsonResponse.put("exception_msg", exceptionMessage);
+        } else if (errorWithUser){
+            // If user doesn't exist, multiple users with email, or email belongs to admin, we pretend like we sent the email
+            // This is to avoid confirming to the potential attacker that whether or not the account exists, etc.
+            jsonResponse.put("success_msg", successMessage);
             
             if (supportMessage != null){
                 jsonResponse.put("support_msg", supportMessage);
@@ -178,7 +183,7 @@ public class MainController {
             }
 
         } else {
-            jsonResponse.put("error_msg", errorMsg);
+            jsonResponse.put("error_msg", errorWithEmailAddress);
         }
 
         return jsonResponse.toJSONString();
@@ -320,14 +325,15 @@ public class MainController {
         return periodFormatter.print(period);
     }
 
-    private String validateErrors(String email) {
+    private String validateEmail(String email) {
 
         String errorMsgs = null;
         log.debug("validating user " + email);
 
+        // Shor circuit: no email provided
         if (StringUtils.isBlank(email)) {
             log.debug("no email provided");
-            errorMsgs = messageSource.getMessage("noemailprovided", null, userLocale);
+            return messageSource.getMessage("noemailprovided", null, userLocale);
         }
 
         // Short circuit: domain provided not allowed
@@ -350,33 +356,32 @@ public class MainController {
         return errorMsgs;
     }
 
-    private boolean validateExceptions(String email){
+    private boolean validateUser(String email){
 
-        boolean exceptionMsg = false;
-
-        // User doesn't exist, null out the user and transfer to next page
+        boolean invalidEmail = false;
         Collection<User> c = this.userDirectoryService.findUsersByEmail(email.trim());
 
+        // User doesn't exist
         if (CollectionUtils.isEmpty(c) && StringUtils.isNotBlank(email)) {
             log.warn("No such email: {}", email);
-            exceptionMsg = true;
+            invalidEmail = true;
 
         } else if (c.size() > 1) {
-            // Email is tied to more than one user, null out the user and transfer to next page
+            // Email is tied to more than one user
             log.warn("More than one account with provided email address, aborting: {}", email);
-            exceptionMsg = true;
+            invalidEmail = true;
         }
 
-        // Email belongs to super user, null out the user and transfer to next page
+        // Email belongs to super user
         if (CollectionUtils.isNotEmpty(c)) {
             User user = (User) c.iterator().next();
 
             if (securityService.isSuperUser(user.getId())) {
                 log.warn("Attempt to change admin password with email, aborting: {}", email);
-                exceptionMsg = true;
+                invalidEmail = true;
             }
         }
 
-        return exceptionMsg;
+        return invalidEmail;
     }
 }
