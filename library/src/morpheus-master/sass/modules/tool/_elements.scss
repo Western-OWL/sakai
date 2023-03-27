@@ -10,10 +10,12 @@
 		&:hover,
 		&:focus {
 			background-color: var(--sakai-active-color-1);
+			color: var(--sakai-active-text-color);
 		}
 
 		&:active {
 			background-color: var(--sakai-active-color-2);
+			color: var(--sakai-active-text-color);
 		}
 	}
 
@@ -33,7 +35,7 @@
 		a:hover,
 		a:focus,
 		a:active {
-			color: var(--sakai-text-color-1);
+			color: var(--sakai-active-text-color);
 		}
 
 		a:focus {

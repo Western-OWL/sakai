@@ -76,6 +76,8 @@
     // Used for active, focus, selected effects with --sakai-text-color-3
     --sakai-active-color-3: var(--sakai-brand--darker-4);
 
+    --sakai-active-text-color: var(--sakai-color-white);
+
     // Default: A very light tint of gray. 
     // Suggested: --sakai-color-gray--lighter-6.
     // Used as background for non-active/current site in favorites and buttons
@@ -171,6 +173,8 @@
     --sakai-text-color-inverted: var(--sakai-background-color-1);
 
     /////////////////////End main theme definition/////////////////////
+
+    --sakai-image-invert: grayscale(100%) invert(100%);
 
     //Built to be used for box-shadow
     //https://material-components.github.io/material-components-web-catalog/#/component/elevation
@@ -324,7 +328,7 @@
     /* End Default state */
     /* Active/Current site */
     --sites-nav-menu-item-selected-background: var(--sakai-active-color-1);
-    --sites-nav-menu-item-selected-color: var(--sakai-color-white);
+    --sites-nav-menu-item-selected-color: var(--sakai-active-text-color);
     --sites-nav-menu-item-selected-border-color: var(--sites-nav-menu-item-selected-background);
     // Hover
     --sites-nav-menu-item-selected-hover-background: var(--sakai-active-color-2);
@@ -373,7 +377,7 @@
     --all-sites-button-star-full-color: var(--sakai-color-gold);
     --all-sites-button-star-empty-color: var(--sakai-text-color-1);
 
-    --all-sites-button-selected-text-color: var(--sakai-color-white);
+    --all-sites-button-selected-text-color: var(--sakai-active-text-color);
     --all-sites-button-selected-background-color: var(--sakai-active-color-1);
     --all-sites-button-selected-border-color: var(--all-sites-button-selected-background-color);
     --all-sites-button-selected-dropdown-color: var(--all-sites-button-selected-text-color);
@@ -432,7 +436,7 @@
     --tool-menu-item-hidden-active-icon-color: var(--tool-menu-item-active-icon-color);
     --tool-menu-item-hidden-active-background-color: var(--tool-menu-item-active-background-color);
     //Selected - normal state
-    --tool-menu-item-selected-text-color: var(--sakai-color-white);
+    --tool-menu-item-selected-text-color: var(--sakai-active-text-color);
     --tool-menu-item-selected-icon-color: var(--tool-menu-item-selected-text-color);
     --tool-menu-item-selected-background-color: var(--sakai-active-color-1);
     //Selected - hover

@@ -583,7 +583,7 @@ sakai.editor.editors.ckeditor.launch = function(targetId, config, w, h) {
                     border-top-color:{defaultBorder};
                 ] 
                 {id} .cke_dialog_tab_selected [
-                    color:{defaultTextColor};
+                    color:{activeTextColor};
                     background:{dialogTabSelected};
                     border-bottom-color:{dialogTabSelectedBorder};
                 ] 
@@ -631,6 +631,9 @@ sakai.editor.editors.ckeditor.launch = function(targetId, config, w, h) {
                     background-color:{ckeButtonOn};
                     border-color:{toolbarElementsBorder};
                 ] 
+                {id} .cke_button_on span [
+                    filter: {ckeButtonOnIcon};
+                ]
                 {id} .cke_toolbar_separator,
                 {id} .cke_toolgroup a.cke_button:last-child:after,
                 {id} .cke_toolgroup a.cke_button.cke_button_disabled:hover:last-child:after [
@@ -726,10 +729,12 @@ sakai.editor.editors.ckeditor.launch = function(targetId, config, w, h) {
                 lightBackground: uiColor.getPropertyValue("--sakai-background-color-1"),
                 darkBackground: uiColor.getPropertyValue("--sakai-background-color-3"),
                 defaultTextColor: uiColor.getPropertyValue("--sakai-text-color-1"),
+                activeTextColor: uiColor.getPropertyValue("--sakai-active-text-color"),
 
                 // These are for specific UI elements.
                 ckeButtonColor: uiColor.getPropertyValue("--sakai-text-color-1"),
                 ckeButtonOn: uiColor.getPropertyValue("--sakai-active-color-1"),
+                ckeButtonOnIcon: uiColor.getPropertyValue("--sakai-image-invert"),
                 ckeResizer: uiColor.getPropertyValue("--sakai-text-color-1"),
                 ckeColorauto: uiColor.getPropertyValue("--sakai-background-color-3"),
                 dialogBody: uiColor.getPropertyValue("--sakai-background-color-2"),
