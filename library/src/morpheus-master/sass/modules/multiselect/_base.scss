@@ -117,7 +117,7 @@
     .select2-container--default
         .select2-results__option--highlighted[aria-selected] {
         background-color: var(--sakai-active-color-1);
-        color: var(--sakai-text-color-3);
+        color: var(--sakai-active-text-color);
     }
     .select2-container--classic .select2-selection--single {
         background-color: var(--sakai-background-color-2);
@@ -215,7 +215,7 @@
     .select2-container--classic
         .select2-results__option--highlighted[aria-selected] {
             background-color: var(--sakai-active-color-1);
-            color: var(--sakai-text-color-3);
+            color: var(--sakai-active-text-color);
     }
     .select2-container--classic.select2-container--open .select2-dropdown {
         border-color: var(--sakai-active-color-1);

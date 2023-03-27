@@ -184,7 +184,7 @@
         text-align: center;
     }
     div.#{$namespace}sakai-mycalendar div.ui-datepicker table.ui-datepicker-calendar td.mycalendar-eventful-day > a {
-        color: var(--sakai-text-color-1);
+        color: var(--sakai-active-text-color);
         background-color: var(--sakai-active-color-1);
         border-radius:50%;
         width:27px;

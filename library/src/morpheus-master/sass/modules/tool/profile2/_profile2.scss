@@ -969,10 +969,12 @@
 
 	.unread-message {
 		background-color: var(--sakai-active-color-1);
+		color: var(--sakai-active-text-color);
 	}
 
 	.unread-message:hover {
 		background-color: var(--sakai-active-color-2);
+		color: var(--sakai-active-text-color);
 	}
 
 	/* gallery-related */
