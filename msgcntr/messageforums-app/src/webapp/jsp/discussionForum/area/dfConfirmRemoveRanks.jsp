@@ -11,13 +11,13 @@
 <!--jsp/discussionForum/area/dfConfirmRemoveRanks.jsp-->
 <f:view>
     <sakai:view title="Confirm Remove Ranks">
-        <link rel="stylesheet" href="/messageforums-tool/css/msgcntr.css" type="text/css" />
-        <link rel="stylesheet" href="/messageforums-tool/css/forum_rank.css" type="text/css" />
+        <link rel="stylesheet" href="/messageforums-tool/css/msgcntr.css<h:outputText value="#{ForumTool.CDNQuery}" />" type="text/css" />
+        <link rel="stylesheet" href="/messageforums-tool/css/forum_rank.css<h:outputText value="#{ForumTool.CDNQuery}" />" type="text/css" />
     
         <h:form id="revise">
-            <script src="/library/js/fluid/1.5/MyInfusion.js"></script>
-            <script src="/messageforums-tool/js/forum_rank.js"></script>
-            <script src="/messageforums-tool/js/forum.js"></script>
+            <script src="/library/js/fluid/1.5/MyInfusion.js<h:outputText value="#{ForumTool.CDNQuery}" />"></script>
+            <script src="/messageforums-tool/js/forum_rank.js<h:outputText value="#{ForumTool.CDNQuery}" />"></script>
+            <script src="/messageforums-tool/js/forum.js<h:outputText value="#{ForumTool.CDNQuery}" />"></script>
     
             <sakai:tool_bar_message value="#{msgs.delete_rank}" />
             <f:verbatim><div style="padding:1em 0;"></f:verbatim>
