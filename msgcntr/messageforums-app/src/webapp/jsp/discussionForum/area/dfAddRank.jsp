@@ -11,16 +11,16 @@
 <!--jsp/discussionForum/area/dfAddRank.jsp-->
 <f:view>
     <sakai:view title="Forums">
-        <link rel="stylesheet" href="/messageforums-tool/css/msgcntr.css" type="text/css" />
-        <link rel="stylesheet" href="/library/webjars/jquery-ui/1.12.1/jquery-ui.min.css" type="text/css" />
-        <link rel="stylesheet" href="/messageforums-tool/css/forum_rank.css" type="text/css" />
+        <link rel="stylesheet" href="/messageforums-tool/css/msgcntr.css<h:outputText value="#{ForumTool.CDNQuery}" />" type="text/css" />
+        <link rel="stylesheet" href="/library/webjars/jquery-ui/1.12.1/jquery-ui.min.css<h:outputText value="#{ForumTool.CDNQuery}" />" type="text/css" />
+        <link rel="stylesheet" href="/messageforums-tool/css/forum_rank.css<h:outputText value="#{ForumTool.CDNQuery}" />" type="text/css" />
         
         <script>includeLatestJQuery("msgcntr");</script>
-        <script src="/messageforums-tool/js/fluidframework-min.js"></script>
-        <script src="/messageforums-tool/js/json2.js"></script>
-        <script src="/messageforums-tool/js/Scroller.js"></script>
-        <script src="/messageforums-tool/js/forum.js"></script>
-        <script src="/messageforums-tool/js/forum_rank.js"></script>
+        <script src="/messageforums-tool/js/fluidframework-min.js<h:outputText value="#{ForumTool.CDNQuery}" />"></script>
+        <script src="/messageforums-tool/js/json2.js<h:outputText value="#{ForumTool.CDNQuery}" />"></script>
+        <script src="/messageforums-tool/js/Scroller.js<h:outputText value="#{ForumTool.CDNQuery}" />"></script>
+        <script src="/messageforums-tool/js/forum.js<h:outputText value="#{ForumTool.CDNQuery}" />"></script>
+        <script src="/messageforums-tool/js/forum_rank.js<h:outputText value="#{ForumTool.CDNQuery}" />"></script>
         
         
         <script>
