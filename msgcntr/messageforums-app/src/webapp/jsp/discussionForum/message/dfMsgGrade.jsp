@@ -5,6 +5,7 @@
                  org.sakaiproject.tool.cover.ToolManager" %>
 <%@ taglib uri="http://java.sun.com/jsf/html" prefix="h" %>
 <%@ taglib uri="http://java.sun.com/jsf/core" prefix="f" %>
+<%@ taglib uri="http://myfaces.apache.org/tomahawk" prefix="t"%>
 <%@ taglib uri="http://sakaiproject.org/jsf2/sakai" prefix="sakai" %>
 <%@ taglib uri="http://sakaiproject.org/jsf/messageforums" prefix="mf" %>
 <jsp:useBean id="msgs" class="org.sakaiproject.util.ResourceLoader" scope="session">
@@ -12,16 +13,18 @@
 </jsp:useBean>
 
 <f:view>
-    <sakai:view toolCssHref="/messageforums-tool/css/msgcntr.css">
+    <sakai:view>
         <script>includeLatestJQuery("msgcntr");</script>
-        <script src="/messageforums-tool/js/sak-10625.js"></script>
-        <script src="/messageforums-tool/js/messages.js"></script>
-        <script src="/messageforums-tool/js/forum.js"></script>
+        <link rel="stylesheet" href="/messageforums-tool/css/msgcntr.css<h:outputText value="#{ForumTool.CDNQuery}" />" type="text/css" />
+        <script src="/messageforums-tool/js/sak-10625.js<h:outputText value="#{ForumTool.CDNQuery}" />"></script>
+        <script src="/messageforums-tool/js/messages.js<h:outputText value="#{ForumTool.CDNQuery}" />"></script>
+        <script src="/messageforums-tool/js/forum.js<h:outputText value="#{ForumTool.CDNQuery}" />"></script>
+        <script>includeWebjarLibrary("qtip2");</script>
         <script>includeWebjarLibrary('ckeditor4')</script>
         <script>includeWebjarLibrary('awesomplete')</script>
-        <script src="/library/js/sakai-reminder.js"></script>
-        <script type="module" src="/webcomponents/rubrics/rubric-association-requirements.js<h:outputText value="#{ForumTool.CDNQuery}" />"></script>
-        <h:form id="msgForum">
+        <script src="/library/js/sakai-reminder.js<h:outputText value="#{ForumTool.CDNQuery}" />"></script>
+        <%@ include file="/jsp/discussionForum/includes/rubrics/rubricsJs.jspf" %>
+        <h:form id="msgForum" styleClass="dfMsgGradeForm">
             <!--jsp\discussionForum\message\dfMsgGrade.jsp-->
 
             <%
@@ -32,6 +35,7 @@
 
             //Check if user called this page with a popup dialog
 
+            // these request params are not validated here, but rather in processDfMsgGrdFromThread() called later on
             String messageId = request.getParameter("messageId");
             String topicId = request.getParameter("topicId");
             String forumId = request.getParameter("forumId");
@@ -67,10 +71,13 @@
             boolean hasAssociatedRubric = forumTool.hasAssociatedRubric();
             String entityId = forumTool.getRubricAssociationId();
 
-            if (userId == null) userId = forumTool.getUserId();
-
-            String rbcsEvaluationId = entityId + "." + userId;
-            String rbcsEvaluationOwnerId = userId;
+            String rbcsEvaluationId = "";
+            String rbcsEvaluationOwnerId = "";
+            // No need to validate further - rubrics does its own validation
+            if (forumTool.isUserActiveInCurrentSite(userId)) {
+                rbcsEvaluationId = entityId + "." + userId;
+                rbcsEvaluationOwnerId = userId;
+            }
             %>
 
             <script>
@@ -108,43 +115,21 @@
                   } catch (err) {
                       //Just ignore the exception, happens when a gradebook item is not selected.
                   }
+
+                  initExternalWordCount();
                 });
             </script>
 
+            <%--
+            I commented out the following span because the 'X' had very odd behaviour, making the entire page unresponsive. If you know a way to add the 'X' back such that it displays only when dfMsgGrade is embedded in a dialog, please do so. Until then, the Save and Cancel buttons are available, and they work as expected.
+            --bbailla2
             <span class="close-button fa fa-times" onClick="SPNR.disableControlsAndSpin(this, null);closeDialogBoxIfExists();" aria-label="<h:outputText value="#{msgs.close_window}" />"></span>
+            --%>
             <h3><h:outputText value="#{msgs.cdfm_grade_msg}" /></h3>
-            <h4>
-                <h:outputText value="#{ForumTool.selectedForum.forum.title}" />
-                <h:outputText value=" #{msgs.cdfm_dash} " rendered="#{!empty ForumTool.selectedTopic}"/>
-                <h:outputText   value="#{ForumTool.selectedTopic.topic.title}" />
-            </h4>
-            <h:messages globalOnly="true" infoClass="success" errorClass="alertMessage" rendered="#{! empty facesContext.maximumSeverity}"/>
-            <h:panelGroup rendered="#{ForumTool.selectedMessage != null}">
-                <f:verbatim>
-                <div class="singleMessage">
-                </f:verbatim>
-                    <h:outputText value="#{ForumTool.selectedMessage.message.title} " styleClass="title"/>
-                    <h:outputText value="#{ForumTool.selectedMessage.anonAwareAuthor}" styleClass="#{ForumTool.selectedMessage.useAnonymousId ? 'anonymousAuthor' : ''}" />
-                    <h:outputText value=" #{msgs.cdfm_me}" rendered="#{ForumTool.selectedMessage.currentUserAndAnonymous}" />
-                    <h:outputText value=" #{msgs.cdfm_openb} " />
-                    <h:outputText value="#{ForumTool.selectedMessage.message.created}">
-                        <f:convertDateTime pattern="#{msgs.date_format}" timeZone="#{ForumTool.userTimeZone}" locale="#{ForumTool.userLocale}"/>
-                    </h:outputText>
-                    <h:outputText value=" #{msgs.cdfm_closeb}" />
-                    <%-- Attachments --%>
-                    <h:dataTable value="#{ForumTool.selectedMessage.attachList}"    var="eachAttach" rendered="#{!empty ForumTool.selectedMessage.attachList}">
-                        <h:column rendered="#{!empty ForumTool.selectedMessage.message.attachments}">
-                            <sakai:contentTypeMap fileType="#{eachAttach.attachment.attachmentType}" mapType="image" var="imagePath" pathPrefix="/library/image/"/>
-                            <h:graphicImage id="exampleFileIcon" value="#{imagePath}" />
-                            <h:outputLink value="#{eachAttach.url}" target="_new_window">
-                                <h:outputText value="#{eachAttach.attachment.attachmentName}" />
-                            </h:outputLink>
-                        </h:column>
-                    </h:dataTable>
-                    <h:outputText escape="false" value="#{ForumTool.selectedMessage.message.body}"  style="display:block;margin-top:2em" styleClass="textPanel"/>
-                <f:verbatim>
-                </div>
-                </f:verbatim>
+            <%@ include file="/jsp/discussionForum/includes/topicHeader/singletonTopicHeaderList.jspf"%>
+            <h:messages globalOnly="true" infoClass="sak-banner-success" errorClass="sak-banner-error" rendered="#{! empty facesContext.maximumSeverity}"/>
+            <h:panelGroup layout="block" rendered="#{ForumTool.selectedMessage != null}" styleClass="suppressAuthorLinkDisplay">
+                <%@ include file="/jsp/discussionForum/includes/singletonMessageList.jspf"%>
             </h:panelGroup>
 
             <h:panelGroup styleClass="instruction" rendered="#{ForumTool.allowedToGradeItem}">

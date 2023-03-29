@@ -1,0 +1,9 @@
+<f:subview id="longDescTopic" rendered="#{!empty topic.attachList || (topic.topic.extendedDescription != '' &&  topic.topic.extendedDescription != null && topic.topic.extendedDescription != '<br/>')}">
+	<h:panelGroup layout="block" id="fullTopicDescription">
+		<mf:htmlShowArea id="topic_fullDescription" hideBorder="true" value="#{topic.topic.extendedDescription}" />
+		<%-- attachs --%>
+		<t:dataList value="#{topic.attachListAsSingletonList}" var="attachList">
+			<%@ include file="/jsp/discussionForum/includes/attachments.jspf"%>
+		</t:dataList>
+	</h:panelGroup>
+</f:subview>

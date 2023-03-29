@@ -23,7 +23,7 @@
             </script>
             <%@ include file="/jsp/privateMsg/pvtMenu.jsp" %>
     <sakai:tool_bar_message value="#{msgs.pvt_rename_folder_label}" />
-    <h:messages styleClass="alertMessage" id="errorMessages" rendered="#{! empty facesContext.maximumSeverity}" /> 
+    <h:messages styleClass="sak-banner-error" id="errorMessages" rendered="#{! empty facesContext.maximumSeverity}" />
  
     <div class="instruction">
 	    <h:outputText value="#{msgs.cdfm_required}"/> <h:outputText value="#{msgs.pvt_star}" styleClass="reqStarInline"/>

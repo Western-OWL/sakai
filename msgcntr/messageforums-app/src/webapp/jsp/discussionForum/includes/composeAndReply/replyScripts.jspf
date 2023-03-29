@@ -1,0 +1,28 @@
+<script>
+	// set the previous message variable
+	const composeArea = document.querySelector('textarea[id*="df_compose_body"]');
+	var rteId = composeArea === null ? "" : composeArea.id;
+	const msgHidden = document.forms['dfCompose'].elements.namedItem('dfCompose:msgHidden');
+	var messagetext = msgHidden === null ? "" : msgHidden.value;
+	const titleHidden = document.forms['dfCompose'].elements.namedItem('dfCompose:titleHidden');
+	var titletext = titleHidden === null ? "" : titleHidden.value;
+</script>
+<script>
+	setTimeout(function(){
+		var _div = document.getElementsByTagName('div');
+		for(i=0;i<_div.length; i++)
+		{
+			if(_div[i].className == 'htmlarea')
+			{
+				var children = _div[i].childNodes;
+				for (j=0; j<children.length; j++)
+				{
+					if(children.item(j).tagName == 'IFRAME')
+					{
+						children.item(j).contentWindow.focus();
+					}
+				}
+			}
+		}
+	}, 800);
+</script>

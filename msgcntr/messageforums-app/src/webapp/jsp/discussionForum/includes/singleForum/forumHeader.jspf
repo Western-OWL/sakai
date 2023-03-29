@@ -1,0 +1,17 @@
+<h:panelGroup layout="block" styleClass="forumTitle">
+	<%-- link to forum and decorations --%>
+	<%@ include file="forumTitle.jspf"%>
+	<%-- the forum details --%>
+	<h:outputText value="#{forum.forum.shortDescription}" styleClass="shortDescription" rendered="#{forum.forum.shortDescription != null && forum.forum.shortDescription != ''}" />
+
+	<%-- render the more link only if there is something to show --%>
+	<h:outputLink value="#" styleClass="forumsCollapseTrigger"
+				  rendered="#{(!empty forum.attachList || (forum.forum.extendedDescription != '' &&  forum.forum.extendedDescription != null && forum.forum.extendedDescription != '<br/>'))
+				  || (ForumTool.showAvailabilityDates == 'true' && forum.availabilityRestricted == 'true')}">
+		<h:outputText value="#{msgs.cdfm_details}" />
+	</h:outputLink>
+	<t:div id="togglePanel" styleClass="collapse forumsCollapseTarget">
+	<%@ include file="forumDesc.jspf"%>
+	<%@ include file="forumDates.jspf"%>
+	</t:div>
+</h:panelGroup>

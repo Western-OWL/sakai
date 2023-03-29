@@ -21,6 +21,7 @@
 package org.sakaiproject.tool.messageforums.ui;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -42,6 +43,7 @@ import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.user.api.User;
 import org.sakaiproject.user.api.UserNotDefinedException;
 import org.sakaiproject.user.cover.UserDirectoryService;
+import org.sakaiproject.util.ResourceLoader;
 
 /** 
  * @author <a href="mailto:rshastri@iupui.edu">Rashmi Shastri</a>
@@ -51,6 +53,8 @@ import org.sakaiproject.user.cover.UserDirectoryService;
 @Slf4j
 public class DiscussionMessageBean
 {
+  private static final String MESSAGECENTER_BUNDLE = "org.sakaiproject.api.app.messagecenter.bundle.Messages";
+  private static final ResourceLoader rb = new ResourceLoader(MESSAGECENTER_BUNDLE);
 
   private boolean selected;
   private Message message;
@@ -322,6 +326,11 @@ public class DiscussionMessageBean
 	  return decoAttachList;
   }
 
+  public List<List<DecoratedAttachment>> getAttachListAsSingletonList()
+  {
+	  return Collections.singletonList(getAttachList());
+  }
+
   public int getChildUnread(){
 	  return childUnread;
   }
@@ -516,7 +525,7 @@ log.debug("... before return getAuthorEmail(): userEmail = " + userEmail);
 			try
 			{
 				User author = UserDirectoryService.getUser(authorID);
-				return author.getDisplayName();
+				return rb.getFormattedMessage("cdfm_author", author.getDisplayName(), author.getDisplayId());
 			}
 			catch (UserNotDefinedException e)
 			{

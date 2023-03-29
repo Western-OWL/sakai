@@ -265,7 +265,9 @@ AutoRegisterEntityProvider, PropertyProvideable, RESTful, RequestStorable, Reque
 			if(privateMessages && siteId != null){
 				
 				DecoratedForumInfo dForum = new DecoratedForumInfo(0L, "Messages", new ArrayList<DecoratedAttachment>(), "", "");
-				Area area = getPrivateMessageManager().getPrivateMessageArea(siteId);
+				// this getArea() call will always return something, so to avoid allowing users to confirm site ids, we
+				// set it to null they have no site visit or the site doesn't exist (which implies no site visit)
+				Area area = uiPermissionsManager.hasSiteVisit(userId, siteId) ? getPrivateMessageManager().getPrivateMessageArea(siteId) : null;
 
 				if (area != null){    
 					List aggregateList = new ArrayList();
@@ -381,13 +383,13 @@ AutoRegisterEntityProvider, PropertyProvideable, RESTful, RequestStorable, Reque
 				}else{
 					forums = forumManager.getDiscussionForumsWithTopics(siteId);
 				}
-				
+				boolean isInstructor = forumManager.isInstructor(userId, siteId);
 				// retrieve all of the gradebook items here so we aren't checking repeatedly
 				Map<String, Long> gbItemNameToId = new HashMap<String, Long>();
 				try {
 				    GradebookService gradebookService = (GradebookService)ComponentManager.get("org.sakaiproject.service.gradebook.GradebookService");
 				    List<Assignment> gbItems = gradebookService.getAssignments(siteId);
-				    if (gbItems != null) {
+				    if (isInstructor && gbItems != null) {
 				        for (Assignment gbItem : gbItems) {
 				            gbItemNameToId.put(gbItem.getName(), gbItem.getId());
 				        }
@@ -399,6 +401,10 @@ AutoRegisterEntityProvider, PropertyProvideable, RESTful, RequestStorable, Reque
 				}
 
 				for (DiscussionForum forum : forums) {
+					if (!uiPermissionsManager.hasAccessPrivileges(forum))
+					{
+						continue;
+					}
 						List<DecoratedAttachment> forumAttachments = decorateAttachments(forum.getAttachments());
 					        Long forumOpenDate = null;
 					        Long forumCloseDate = null;
@@ -408,6 +414,10 @@ AutoRegisterEntityProvider, PropertyProvideable, RESTful, RequestStorable, Reque
 					        }
 					        
 					        Long forumGbItemId = null;
+							if (!isInstructor)
+							{
+								forum.setDefaultAssignName(null); // this mistakenly contains the gb item id, not the name, sanitize if not instructor
+							}
 					        if (forum.getDefaultAssignName() != null && !forum.getDefaultAssignName().isEmpty() &&
 					                gbItemNameToId.containsKey(forum.getDefaultAssignName())) {
 					            forumGbItemId = gbItemNameToId.get(forum.getDefaultAssignName());
@@ -420,8 +430,7 @@ AutoRegisterEntityProvider, PropertyProvideable, RESTful, RequestStorable, Reque
 
 						for (DiscussionTopic topic : topics) {
 
-								if (forumManager.isInstructor(userId, siteId) || 
-										getUiPermissionsManager().isRead(topic, forum, userId, siteId))
+								if (uiPermissionsManager.hasAccessPrivileges(topic, forum))
 								{
 									int unreadMessages = 0;
 									int totalMessages = 0;
@@ -448,6 +457,10 @@ AutoRegisterEntityProvider, PropertyProvideable, RESTful, RequestStorable, Reque
 									}
 									
 									Long topicGbItemId = null;
+									if (!isInstructor)
+									{
+										topic.setDefaultAssignName(null); // this mistakenly contains the gb item id, not the name, sanitize if not instructor
+									}
 									if (topic.getDefaultAssignName() != null && !topic.getDefaultAssignName().isEmpty() &&
 											gbItemNameToId.containsKey(topic.getDefaultAssignName())) {
 										topicGbItemId = gbItemNameToId.get(topic.getDefaultAssignName());

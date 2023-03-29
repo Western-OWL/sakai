@@ -1,0 +1,103 @@
+<%-- author image --%>
+<h:panelGroup rendered="#{!message.deleted && ForumTool.showProfileInfo && !message.useAnonymousId}" styleClass="authorImage">
+	<h:outputLink value="#{ForumTool.serverUrl}/direct/portal/#{message.message.authorId}/formatted" styleClass="authorProfile" rendered="#{ForumTool.showProfileLink}" >
+		<h:graphicImage value="#{ForumTool.serverUrl}/direct/profile/#{message.message.authorId}/image/thumb" alt="#{message.message.author}" />
+	</h:outputLink>
+	<h:graphicImage value="#{ForumTool.serverUrl}/direct/profile/#{message.message.authorId}/image/thumb" alt="#{message.message.author}" rendered="#{!ForumTool.showProfileLink}" />
+</h:panelGroup>
+
+<%-- a deleted message --%>
+<h:outputText styleClass="inactive" rendered="#{message.deleted}" value="#{msgs.cdfm_msg_deleted_label}" />
+
+<%-- moved--%>
+<h:panelGroup layout="block" styleClass="conversationMovedMessage sak-banner-info" rendered="#{message.moved}">
+	<h:outputText escape="false" value="\"#{message.message.title}\" #{msgs.hasBeen} #{msgs.moved} " />
+	<h:commandLink action="#{ForumTool.processActionDisplayTopic}" id="topic_title" styleClass="title">
+		<h:outputText value="#{message.message.topic.title}" />
+		<f:param value="#{message.message.topic.id}" name="topicId"/>
+		<f:param value="#{ForumTool.selectedForum.forum.id}" name="forumId"/>
+	</h:commandLink>
+</h:panelGroup>
+
+<%-- non deleted messages --%>
+<h:panelGroup layout="block" styleClass="messageMetadata" rendered="#{!message.deleted && !message.moved}">
+	<div class="messageDetails">
+		<div class="messageSubject">
+			<%--message subject line --%>
+			<h:commandLink action="#{ForumTool.processActionDisplayMessage}" immediate="true" styleClass="title">
+				<h:outputText value="#{message.message.title}" rendered="#{message.read}" />
+				<h:outputText styleClass="unreadMsg" value="#{message.message.title}" rendered="#{!message.read}" />
+				<f:param value="#{message.message.id}" name="messageId" />
+				<f:param value="#{ForumTool.selectedTopic.topic.id}" name="topicId" />
+				<f:param value="#{ForumTool.selectedTopic.topic.baseForum.id}" name="forumId" />
+			</h:commandLink>
+			<h:outputText styleClass="messageNew" value="#{msgs.cdfm_newflag}" rendered="#{!message.read}"/>
+			<%--pending message flag --%>
+			<h:outputText value="#{msgs.cdfm_msg_pending_label}" rendered="#{message.msgPending}" styleClass="messagePending"/>
+			<%--denied message flag --%>
+			<h:outputText value="#{msgs.cdfm_msg_denied_label}" rendered="#{message.msgDenied}" styleClass="messageDenied" />
+		</div>
+
+		<%--author --%>
+		<span class="messageAuthor">
+			<h:outputText value="#{message.anonAwareAuthor}" rendered="#{!ForumTool.instructor || message.useAnonymousId}" styleClass="#{message.read ? '' : 'unreadMsg'} md #{message.useAnonymousId ? 'anonymousAuthor' : ''}"/>
+			<h:commandLink action="#{mfStatisticsBean.processActionStatisticsUser}" immediate="true" rendered="#{ForumTool.instructor && !message.useAnonymousId}" styleClass="msgAuthorStatsLink md #{message.read ? '' : 'unreadMsg'} #{message.useAnonymousId ? 'anonymousAuthor' : ''}">
+				<f:param value="#{message.authorEid}" name="siteUserId"/>
+				<h:outputText value=" #{message.anonAwareAuthor}"/>
+			</h:commandLink>
+			<h:outputText value=" #{msgs.cdfm_me}" rendered="#{message.currentUserAndAnonymous}" styleClass="md #{message.read ? '' : 'unreadMsg'}" />
+		</span>
+
+		<%--date --%>
+		<h:outputText value="#{message.message.created}" styleClass="messageDate #{message.read ? '' : 'unreadMsg'}">
+			<f:convertDateTime pattern="#{msgs.date_format}" timeZone="#{ForumTool.userTimeZone}" locale="#{ForumTool.userLocale}"/>
+		</h:outputText>
+	</div>
+	<div class="messageCounts">
+		<%--word count --%>
+		<h:panelGroup layout="block" styleClass="messageWordCount" rendered="#{view.viewId != '/jsp/discussionForum/message/dfViewThread.jsp' && view.viewId != '/jsp/discussionForum/message/dfFlatView.jsp'}">
+			<h:outputText value="#{msgs.cdfm_message_count}" />
+			<div id="counttotal"></div>
+		</h:panelGroup>
+
+		<%--read by count --%>
+		<div class="messageReadByCount">
+			<h:outputText styleClass="readBy" value="#{msgs.cdfm_readby}" />
+			<h:outputText styleClass="readByCount" value="#{message.message.numReaders}" />
+		</div>
+	</div>
+</h:panelGroup>
+<%-- End of div for messageMetadata --%>
+
+<%-- Rank --%>
+<h:panelGroup rendered="#{message.authorRank != null && !message.moved}">
+<f:verbatim><div class="forumsRank"></f:verbatim>
+	<h:outputText escape="false" rendered="#{not empty message.authorRank.rankImage.attachmentId}" value="<img src=\"#{message.authorRank.rankImage.attachmentUrl}\" class=\"rankImage\" alt=\"Rank Image\" height=\"35\" width=\"35\" />" />
+
+	<f:verbatim><div class="forumsRankNameContainer"></f:verbatim>
+		<h:outputText value="#{message.authorRank.title}" styleClass="forumsRankName"/>
+		<h:outputText value="#{msgs.num_of_posts} #{message.authorPostCount}" styleClass="forumsRankName" rendered="#{message.authorRank.type == 2}"/>
+	<f:verbatim></div></f:verbatim>
+<f:verbatim></div></f:verbatim>
+</h:panelGroup>
+<%-- End Rank --%>
+
+<%-- the message body--%>
+<t:div rendered="#{!message.deleted && !message.moved}" styleClass="messageBody"><mf:htmlShowArea value="#{message.message.body}" hideBorder="true"/></t:div>
+<%-- attach list --%>
+<h:panelGroup rendered="#{!empty message.attachList && !message.deleted && !message.moved}">
+	<t:dataList value="#{message.attachListAsSingletonList}" var="attachList">
+		<%@ include file="/jsp/discussionForum/includes/attachments.jspf"%>
+	</t:dataList>
+</h:panelGroup>
+
+<%-- If message actually deleted, don't display links --%>
+<h:panelGroup layout="block" rendered="#{!message.deleted && !message.moved &&
+		(view.viewId == '/jsp/discussionForum/message/dfViewThread.jsp' || view.viewId == '/jsp/discussionForum/message/dfFlatView.jsp')}" styleClass="itemToolBar">
+	<%-- reply and other message actions panel for the thread pages in the tool (dfViewThread/dfFlatView)--%>
+	<%@ include file="/jsp/discussionForum/includes/singleMessage/standardButtons.jspf"%>
+</h:panelGroup>
+<h:panelGroup layout="block" rendered="#{!ForumTool.deleteMsg && !message.deleted && !message.moved && view.viewId == '/jsp/discussionForum/message/dfViewMessage.jsp'}" styleClass="itemToolBar">
+	<%-- reply and other message actions panel for the single message view only (dfViewMessage) because different buttons and actions are available than on thread pages --%>
+	<%@ include file="/jsp/discussionForum/includes/singleMessage/dfViewMessageButtons.jspf"%>
+</h:panelGroup>

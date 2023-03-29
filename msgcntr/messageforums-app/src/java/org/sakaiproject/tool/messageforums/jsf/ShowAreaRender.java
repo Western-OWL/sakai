@@ -43,6 +43,7 @@ public class ShowAreaRender extends Renderer
   {
     ResponseWriter writer = context.getResponseWriter();
 
+    String id = (String) component.getAttributes().get("id");
     String value = (String) component.getAttributes().get("value");
     String hideBorder = (String) component.getAttributes().get("hideBorder");
     String showInputTextArea = (String) component.getAttributes().get(
@@ -51,8 +52,8 @@ public class ShowAreaRender extends Renderer
     {
       int pos;
       // writer.write("<div>");
-      value = value.replaceAll("<strong>", "<b>");
-      value = value.replaceAll("</strong>", "</b>");
+      //value = value.replaceAll("<strong>", "<b>");
+      //value = value.replaceAll("</strong>", "</b>");
       // writer.write("<table STYLE=\"table-layout:fixed\" width=300><tr width=\"100%\"><td
       // width=\"100%\" STYLE=\"word-wrap: break-all; white-space: -moz-pre-wrap;
       // text-overflow:ellipsis; overflow: auto;\">");
@@ -61,8 +62,9 @@ public class ShowAreaRender extends Renderer
  //         "<a title=\"Open a new window\" target=\"_new\" href=");
       if (hideBorder != null && "true".equals(hideBorder))
       {
-        writer
-            .write("<div class=\"textPanel\">");
+        writer.write("<div id=\"");
+        writer.write(id);
+        writer.write("\" class=\"textPanel\">");
 //gsilver            .write("<table border=\"0\" id=\"message_table\" cellpadding=\"0\"  width=\"90%\"><tr width=\"95%\"><td width=\"100%\" STYLE=\"word-wrap: break-word\">");
 			
         writer.write(value);
@@ -77,8 +79,9 @@ public class ShowAreaRender extends Renderer
         }
         else
         {
-          writer
-            .write("<div class=\"textPanel bordered\">");
+          writer.write("<div id=\"");
+          writer.write(id);
+          writer.write("\" class=\"textPanel bordered\">");
 //		  .write("<table border=\"1\" id=\"message_table\" cellpadding=\"7\" style=\"border-collapse: collapse; table-layout:fixed\" width=\"90%\"><tr width=\"95%\"><td width=\"100%\" STYLE=\"word-wrap: break-word\">");
               writer.write(value);
           writer.write("</div>");

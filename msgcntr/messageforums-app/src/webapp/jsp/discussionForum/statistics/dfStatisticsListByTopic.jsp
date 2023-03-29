@@ -120,10 +120,10 @@
 			}
 		</script>
        		<script>includeLatestJQuery("msgcntr");</script>
-			<script src="/messageforums-tool/js/dialog.js"></script>
-			<script src="/library/js/spinner.js"></script>
-			<link rel="stylesheet" type="text/css" href="/messageforums-tool/css/dialog.css" />
-			<link rel="stylesheet" type="text/css" href="/messageforums-tool/css/msgcntr_statistics.css" />
+			<script src="/messageforums-tool/js/dialog.js<h:outputText value="#{ForumTool.CDNQuery}" />"></script>
+			<script src="/library/js/spinner.js<h:outputText value="#{ForumTool.CDNQuery}" />"></script>
+			<link rel="stylesheet" type="text/css" href="/messageforums-tool/css/dialog.css<h:outputText value="#{ForumTool.CDNQuery}" />" />
+			<link rel="stylesheet" type="text/css" href="/messageforums-tool/css/msgcntr_statistics.css<h:outputText value="#{ForumTool.CDNQuery}" />" />
 		<script>		
 			function toggleComments(link){
 				if(link.innerHTML == "<h:outputText value="#{msgs.stat_forum_comments_show}" escape="false"/>"){
@@ -177,7 +177,7 @@
 	  	<f:verbatim>
 	  		</div>
 	  	</f:verbatim>
-	  	<h:messages globalOnly="true" infoClass="success" errorClass="alertMessage" rendered="#{! empty facesContext.maximumSeverity}"/>
+	  	<h:messages globalOnly="true" infoClass="sak-banner-success" errorClass="sak-banner-error" rendered="#{! empty facesContext.maximumSeverity}"/>
 		
   		<h:panelGrid columns="2" width="100%" styleClass="navPanel  specialLink">
           <h:panelGroup>
@@ -217,8 +217,7 @@
 	        </h:selectOneMenu>          
           </h:panelGroup>  
         </h:panelGrid>
-        
-	  	
+
 	  	<f:subview id="defaultValueView" rendered="#{mfStatisticsBean.selectedAssign != 'Default_0'}">
 	  		<div>
 	  			<h:inputText styleClass="defaultValue" size="5" value="0" onkeyup="warn = true;"/>

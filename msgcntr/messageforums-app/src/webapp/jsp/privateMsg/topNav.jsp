@@ -4,11 +4,11 @@
 	<h:panelGroup>
 		<f:verbatim><div class="breadCrumb specialLink"><h3></f:verbatim>
 			<h:panelGroup rendered="#{PrivateMessagesTool.messagesandForums}" >
-				<h:commandLink action="#{PrivateMessagesTool.processActionHome}" value="#{msgs.cdfm_message_forums}" title="#{msgs.cdfm_message_forums}"/>
+				<h:commandLink action="#{PrivateMessagesTool.processActionHome}" value="#{msgs.cdfm_message_forums}"/>
 				<h:outputText value=" / " />
 			</h:panelGroup>
 	  	
-			<h:commandLink action="#{PrivateMessagesTool.processActionPrivateMessages}" value="#{msgs.pvt_message_nav}" title=" #{msgs.cdfm_message_forums}"/>
+			<h:commandLink action="#{PrivateMessagesTool.processActionPrivateMessages}" value="#{msgs.pvt_message_nav}"/>
 			<h:outputText value=" " /><h:outputText value=" / " /><h:outputText value=" " />
 			
 			<h:outputText value="#{msgs[PrivateMessagesTool.selectedTopic.topic.title]}" rendered="#{PrivateMessagesTool.searchPvtMsgsEmpty && (PrivateMessagesTool.selectedTopic.topic.title == 'pvt_received' || PrivateMessagesTool.selectedTopic.topic.title == 'pvt_sent' || PrivateMessagesTool.selectedTopic.topic.title == 'pvt_deleted' || PrivateMessagesTool.selectedTopic.topic.title == 'pvt_drafts') }" />
@@ -25,16 +25,14 @@
 	</h:panelGroup>
 	<h:panelGroup styleClass="itemNav specialLink">
 		<%-- gsilver:huh? renders anyway - because it is looking at topics instead of at folders?--%>
-		<h:commandLink styleClass="button" action="#{PrivateMessagesTool.processDisplayPreviousTopic}" value="#{msgs.pvt_prev_folder}"  
-			                rendered="#{PrivateMessagesTool.selectedTopic.hasPreviousTopic}" title=" #{msgs.pvt_prev_folder}">
+		<h:commandLink styleClass="button" action="#{PrivateMessagesTool.processDisplayPreviousTopic}" value="#{msgs.pvt_prev_folder}" rendered="#{PrivateMessagesTool.selectedTopic.hasPreviousTopic}">
 			<f:param value="#{PrivateMessagesTool.selectedTopic.previousTopicTitle}" name="previousTopicTitle"/>
 		</h:commandLink>
 		<h:panelGroup rendered="#{!PrivateMessagesTool.selectedTopic.hasPreviousTopic}" styleClass="button formButtonDisabled">
 			<h:outputText value="#{msgs.pvt_prev_folder}"/>
 		</h:panelGroup>
 		
-		<h:commandLink styleClass="button" action="#{PrivateMessagesTool.processDisplayNextTopic}" value="#{msgs.pvt_next_folder}" 
-				  		                  rendered="#{PrivateMessagesTool.selectedTopic.hasNextTopic}" title=" #{msgs.pvt_next_folder}">
+		<h:commandLink styleClass="button" action="#{PrivateMessagesTool.processDisplayNextTopic}" value="#{msgs.pvt_next_folder}" rendered="#{PrivateMessagesTool.selectedTopic.hasNextTopic}">
 			<f:param value="#{PrivateMessagesTool.selectedTopic.nextTopicTitle}" name="nextTopicTitle"/>
 		</h:commandLink>
 		<h:panelGroup  rendered="#{!PrivateMessagesTool.selectedTopic.hasNextTopic}" styleClass="button formButtonDisabled">

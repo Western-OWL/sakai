@@ -90,8 +90,7 @@
 		</h:panelGroup>
           <%-- 	<h:commandButton action="#{ForumTool.processAddMessage}" id="df_compose_message_dfAllMessages" value="#{msgs.cdfm_container_title}"/> --%>
 		  <h:panelGroup styleClass="specialLink" style="text-align: right;float:right">
-			  <h:commandLink action="#{ForumTool.processActionTopicSettings}" id="topic_setting" value="#{msgs.cdfm_topic_settings}" 
-				rendered="#{ForumTool.selectedTopic.changeSettings}" title=" #{msgs.cdfm_topic_settings}">
+			<h:commandLink action="#{ForumTool.processActionTopicSettings}" id="topic_setting" value="#{msgs.cdfm_topic_settings}" rendered="#{ForumTool.selectedTopic.changeSettings}">
 				<f:param value="#{ForumTool.selectedTopic.topic.id}" name="topicId"/>
 				<f:param value="#{ForumTool.selectedForum.forum.id}" name="forumId"/>
 			</h:commandLink>
@@ -99,4 +98,4 @@
   </h:panelGrid>
   
 
-<h:messages styleClass="alertMessage" id="errorMessages" rendered="#{! empty facesContext.maximumSeverity}" />
+<h:messages styleClass="sak-banner-error" id="errorMessages" rendered="#{! empty facesContext.maximumSeverity}" />

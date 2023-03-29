@@ -28,7 +28,8 @@ import org.sakaiproject.api.app.messageforums.DBMembershipItem;
 import org.sakaiproject.api.app.messageforums.DiscussionForum;
 import org.sakaiproject.api.app.messageforums.DiscussionTopic;
 import org.sakaiproject.api.app.messageforums.Area;
-import org.sakaiproject.api.app.messageforums.Topic;
+import org.sakaiproject.api.app.messageforums.Message;
+import org.sakaiproject.user.api.User;
 
 /**
  * @author <a href="mailto:rshastri@iupui.edu">Rashmi Shastri</a>
@@ -45,6 +46,7 @@ public interface UIPermissionsManager
    * @return
    */
   public boolean isChangeSettings(DiscussionForum forum);
+  public boolean isChangeSettings(DiscussionForum forum, String userId);
   
   /**     
    * @param forum
@@ -213,7 +215,6 @@ public interface UIPermissionsManager
    * (role + groups/sections) 
    * @return
    */
-  public List<String> getCurrentUserMemberships();
   public List<String> getCurrentUserMemberships(String siteId);
   
   public Set<DBMembershipItem> getAreaItemsSet(Area area);
@@ -227,4 +228,37 @@ public interface UIPermissionsManager
   BulkPermission getBulkPermissions(DiscussionForum forum);
 
   void clearMembershipsFromCacheForArea(Area area);
+
+  /**
+   * Returns whether this user cannot view messages specifically because the topic is 'post first' and they have not yet posted.
+   * @param userId
+   * @param topic the result will be false unless this topic is 'post first'.
+   * @return users who cannot view messages if they have not posted and this topic is 'post first'
+   */
+  public boolean isUserDeniedByPostFirst(String userId, DiscussionTopic topic);
+
+  /**
+   * Given a list of users, a topic, and its messages, returns the list of users who cannot view messages messages specifically because the topic is 'post first' and they have not yet posted.
+   * @param userIds return value will be a subset of this list.
+   * @param topic the result will be empty unless this topic is 'post first'.
+   * @param messages all messages within this topic.
+   * @return users who cannot view messages if they have not posted and this topic is 'post first'
+   */
+  public List<String> getUsersDeniedByPostFirst(List<String> userIds, DiscussionTopic topic, List<Message> messages);
+
+  public boolean hasAccessPrivileges(DiscussionForum forum);
+
+  // Having access to the parent forum is a requirement that is automatically also checked by these methods
+  // Note also that if these methods return true, it does not necessarily imply they have read access to any message in the topic,
+  // only that they have the permission to see the topic itself, perhaps only to change its settings or create a new message
+  public boolean hasAccessPrivileges(DiscussionTopic topic);
+  public boolean hasAccessPrivileges(DiscussionTopic topic, DiscussionForum forum);
+
+  // Having access to the parent forum and topic is a requirement that is automatically also checked by these methods
+  public boolean hasAccessPrivileges(Message msg);
+  public boolean hasAccessPrivileges(Message msg, DiscussionTopic topic);
+  public List<Long> hasAccessPrivileges(List<Message> messages, DiscussionTopic topic);
+
+  public boolean hasSiteVisit(String userId, String siteId);
+  public boolean hasSiteVisit(User user, String siteId);
 }

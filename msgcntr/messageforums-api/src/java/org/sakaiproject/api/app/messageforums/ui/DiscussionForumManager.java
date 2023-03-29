@@ -494,8 +494,11 @@ public interface DiscussionForumManager
   /**
    * 
    */
+  @Deprecated
   public DBMembershipItem getAreaDBMember(Set<DBMembershipItem> originalSet, String name, int type);
+  public DBMembershipItem getAreaDBMember(Set<DBMembershipItem> originalSet, String name, int type, String contextSiteId);
 
+  @Deprecated
   public DBMembershipItem getDBMember(Set<DBMembershipItem> originalSet, String name, int type);
   public DBMembershipItem getDBMember(Set<DBMembershipItem> originalSet, String name, int type, String contextSiteId);
   
@@ -668,4 +671,11 @@ public interface DiscussionForumManager
   public Optional<LRS_Statement> getStatementForGrade(String studentUid, String forumTitle, double score);
 
   void setUiPermissionsManager(UIPermissionsManager uiPermissionsManager);
+
+  public String getSiteIdForForum(DiscussionForum forum);
+  public String getSiteIdForTopic(DiscussionTopic topic);
+
+  public Optional<DiscussionForum> getDiscussionForumForTopic(DiscussionTopic topic);
+
+  public Optional<DiscussionTopic> getDiscussionTopicForMessage(Message msg);
 }

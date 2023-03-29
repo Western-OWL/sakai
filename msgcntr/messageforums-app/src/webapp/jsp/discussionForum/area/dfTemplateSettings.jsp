@@ -9,16 +9,17 @@
 </jsp:useBean>
 
 <f:view>
-	<sakai:view title="#{msgs.cdfm_default_template_settings}" toolCssHref="/messageforums-tool/css/msgcntr.css">
-	<h:form id="revise">
+	<sakai:view title="#{msgs.cdfm_default_template_settings}">
+	<h:form id="revise" rendered="#{ForumTool.instructor}">
+		<link rel="stylesheet" href="/messageforums-tool/css/msgcntr.css<h:outputText value="#{ForumTool.CDNQuery}" />" type="text/css" />
         <script>includeLatestJQuery("msgcntr");</script>
-		<script src="/messageforums-tool/js/datetimepicker.js"></script>             		             		
-       		<script src="/messageforums-tool/js/sak-10625.js"></script>
-		<script src="/messageforums-tool/js/permissions_header.js"></script>
-		<script src="/messageforums-tool/js/forum.js"></script>
-		<script src="/messageforums-tool/js/messages.js"></script>
-		<link href="/library/webjars/jquery-ui/1.12.1/jquery-ui.min.css" rel="stylesheet" type="text/css" />
-		<script src="/library/js/lang-datepicker/lang-datepicker.js"></script>
+		<script src="/messageforums-tool/js/datetimepicker.js<h:outputText value="#{ForumTool.CDNQuery}" />"></script>
+		<script src="/messageforums-tool/js/sak-10625.js<h:outputText value="#{ForumTool.CDNQuery}" />"></script>
+		<script src="/messageforums-tool/js/permissions_header.js<h:outputText value="#{ForumTool.CDNQuery}" />"></script>
+		<script src="/messageforums-tool/js/forum.js<h:outputText value="#{ForumTool.CDNQuery}" />"></script>
+		<script src="/messageforums-tool/js/messages.js<h:outputText value="#{ForumTool.CDNQuery}" />"></script>
+		<link href="/library/webjars/jquery-ui/1.12.1/jquery-ui.min.css<h:outputText value="#{ForumTool.CDNQuery}" />" rel="stylesheet" type="text/css" />
+		<script src="/library/js/lang-datepicker/lang-datepicker.js<h:outputText value="#{ForumTool.CDNQuery}" />"></script>
 
 <%
 	  	String thisId = request.getParameter("panel");
@@ -66,7 +67,7 @@
 		 		<div class="instruction">
 		  		  <h:outputText id="instruction" value="#{msgs.cdfm_default_template_settings_instruction}"/>
 				</div>
-				<h:messages styleClass="messageAlert" id="errorMessages" rendered="#{! empty facesContext.maximumSeverity}" />
+				<h:messages styleClass="sak-banner-error" id="errorMessages" rendered="#{! empty facesContext.maximumSeverity}" />
 
 				<h2><h:outputText value="#{msgs.cdfm_forum_posting}" /></h2>
 				<h3><h:outputText id="outputLabel4" value="#{msgs.cdfm_moderate_forums}" /></h3>

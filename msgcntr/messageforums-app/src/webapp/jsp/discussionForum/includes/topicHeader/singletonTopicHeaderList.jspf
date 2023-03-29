@@ -1,0 +1,5 @@
+<t:dataList id="singletonTopicHeaderList" value="#{ForumTool.selectedTopicAsList}" rendered="#{!empty ForumTool.selectedTopicAsList}" var="topic">
+	<t:div styleClass="singleTopicHeader suppressLinkTitleDisplay page-header">
+		<%@ include file="/jsp/discussionForum/includes/topicHeader/topicHeader.jspf"%>
+	</t:div>
+</t:dataList>

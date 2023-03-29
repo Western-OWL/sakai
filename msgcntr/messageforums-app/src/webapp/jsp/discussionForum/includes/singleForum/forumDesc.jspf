@@ -1,0 +1,9 @@
+<f:subview id="longDesc" rendered="#{!empty forum.attachList || (forum.forum.extendedDescription != '' &&  forum.forum.extendedDescription != null && forum.forum.extendedDescription != '<br/>')}">
+	<h:panelGroup layout="block" id="fullForumDescription" styleClass="textPanel">
+		<h:outputText escape="false" value="#{forum.forum.extendedDescription}" />
+		<%-- attachs --%>
+		<t:dataList value="#{forum.attachListAsSingletonList}" var="attachList">
+			<%@ include file="/jsp/discussionForum/includes/attachments.jspf"%>
+		</t:dataList>
+	</h:panelGroup>
+</f:subview>

@@ -47,10 +47,10 @@ public class SparseMessage{
 	@Getter @Setter
 	private List<SparseMessage> replies = new ArrayList<SparseMessage>();
 	
-	@Getter
+	@Getter @Setter
 	private String authoredBy;
 	
-	@Getter
+	@Getter @Setter
 	private String authorId;
 	
 	@Getter @Setter
@@ -109,7 +109,6 @@ public class SparseMessage{
 		this.read = readStatus;
 		
 		if(addAttachments && fatMessage.getHasAttachments()) {
-			List<SparseAttachment> sparseAttachments = new ArrayList<SparseAttachment>();
 			for(Attachment fatAttachment : (List<Attachment>)fatMessage.getAttachments()) {
 				String url = serverUrl + "/access/content" + fatAttachment.getAttachmentId();
 				attachments.add(new SparseAttachment(fatAttachment.getAttachmentName(),url));
