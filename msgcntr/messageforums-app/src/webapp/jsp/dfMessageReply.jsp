@@ -39,11 +39,13 @@
 					<span class ="title">
 							<h:outputText value="#{ForumTool.selectedForum.forum.title}" />
 							<h:outputText value="/ "/>
-	      <h:outputText value="#{ForumTool.selectedTopic.topic.title}"/>
+							<h:outputText value="#{ForumTool.selectedTopic.topic.title}"/>
 					</span>
-    <p class="textPanel">
-		  <h:outputText value="#{ForumTool.selectedTopic.topic.shortDescription}"/>
-    </p>
+					<h:panelGroup layout="block" rendered="#{!empty ForumTool.selectedTopic.topic.shortDescription}">
+						<p class="textPanel">
+							<h:outputText value="#{ForumTool.selectedTopic.topic.shortDescription}"/>
+						</p>
+					</h:panelGroup>
 					</td>
 				</tr>	
 			</table>

@@ -425,7 +425,7 @@ $(document).ready(function() {
         if (toggleFinished) {
             toggleFinished = false;
             $(this).parent().parent().find('.toggleParent').toggle();
-            $(this).parent().parent().find('[id$=fullTopicDescription]').slideToggle('slow', function() {
+            $(this).parent().parent().find('[id$=fullTopicDescription]').slideToggle('normal', function() {
                 toggleFinished = true;
             });
         }

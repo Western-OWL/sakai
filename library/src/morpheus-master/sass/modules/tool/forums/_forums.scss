@@ -19,7 +19,9 @@
 
 .#{$namespace}sakai-forums{
 	.topicBlocLone{
-		@extend .bs-callout-info;
+		display: block;
+		margin: $standard-spacing 0;
+		border-left-width: $standard-space;
 	}
 
 	.permissionRow{

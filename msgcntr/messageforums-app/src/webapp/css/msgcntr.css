@@ -58,7 +58,9 @@
 .topicBloc td td{
 	padding-left: 0;
 }
-
+.topicBlocLone td {
+	padding: 0;
+}
 .singleMessage .title, .singleMessageReply .title, .topicBloc .title,.pendingApproval .title{
 	/*	title for all the above cases*/
 	margin-right: 4px;

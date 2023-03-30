@@ -32,9 +32,11 @@
                 <tr>
                     <td>
                         <h:outputText value="#{ForumTool.selectedForum.forum.title} /  #{ForumTool.selectedTopic.topic.title}"  styleClass="title"/> 
-                        <div class="textPanel">
-                            <h:outputText value="#{ForumTool.selectedTopic.topic.shortDescription}" />
-                        </div>
+                        <h:panelGroup layout="block" rendered="#{!empty ForumTool.selectedTopic.topic.shortDescription}">
+                            <p class="textPanel">
+                                <h:outputText value="#{ForumTool.selectedTopic.topic.shortDescription}"/>
+                            </p>
+                        </h:panelGroup>
                         <div>
                             <h:commandLink immediate="true" 
                                            action="#{ForumTool.processDfComposeToggle}" 
