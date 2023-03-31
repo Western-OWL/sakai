@@ -1,0 +1,37 @@
+<h:panelGroup id="forumsActions" layout="block" styleClass="topicViewActions sakai-table-toolBar">
+	<div class="sakai-table-filterContainer">
+		<div class="sakai-table-viewFilter">
+			<h:commandLink styleClass="button startNewConversation" value="#{msgs.cdfm_container_title_thread}" id="df_compose_message_dfAllMessages"
+				rendered="#{ForumTool.selectedTopic.isNewResponse && !ForumTool.selectedTopic.locked && !ForumTool.selectedForum.locked == 'true'}" action="#{ForumTool.processAddMessage}" immediate="true"/>
+			<h:commandLink action="#{ForumTool.processActionMarkAllAsRead}" rendered="#{ForumTool.selectedTopic.isMarkAsRead && ForumTool.selectedTopic.unreadNoMessages > 0 && !ForumTool.needToPostFirst}" styleClass="button markAllAsRead">
+				<h:outputText value=" #{msgs.cdfm_mark_all_as_read}" />
+			</h:commandLink>
+		</div>
+	</div>
+	<h:panelGroup layout="block" styleClass="sakai-table-buttonContainer threadOptions" rendered="#{!ForumTool.threadMoved}">
+		<%-- target span container for additional buttons --%>
+		<span id="messNavHolder">
+			<h:outputLink styleClass="button jumpToNew" value="#messageNewnewMess0"
+					rendered="#{ForumTool.selectedTopic.unreadNoMessages > 0 && view.viewId != '/jsp/discussionForum/message/dfAllMessages.jsp'}">
+				<h:outputText value="#{msgs.cdfm_gotofirstnewtitle}" />
+			</h:outputLink>
+		</span>
+		<h:commandLink styleClass="button" value="#{msgs.cdfm_thread_view}"  id="threadView" action="#{ForumTool.processActionDisplayThreadedView}" immediate="true"
+			rendered="#{view.viewId == '/jsp/discussionForum/message/dfFlatView.jsp' && !ForumTool.needToPostFirst && !empty ForumTool.messages}"/>
+		<h:commandLink styleClass="button" value="#{msgs.cdfm_flat_view}" action="#{ForumTool.processActionDisplayFlatView}"
+			rendered="#{view.viewId == '/jsp/discussionForum/message/dfAllMessages.jsp' && !ForumTool.needToPostFirst && !empty ForumTool.messages && ForumTool.topicHasVisibleMessages()}"/>
+		<h:commandLink styleClass="button" action="#{ForumTool.processActionTopicSettings}" id="topic_setting" value="#{msgs.cdfm_topic_settings}"
+			rendered="#{ForumTool.selectedTopic.changeSettings}">
+			<f:param value="#{ForumTool.selectedTopic.topic.id}" name="topicId"/>
+		</h:commandLink>
+		<h:commandLink styleClass="button" action="#{ForumTool.processActionDeleteTopicConfirm}" id="delete_confirm"
+			value="#{msgs.cdfm_button_bar_delete_topic}" accesskey="d"
+			rendered="#{!ForumTool.selectedTopic.markForDeletion && ForumTool.displayTopicDeleteOption}">
+			<f:param value="#{ForumTool.selectedTopic.topic.id}" name="topicId"/>
+		</h:commandLink>
+		<h:outputLink styleClass="button" id="print" value="javascript:printFriendly('#{ForumTool.printFriendlyUrl}');"
+					rendered="#{!ForumTool.needToPostFirst && !empty ForumTool.messages && ForumTool.topicHasVisibleMessages()}">
+			<h:outputText value="#{msgs.cdfm_print}" />
+		</h:outputLink>
+	</h:panelGroup>
+</h:panelGroup>

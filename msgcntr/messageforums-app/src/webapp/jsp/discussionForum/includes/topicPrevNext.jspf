@@ -1,0 +1,14 @@
+<h:panelGroup layout="block" styleClass="view-message-nav">
+	<h:outputText styleClass="button formButtonDisabled" value="#{msgs.cdfm_previous_topic}" rendered="#{!ForumTool.selectedTopic.hasPreviousTopic}" />
+	<h:commandLink styleClass="button" action="#{ForumTool.processActionDisplayPreviousTopic}" value="#{msgs.cdfm_previous_topic}" rendered="#{ForumTool.selectedTopic.hasPreviousTopic}">
+		<f:param value="#{ForumTool.selectedTopic.previousTopicId}" name="previousTopicId"/>
+		<f:param value="#{ForumTool.selectedForum.forum.id}" name="forumId"/>
+		<f:param name="dfFlatView" value="#{view.viewId == '/jsp/discussionForum/message/dfFlatView.jsp' ? 'true' : 'false'}" />
+	</h:commandLink>
+	<h:outputText styleClass="button formButtonDisabled" value="#{msgs.cdfm_next_topic}" rendered="#{!ForumTool.selectedTopic.hasNextTopic}" />
+	<h:commandLink action="#{ForumTool.processActionDisplayNextTopic}" value="#{msgs.cdfm_next_topic}" rendered="#{ForumTool.selectedTopic.hasNextTopic}" styleClass="button">
+		<f:param value="#{ForumTool.selectedTopic.nextTopicId}" name="nextTopicId"/>
+		<f:param value="#{ForumTool.selectedForum.forum.id}" name="forumId"/>
+		<f:param name="dfFlatView" value="#{view.viewId == '/jsp/discussionForum/message/dfFlatView.jsp' ? 'true' : 'false'}" />
+	</h:commandLink>
+</h:panelGroup>

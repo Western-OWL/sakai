@@ -160,7 +160,7 @@ Licenses.
         });
 
 	$(".threads-to-move", container).html(itemHTML);
-    }
+    };
 
     var buildSourceListScroller = function () {
         var itemHTML = "";
@@ -169,7 +169,7 @@ Licenses.
         for (var j = 0; j < totalTopics; j++) {
             var sourcetopicid = $("[id^='sourcetopicid-']")[0].id.split("-")[1];
             var currtopicid = topics[j].topicid;
-            if (sourcetopicid == currtopicid) {
+            if (sourcetopicid == currtopicid) { // we want '==' here, not '===' as we're relying on type coercion (sourceTopicId is String, topicId is int)
                 // if current topic, greyed out disable radio selection
                 itemHTML += makeSourceListItemDisabled(topics[j]);
             }

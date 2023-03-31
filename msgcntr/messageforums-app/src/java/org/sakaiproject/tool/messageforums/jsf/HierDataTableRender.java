@@ -336,7 +336,11 @@ public class HierDataTableRender extends HtmlBasicRenderer
 				}
 
 				if (column.getId().endsWith("_msg_subject")) {
-					writer.writeAttribute("style", "padding-left: " + dmb.getDepth() + "em;", "style");
+					String paddingLeft = dmb.getDepth() + "em;";
+					if ("messagesInHierDataTable".equals(data.getId())) {
+						paddingLeft = "calc(" + dmb.getDepth() + "em + 8px);";
+					}
+					writer.writeAttribute("style", "padding-left: " + paddingLeft, "style");
 				}
 
 				// Render the contents of this cell by iterating over the kids of our kids

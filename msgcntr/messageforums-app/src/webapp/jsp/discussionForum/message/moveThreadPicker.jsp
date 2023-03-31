@@ -1,16 +1,18 @@
     <h:outputText escape="false" value='<div class="topic-picker" id="topic-picker" style="display:none" title="#{msgs.move_thread}">'/>
         <div class="selected-threads-to-move">
-            <div>
-                <h:outputText value="#{msgs.move_thread_info1}"  />
+            <p>
+                <h:outputText value="#{msgs.move_thread_info1} " />
                 <span id="sourcetopicid-<h:outputText value="#{ForumTool.selectedTopic.topic.id}" />">
-                    <h:outputText styleClass="sourcetitle" escape="true" value=" #{ForumTool.selectedTopic.topic.title} "  />
+                    <h:outputText styleClass="sourcetitle" escape="true" value=" #{ForumTool.selectedTopic.topic.title} " />
                 </span>
-                <h:outputText value="#{msgs.move_thread_info2}"  />
-            </div>
+                <h:outputText value=" #{msgs.move_thread_info2}" />
+            </p>
             <div class="threads-to-move" escape="true"></div>
-            <input class="checkbox-reminder" id="checkbox-reminder" type="checkbox" name="checkbox-reminder"  /> <h:outputText value="#{msgs.leave_reminder}"  />
+            <label style="font-weight:normal">
+                <input class="checkbox-reminder" id="checkbox-reminder" type="checkbox" name="checkbox-reminder" />
+                <h:outputText value="#{msgs.leave_reminder}" />
+            </label>
         </div>
-                       
         <div class="topic-filter">
             <div class="topic-filter-header">
                 <div class="topic-header-h3"><h:outputText value="#{msgs.filter_topics}"  /></div>
@@ -24,11 +26,9 @@
                 </select>
             </div>
             <div class="sak-banner-warn">
-                <img src="../../images/exclamation.gif" alt="warning"/>
                 <h:outputText value="#{msgs.locked_topics_hidden}"  />
             </div>
         </div>
-          
         <div class="topic-source">
             <div class="topic-filter-header">
                 <span class="topic-header-h3"><h:outputText value="#{msgs.topics}"  /></span>
@@ -48,9 +48,9 @@
             </div>
         </div>
 
-        <div class="topic-submit">
-        	<h:commandButton type="button" value="#{msgs.move_cancel}" styleClass="topic-btn-cancel" />
-        	<h:commandButton type="button" value="#{msgs.move_move}" styleClass="topic-btn-save"/>
+        <div class="topic-submit act">
+            <h:commandButton type="button" value="#{msgs.move_move}" styleClass="topic-btn-save active"/>
+            <h:commandButton type="button" value="#{msgs.move_cancel}" styleClass="topic-btn-cancel" />
         </div>
     </div>
     <div id="data" style="display:none">

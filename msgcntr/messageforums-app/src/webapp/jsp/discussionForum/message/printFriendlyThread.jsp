@@ -7,7 +7,8 @@
 </jsp:useBean>
 
 <f:view>
-<sakai:view toolCssHref="/messageforums-tool/css/msgcntr.css">
+<sakai:view>
+	<link rel="stylesheet" href="/messageforums-tool/css/msgcntr.css<h:outputText value="#{ForumTool.CDNQuery}" />" type="text/css" />
 	<h:form id="msgForum">
 
 <!--jsp/discussionForum/message/printFriendlyThread.jsp-->
