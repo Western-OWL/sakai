@@ -1,0 +1,118 @@
+<h:column>
+	<h:panelGroup layout="block" rendered="#{! forum.nonePermission}">
+		<h:panelGroup layout="block" styleClass="forumHeader">
+			<%@ include file="/jsp/discussionForum/includes/singleForum/forumHeader.jspf"%>
+			<h:panelGroup layout="block" styleClass="forumActions" rendered="#{forum.newTopic || forum.changeSettings || ForumTool.instructor}">
+				<div class="dropdown">
+					<button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+						<h:outputText value="#{msgs.cdfm_forum_options}" />
+						<span class="caret"></span>
+					</button>
+					<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu1">
+						<t:htmlTag value="li" rendered="#{forum.changeSettings}">
+							<h:commandLink action="#{ForumTool.processActionForumSettings}" value="#{msgs.cdfm_forum_settings}" rendered="#{forum.changeSettings}">
+								<f:param value="#{forum.forum.id}" name="forumId"/>
+							</h:commandLink>
+						</t:htmlTag>
+						<t:htmlTag value="li" rendered="#{ForumTool.newForum}">
+							<h:commandLink id="duplicate" action="#{ForumTool.processActionDuplicateForumMainConfirm}" value="#{msgs.cdfm_duplicate_forum}" rendered="#{ForumTool.newForum}" >
+								<f:param value="#{forum.forum.id}" name="forumId"/>
+							</h:commandLink>
+						</t:htmlTag>
+						<t:htmlTag value="li" rendered="#{ForumTool.instructor}">
+							<h:commandLink action="#{mfStatisticsBean.processActionStatisticsByTopic}" immediate="true" rendered="#{ForumTool.instructor}">
+								<f:param value="" name="topicId"/>
+								<f:param value="#{forum.forum.id}" name="forumId"/>
+								<h:outputText value="#{msgs.cdfm_button_bar_grade}" />
+							</h:commandLink>
+						</t:htmlTag>
+						<t:htmlTag value="li" rendered="#{forum.changeSettings}">
+							<h:commandLink id="delete" action="#{ForumTool.processActionDeleteForumMainConfirm}" value="#{msgs.cdfm_button_bar_delete_forum}" rendered="#{forum.changeSettings}">
+								<f:param value="#{forum.forum.id}" name="forumId"/>
+							</h:commandLink>
+						</t:htmlTag>
+					</ul>
+				</div>
+				<h:commandLink styleClass="button" action="#{ForumTool.processActionNewTopic}" value="#{msgs.cdfm_new_topic}" rendered="#{forum.newTopic}">
+					<f:param value="#{forum.forum.id}" name="forumId"/>
+				</h:commandLink>
+			</h:panelGroup>
+		</h:panelGroup> <%--end of Forum Heading--%>
+
+		<%-- the topic list  --%>
+		<%--//designNote: display a message if there is no topics for this forum , give a prompt to create a topic; in a table to match the datatable when topis are populated--%>
+		<h:panelGroup layout="block" styleClass="noForumsTopics" rendered="#{empty forum.topics}">
+			<h:panelGroup layout="block" styleClass="sak-banner-info">
+				<h:outputText escape="false" value="#{msgs.cdfm_forum_inf_no_topic_here} " />
+				<h:commandLink styleClass="button" action="#{ForumTool.processActionNewTopic}" value="#{msgs.cdfm_new_topic}" rendered="#{forum.newTopic}">
+					<f:param value="#{forum.forum.id}" name="forumId"/>
+				</h:commandLink>
+			</h:panelGroup>
+		</h:panelGroup>
+		<h:panelGroup layout="block" id="topics" styleClass="forumsTopics" rendered="#{!empty forum.topics}">
+			<t:dataList value="#{forum.topics}" var="topic">
+				<t:div rendered="#{! topic.nonePermission}" styleClass="forumTopic">
+					<%@ include file="/jsp/discussionForum/includes/topicHeader/topicHeader.jspf"%>
+					<div class="topicCountAndActionsContainer">
+						<h:panelGroup layout="block" styleClass="messagesCountColumn">
+							<%-- // display singular ('message') if total message is 1--%>
+							<h:outputText id="topic_msg_count58" value="#{topic.totalNoMessages} #{msgs.cdfm_lowercase_msg}"
+								rendered="#{topic.isRead && topic.totalNoMessages == 1}"/>
+							<%-- // display singular ('message') if total message is 0 or more than 1--%>
+							<h:outputText id="topic_msg_count59" value="#{topic.totalNoMessages} #{msgs.cdfm_lowercase_msgs}"
+								rendered="#{topic.isRead && (topic.totalNoMessages > 1 || topic.totalNoMessages == 0)}"/>
+						</h:panelGroup>
+
+						<h:panelGroup layout="block" styleClass="unreadCountColumn">
+							<%-- // display  singular ('unread message') if unread message is  1 --%>
+							<h:outputText styleClass="badge-new" id="topic_msg_count55" value="  #{topic.unreadNoMessages} #{msgs.cdfm_lowercase_unread_msg}"
+								rendered="#{topic.isRead && topic.unreadNoMessages >= 1}"/>
+							<%-- // display  plural ('unread messages') with different style sheet if unread message is 0 --%>
+							<h:outputText styleClass="" id="topic_msg_count57" value="   #{topic.unreadNoMessages} #{msgs.cdfm_lowercase_unread_msg}"
+								rendered="#{topic.isRead && topic.unreadNoMessages == 0}"/>
+						</h:panelGroup>
+
+						<h:panelGroup layout="block" styleClass="actionsColumn" rendered="#{forum.newTopic || topic.changeSettings || ForumTool.instructor}">
+							<%--//desNote: links to act on this topic --%>
+							<h:panelGroup layout="block" styleClass="topicActions" rendered="#{forum.newTopic || topic.changeSettings || ForumTool.instructor}">
+								<div class="dropdown">
+									<button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+										<h:outputText styleClass="optionsText" value="#{msgs.cdfm_topic_options}" />
+										<span class="caret"></span>
+									</button>
+									<ul class="dropdown-menu dropdown-menu-right">
+										<t:htmlTag value="li" rendered="#{topic.changeSettings}">
+											<h:commandLink action="#{ForumTool.processActionTopicSettings}" id="topic_setting" value="#{msgs.cdfm_topic_settings}" rendered="#{topic.changeSettings}">
+												<f:param value="#{topic.topic.id}" name="topicId"/>
+												<f:param value="#{forum.forum.id}" name="forumId"/>
+											</h:commandLink>
+										</t:htmlTag>
+										<t:htmlTag value="li" rendered="#{forum.newTopic}">
+											<h:commandLink action="#{ForumTool.processActionDuplicateTopicMainConfirm}" id="duplicate_confirm" value="#{msgs.cdfm_duplicate_topic}" rendered="#{forum.newTopic}">
+												<f:param value="#{topic.topic.id}" name="topicId"/>
+												<f:param value="#{forum.forum.id}" name="forumId"/>
+											</h:commandLink>
+										</t:htmlTag>
+										<t:htmlTag value="li" rendered="#{ForumTool.instructor}">
+											<h:commandLink action="#{mfStatisticsBean.processActionStatisticsByTopic}" immediate="true" rendered="#{ForumTool.instructor}">
+												<f:param value="#{topic.topic.id}" name="topicId"/>
+												<f:param value="#{forum.forum.id}" name="forumId"/>
+												<h:outputText value="#{msgs.cdfm_button_bar_grade}" />
+											</h:commandLink>
+										</t:htmlTag>
+										<t:htmlTag value="li" rendered="#{topic.changeSettings}">
+											<h:commandLink action="#{ForumTool.processActionDeleteTopicMainConfirm}" id="delete_confirm" value="#{msgs.cdfm_button_bar_delete_topic}" accesskey="d" rendered="#{topic.changeSettings}">
+												<f:param value="#{topic.topic.id}" name="topicId"/>
+												<f:param value="#{forum.forum.id}" name="forumId"/>
+											</h:commandLink>
+										</t:htmlTag>
+									</ul>
+								</div>
+							</h:panelGroup>
+						</h:panelGroup>
+					</div>
+				</t:div>
+			</t:dataList>
+		</h:panelGroup>
+	</h:panelGroup>
+</h:column>

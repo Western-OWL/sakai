@@ -348,15 +348,20 @@ function setupMessageNav(messageType){
                     var targetPosPrep=$(this).attr('href').replace('#','');
                     var targetPos = $("a[name='" + targetPosPrep + "']").position();
                     window.parent.scrollTo(0, targetPos.top);        
-                })
+                });
             }
             else {
                 $(this).prop("title", last);
             }
         });
     }
+    removeMess();
+}
+
+function removeMess()
+{
     if ($(".messageNew").size() < 1 && $(".messagePending").size() < 1) {
-        $('#messNavHolder').remove()
+        $('#messNavHolder').remove();
     }
 }
 
@@ -374,32 +379,36 @@ function doAjax(messageId, topicId, self){
                     if ($(self).parent('td').size() === 1) {
                         var thisTheadClassArr = $(thisRow).prop('class').split(' ');
                         var thisThread = thisTheadClassArr[thisTheadClassArr.length - 1];
-                        var unread = parseInt($('.hierItemBlock.' + thisThread + ' .childrenNewNumber').text(), 10);
+                        const $childrenNewNumber = $('.hierItemBlock.' + thisThread + ' .childrenNewNumber');
+                        const unreadText = $childrenNewNumber.text();
+                        const unread = parseInt(unreadText, 10);
+                        const noNumText = unreadText.replace(/\d+/g, "");
                         if (unread > 0) {
-                            $('.hierItemBlock.' + thisThread + ' .childrenNewNumber').text(unread - 1);
+                            $childrenNewNumber.text((unread - 1) + noNumText);
+                            if (unread === 1)
+                            {
+                                $childrenNewNumber.removeClass();
+                            }
                         }
                         $('.' + thisThread).find('em').text($('.' + thisThread).find('em').text() - 1);
 						//hide "New Messages" in thread seed if all messages have been marked as "read"
                         if ($('.' + thisThread).find('span.messageNew').size() === 1) {
                             $('.' + thisThread).find('span.childrenNewThread').css('visibility', 'hidden');
+                            $('.button.markAllAsRead').remove(); // also remove mark all as read button
                         }
 						// remove this "New" flag if this message has been marked as read
                         $(thisRow).children("td").children("span").children("span.messageNew").remove();
+
+                        // set visiblity hidden to preserve row height and reduce jitter
+                        $(self).css("visibility", "hidden");
                     }
                     else {
-						//in dfFlatView - remove "New" flag, as well as link target for the thread navigator
-						$(self).parents('tr').removeClass('messageNewNext')
-                        $(self).parents("div").parents("div").children('a.messageNewAnchor').remove()
-                        $(self).parents("div").parents("div").children("span.messageNew").remove()
-						// remove "Go to first new message" link if all messages have been marked as "read"
-                        if ($('.messagesThreaded').find('a.messageNewAnchor').size() === 0) {
-                            $('.jumpToNew').remove();
-                        }
+                        markAsReadFlat(self);
+
+                        $(self).remove();
                     }
 
-
                     //remove at end after references are not needed
-                    $(self).remove();
                     $("#" + messageId).parents("tr:first").children("td").each(function(){
                         this.innerHTML = this.innerHTML.replace(/unreadMsg/g, 'bogus');
                     });
@@ -417,6 +426,46 @@ function doAjax(messageId, topicId, self){
     });
     //$.ajax({type: "GET", url: location.href, data: ""});
     return false;
+}
+
+// lifted from doAjax to also handle marking as read after grading from modal dialog
+function markAsReadFlat(self)
+{
+	//in dfFlatView - remove "New" flag, as well as link target for the thread navigator
+	const $parentTr = $(self).parents('tr');
+	$parentTr.removeClass('messageNewNext');
+	$parentTr.find('span.messageNew + a.messageNewAnchor').remove();
+	$parentTr.find("span.messageNew").remove();
+	// remove "Go to first new message" link if all messages have been marked as "read"
+	if ($('.messagesThreaded').find('span.messageNew + a.messageNewAnchor').size() === 0) {
+		$('.jumpToNew').not('#jumpToNewPending').remove();
+		$('.button.markAllAsRead').remove(); // also remove mark all as read button
+	}
+	// increment the read by count
+	$readByCount = $parentTr.find(".readByCount");
+	const readBy = parseInt($readByCount.text(), 10);
+	$readByCount.text(readBy + 1);
+}
+
+function displayAsReadAfterGrading(self)
+{
+	const $parentTr = $(self).parents('tr');
+	const $markBtn = $parentTr.find('.markAsReadIcon');
+	if ($markBtn.length === 0)
+	{
+		return; // no mark as read button, message has already been read, just return
+	}
+
+	markAsReadFlat(self);
+	$markBtn.remove();
+
+	// This also gets called by doAjax regardless of allMessages/flatView so need to run it here:
+	//remove at end after references are not needed
+	$parentTr.children("td").each(function(){
+		this.innerHTML = this.innerHTML.replace(/unreadMsg/g, 'bogus');
+	});
+
+	return false;
 }
 
 $(document).ready(function() {
@@ -472,8 +521,20 @@ function ckeditor_word_count() {
 
 function msgcntr_word_count(forumHtml) {
     if (document.getElementById('counttotal')) {
-        document.getElementById('counttotal').innerHTML = "<span class='highlight'>(" + getWordCount(forumHtml) + ")</span>";
+        document.getElementById('counttotal').innerHTML = getWordCount(forumHtml);
     }
+}
+
+function initExternalWordCount()
+{
+    var msgText = "";
+    var msg = document.querySelector(".messageBody .textPanel");
+    if (msg !== null)
+    {
+        msgText = msg.innerHTML;
+        msgText = msgText.replace(/\n/g,',').replace(/\s/g,' ').replace(/  ,/g,',');
+    }
+    msgcntr_word_count(msgText);
 }
 
  function getWordCount(msgStr) {
@@ -842,6 +903,28 @@ $(document).ready(function(){
         }
     });
 
+});
+
+// general panel show/hide functionality with a11y support
+$(document).ready(function ()
+{
+	$(".forumsCollapseTrigger").each(function(index)
+	{
+		// find the panel
+		const $panel = $(this).siblings(".forumsCollapseTarget").first();
+		// write aria-expanded, aria-controls, and attach click event handler (should also support keyboard)
+		$(this).attr("aria-expanded", "false").attr("aria-controls", $panel[0].id).click(function(event)
+		{
+			// toggle the panel visibility
+			$panel.toggle("blind", 200);
+			// toggle the aria-expanded attribute on the link
+			const toggleExpanded = this.getAttribute("aria-expanded") === "false" ? "true" : "false";
+			this.setAttribute("aria-expanded", toggleExpanded);
+			resizeFrame('grow'); // still needed for Lessons iframe?
+			return false; // stop link navigation
+		});
+
+	});
 });
 
 var MFR = MFR || {};

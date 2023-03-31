@@ -1,5 +1,6 @@
 <%@ taglib uri="http://java.sun.com/jsf/html" prefix="h" %>
 <%@ taglib uri="http://java.sun.com/jsf/core" prefix="f" %>
+<%@ taglib uri="http://myfaces.apache.org/tomahawk" prefix="t"%>
 <%@ taglib uri="http://sakaiproject.org/jsf2/sakai" prefix="sakai" %>
 <%@ taglib uri="http://sakaiproject.org/jsf/messageforums" prefix="mf" %>
 
@@ -16,10 +17,11 @@ org.sakaiproject.tool.cover.SessionManager.getCurrentToolSession().
 
 
 <f:view>
-  <sakai:view title="#{msgs.cdfm_discussions}" toolCssHref="/messageforums-tool/css/msgcntr.css">
-  		<script>includeLatestJQuery("msgcntr");</script>
-		<script src="/messageforums-tool/js/sak-10625.js"></script>
-		<script src="/messageforums-tool/js/forum.js"></script>
+  <sakai:view title="#{msgs.cdfm_discussions}">
+		<script>includeLatestJQuery("msgcntr");</script>
+		<link rel="stylesheet" href="/messageforums-tool/css/msgcntr.css<h:outputText value="#{ForumTool.CDNQuery}" />" type="text/css" />
+		<script src="/messageforums-tool/js/sak-10625.js<h:outputText value="#{ForumTool.CDNQuery}" />"></script>
+		<script src="/messageforums-tool/js/forum.js<h:outputText value="#{ForumTool.CDNQuery}" />"></script>
 		<script>
 			$(document).ready(function () {
 				var menuLink = $('#forumsMainMenuLink');
@@ -30,7 +32,7 @@ org.sakaiproject.tool.cover.SessionManager.getCurrentToolSession().
 		</script>
 	<h:form id="msgForum">
 	<%@ include file="/jsp/discussionForum/menu/forumsMenu.jsp" %>
-	<h:messages styleClass="alertMessage" id="errorMessages" rendered="#{! empty facesContext.maximumSeverity}" />
+	<h:messages styleClass="sak-banner-error" id="errorMessages" rendered="#{! empty facesContext.maximumSeverity}" />
         <div class="page-header">
             <h1><h:outputText value="#{msgs.cdfm_discussions}" /></h1>
         </div>

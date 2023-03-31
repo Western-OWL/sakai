@@ -1,0 +1,23 @@
+<%-- different pages require the topic title to have different heading levels:--%>
+<%@ include file="openTitleHeading.jspf"%>
+	<h:commandLink action="#{ForumTool.processActionDisplayTopic}" id="topic_title" styleClass="title">
+		<f:param value="#{topic.topic.id}" name="topicId"/>
+		<f:param value="#{forum.forum.id}" name="forumId"/>
+		<h:outputText value="#{topic.topic.title}"/>
+	</h:commandLink>
+	<h:outputText id="draft" styleClass="badge-draft" value="#{msgs.cdfm_draft}" rendered="#{topic.topic.draft == 'true'}" />
+	<h:outputText styleClass="badge-unavailable" value="#{msgs.cdfm_unavailable_flag}" rendered="#{topic.availability == 'false'}" />
+	<h:outputText styleClass="badge-locked" value="#{msgs.cdfm_forum_locked_flag}" rendered="#{forum.locked == 'true' || topic.locked == 'true'}" />
+	<h:outputText id="topic_moderated" styleClass="badge-moderated" value="#{msgs.cdfm_forum_moderated_flag}" rendered="#{topic.moderated == 'true'}" />
+	<h:outputText styleClass="badge-post-first" value="#{msgs.cdfm_topic_post_first_flag}" rendered="#{topic.postFirst}" />
+	<h:outputText styleClass="badge-anon" value="#{msgs.cdfm_topic_anon_flag}" rendered="#{ForumTool.anonymousEnabled && topic.postAnonymous}" />
+	<%-- Rubrics marker --%>
+	<h:panelGroup rendered="#{topic.hasRubric == 'true'}">
+		<sakai-rubric-student-preview-button
+			site-id='<h:outputText value="#{ForumTool.siteId}" />'
+			display="icon"
+			tool-id="sakai.gradebookng"
+			entity-id="<h:outputText value="#{topic.gradeAssign}" />">
+		</sakai-rubric-student-preview-button>
+	</h:panelGroup>
+<%@ include file="closeTitleHeading.jspf"%>

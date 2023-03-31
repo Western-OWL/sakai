@@ -1,0 +1,34 @@
+<f:verbatim rendered="#{view.viewId == '/jsp/discussionForum/forum/dfForumSettings.jsp'}">
+	<h1>
+</f:verbatim>
+<f:verbatim rendered="#{view.viewId != '/jsp/discussionForum/forum/dfForumSettings.jsp'}">
+	<h2>
+</f:verbatim>
+	<h:commandLink action="#{ForumTool.processActionDisplayForum}" rendered="#{ForumTool.showForumLinksInNav}" styleClass="title">
+		<f:param value="#{forum.forum.id}" name="forumId"/>
+		<h:outputText value="#{forum.forum.title}"/>
+	</h:commandLink>
+	<h:outputText value="#{forum.forum.title}" rendered="#{!ForumTool.showForumLinksInNav}" styleClass="title" />
+
+	<%-- draft marker --%>
+	<h:outputText id="draft" styleClass="badge-draft" value="#{msgs.cdfm_draft}" rendered="#{forum.forum.draft == 'true'}" />
+	<%-- availability marker --%>
+	<h:outputText styleClass="badge-unavailable" value="#{msgs.cdfm_unavailable_flag}" rendered="#{forum.availability == 'false'}" />
+	<h:outputText styleClass="badge-inactive" value="#{msgs.cdfm_inactive_flag}" rendered="#{empty forum.topics}" />
+	<%-- locked marker --%>
+	<h:outputText styleClass="badge-locked" value="#{msgs.cdfm_forum_locked_flag}" rendered="#{forum.locked == 'true'}" />
+	<%-- Rubrics marker --%>
+	<h:panelGroup rendered="#{forum.hasRubric == 'true'}">
+		<sakai-rubric-student-preview-button
+			site-id='<h:outputText value="#{ForumTool.siteId}" />'
+			display="icon"
+			tool-id="sakai.gradebookng"
+			entity-id="<h:outputText value="#{forum.gradeAssign}" />">
+		</sakai-rubric-student-preview-button>
+	</h:panelGroup>
+<f:verbatim rendered="#{view.viewId == '/jsp/discussionForum/forum/dfForumSettings.jsp'}">
+	</h1>
+</f:verbatim>
+<f:verbatim rendered="#{view.viewId != '/jsp/discussionForum/forum/dfForumSettings.jsp'}">
+	</h2>
+</f:verbatim>

@@ -8,18 +8,19 @@
    <jsp:setProperty name="msgs" property="baseName" value="org.sakaiproject.api.app.messagecenter.bundle.Messages"/>
 </jsp:useBean>
 <f:view>
-	<sakai:view title="#{msgs.cdfm_discussion_forum_settings}" toolCssHref="/messageforums-tool/css/msgcntr.css">
+	<sakai:view title="#{msgs.cdfm_discussion_forum_settings}">
 	<script>includeLatestJQuery("msgcntr");</script>
 	<script>includeWebjarLibrary("momentjs");</script>
-	<script src="/messageforums-tool/js/jquery.charcounter.js"> </script>
-	<script src="/messageforums-tool/js/sak-10625.js"></script>
-	<script src="/messageforums-tool/js/forum.js"></script>
-	<script src="/messageforums-tool/js/messages.js"></script>
-	<script src="/messageforums-tool/js/permissions_header.js"></script>
-	<script src="/library/js/lang-datepicker/lang-datepicker.js"></script>
+	<link rel="stylesheet" href="/messageforums-tool/css/msgcntr.css<h:outputText value="#{ForumTool.CDNQuery}" />" type="text/css" />
+	<script src="/messageforums-tool/js/jquery.charcounter.js<h:outputText value="#{ForumTool.CDNQuery}" />"> </script>
+	<script src="/messageforums-tool/js/sak-10625.js<h:outputText value="#{ForumTool.CDNQuery}" />"></script>
+	<script src="/messageforums-tool/js/forum.js<h:outputText value="#{ForumTool.CDNQuery}" />"></script>
+	<script src="/messageforums-tool/js/messages.js<h:outputText value="#{ForumTool.CDNQuery}" />"></script>
+	<script src="/messageforums-tool/js/permissions_header.js<h:outputText value="#{ForumTool.CDNQuery}" />"></script>
+	<script src="/library/js/lang-datepicker/lang-datepicker.js<h:outputText value="#{ForumTool.CDNQuery}" />"></script>
 	<script src="/webcomponents/rubrics/sakai-rubrics-utils.js<h:outputText value="#{ForumTool.CDNQuery}" />"></script>
 	<script type="module" src="/webcomponents/rubrics/rubric-association-requirements.js<h:outputText value="#{ForumTool.CDNQuery}" />"></script>
-	<link href="/library/webjars/jquery-ui/1.12.1/jquery-ui.min.css" rel="stylesheet" type="text/css" />
+	<link href="/library/webjars/jquery-ui/1.12.1/jquery-ui.min.css<h:outputText value="#{ForumTool.CDNQuery}" />" rel="stylesheet" type="text/css" />
 	<%
 	  	String thisId = request.getParameter("panel");
   		if (thisId == null) 
@@ -137,7 +138,7 @@
 			<h:panelGrid columns="1" styleClass="jsfFormTable" columnClasses="shorttext">
 				<h:panelGroup>
 					<%-- //designNote: does this text input need a maxlength attribute ? --%>
-					<h:outputLabel id="outputLabel" for="forum_title" styleClass="block strong" style="padding-bottom:.3em;display:block;clear:both;float:none;">
+					<h:outputLabel id="outputLabel" for="forum_title" styleClass="block strong" style="padding-bottom:.3em;display:block;clear:both;float:none;font-weight:700;">
 					<h:outputText id="req_star"  value="#{msgs.cdfm_info_required_sign}" styleClass="reqStar"/>	
 						<h:outputText  value="#{msgs.cdfm_forum_title}" />
 					</h:outputLabel>
@@ -182,7 +183,7 @@
 	      </h2>
 
 				<%--designNote: would be nice to make this an include, as well as a more comprehensive MIME type check  --%> 
-			<h:dataTable styleClass="attachPanel" id="attmsg"  value="#{ForumTool.attachments}" var="eachAttach"  cellpadding="0" cellspacing="0" columnClasses="attach,bogus,specialLink,bogus,bogus" rendered="#{!empty ForumTool.attachments}">
+			<h:dataTable styleClass="table table-hover attachPanel" id="attmsg" value="#{ForumTool.attachments}" var="eachAttach" columnClasses="attach,bogus,specialLink,bogus,bogus" rendered="#{!empty ForumTool.attachments}">
 				<h:column>
 					<f:facet name="header">   <h:outputText value=" "/>
 						</f:facet>
@@ -199,9 +200,7 @@
 					<f:facet name="header">
 						<h:outputText value=" "/>
 					</f:facet>
-						<h:commandLink action="#{ForumTool.processDeleteAttachSetting}" 
-								immediate="true"
-								title="#{msgs.cdfm_remove}">
+						<h:commandLink action="#{ForumTool.processDeleteAttachSetting}" immediate="true">
 							<h:outputText value="#{msgs.cdfm_remove}"/>
 								<f:param value="#{eachAttach.attachment.attachmentId}" name="dfmsg_current_attach"/>
 							</h:commandLink>
@@ -241,24 +240,15 @@
 			</h2>
 
 				<p class="checkbox">
-					<h:selectBooleanCheckbox
-						title="ForumLocked" value="#{ForumTool.selectedForum.forumLocked}"
-						id="forum_locked">
-					</h:selectBooleanCheckbox>
+					<h:selectBooleanCheckbox value="#{ForumTool.selectedForum.forumLocked}" id="forum_locked" />
 					<h:outputLabel for="forum_locked" value="#{msgs.cdfm_lock_forum}" />
 				</p>
 				<p class="checkbox">
-					<h:selectBooleanCheckbox
-						title="Moderated" value="#{ForumTool.selectedForum.forumModerated}"
-						id="moderated">
-					</h:selectBooleanCheckbox>
+					<h:selectBooleanCheckbox value="#{ForumTool.selectedForum.forumModerated}" id="moderated" />
 					<h:outputLabel for="moderated" value="#{msgs.cdfm_moderate_forum}" />
 				</p>
 				<p class="checkbox">
-					<h:selectBooleanCheckbox
-						title="postFirst" value="#{ForumTool.selectedForum.forumPostFirst}"
-						id="postFirst">
-					</h:selectBooleanCheckbox>
+					<h:selectBooleanCheckbox value="#{ForumTool.selectedForum.forumPostFirst}" id="postFirst" />
 					<h:outputLabel for="postFirst" value="#{msgs.cdfm_postFirst}" />
 				</p>
 
@@ -313,12 +303,8 @@
 		<h2><h:outputText value="#{msgs.cdfm_forum_mark_read}"/></h2>
 			
 			<p class="checkbox">
-				<h:selectBooleanCheckbox
-					title="autoMarkThreadsRead"
-					value="#{ForumTool.selectedForum.forumAutoMarkThreadsRead}"
-					id="autoMarkThreadsRead">
-				</h:selectBooleanCheckbox>
-				<h:outputLabel for="autoMarkThreadsRead"	value="#{msgs.cdfm_auto_mark_threads_read}" />
+				<h:selectBooleanCheckbox value="#{ForumTool.selectedForum.forumAutoMarkThreadsRead}" id="autoMarkThreadsRead" />
+				<h:outputLabel for="autoMarkThreadsRead" value="#{msgs.cdfm_auto_mark_threads_read}" />
 			</p>
 
 	      <%--designNote: gradebook assignment - need to finesse this - make aware that functionality exists, but flag that there are no gb assignmetns to select --%>
@@ -412,7 +398,7 @@
 	        	<f:param value="#{ForumTool.selectedForum.forum.id}" name="forumId"/>
           </h:commandButton>  
 				<h:commandButton action="#{ForumTool.processActionSaveForumAsDraft}" value="#{msgs.cdfm_button_bar_save_draft}" accesskey="v"
-          								 rendered = "#{!ForumTool.selectedForum.markForDeletion}" styleClass="blockMeOnClick">
+          								 rendered = "#{!ForumTool.selectedForum.markForDeletion && ForumTool.getSelectedForumTotalNoMessages() eq 0}" styleClass="blockMeOnClick">
 	        	<f:param value="#{ForumTool.selectedForum.forum.id}" name="forumId"/>
           </h:commandButton>
 				<%-- // designNote: these next 2 actions  should be available in the list view instead of here --%>

@@ -1,0 +1,18 @@
+<h:panelGroup layout="block" rendered="#{! topic.nonePermission}" styleClass="topicTitle">
+	<%@ include file="topicTitle.jspf"%>
+
+	<%--the topic details --%>
+	<h:outputText id="topic_desc" value="#{topic.topic.shortDescription}" styleClass="shortDescription"  rendered="#{topic.topic.shortDescription != null && topic.topic.shortDescription != ''}" />
+
+	<f:subview id="desc1" rendered="#{ForumTool.alwaysShowFullDesc}"><%@ include file="topicDesc.jspf"%></f:subview>
+	<%-- render the more link only if there is something to show --%>
+	<h:outputLink value="#" styleClass="forumsCollapseTrigger"
+				  rendered="#{(!ForumTool.alwaysShowFullDesc && (!empty topic.attachList || (topic.topic.extendedDescription != '' &&  topic.topic.extendedDescription != null && topic.topic.extendedDescription != '<br/>')))
+				  || (ForumTool.showAvailabilityDates == 'true' && topic.availabilityRestricted == 'true')}">
+		<h:outputText value="#{msgs.cdfm_details}" />
+	</h:outputLink>
+	<t:div id="togglePanel" styleClass="collapse forumsCollapseTarget">
+	<f:subview id="desc2" rendered="#{!ForumTool.alwaysShowFullDesc}"><%@ include file="topicDesc.jspf"%></f:subview>
+	<%@ include file="topicDates.jspf"%>
+	</t:div>
+</h:panelGroup>

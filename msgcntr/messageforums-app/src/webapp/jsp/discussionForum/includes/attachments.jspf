@@ -1,0 +1,7 @@
+<t:dataList layout="unorderedList" value="#{attachList}" var="eachAttach" styleClass="attachListJSF" rendered="#{!empty attachList}">
+	<sakai:contentTypeMap fileType="#{eachAttach.attachment.attachmentType}" mapType="image" var="imagePath" pathPrefix="/library/image/"/>
+	<h:graphicImage id="exampleFileIcon" value="#{imagePath}" alt="" />
+	<h:outputLink value="#{eachAttach.url}" target="_blank" rel="noreferrer">
+		<h:outputText value="#{eachAttach.attachment.attachmentName}" />
+	</h:outputLink>
+</t:dataList>
