@@ -7,12 +7,13 @@
 </jsp:useBean>
 
 <f:view>
-	<sakai:view toolCssHref="/messageforums-tool/css/msgcntr.css">
+	<sakai:view>
 		<h:form id="msgForum" styleClass="specialLink">
-			
-	       		<script>includeLatestJQuery("msgcntr");</script>
-       		<script src="/messageforums-tool/js/sak-10625.js"></script>
-		<script src="/messageforums-tool/js/forum.js"></script>
+
+			<script>includeLatestJQuery("msgcntr");</script>
+			<link rel="stylesheet" href="/messageforums-tool/css/msgcntr.css<h:outputText value="#{ForumTool.CDNQuery}" />" type="text/css" />
+			<script src="/messageforums-tool/js/sak-10625.js<h:outputText value="#{ForumTool.CDNQuery}" />"></script>
+			<script src="/messageforums-tool/js/forum.js<h:outputText value="#{ForumTool.CDNQuery}" />"></script>
 
 		<%@ include file="/jsp/discussionForum/menu/forumsMenu.jsp" %>
 
@@ -59,7 +60,7 @@
 				</p>	
 	  </div>
   
-	  <h:messages globalOnly="true" infoClass="success" errorClass="alertMessage" rendered="#{! empty facesContext.maximumSeverity}"/>
+	  <h:messages globalOnly="true" infoClass="sak-banner-success" errorClass="sak-banner-error" rendered="#{! empty facesContext.maximumSeverity}"/>
 	  <div>
 		<h:dataTable id="pendingMsgs" value="#{ForumTool.pendingMessages}" width="100%" var="message" 
 				columnClasses="bogus,nopadd" styleClass="table table-hover table-striped table-bordered specialLink" rendered="#{ForumTool.numPendingMessages >0 }" cellpadding="0" cellspacing="0">

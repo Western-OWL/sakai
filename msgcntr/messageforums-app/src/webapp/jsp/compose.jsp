@@ -97,7 +97,7 @@
 		  	  <sakai:instruction_message value="#{PrivateMessagesTool.privacyAlert}"/>
 		  </h:outputLink>
 
-		  <h:messages styleClass="alertMessage" id="errorMessages" rendered="#{! empty facesContext.maximumSeverity}" />
+		  <h:messages styleClass="sak-banner-error" id="errorMessages" rendered="#{! empty facesContext.maximumSeverity}" />
 
 		  <h:outputText styleClass="sak-banner-warn" value="#{msgs.pvt_hiddenGroupsBccMsg}" rendered="#{PrivateMessagesTool.displayHiddenGroupsMsg}" />
 		  <h:outputText styleClass="sak-banner-warn" value="#{msgs.pvt_draftRecipientsNotFoundMsg}" rendered="#{PrivateMessagesTool.displayDraftRecipientsNotFoundMsg}" />
@@ -279,12 +279,11 @@
 						</h:column>
 						<h:column>
 
-						  <h:commandLink action="#{PrivateMessagesTool.processDeleteAttach}"
-							           		immediate="true" title="#{msgs.pvt_attrem}">
-							  <h:outputText value="#{msgs.pvt_attrem}"/>
-<%--							<f:param value="#{eachAttach.attachmentId}" name="dfmsg_current_attach"/>--%>
-								<f:param value="#{eachAttach.attachment.attachmentId}" name="pvmsg_current_attach"/>
-							</h:commandLink>
+						<h:commandLink action="#{PrivateMessagesTool.processDeleteAttach}" immediate="true">
+							<h:outputText value="#{msgs.pvt_attrem}"/>
+<%--						<f:param value="#{eachAttach.attachmentId}" name="dfmsg_current_attach"/>--%>
+							<f:param value="#{eachAttach.attachment.attachmentId}" name="pvmsg_current_attach"/>
+						</h:commandLink>
 
 					</h:column>
 					<h:column rendered="#{!empty PrivateMessagesTool.attachments}">

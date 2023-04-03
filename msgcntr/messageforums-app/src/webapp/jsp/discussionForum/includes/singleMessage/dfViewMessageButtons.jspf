@@ -1,0 +1,48 @@
+<%-- Reply to this message--%>
+<h:commandLink styleClass="button" action="#{ForumTool.processDfMsgReplyMsg}"
+		rendered="#{ForumTool.selectedTopic.isNewResponseToResponse && ForumTool.selectedMessage.msgApproved && !ForumTool.selectedTopic.locked && !ForumTool.selectedForum.locked == 'true'}">
+	<h:outputText value=" #{msgs.cdfm_button_bar_reply_to_msg}" />
+</h:commandLink>
+<%-- Reply to the initial message--%>
+<h:commandLink styleClass="button replyButton" action="#{ForumTool.processDfMsgReplyThread}"
+		rendered="#{ForumTool.selectedTopic.isNewResponseToResponse && ForumTool.selectedThreadHead.msgApproved && !ForumTool.selectedTopic.locked && !ForumTool.selectedForum.locked == 'true'}">
+	<h:outputText value=" #{msgs.cdfm_button_bar_reply_to_thread}" />
+</h:commandLink>
+<%-- Grade this message--%>
+<h:commandLink styleClass="button" action="#{ForumTool.processDfMsgGrd}"
+		rendered="#{ForumTool.selectedTopic.isPostToGradebook && ForumTool.gradebookExist}">
+	<h:outputText value=" #{msgs.cdfm_button_bar_grade}" />
+</h:commandLink>
+<%-- Edit this message--%>
+<h:commandLink styleClass="button" action="#{ForumTool.processDfMsgRvs}"
+		rendered="#{ForumTool.selectedMessage.revise}">
+	<h:outputText value=" #{msgs.cdfm_button_bar_revise}" />
+</h:commandLink>
+<%-- Email --%>
+<h:outputLink styleClass="button" id="createEmail2" value="mailto:#{ForumTool.selectedMessage.authorEmail}" rendered="#{ForumTool.selectedMessage.userCanEmail && ForumTool.selectedMessage.authorEmail != '' && ForumTool.selectedMessage.authorEmail != null}">
+	<f:param value="Feedback on #{ForumTool.selectedMessage.message.title}" name="subject" />
+	<h:outputText value=" #{msgs.cdfm_button_bar_email}"/>
+</h:outputLink>
+<%-- Copy Link - permalink --%>
+<h:outputLink id="permalink1" value="#{ForumTool.messageURL}" styleClass="button permaLink" title="#{msgs.cdfm_button_bar_permalink_message}">
+	<h:outputText value=" #{msgs.cdfm_button_bar_permalink}"/>
+</h:outputLink>
+<%-- Approve this message--%>
+<h:commandLink styleClass="button" action="#{ForumTool.processDfMsgApprove}"
+		rendered="#{ForumTool.allowedToApproveMsg}">
+	<h:outputText value=" #{msgs.cdfm_button_bar_approve}" />
+</h:commandLink>
+<%-- Deny this message--%>
+<h:commandLink styleClass="button" action="#{ForumTool.processDfMsgDeny}"
+		rendered="#{ForumTool.allowedToDenyMsg}">
+	<h:outputText value=" #{msgs.cdfm_button_bar_deny}" />
+</h:commandLink>
+<%-- Add a comment to this message--%>
+<h:commandLink styleClass="button" action="#{ForumTool.processDfMsgAddComment}"
+		rendered="#{ForumTool.allowedToApproveMsg && ForumTool.selectedMessage.msgDenied}">
+	<h:outputText value=" #{msgs.cdfm_button_bar_add_comment}" />
+</h:commandLink>
+<%-- Delete this message--%>
+<h:commandLink styleClass="button" action="#{ForumTool.processDfMsgDeleteConfirm}" rendered="#{ForumTool.selectedMessage.userCanDelete}" >
+	<h:outputText value=" #{msgs.cdfm_button_bar_delete_msg}" />
+</h:commandLink>
