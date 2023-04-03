@@ -31,7 +31,7 @@
 	String dialogDivId = request.getParameter("dialogDivId");
 	boolean isDialogBox = false;
 
-	if(selectedUserId != null && !"".equals(selectedUserId)){
+	if(selectedUserId != null && !"".equals(selectedUserId) && statsBean.canViewMemberStatistics(selectedUserId)){
 		isDialogBox = true;
 		statsBean.selectedSiteUserId = selectedUserId;
 		//set up default settings:
@@ -40,7 +40,8 @@
 %>
 
 <f:view>
-  <sakai:view toolCssHref="/messageforums-tool/css/msgcntr.css">
+  <sakai:view>
+	<link rel="stylesheet" href="/messageforums-tool/css/msgcntr.css<h:outputText value="#{ForumTool.CDNQuery}" />" type="text/css" />
   	<h:form id="dfStatisticsForm" rendered="#{ForumTool.instructor}">
   	<!-- discussionForum/statistics/dfStatisticsAllAuthoredMsgForOneUser.jsp-->
   		<script>
@@ -114,13 +115,13 @@
 
 			</script>
 
-  	       	<script>includeLatestJQuery("msgcntr");</script>
-			<script src="/messageforums-tool/js/sak-10625.js"></script>
-			<script src="/messageforums-tool/js/forum.js"></script>
-			<script src="/messageforums-tool/js/messages.js"></script>
-			<script src="/messageforums-tool/js/dialog.js"></script>
-  			<link rel="stylesheet" type="text/css" href="/messageforums-tool/css/dialog.css" />
-  			<link rel="stylesheet" type="text/css" href="/messageforums-tool/css/msgcntr_statistics.css" />
+			<script>includeLatestJQuery("msgcntr");</script>
+			<script src="/messageforums-tool/js/sak-10625.js<h:outputText value="#{ForumTool.CDNQuery}" />"></script>
+			<script src="/messageforums-tool/js/forum.js<h:outputText value="#{ForumTool.CDNQuery}" />"></script>
+			<script src="/messageforums-tool/js/messages.js<h:outputText value="#{ForumTool.CDNQuery}" />"></script>
+			<script src="/messageforums-tool/js/dialog.js<h:outputText value="#{ForumTool.CDNQuery}" />"></script>
+			<link rel="stylesheet" type="text/css" href="/messageforums-tool/css/dialog.css<h:outputText value="#{ForumTool.CDNQuery}" />" />
+			<link rel="stylesheet" type="text/css" href="/messageforums-tool/css/msgcntr_statistics.css<h:outputText value="#{ForumTool.CDNQuery}" />" />
 
   			<script>
 	  			$(document).ready(function() {

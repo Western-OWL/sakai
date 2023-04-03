@@ -6,14 +6,15 @@
 	<jsp:setProperty name="msgs" property="baseName" value="org.sakaiproject.api.app.messagecenter.bundle.Messages"/>
 </jsp:useBean>
 <f:view>
-  <sakai:view toolCssHref="/messageforums-tool/css/msgcntr.css">
+  <sakai:view>
+	<link rel="stylesheet" href="/messageforums-tool/css/msgcntr.css<h:outputText value="#{ForumTool.CDNQuery}" />" type="text/css" />
   	<h:form id="dfStatisticsForm" rendered="#{ForumTool.instructor}">
 				<!-- discussionForum/statistics/dfStatisticsDisplayInThread.jsp -->
-  	    <script>includeLatestJQuery("msgcntr");</script>
-       	<script src="/messageforums-tool/js/sak-10625.js"></script>
-       	<script src="/messageforums-tool/js/forum.js"></script>
-       	<script src="/messageforums-tool/js/messages.js"></script>
-       	<script>
+		<script>includeLatestJQuery("msgcntr");</script>
+		<script src="/messageforums-tool/js/sak-10625.js<h:outputText value="#{ForumTool.CDNQuery}" />"></script>
+		<script src="/messageforums-tool/js/forum.js<h:outputText value="#{ForumTool.CDNQuery}" />"></script>
+		<script src="/messageforums-tool/js/messages.js<h:outputText value="#{ForumTool.CDNQuery}" />"></script>
+		<script>
   			$(document).ready(function() {
 				$(".messageBody").each(function(index){
 					var msgBody = $(this).html();
@@ -26,7 +27,7 @@
 				menuLinkSpan.html(menuLink.text());
 			});
 		</script>
-		<link rel="stylesheet" type="text/css" href="/messageforums-tool/css/msgcntr_statistics.css" />
+		<link rel="stylesheet" type="text/css" href="/messageforums-tool/css/msgcntr_statistics.css<h:outputText value="#{ForumTool.CDNQuery}" />" />
 		<%@ include file="/jsp/discussionForum/menu/forumsMenu.jsp" %>
 
 	<f:verbatim><div class="breadCrumb"><h3></f:verbatim>
