@@ -37,6 +37,8 @@ import org.springframework.orm.hibernate5.support.HibernateDaoSupport;
 
 import org.sakaiproject.api.app.messageforums.AnonymousManager;
 import org.sakaiproject.api.app.messageforums.AnonymousMapping;
+import org.sakaiproject.api.app.messageforums.DiscussionTopic;
+import org.sakaiproject.api.app.messageforums.ui.UIPermissionsManager;
 import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.component.app.messageforums.dao.hibernate.AnonymousMappingImpl;
 
@@ -61,10 +63,16 @@ public class AnonymousManagerImpl extends HibernateDaoSupport implements Anonymo
 	private final int MAX_IN_CLAUSE_SIZE = 1000;
 
 	private ServerConfigurationService serverConfigurationService;
+	private UIPermissionsManager uiPermissionsManager;
 	
 	public void setServerConfigurationService(ServerConfigurationService serverConfigurationService)
 	{
 		this.serverConfigurationService = serverConfigurationService;
+	}
+
+	public void setUiPermissionsManager(UIPermissionsManager value)
+	{
+		uiPermissionsManager = value;
 	}
 
 	/** {@inheritDoc} */
@@ -254,5 +262,38 @@ public class AnonymousManagerImpl extends HibernateDaoSupport implements Anonymo
 		// 6 hex characters is short enough to be recognizable to follow a conversation.
 		String hex = Integer.toHexString( (new Random()).nextInt(MAX_HEX) );
 		return (ANON_ID_PADDING.substring(hex.length()) + hex).toUpperCase();
+	}
+
+	@Override
+	public boolean displayAnonIdsToUser(String currentUser, DiscussionTopic topic)
+	{
+		if (topic == null || !isAnonymousEnabled())
+		{
+			return false;
+		}
+
+		if (topic.getPostAnonymous())
+		{
+			// Are we supposed to reveal authors' identities to certain roles in this topic?
+			if (topic.getRevealIDsToRoles())
+			{
+				if (uiPermissionsManager.isIdentifyAnonAuthors(topic))
+				{
+					// This user has permission to identify authors in this topic
+					return false;
+				}
+			}
+
+			/*
+			 * The topic is anonymous, and either
+			 *   a) the topic is not configured to reveal identities to anymous, or
+			 *   b) the topic is configured to reveal identities to some roles, but the current user does not have such a role
+			 *
+			 * Use the anonymous identity
+			 */
+			return true;
+		}
+
+		return false;
 	}
 }
