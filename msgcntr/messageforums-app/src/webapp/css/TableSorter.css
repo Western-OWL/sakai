@@ -1,22 +1,18 @@
-
 .header {
-height:auto;
-padding-top:8px !important;
-cursor:pointer;
+    height: auto;
+    padding-top:8px !important;
+    cursor: pointer;
 }
-.headerSortUp {
-background: url(../images/sortascending.gif) no-repeat left;
-background-position: 85%;
-height:auto;
-padding-top:8px !important;
+
+.allMessages .headerSortDown a, .allMessages .headerSortUp a {
+    background: url(../images/sortascending.gif) no-repeat right;
+    background-position: 100% center;
+    padding-right: 15px;
 }
-.headerSortDown {
-background: url(../images/sortdescending.gif) no-repeat left;
-background-position: 85%;
-height:auto;
-padding-top:8px !important;
+.allMessages .headerSortUp a {
+    background: url(../images/sortdescending.gif) no-repeat right;
 }
 
 .rightAlignColumn{
-	text-align: right;
+    text-align: right;
 }
