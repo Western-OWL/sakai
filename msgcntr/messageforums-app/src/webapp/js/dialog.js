@@ -4,10 +4,7 @@ var dialogutil = dialogutil || {};
 
 	dialogutil.openDialog = function(divId, frameId, yPos) {
 		var vHeight = 300;
-		
-		
 
-		$('body').css('padding-bottom','300px')
 		$("#" + divId).dialog({
 			resizable: false,
 			autoOpen:false,
@@ -51,7 +48,7 @@ var dialogutil = dialogutil || {};
 
 	dialogutil.showDiv = function(divId) {
 		$("#" + divId).show();
-		$("#" + divId).delay(5000, function(){$("#" + divId).fadeOut(1000)});
+		$("#" + divId).delay(5000, function(){$("#" + divId).fadeOut(1000);});
 	};
 
 	$.fn.delay = function(time, func) {
@@ -91,11 +88,10 @@ var dialogutil = dialogutil || {};
 				objToResize.height = localHeight + "px";
 			}
 		}
-	}
+	};
 
 	dialogutil.replaceBodyOnLoad = function (newOnLoad, contextObject) {
 		$("body", contextObject.document).prop("onload", newOnLoad);
-	}
-
+	};
 
 })(jQuery, dialogutil);
