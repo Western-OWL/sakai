@@ -24,6 +24,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.function.Predicate;
@@ -471,6 +472,11 @@ public class DiscussionForumBean
     public List<DecoratedAttachment> getAttachList() {
         return decoAttachList;
     }
+
+	public List<List<DecoratedAttachment>> getAttachListAsSingletonList()
+	{
+		return Collections.singletonList(getAttachList());
+	}
 
     public String getAvailabilityRestricted()
 	  {
