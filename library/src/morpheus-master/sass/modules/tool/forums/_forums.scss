@@ -91,10 +91,6 @@
 				}
 			}
 		}
-
-		.view-message-nav{
-			text-align: right;
-		}
 	}
 
 	table.specialLink{
@@ -120,40 +116,6 @@
 		}
 	}
 
-	.allMessages{
-		border: 1px solid var(--sakai-border-color);
-		border-collapse: collapse;
-		width: 100%;
-		margin: 1em 0 0 0;
-		thead{
-			th{
-				vertical-align: text-bottom;
-				padding: 0.8em 0em;
-				background: var(--sakai-background-color-2);
-				border: 1px solid var(--sakai-border-color);
-				text-align: center;
-				&.header{
-					padding: 0.8em 0.4em;
-					text-align: left;
-				}
-			}
-		}
-		tbody{
-			td{
-				padding: 0.8em 0.4em;
-				&.attach{
-					padding: 0.8em 0;
-					text-align: center;
-				}
-				&.messageTitle{
-					a{
-						margin-left: 0.2em;
-					}
-				}
-			}
-		}
-	}
-
 	.labeled{
 		display: inline-block;
 		font-weight: 700;
@@ -163,7 +125,9 @@
 	#revise{
 		label{
 			font-weight: 400;
-			margin: 1em 0 0.25em 0;
+			margin: $standard-spacing 0 $standard-space 0;
+			padding-left: 0;
+
 			input[type="radio"]{
 				margin: 0 0.5em 0 -2em;
 			}
@@ -202,7 +166,8 @@
 				margin: 0 10px;
 				position: inherit;
 				+ label{
-					padding-left: 10px;
+					margin-left: 0;
+					padding-left: 0;
 					padding-right: 40px;
 					@media #{$phone}{
 						max-width: calc(100% - 50px);
@@ -237,31 +202,11 @@
 			    padding: 3px 0 3px 6px;
 			}
 		}
-		
-		&\:alert-delete{
-			margin: 2em 0 0 0;
-		}
-	}
-
-	.messagesThreaded{
-		.md{
-			display: inline-block;
-			font-size: 1em;
-			padding: 0.3em 0.2em 0.1em 0;
-			a{
-				color: var(--sakai-text-color-1);
-				text-decoration: none;
-				border-bottom: 1px solid var(--sakai-border-color);
-				&:hover, &:focus{
-					color: var(--link-hover-color);
-				}
-			}
-		}
 	}
 
 	.openLinkBlock, .hideLinkBlock {
 		padding: 0;
-		margin: 0.5em 0;
+		margin: 0;
 		&.display-none {
 			display: none;
 		}
@@ -269,6 +214,7 @@
 
 	.fullTopicDescription {
 		display: none;
+		margin: $standard-spacing 13px; // 13px = disclosure triangle width
 		&.display-block {
 			display: block;
 		}
