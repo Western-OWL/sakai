@@ -10,6 +10,8 @@
 <f:view>
 	<sakai:view>
 		<h:form id="dfCompose">
+			<f:verbatim><input type="hidden" id="ckeditor-autosave-context" name="ckeditor-autosave-context" value="forums_dfMsgRevise" /></f:verbatim>
+			<h:panelGroup rendered="#{ForumTool.selectedMessage.message.id!=null}"><f:verbatim><input type="hidden" id="ckeditor-autosave-entity-id" name="ckeditor-autosave-entity-id" value="</f:verbatim><h:outputText value="#{ForumTool.selectedMessage.message.id}"/><f:verbatim>"/></f:verbatim></h:panelGroup>
 			<f:verbatim><input type="hidden" id="currentMessageId" name="currentMessageId" value="</f:verbatim>
 							<h:outputText rendered="#{view.viewId != '/jsp/dfCompose.jsp'}" value="#{ForumTool.selectedMessage.message.id}"/><f:verbatim>"/></f:verbatim>
 			<f:verbatim><input type="hidden" id="currentTopicId" name="currentTopicId" value="</f:verbatim><h:outputText value="#{ForumTool.selectedTopic.topic.id}"/><f:verbatim>"/></f:verbatim>
@@ -92,7 +94,7 @@
 
 					<p class="act">
 						<h:commandButton rendered="#{view.viewId == '/jsp/dfCompose.jsp'}" id="post" action="#{ForumTool.processDfMsgPost}" value="#{msgs.cdfm_button_bar_post_message}" accesskey="s" styleClass="active blockMeOnClick"/>
-						<h:commandButton rendered="#{view.viewId == '/jsp/dfMsgRevise.jsp'}" action="#{ForumTool.processDfMsgRevisedPost}" value="#{msgs.cdfm_button_bar_post_revised_msg}" accesskey="s" styleClass="active blockMeOnClick">
+						<h:commandButton rendered="#{view.viewId == '/jsp/dfMsgRevise.jsp' && empty facesContext.maximumSeverity}" action="#{ForumTool.processDfMsgRevisedPost}" value="#{msgs.cdfm_button_bar_post_revised_msg}" accesskey="s" styleClass="active blockMeOnClick">
 							<f:param value="#{ForumTool.selectedTopic.topic.id}" name="topicId"/>
 							<f:param value="#{ForumTool.selectedThreadHead.message.id}" name="messageId"/>
 						</h:commandButton>

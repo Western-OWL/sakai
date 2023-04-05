@@ -30,7 +30,7 @@
 			<f:facet name="header">
 				<h:outputText value="#{msgs.cdfm_attsize}" />
 			</f:facet>
-			<h:outputText value="#{eachAttach.attachment.attachmentSize}"/>
+			<h:outputText value="#{ForumTool.getAttachmentReadableSize(eachAttach.attachment.attachmentSize)}"/>
 		</h:column>
 		<h:column rendered="#{!empty ForumTool.attachments}">
 			<f:facet name="header">
@@ -41,8 +41,8 @@
 	</h:dataTable>
 	<p class="act">
 		<h:commandButton action="#{ForumTool.processAddAttachmentRedirect}" value="#{msgs.cdfm_button_bar_add_attachment_redirect}" accesskey="a"
-			style="font-size:96%"  rendered="#{empty ForumTool.attachments}"/>
+			style="font-size:96%"  rendered="#{empty ForumTool.attachments && empty facesContext.maximumSeverity}"/>
 		<h:commandButton action="#{ForumTool.processAddAttachmentRedirect}" value="#{msgs.cdfm_button_bar_add_attachment_more_redirect}" accesskey="a"
-			style="font-size:96%"  rendered="#{!empty ForumTool.attachments}"/>
+			style="font-size:96%"  rendered="#{!empty ForumTool.attachments && empty facesContext.maximumSeverity}"/>
 	</p>
 </div>
