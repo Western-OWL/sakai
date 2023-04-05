@@ -23,6 +23,7 @@ package org.sakaiproject.tool.messageforums.ui;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.function.Predicate;
@@ -1042,6 +1043,11 @@ public class DiscussionTopicBean
 	public void setAttachList(List<DecoratedAttachment> attachList) {
       this.attachList = attachList;
     }
+
+	public List<List<DecoratedAttachment>> getAttachListAsSingletonList()
+	{
+		return Collections.singletonList(getAttachList());
+	}
 
 	public boolean isSorted()
 	{
