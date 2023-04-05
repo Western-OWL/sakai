@@ -189,7 +189,7 @@ table{
 		@include display-flex();
 		width: 100%;
 
-		input:last-of-type, button:last-of-type
+		input[type=button]:last-of-type, input[type=submit]:last-of-type, button:last-of-type
 		{
 			margin-right: 0;
 		}
