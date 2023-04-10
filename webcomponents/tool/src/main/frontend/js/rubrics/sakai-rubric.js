@@ -42,7 +42,6 @@ export class SakaiRubric extends RubricsElement {
     const oldValue = this._rubric;
     this._rubric = newValue;
     if (!this._rubric.criteria) this._rubric.criteria = [];
-    this.handleWeightLink();
     this.handleShareLink();
     this.requestUpdate("rubric", oldValue);
   }
@@ -86,26 +85,6 @@ export class SakaiRubric extends RubricsElement {
         <div class="hidden-xs">${this.rubric.formattedModifiedDate}</div>
 
         <div class="actions">
-          ${!this.rubric.locked ? html`
-            <div class="action-container">
-              <span class="hidden-sm hidden-xs sr-only">
-                ${this.rubric.weighted ?
-                  html`<sr-lang key="weighted_label">weighted_label</sr-lang>`
-                  :
-                  html`<sr-lang key="standard_label">standard_label</sr-lang>`
-                }
-              </span>
-              <a role="button"
-                  class="linkStyle weighted fa ${this.weightedIcon}"
-                  href="javascript:;"
-                  title="${this.weightLabel}"
-                  tabindex="0"
-                  @keyup="${this.openEditWithKeyboard}"
-                  @click="${this.weightedChange}">
-              </a>
-            </div>`
-          : ""
-          }
           <div class="action-container">
             <span class="hidden-sm hidden-xs sr-only">
               ${this.rubric.shared ?
@@ -313,7 +292,6 @@ export class SakaiRubric extends RubricsElement {
     .then(r => {
 
       if (r.ok) {
-        this.handleWeightLink();
         this.requestUpdate();
       }
     });
@@ -338,19 +316,6 @@ export class SakaiRubric extends RubricsElement {
       }
     })
     .catch (error => console.error(error));
-  }
-
-  handleWeightLink() {
-
-    if (this.rubric.weighted) {
-      this.weightedIcon = "fa-percent";
-      this.weightLabel = tr("weighted_label");
-    } else {
-      this.weightedIcon = "fa-hashtag";
-      this.weightLabel = tr("standard_label");
-    }
-
-    this.dispatchEvent(new SharingChangeEvent());
   }
 
   handleShareLink() {

@@ -49,7 +49,6 @@ import org.sakaiproject.authz.api.AuthzGroupService;
 import org.sakaiproject.authz.api.FunctionManager;
 import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.component.api.ServerConfigurationService;
-import org.sakaiproject.entity.api.Entity;
 import org.sakaiproject.entity.api.EntityManager;
 import org.sakaiproject.entity.api.EntityProducer;
 import org.sakaiproject.entity.api.EntityTransferrer;
@@ -483,7 +482,7 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
                     }));
         }
         rubric.setTitle(bean.getTitle());
-        rubric.setWeighted(bean.getWeighted());
+        rubric.setWeighted(false);
         rubric.setCreated(bean.getCreated());
         rubric.setModified(bean.getModified());
         rubric.setOwnerId(bean.getOwnerId());
