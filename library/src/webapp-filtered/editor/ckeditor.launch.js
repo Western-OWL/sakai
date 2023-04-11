@@ -323,7 +323,7 @@ sakai.editor.editors.ckeditor.launch = function(targetId, config, w, h) {
             // 'textmatch',
             // 'textwatcher',
             'uicolor',
-            'uploadfile',
+            //'uploadfile',
             'widget',
             'wsc', // re-enable wsc (webspellchecker) plugin which is now disabled by default --plukasew
             
