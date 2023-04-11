@@ -98,7 +98,7 @@ sakai.editor.editors.ckeditor.launch = function(targetId, config, w, h) {
         }
     }
 
-    function addClassOnModeChange(){
+    function addClassOnContentDom(){
         try {
             //Only run when switching out of source mode into mysiwyg mode
             if (this.mode === 'wysiwyg') {
@@ -518,10 +518,11 @@ sakai.editor.editors.ckeditor.launch = function(targetId, config, w, h) {
         //should be refactored when ckeditor5 is implemented
         if (document.firstElementChild.classList.contains('sakaiUserTheme-dark')){
   
-            CKEDITOR.once('instanceReady', addClassOnLoad);
+            CKEDITOR.once('instanceLoaded', addClassOnLoad);
+
             // //and we watch for switching out or source mode
             CKEDITOR.once('instanceReady', function(editor){
-                editor.editor.on('mode', addClassOnModeChange);
+                editor.editor.on('contentDom', addClassOnContentDom);
             });
         }
 
