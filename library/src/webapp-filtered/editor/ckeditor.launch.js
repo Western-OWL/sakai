@@ -81,33 +81,32 @@ sakai.editor.editors.ckeditor.launch = function(targetId, config, w, h) {
     }
 
     function addClassOnLoad(){
-        try {
-            if (typeof this.instances !== 'undefined'){
-                //Run on all ckeditor instances on the page
-                for (const instance in this.instances) {
+        if (typeof this.instances !== 'undefined'){
+            //Run on all ckeditor instances on the page
+            for (const instance in this.instances) {
+                try {
                     //check for the instance to be an object not a function
                     if (Object.hasOwnProperty.call(this.instances, instance)) {
                         const instanceDoc = this.instances[instance];
                         //Add sakai-dark-theme class to ckeditor iframe
-                        instanceDoc.document.$.documentElement.classList.add('sakaiUserTheme-dark');
+                        if (typeof instanceDoc.document !== 'undefined') {
+                            instanceDoc.document.$.documentElement.classList.add('sakaiUserTheme-dark');
+                        }
                     }
+                } catch (error) {
+                    console.error(error);
                 }
             }
-        } catch (error) {
-            console.error(error);
         }
     }
 
-    function addClassOnContentDom(){
+    function addClassAfterCommandExec(){
         try {
-            //Only run when switching out of source mode into mysiwyg mode
-            if (this.mode === 'wysiwyg') {
-                //Check for the editor to be an object not a function
-                if (Object.prototype.hasOwnProperty.call(this, 'document')) {
-                    const instanceDoc = this.document.$;
-                    //Add sakai-dark-theme class to ckeditor iframe
-                    instanceDoc.documentElement.classList.add('sakaiUserTheme-dark');
-                }
+            //Check for the editor to be an object not a function
+            if (Object.prototype.hasOwnProperty.call(this, 'document')) {
+                const instanceDoc = this.document.$;
+                //Add sakai-dark-theme class to ckeditor iframe
+                instanceDoc.documentElement.classList.add('sakaiUserTheme-dark');
             }
         } catch (error) {
             console.error(error);
@@ -517,13 +516,21 @@ sakai.editor.editors.ckeditor.launch = function(targetId, config, w, h) {
         //so we manually add the class on load
         //should be refactored when ckeditor5 is implemented
         if (document.firstElementChild.classList.contains('sakaiUserTheme-dark')){
-  
+
+            // Immediate in chrome, doesn't cover FF
             CKEDITOR.once('instanceLoaded', addClassOnLoad);
 
-            // //and we watch for switching out or source mode
+            // Covers FF
+            CKEDITOR.once('instanceReady', addClassOnLoad);
+
+            // and we watch for switching out of source mode
             CKEDITOR.once('instanceReady', function(editor){
-                editor.editor.on('contentDom', addClassOnContentDom);
+                // Immediate in chrome, doesn't cover FF
+                editor.editor.on('afterCommandExec', addClassAfterCommandExec);
+                // Covers FF
+                editor.editor.on('mode', addClassAfterCommandExec);
             });
+
         }
 
         //Enable ckeditor to reflect themeswitcher changes. Overrides:
