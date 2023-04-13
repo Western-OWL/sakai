@@ -11661,7 +11661,7 @@ public class AssignmentAction extends PagedResourceActionII {
                     }
                 }
                 if (params.getString("allowExtensionToggle") != null){  //if the Allow Extension box is checked, we can read in the allowExtension params.
-                    readAllowExtensionParams(params, state, submission.getProperties());
+                    //readAllowExtensionParams(params, state, submission.getProperties());
                 } else {    //if it's not checked, State should have no data about it.
                     state.removeAttribute(AssignmentConstants.ALLOW_EXTENSION_CLOSETIME);
                     if (!"read".equals(gradeOption)) {
