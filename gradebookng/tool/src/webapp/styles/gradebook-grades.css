@@ -761,3 +761,14 @@ div.wicket-mask-transparent, div.wicket-mask-dark {
   width: 100%;
   margin-bottom: 15px;
 }
+
+/* OWL */
+.gb-lazyLoadGradeTable {
+  display: flex;
+  justify-content: center;
+}
+
+.gb-lazyLoadGradeTable .spinButton {
+  width: 16px;
+  height: 50vh;
+}
