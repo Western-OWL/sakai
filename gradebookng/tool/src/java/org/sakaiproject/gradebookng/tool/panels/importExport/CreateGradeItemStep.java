@@ -40,7 +40,7 @@ import org.sakaiproject.service.gradebook.shared.Assignment;
 import org.sakaiproject.util.api.FormattedText;
 
 import lombok.extern.slf4j.Slf4j;
-import org.sakaiproject.gradebookng.tool.owl.component.SakaiAjaxButton;
+import org.sakaiproject.wicket.component.SakaiAjaxButton;
 
 /**
  * Importer has detected that items need to be created so extract the data and wrap the 'AddOrEditGradeItemPanelContent' panel

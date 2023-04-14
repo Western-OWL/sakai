@@ -43,12 +43,12 @@ import org.sakaiproject.gradebookng.business.owl.importExport.DpcDelegate;
 import org.sakaiproject.gradebookng.business.util.ImportGradesHelper;
 import org.sakaiproject.gradebookng.business.util.MessageHelper;
 import org.sakaiproject.gradebookng.tool.model.ImportWizardModel;
-import org.sakaiproject.gradebookng.tool.owl.component.SakaiAjaxButton;
 import org.sakaiproject.gradebookng.tool.owl.panels.importExport.OwlExportPanel;
 import org.sakaiproject.gradebookng.tool.pages.GradebookPage;
 import org.sakaiproject.gradebookng.tool.pages.ImportExportPage;
 import org.sakaiproject.gradebookng.tool.panels.BasePanel;
 import org.sakaiproject.util.api.FormattedText;
+import org.sakaiproject.wicket.component.SakaiAjaxButton;
 
 /**
  * Upload/Download page

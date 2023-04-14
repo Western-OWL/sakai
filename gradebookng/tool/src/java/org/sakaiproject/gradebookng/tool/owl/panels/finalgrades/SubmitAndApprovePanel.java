@@ -11,9 +11,9 @@ import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.sakaiproject.gradebookng.tool.component.GbFeedbackPanel;
-import org.sakaiproject.gradebookng.tool.owl.component.SakaiAjaxButton;
 import org.sakaiproject.gradebookng.tool.owl.pages.FinalGradesPage;
 import org.sakaiproject.gradebookng.tool.owl.panels.finalgrades.CourseGradeSubmissionPanel.CourseGradeSubmissionData;
+import org.sakaiproject.wicket.component.SakaiAjaxButton;
 
 
 /**

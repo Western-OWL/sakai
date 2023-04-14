@@ -4,7 +4,6 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.ChoiceRenderer;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.EmptyPanel;
@@ -24,6 +23,7 @@ import org.sakaiproject.gradebookng.tool.owl.model.OwlGbUiSettings;
 import org.sakaiproject.gradebookng.tool.owl.model.UiSettings;
 import org.sakaiproject.gradebookng.tool.owl.pages.FinalGradesPage;
 import org.sakaiproject.service.gradebook.shared.PermissionDefinition;
+import org.sakaiproject.wicket.component.SakaiAjaxButton;
 
 /**
  *

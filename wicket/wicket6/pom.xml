@@ -32,6 +32,11 @@
 			<groupId>org.sakaiproject.portal</groupId>
 			<artifactId>sakai-portal-util</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-collections4</artifactId>
+			<type>jar</type>
+		</dependency>
 	</dependencies>
 
 </project>
