@@ -99,6 +99,7 @@ public interface Authz {
 	/**
 	 * @param gradebookUid
 	 * @param userUid
+	 *			The grader
 	 * @param categoryId
 	 * 			The category id that the desired item is associated with
 	 * @param gbCategoryType
