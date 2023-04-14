@@ -26,14 +26,9 @@ import org.apache.wicket.ajax.AjaxEventBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.Component;
-import org.apache.wicket.markup.html.IHeaderContributor;
 import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.ResourceModel;
 import org.apache.wicket.spring.injection.annot.SpringBean;
@@ -41,11 +36,31 @@ import org.apache.wicket.spring.injection.annot.SpringBean;
 import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.gradebookng.tool.actions.Action;
 import org.sakaiproject.gradebookng.tool.actions.ActionResponse;
+import org.sakaiproject.gradebookng.tool.actions.DeleteAssignmentAction;
+import org.sakaiproject.gradebookng.tool.actions.EditAssignmentAction;
+import org.sakaiproject.gradebookng.tool.actions.EditCommentAction;
+import org.sakaiproject.gradebookng.tool.actions.EditSettingsAction;
+import org.sakaiproject.gradebookng.tool.actions.ExcuseGradeAction;
+import org.sakaiproject.gradebookng.tool.actions.GradeUpdateAction;
+import org.sakaiproject.gradebookng.tool.actions.MoveAssignmentLeftAction;
+import org.sakaiproject.gradebookng.tool.actions.MoveAssignmentRightAction;
+import org.sakaiproject.gradebookng.tool.actions.OverrideCourseGradeAction;
+import org.sakaiproject.gradebookng.tool.actions.SetScoreForUngradedAction;
+import org.sakaiproject.gradebookng.tool.actions.SetStudentNameOrderAction;
+import org.sakaiproject.gradebookng.tool.actions.SetZeroScoreAction;
+import org.sakaiproject.gradebookng.tool.actions.ToggleCourseGradePoints;
+import org.sakaiproject.gradebookng.tool.actions.ViewAssignmentStatisticsAction;
+import org.sakaiproject.gradebookng.tool.actions.ViewCourseGradeLogAction;
+import org.sakaiproject.gradebookng.tool.actions.ViewCourseGradeStatisticsAction;
+import org.sakaiproject.gradebookng.tool.actions.ViewGradeLogAction;
+import org.sakaiproject.gradebookng.tool.actions.ViewGradeSummaryAction;
+import org.sakaiproject.gradebookng.tool.actions.ViewRubricGradeAction;
+import org.sakaiproject.gradebookng.tool.actions.owl.OwlEmptyAction;
 import org.sakaiproject.gradebookng.tool.model.GbGradeTableData;
 import org.sakaiproject.gradebookng.tool.model.GbGradebookData;
-import org.sakaiproject.portal.util.PortalUtils;
+import org.sakaiproject.gradebookng.tool.pages.GradebookPage;
 
-public class GbGradeTable extends Panel implements IHeaderContributor {
+public class GbGradeTable extends GenericPanel<GbGradeTableData> {
 
 	@SpringBean(name = "org.sakaiproject.component.api.ServerConfigurationService")
 	protected ServerConfigurationService serverConfigService;
@@ -73,7 +88,7 @@ public class GbGradeTable extends Panel implements IHeaderContributor {
 		return listeners.get(event).handleEvent(params, target);
 	}
 
-	public GbGradeTable(final String id, final IModel model) {
+	public GbGradeTable(final String id, final IModel<GbGradeTableData> model) {
 		super(id);
 
 		setDefaultModel(model);
@@ -124,39 +139,37 @@ public class GbGradeTable extends Panel implements IHeaderContributor {
 		WebMarkupContainer cgStats = new WebMarkupContainer("cgStats");
 		cgStats.add(new Label("cgStatsMsg", new ResourceModel("coursegrade.option.viewcoursegradestatistics")).setRenderBodyOnly(true));
 		add(cgStats.setVisible(showStats));
+
+		// OWL - attach event listeners, replacing with empty action as required for anon grading support
+		// in anonymous gradebooks the student and/or course grade columns can be hidden using CSS
+		// to prevent anyone from tampering with the CSS and exposing these actions, we disable them on the server side
+		boolean anon = ((GradebookPage) getPage()).getOwlUiSettings().isContextAnonymous();
+		boolean hideCourseGrade = ((GradebookPage) getPage()).getOwlUiSettings().isCourseGradeHiddenInCurrentContext();
+		addEventListener("setScore", new GradeUpdateAction());
+		addEventListener("gradeRubric", new ViewRubricGradeAction());
+		addEventListener("viewLog", new ViewGradeLogAction());
+		addEventListener("editAssignment", new EditAssignmentAction());
+		addEventListener("viewStatistics", new ViewAssignmentStatisticsAction());
+		addEventListener("overrideCourseGrade", hideCourseGrade ? new OwlEmptyAction() : new OverrideCourseGradeAction());
+		addEventListener("editComment", new EditCommentAction());
+		addEventListener("viewGradeSummary", anon ? new OwlEmptyAction() : new ViewGradeSummaryAction());
+		addEventListener("setZeroScore", hideCourseGrade ? new OwlEmptyAction() : new SetZeroScoreAction());
+		addEventListener("viewCourseGradeLog", hideCourseGrade ? new OwlEmptyAction() : new ViewCourseGradeLogAction());
+		addEventListener("deleteAssignment", new DeleteAssignmentAction());
+		addEventListener("setUngraded", new SetScoreForUngradedAction());
+		addEventListener("setStudentNameOrder", anon ? new OwlEmptyAction() : new SetStudentNameOrderAction());
+		addEventListener("toggleCourseGradePoints", hideCourseGrade ? new OwlEmptyAction() : new ToggleCourseGradePoints());
+		addEventListener("editSettings", new EditSettingsAction());
+		addEventListener("moveAssignmentLeft", new MoveAssignmentLeftAction());
+		addEventListener("moveAssignmentRight", new MoveAssignmentRightAction());
+		addEventListener("viewCourseGradeStatistics", new ViewCourseGradeStatisticsAction());
+		addEventListener("excuseGrade", new ExcuseGradeAction());
 	}
 
-	public void renderHead(final IHeaderResponse response) {
-		final GbGradeTableData gbGradeTableData = (GbGradeTableData) getDefaultModelObject();
+	// OWL
+	public String getLoadTableDataJs() {
+		final GbGradebookData gradebookData = new GbGradebookData(getModelObject(), this);
 
-		final String version = PortalUtils.getCDNQuery();
-
-		response.render(JavaScriptHeaderItem.forUrl("/library/js/view-preferences.js"));
-		response.render(JavaScriptHeaderItem.forUrl("/library/js/sakai-reminder.js"));
-
-		response.render(
-				JavaScriptHeaderItem.forUrl(String.format("/gradebookng-tool/scripts/gradebook-gbgrade-table.js%s", version)));
-
-		response.render(
-				JavaScriptHeaderItem.forUrl(String.format("/gradebookng-tool/webjars/handsontable/6.2.2/handsontable.full.min.js%s", version)));
-		response.render(CssHeaderItem.forUrl(String.format("/gradebookng-tool/webjars/handsontable/6.2.2/handsontable.full.min.css%s", version)));
-
-		final GbGradebookData gradebookData = new GbGradebookData(
-				gbGradeTableData,
-				this);
-
-		response.render(OnDomReadyHeaderItem.forScript(String.format("var tableData = %s", gradebookData.toScript())));
-
-		response.render(OnDomReadyHeaderItem.forScript(String.format("GbGradeTable.renderTable('%s', tableData)",
-				component.getMarkupId())));
-
-		int sectionsColumnWidth = serverConfigService.getInt("gradebookng.sectionsColumnWidth", 140);
-		int studentNumberColumnWidth = serverConfigService.getInt("gradebookng.studentNumberColumnWidth", 140);
-		boolean allowColumnResizing = serverConfigService.getBoolean("gradebookng.allowColumnResizing", false);
-		StringBuilder sb = new StringBuilder();
-		sb.append("var sectionsColumnWidth = ").append(sectionsColumnWidth);
-		sb.append(", allowColumnResizing = ").append(allowColumnResizing);
-		sb.append(", studentNumberColumnWidth = ").append(studentNumberColumnWidth).append(";");
-		response.render(JavaScriptHeaderItem.forScript(sb.toString(), null));
+		return String.format("GbGradeTable.loadTemplates(); var tableData = %s; GbGradeTable.renderTable('%s', tableData);", gradebookData.toScript(), component.getMarkupId());
 	}
 }
