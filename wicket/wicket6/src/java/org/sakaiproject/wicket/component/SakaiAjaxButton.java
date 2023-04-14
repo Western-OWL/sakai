@@ -15,6 +15,10 @@
  */
 package org.sakaiproject.wicket.component;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.wicket.ajax.AjaxChannel;
 import org.apache.wicket.ajax.attributes.AjaxCallListener;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -24,12 +28,13 @@ import org.apache.wicket.markup.html.form.Form;
 /**
  * Disables the button on click, sets the standard Sakai spinner on it, and removes it/re-enables the button after the Ajax call completes.
  *
- * @author plukasew
+ * @author plukasew, bjones86
  */
 public class SakaiAjaxButton extends AjaxButton
 {
 	private static final long serialVersionUID = 1L;
 	protected boolean willRenderOnClick = false;
+	private List<String> elementsToDisable = new ArrayList<>();
 
 	public SakaiAjaxButton(String id) {
 		super(id);
@@ -47,6 +52,21 @@ public class SakaiAjaxButton extends AjaxButton
 	public SakaiAjaxButton setWillRenderOnClick(boolean value)
 	{
 		willRenderOnClick = value;
+		return this;
+	}
+
+	/**
+	 * Set a list of HTML component IDs that should be disabled when the button is clicked.
+	 * @param elementsToDisable list of IDs that will be disabled on click
+	 * @return the button, for method chaining
+	 */
+	public SakaiAjaxButton setElementsToDisableOnClick(List<String> elementsToDisable)
+	{
+		if (CollectionUtils.isNotEmpty(elementsToDisable))
+		{
+			this.elementsToDisable = elementsToDisable;
+		}
+
 		return this;
 	}
 

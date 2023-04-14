@@ -52,10 +52,10 @@ import org.sakaiproject.gradebookng.business.model.ProcessedGradeItem.Type;
 import org.sakaiproject.gradebookng.tool.component.GbStyle;
 import org.sakaiproject.gradebookng.tool.component.GbStyleableWebMarkupContainer;
 import org.sakaiproject.gradebookng.tool.model.ImportWizardModel;
-import org.sakaiproject.gradebookng.tool.owl.component.SakaiAjaxButton;
 import org.sakaiproject.gradebookng.tool.pages.ImportExportPage;
 import org.sakaiproject.gradebookng.tool.panels.BasePanel;
 import org.sakaiproject.portal.util.PortalUtils;
+import org.sakaiproject.wicket.component.SakaiAjaxButton;
 
 /**
  * Page to allow the user to select which items in the imported file are to be imported

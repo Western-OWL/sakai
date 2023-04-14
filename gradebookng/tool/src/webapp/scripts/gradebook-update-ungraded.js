@@ -62,6 +62,8 @@ GradebookUpdateUngraded.prototype.setupConfirmation = function(){
 
 
   function performRealSubmit() {
+    self.$content.find(".gb-update-ungraded-fake-submit").hide();
+    self.$content.find(".gb-update-ungraded-real-submit").toggleClass("hide");
     self.$content.find(".gb-update-ungraded-real-submit").trigger("click");
     self.$content.find(":input").prop("disabled", true);
   };
