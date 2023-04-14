@@ -33,7 +33,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -54,7 +53,6 @@ import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.entity.api.Entity;
 import org.sakaiproject.entity.api.EntityManager;
 import org.sakaiproject.entity.api.Reference;
-import org.sakaiproject.exception.IdUnusedException;
 import org.sakaiproject.hibernate.HibernateCriterionUtils;
 import org.sakaiproject.rubrics.api.RubricsService;
 import org.sakaiproject.section.api.coursemanagement.CourseSection;
@@ -83,7 +81,6 @@ import org.sakaiproject.service.gradebook.shared.StaleObjectModificationExceptio
 import org.sakaiproject.service.gradebook.shared.exception.UnmappableCourseGradeOverrideException;
 import org.sakaiproject.site.api.Group;
 import org.sakaiproject.site.api.Site;
-import org.sakaiproject.site.api.SitePage;
 import org.sakaiproject.site.api.SiteService;
 import org.sakaiproject.site.api.ToolConfiguration;
 import org.sakaiproject.tool.api.ToolManager;
@@ -100,7 +97,6 @@ import org.sakaiproject.tool.gradebook.GradingEvent;
 import org.sakaiproject.tool.gradebook.LetterGradePercentMapping;
 import org.sakaiproject.tool.gradebook.facades.Authz;
 import org.sakaiproject.util.ResourceLoader;
-import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.orm.hibernate5.HibernateCallback;
 import org.springframework.orm.hibernate5.HibernateOptimisticLockingFailureException;
 
@@ -1367,7 +1363,7 @@ public class GradebookServiceHibernateImpl extends BaseHibernateManager implemen
 					int maxStudent = Math.min(studentUids.size(), 1000);
 					while (minStudent < studentUids.size()) {
 						final Query q = session
-								.createQuery("from AssignmentGradeRecord as agr where agr.gradableObject.removed = false and " +
+								.createQuery("from AssignmentGradeRecord as agr join fetch agr.gradableObject where agr.gradableObject.removed = false and " +
 										"agr.gradableObject.id in (:gradableObjectIds) and agr.studentId in (:studentUids)");
 						q.setParameterList("gradableObjectIds", gradableObjectIds.subList(minGbo, maxGbo));
 						q.setParameterList("studentUids", studentUids.subList(minStudent, maxStudent));
