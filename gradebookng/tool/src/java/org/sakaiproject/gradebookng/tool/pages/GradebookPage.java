@@ -85,7 +85,6 @@ import org.sakaiproject.gradebookng.tool.panels.ToggleGradeItemsToolbarPanel;
 import org.sakaiproject.portal.util.PortalUtils;
 import org.sakaiproject.service.gradebook.shared.Assignment;
 import org.sakaiproject.service.gradebook.shared.GraderPermission;
-import org.sakaiproject.service.gradebook.shared.GradingType;
 import org.sakaiproject.service.gradebook.shared.PermissionDefinition;
 import org.sakaiproject.service.gradebook.shared.SortType;
 import org.sakaiproject.tool.gradebook.Gradebook;
@@ -164,9 +163,8 @@ public class GradebookPage extends BasePage implements IGradesPage {
 			}
 		}
 
-		final GbStopWatch stopwatch = new GbStopWatch();
-		stopwatch.start();
-		stopwatch.time("GradebookPage init", stopwatch.getTime());
+		final GbStopWatch stopwatch = new GbStopWatch("GradebookPage");
+		stopwatch.time("init");
 
 		this.form = new Form<>("form");
 		add(this.form);
@@ -501,7 +499,7 @@ public class GradebookPage extends BasePage implements IGradesPage {
 
 		toolbar.setVisible(this.hasStudents || this.hasGradebookItems);
 
-		stopwatch.time("Gradebook page done", stopwatch.getTime());
+		stopwatch.time("Gradebook page done");
 	}
 
 	/**

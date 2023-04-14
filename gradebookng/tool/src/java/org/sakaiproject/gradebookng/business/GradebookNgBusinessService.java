@@ -38,7 +38,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -77,7 +76,6 @@ import org.sakaiproject.gradebookng.business.importExport.CommentValidator;
 import org.sakaiproject.gradebookng.business.owl.OwlBusinessService;
 import org.sakaiproject.gradebookng.business.owl.OwlGbSiteType;
 import org.sakaiproject.gradebookng.business.owl.finalgrades.OwlCourseGradeFormatter;
-import org.sakaiproject.gradebookng.business.util.CourseGradeFormatter;
 import org.sakaiproject.gradebookng.business.util.EventHelper;
 import org.sakaiproject.gradebookng.business.util.FormatHelper;
 import org.sakaiproject.gradebookng.business.util.GbStopWatch;
@@ -1134,14 +1132,13 @@ public class GradebookNgBusinessService {
 		// settings could be null depending on constructor so it needs to be corrected
 		final GradebookUiSettings settings = (uiSettings != null) ? uiSettings : new GradebookUiSettings();
 
-		final GbStopWatch stopwatch = new GbStopWatch();
-		stopwatch.start();
-		stopwatch.timeWithContext("buildGradeMatrix", "buildGradeMatrix start", stopwatch.getTime());
+		final GbStopWatch stopwatch = new GbStopWatch("buildGradeMatrix");
+		stopwatch.time("buildGradeMatrix start");
 
 		if (gradebook == null) {
 			return null;
 		}
-		stopwatch.timeWithContext("buildGradeMatrix", "getGradebook", stopwatch.getTime());
+		stopwatch.time("getGradebook");
 
 		// get current user
 		final String currentUserUuid = getCurrentUser().getId();
@@ -1158,22 +1155,22 @@ public class GradebookNgBusinessService {
 
 		// get users
 		final List<GbUser> gbStudents = getGbUsersForUiSettings(studentUuids, settings, site);
-		stopwatch.timeWithContext("buildGradeMatrix", "sortUsers", stopwatch.getTime());
+		stopwatch.time("getGbUsersForUiSettings");
 
 		// setup a map because we progressively build this up by adding grades to a student's entry
 		final Map<String, GbStudentGradeInfo> matrix = new LinkedHashMap<>();
 
 		// get course grades
 		putCourseGradesInMatrix(matrix, gbStudents, studentUuids, gradebook, role, isCourseGradeVisible(currentUserUuid, gradebook), settings);
-		stopwatch.timeWithContext("buildGradeMatrix", "putCourseGradesInMatrix", stopwatch.getTime());
+		stopwatch.time("putCourseGradesInMatrix");
 
 		// get assignments and categories
 		putAssignmentsAndCategoryItemsInMatrix(matrix, gbStudents, studentUuids, assignments, gradebook, currentUserUuid, role, settings);
-		stopwatch.timeWithContext("buildGradeMatrix", "putAssignmentsAndCategoryItemsInMatrix", stopwatch.getTime());
+		stopwatch.time("putAssignmentsAndCategoryItemsInMatrix");
 
 		// sorting
 		List<GbStudentGradeInfo> items = sortGradeMatrix(matrix, settings);
-		stopwatch.timeWithContext("buildGradeMatrix", "sortGradeMatrix", stopwatch.getTime());
+		stopwatch.time("sortGradeMatrix");
 
 		return items;
 	}
@@ -1187,15 +1184,14 @@ public class GradebookNgBusinessService {
 	 */
 	public List<GbStudentGradeInfo> buildGradeMatrixForImportExport(final List<Assignment> assignments, GbGroup groupFilter) throws GbException {
 		// ------------- Initialization -------------
-		final GbStopWatch stopwatch = new GbStopWatch();
-		stopwatch.start();
-		stopwatch.timeWithContext("buildGradeMatrixForImportExport", "buildGradeMatrix start", stopwatch.getTime());
+		final GbStopWatch stopwatch = new GbStopWatch("buildGradeMatrixForImportExport");
+		stopwatch.time("buildGradeMatrixForImportExport start");
 
 		final Gradebook gradebook = this.getGradebook();
 		if (gradebook == null) {
 			return Collections.EMPTY_LIST;
 		}
-		stopwatch.timeWithContext("buildGradeMatrixForImportExport", "getGradebook", stopwatch.getTime());
+		stopwatch.time("getGradebook");
 
 		// get current user
 		final String currentUserUuid = getCurrentUser().getId();
@@ -1213,20 +1209,20 @@ public class GradebookNgBusinessService {
 		// ------------- Get Users -------------
 		final List<String> studentUUIDs = getGradeableUsers(groupFilter);
 		final List<GbUser> gbStudents = getGbUsers(studentUUIDs);
-		stopwatch.timeWithContext("buildGradeMatrixForImportExport", "getGbUsersForUiSettings", stopwatch.getTime());
+		stopwatch.time("getGbUsersForUiSettings");
 
 		// ------------- Course Grades -------------
 		final Map<String, GbStudentGradeInfo> matrix = new LinkedHashMap<>();
 		putCourseGradesInMatrix(matrix, gbStudents, studentUUIDs, gradebook, role, isCourseGradeVisible(currentUserUuid), settings);
-		stopwatch.timeWithContext("buildGradeMatrixForImportExport", "putCourseGradesInMatrix", stopwatch.getTime());
+		stopwatch.time("putCourseGradesInMatrix");
 
 		// ------------- Assignments -------------
 		putAssignmentsAndCategoryItemsInMatrix(matrix, gbStudents, studentUUIDs, assignments, gradebook, currentUserUuid, role, settings);
-		stopwatch.timeWithContext("buildGradeMatrixForImportExport", "putAssignmentsAndCategoryItemsInMatrix", stopwatch.getTime());
+		stopwatch.time("putAssignmentsAndCategoryItemsInMatrix");
 
 		// ------------- Sorting -------------
 		List<GbStudentGradeInfo> items = sortGradeMatrix(matrix, settings);
-		stopwatch.timeWithContext("buildGradeMatrixForImportExport", "sortGradeMatrix", stopwatch.getTime());
+		stopwatch.time("sortGradeMatrix");
 
 		return items;
 	}
