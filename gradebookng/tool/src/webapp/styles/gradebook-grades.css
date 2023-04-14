@@ -32,7 +32,9 @@
 .gb-create-another > .glyphicon {
     margin-top: -2px;   /* to compensate for top positioning and sibling button alignment */
 }
-
+.gb-add-gradebook-item-button {
+  white-space: nowrap;
+}
 /* Toolbar */
 #gradebookGradesToolbar {
   position: relative;
@@ -85,10 +87,7 @@
   content: '\f046';
 }
 #filterByGroup {
-  line-height: 1em;
-  max-width: 80%;
-  max-width: calc(100% - 50px);
-  font-size: 12px;
+  width: 100%;      /* to prevent really long group names from widening the page */
 }
 #gradebookGradesToolbar .gb-item-summary.warn-items-hidden .gb-item-summary-counts {
   color: var(--sakai-color-orange);
