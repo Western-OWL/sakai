@@ -329,6 +329,14 @@ div.wicket-modal .w_blue div.w_content
   color: var(--sakai-text-color-1);
 }
 
+/* OWL-5247: port OWL-3679: port and enhance OWL-2624 - override bootstrap negative margins */
+div.wicket-modal .form-horizontal .form-group,
+div.wicket-modal .gb-grade-summary-content .gb-summary-grade-panel .row
+{
+	margin-left: 0;
+	margin-right: 0;
+}
+
 /** temporary override for page width **/
 .Mrphs-pageColumns--single {
 	max-width: none !important;
