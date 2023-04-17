@@ -63,7 +63,7 @@ sakai.getSiteInfo = function(trigger, dialogTarget, nosd, nold){
 						'<h4 class="modal-title">' + sitetitle + '</h4>' +
 					'</div>' +
 					'<div class="modal-body">' +
-						'<p>' + shortdesc + '</p>' +
+						'<p>' + shortdesc.escapeHTML() + '</p>' +
 						'<div>' + desc + '</div>' +
 					'</div>' +
 				'</div>' +
