@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.StringTokenizer;
@@ -157,6 +158,7 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import net.sf.json.JsonConfig;
+import org.apache.commons.lang.math.NumberUtils;
 import org.sakaiproject.api.app.messageforums.events.ForumsMessageEventParams;
 import org.sakaiproject.api.app.messageforums.events.ForumsTopicEventParams;
 
@@ -298,7 +300,6 @@ public class DiscussionForumTool {
   private static final String NO_GRADE_PTS = "cdfm_no_points_for_grade";
   private static final String TOO_LARGE_GRADE = "cdfm_too_large_grade";
   private static final String NO_ASSGN = "cdfm_no_assign_for_grade";
-  private static final String CONFIRM_DELETE_MESSAGE="cdfm_delete_msg";
   private static final String INSUFFICIENT_PRIVILEGES_TO_DELETE = "cdfm_insufficient_privileges_delete_msg";
   private static final String END_DATE_BEFORE_OPEN_DATE = "endDateBeforeOpenDate";
   private static final String NO_GROUP_SELECTED ="cdfm_no_group_selected";
@@ -337,7 +338,8 @@ public class DiscussionForumTool {
   private String selectedMessageShow = SUBJECT_ONLY;
   private String selectedMessageOrganize = "thread"; 
   private String threadAnchorMessageId = null;
-  private boolean deleteMsg;
+  private static final long NO_MESSAGE = Long.MIN_VALUE;
+  private long deleteMsg = NO_MESSAGE;
   private boolean displayUnreadOnly;
   private boolean errorSynch = false;
   // attachment
@@ -520,6 +522,15 @@ public class DiscussionForumTool {
 		return (GradebookService)  ComponentManager.get("org.sakaiproject.service.gradebook.GradebookService");
 	}
 	return null;
+  }
+
+  public int getSelectedForumTotalNoMessages()
+  {
+      int total = 0;
+      if (selectedForum != null) {
+        total = selectedForum.getTopics().stream().map(DiscussionTopicBean::getTotalNoMessages).reduce(0, Integer::sum);
+      }
+      return total;
   }
 
   /**
@@ -1012,6 +1023,7 @@ public class DiscussionForumTool {
       log.error("Forum not found");
       return gotoMain();
     }
+	setForumBeanAssign();
     return FORUM_DETAILS;
   }
 
@@ -1027,8 +1039,19 @@ public class DiscussionForumTool {
 
 	  String forumId = getExternalParameterByKey(FORUM_ID);
 	  DiscussionForum forum = forumManager.getForumById(Long.valueOf(forumId));
-	  selectedForum = new DiscussionForumBean(forum, forumManager, userTimeService);
-	  loadForumDataInForumBean(forum, selectedForum);
+	  if (forum == null)
+	  {
+		  log.error("Forum {} not found.", forumId);
+		  return gotoMain();
+	  }
+	  DiscussionForumBean bean = getDecoratedForum(forum);
+	  if (!bean.isChangeSettings())
+	  {
+		  log.error("User has no permission to delete forum {}", forumId);
+		  return gotoMain();
+	  }
+	  selectedForum = bean;
+	  setForumBeanAssign();
 
 	  selectedForum.setMarkForDeletion(true);
 	  return FORUM_SETTING;
@@ -1200,12 +1223,7 @@ public class DiscussionForumTool {
       }
     }
     
-    selectedForum = new DiscussionForumBean(forum, forumManager, userTimeService);
-    loadForumDataInForumBean(forum, selectedForum);
-    if("true".equalsIgnoreCase(ServerConfigurationService.getString("mc.defaultLongDescription")))
-    {
-    	selectedForum.setReadFullDesciption(true);
-    }
+    selectedForum = getDecoratedForum(forum);
 
     setForumBeanAssign();
     setFromMainOrForumOrTopic();
@@ -1353,6 +1371,12 @@ public class DiscussionForumTool {
     
     if (selectedForum == null)
         throw new IllegalStateException("selectedForum == null");
+
+	// Block going to draft if the forum has one or more non-deleted message in any topic
+    if(getSelectedForumTotalNoMessages() > 0) {
+        log.warn("Invalid attempt to make forum draft, forum has non-deleted messages");
+        return FORUM_SETTING_REVISE;
+    }
     
     if(selectedForum.getForum() != null && selectedForum.getForum().getOpenDate() != null && selectedForum.getForum().getCloseDate() != null
     		&& selectedForum.getForum().getAvailabilityRestricted()){
@@ -1548,6 +1572,22 @@ public class DiscussionForumTool {
   }
 
   /**
+   * Determine if the selected topic has any visible messages. Visible meaning there is at least one message that is not deleted and not moved.
+   * @return true if there are non-deleted, non-moved messages, false otherwise.
+   */
+  public boolean topicHasVisibleMessages()
+  {
+      boolean hasVisibleMessages = false;
+      DiscussionTopicBean topic = getSelectedTopic();
+      if(topic != null)
+      {
+          List<DiscussionMessageBean> messages = topic.getMessages();
+          hasVisibleMessages = messages.stream().anyMatch(dmb -> !dmb.getDeleted() && !dmb.isMoved());
+      }
+      return hasVisibleMessages;
+  }
+
+  /**
    * @return Returns the selectedTopic.
    */
   public DiscussionTopicBean getSelectedTopic()
@@ -1564,6 +1604,11 @@ public class DiscussionForumTool {
   		selectedTopic.setSorted(true);
   	}
   	return selectedTopic;
+  }
+
+  public List<DiscussionTopicBean> getSelectedTopicAsList()
+  {
+	  return Collections.singletonList(getSelectedTopic());
   }
   
   /**
@@ -1614,6 +1659,7 @@ public class DiscussionForumTool {
   /**
    * @return
    */
+  @Deprecated
   public String processActionReviseTopicSettings()
   {
     log.debug("processActionReviseTopicSettings()");
@@ -1631,8 +1677,7 @@ public class DiscussionForumTool {
 
     if (topic == null)
     {
-      topic = forumManager.getTopicById(Long.valueOf(
-          getExternalParameterByKey(TOPIC_ID)));
+      topic = forumManager.getTopicById(Long.valueOf(getExternalParameterByKey(TOPIC_ID)));
     }
     if (topic == null)
     {
@@ -1641,21 +1686,21 @@ public class DiscussionForumTool {
       return gotoMain();
     }
   
-    setSelectedForumForCurrentTopic(topic);
-    selectedTopic = new DiscussionTopicBean(topic, selectedForum.getForum(), forumManager, rubricsService, userTimeService);
-    loadTopicDataInTopicBean(topic, selectedTopic);
-    if("true".equalsIgnoreCase(ServerConfigurationService.getString("mc.defaultLongDescription")))
-    {
-    	selectedTopic.setReadFullDesciption(true);
-    }
-
-    setTopicBeanAssign();
-    
-    if(!uiPermissionsManager.isChangeSettings(selectedTopic.getTopic(),selectedForum.getForum()))
+   	// NOTE: this method is believed to be unreachable. The only thing that calls it is a button on dfTopicSettings.jsp (which is NOT the settings page)
+	// that will never be rendered. As such, the modifications here have not been tested.
+	Optional<DiscussionForum> forum = forumManager.getDiscussionForumForTopic(topic);
+	if(!forum.isPresent() || !uiPermissionsManager.isChangeSettings(topic, forum.get()) || !uiPermissionsManager.hasAccessPrivileges(forum.get()))
     {
       setErrorMessage(getResourceBundleString(INSUFFICIENT_PRIVILEGES_NEW_TOPIC));
       return gotoMain();
     }
+	// now we are validated so we can safely set the selected* vars
+	// note that getDecoratedTopic expects setSelectedForum to have already run, so we must call it first to avoid NPE
+	setSelectedForumAfterValidation(forum.get());
+	selectedTopic = getDecoratedTopic(topic);
+
+    setTopicBeanAssign();
+
     List attachList = selectedTopic.getTopic().getAttachments();
     if (attachList != null)
     {
@@ -1828,6 +1873,12 @@ public class DiscussionForumTool {
   public String processActionSaveTopicAsDraft()
   {
     log.debug("processActionSaveTopicAsDraft()");
+
+	// Block going to draft if the topic has one or more non-deleted message
+    if(selectedTopic != null && selectedTopic.getTotalNoMessages() > 0) {
+        log.warn("Invalid attempt to make topic draft, topic has non-deleted messages");
+        return TOPIC_SETTING_REVISE;
+    }
     
     if(selectedTopic != null && selectedTopic.getTopic() != null
             && selectedTopic.getTopic().getOpenDate() != null && selectedTopic.getTopic().getCloseDate() != null
@@ -1952,7 +2003,6 @@ public class DiscussionForumTool {
    */
   public String processActionDeleteTopicMainConfirm()
   {
-	  {
 		  log.debug("processActionTopicSettings()");
 
 		  DiscussionTopic topic = null;
@@ -1967,17 +2017,18 @@ public class DiscussionForumTool {
 		  {
 			  return gotoMain();
 		  }
-		  setSelectedForumForCurrentTopic(topic);
-		  if(!uiPermissionsManager.isChangeSettings(topic,selectedForum.getForum()))
+		  Optional<DiscussionForum> forum = forumManager.getDiscussionForumForTopic(topic);
+		  if(!forum.isPresent() || !uiPermissionsManager.isChangeSettings(topic, forum.get()) || !uiPermissionsManager.hasAccessPrivileges(forum.get()))
 		  {
 			  setErrorMessage(getResourceBundleString(INSUFFICIENT_PRIVILEGES_NEW_TOPIC));
 			  return gotoMain();
 		  }
-		  selectedTopic = new DiscussionTopicBean(topic, selectedForum.getForum(), forumManager, rubricsService, userTimeService);
-		  loadTopicDataInTopicBean(topic, selectedTopic);
+		  // now we are validated so we can safely set the selected* vars
+		  // note that getDecoratedTopic expects setSelectedForum to have already run, so we must call it first to avoid NPE
+		  setSelectedForumAfterValidation(forum.get());
+		  selectedTopic = getDecoratedTopic(topic);
 		  selectedTopic.setMarkForDeletion(true);
 		    return TOPIC_SETTING;
-	  }
   }
 
   
@@ -1987,7 +2038,7 @@ public class DiscussionForumTool {
   public String processActionDeleteTopicConfirm()
   {
     log.debug("processActionDeleteTopicConfirm()");
-    
+    setFromMainOrForumOrTopic();
     if (selectedTopic == null)
     {
       log.debug("There is no topic selected for deletion");
@@ -2044,7 +2095,7 @@ public class DiscussionForumTool {
     
     topicClickCount = 0;
     forumClickCount = 0;
-    
+    setFromMainOrForumOrTopic();
     setEditMode(true);
     setPermissionMode(PERMISSION_MODE_TOPIC);
     permissions=null;
@@ -2052,9 +2103,7 @@ public class DiscussionForumTool {
     DiscussionTopic topic = null;
     String topicId = getExternalParameterByKey(TOPIC_ID);
     if(StringUtils.isNotBlank(topicId) && !"null".equals(topicId)){
-	    topic = (DiscussionTopic) forumManager
-	        .getTopicByIdWithAttachments(Long.valueOf(
-	            topicId));
+	    topic = (DiscussionTopic) forumManager.getTopicByIdWithAttachments(Long.valueOf(topicId));
     } else if(selectedTopic != null) {
     	topic = selectedTopic.getTopic();
     }
@@ -2062,18 +2111,15 @@ public class DiscussionForumTool {
     {
       return gotoMain();
     }
-    setSelectedForumForCurrentTopic(topic);
-    if(!uiPermissionsManager.isChangeSettings(topic,selectedForum.getForum()))
+    Optional<DiscussionForum> forum = forumManager.getDiscussionForumForTopic(topic);
+	if(!forum.isPresent() || !uiPermissionsManager.isChangeSettings(topic, forum.get()) || !uiPermissionsManager.hasAccessPrivileges(forum.get()))
     {
       setErrorMessage(getResourceBundleString(INSUFFICIENT_PRIVILEGES_NEW_TOPIC));
       return gotoMain();
     }
-    selectedTopic = new DiscussionTopicBean(topic, selectedForum.getForum(), forumManager, rubricsService, userTimeService);
-    loadTopicDataInTopicBean(topic, selectedTopic);
-    if("true".equalsIgnoreCase(ServerConfigurationService.getString("mc.defaultLongDescription")))
-    {
-    	selectedTopic.setReadFullDesciption(true);
-    }
+	// now we are validated so we can safely set the selected* vars
+	setSelectedForumAfterValidation(forum.get());
+    selectedTopic = getDecoratedTopic(topic);
     
     List attachList = selectedTopic.getTopic().getAttachments();
     if (attachList != null)
@@ -2086,12 +2132,12 @@ public class DiscussionForumTool {
     
     siteGroups.clear();
     setTopicBeanAssign();
-    setFromMainOrForumOrTopic();
     
     //return TOPIC_SETTING;
     return TOPIC_SETTING_REVISE;
   }
 
+  @Deprecated
   public String processActionToggleDisplayForumExtendedDescription()
   {
     log.debug("processActionToggleDisplayForumExtendedDescription()");
@@ -2124,6 +2170,7 @@ public class DiscussionForumTool {
   /**
    * @return
    */
+  @Deprecated
   public String processActionToggleDisplayExtendedDescription()
   {
     log.debug("processActionToggleDisplayExtendedDescription()");
@@ -2208,7 +2255,7 @@ public class DiscussionForumTool {
   public String processActionDisplayNextTopic()
   {
     log.debug("processActionDisplayNextTopic()");
-    return displayTopicById("nextTopicId");
+    return topicDest(displayTopicById("nextTopicId"));
   }
 
   /**
@@ -2217,7 +2264,17 @@ public class DiscussionForumTool {
   public String processActionDisplayPreviousTopic()
   {
     log.debug("processActionDisplayNextTopic()");
-    return displayTopicById("previousTopicId");
+    return topicDest(displayTopicById("previousTopicId"));
+  }
+
+  private String topicDest(String origDest)
+  {
+	  if (ALL_MESSAGES.equals(origDest) && "true".equals(getExternalParameterByKey(FLAT_VIEW)))
+	  {
+		  return FLAT_VIEW;
+	  }
+
+	  return origDest;
   }
 
   public  String formatStringByRemoveLastEmptyLine(String inputStr)
@@ -2255,6 +2312,12 @@ public class DiscussionForumTool {
 		 selectedMessage.getMessage().setBody(messageBodyWithoutLastEmptyLine); 		 
 	  }
     return selectedMessage;
+  }
+
+  public List<DiscussionMessageBean> getSelectedMessageAsList()
+  {
+	  DiscussionMessageBean msg = getSelectedMessage();
+	  return msg == null ? Collections.emptyList() : Collections.singletonList(msg);
   }
   
   public List getPFSelectedThread() 
@@ -2317,15 +2380,11 @@ public class DiscussionForumTool {
   }
     
   public boolean getNeedToPostFirst(){
-	  String currentUserId = getUserId();
-	  List<String> currentUser = new ArrayList<String>();
-	  currentUser.add(currentUserId);
 	  if (selectedTopic == null) {
 	      log.warn("selectedTopic null in getNeedToPostFirst");
 	      return true;
-	  } else {
-	      return getNeedToPostFirst(currentUser, selectedTopic.getTopic(), selectedTopic.getMessages()).contains(currentUserId);
 	  }
+	  return uiPermissionsManager.isUserDeniedByPostFirst(getUserId(), selectedTopic.getTopic());
   }
 
   /**
@@ -2334,36 +2393,11 @@ public class DiscussionForumTool {
    * @return
    */
   private List<String> getNeedToPostFirst(List<String> userIds, DiscussionTopic topic, List messages){
-	  List returnList = new ArrayList<String>();
-	  if(topic != null && topic.getPostFirst()){
-		  for(String userId : userIds){
-			  boolean needToPost = true;
-			  //make sure the user has posted before they can view all messages
-			  //only need to force this for users who do not have "ChangeSettings" permission
-			  for (Object messageObj : messages) {
-				  Message message = null;
-				  if(messageObj instanceof DiscussionMessageBean){
-					  message = ((DiscussionMessageBean) messageObj).getMessage();
-				  }else if(messageObj instanceof Message){
-					  message = (Message) messageObj;
-				  }
-				  if(message != null && message.getCreatedBy().equals(userId) && 
-						  !message.getDraft() && 
-						  ((message.getApproved() != null && message.getApproved()) || !topic.getModerated()) &&
-						  !message.getDeleted()){
-					  needToPost = false;
-					  break;
-				  }
-			  }
-			  if(needToPost && !(uiPermissionsManager.isChangeSettings(topic, (DiscussionForum) topic.getBaseForum(), userId)
-					   || uiPermissionsManager.isPostToGradebook(topic, (DiscussionForum) topic.getBaseForum(), userId)
-					   || uiPermissionsManager.isModeratePostings(topic, (DiscussionForum) topic.getBaseForum(), userId))){
-				  returnList.add(userId);
-			  }
-		  }
-	  }
-	  
-	  return returnList;
+	  List<Message> castedMessages = new ArrayList<>(messages.size());
+      for (Object m : messages) {
+          castedMessages.add(m instanceof DiscussionMessageBean ? ((DiscussionMessageBean) m).getMessage() : (Message) m);
+      }
+      return uiPermissionsManager.getUsersDeniedByPostFirst(userIds, topic, castedMessages);
   }
   
   public String processActionGetDisplayThread()
@@ -2392,7 +2426,7 @@ public class DiscussionForumTool {
 	    
 	    //determine to make sure that selectedThreadHead does exist!
 	    if(selectedThreadHead == null){
-	    	return MAIN;
+	    	return gotoMain();
 	    }
 	    
 	    for(int i=0; i<msgsList.size(); i++){
@@ -2425,6 +2459,15 @@ public class DiscussionForumTool {
 	    		((DiscussionMessageBean)selectedThread.get(i)).setRead(Boolean.TRUE);
 	    	}
 	    }
+		else  // calculate unread counts
+		{
+			List<DiscussionMessageBean> selThread = (List<DiscussionMessageBean>) selectedThread;
+			int threadUnreadCount = selThread.stream().map(m -> m.isRead() ? 0 : 1).reduce(0, Integer::sum);
+			Optional<DiscussionMessageBean> selHead = selThread.stream().filter(m -> m.getDepth() == 0).findAny();
+			selHead.ifPresent(m -> selectedThreadHead.setRead(m.isRead()));
+			int deduct = selectedThreadHead.isRead() ? 0 : 1;
+			selectedThreadHead.setChildUnread(threadUnreadCount - deduct);
+		}
 
 	    boolean postFirst = getNeedToPostFirst();	    
 	    if(postFirst){
@@ -2437,16 +2480,19 @@ public class DiscussionForumTool {
 
     private boolean didThreadMove() {
         threadMoved = false;
-        String message = selectedThreadHead.getMessage().toString();
-        List msgsList = selectedTopic.getMessages();
-        boolean listHasMessage = false;
-        for (int i = 0; i < msgsList.size(); i++) {
-            listHasMessage = message.equals(((DiscussionMessageBean) msgsList.get(i)).getMessage().toString());
-            if (listHasMessage) {
-                break;
-            }
-        }
-        threadMoved = !listHasMessage;
+		if (selectedThreadHead != null && selectedThreadHead.getMessage() != null && !selectedThreadHead.getMessage().getDeleted() && selectedTopic != null && selectedTopic.getMessages() != null)
+        {
+			String message = selectedThreadHead.getMessage().toString();
+			List msgsList = selectedTopic.getMessages();
+			boolean listHasMessage = false;
+			for (int i = 0; i < msgsList.size(); i++) {
+				listHasMessage = message.equals(((DiscussionMessageBean) msgsList.get(i)).getMessage().toString());
+				if (listHasMessage) {
+					break;
+				}
+			}
+			threadMoved = !listHasMessage;
+		}
         return threadMoved;
     }
 
@@ -2480,55 +2526,41 @@ public class DiscussionForumTool {
 
 	    threadAnchorMessageId = null;
 	    String threadId = getExternalParameterByKey(MESSAGE_ID);
-	    String topicId = getExternalParameterByKey(TOPIC_ID);
 	    if ("".equals(threadId) || null == threadId || "null".equals(threadId))
 	    {
 	      setErrorMessage(getResourceBundleString(MESSAGE_REFERENCE_NOT_FOUND));
 	      return gotoMain();
 	    }
-	    if ("".equals(topicId) || null == topicId || "null".equals(topicId))
-	    {
-	      setErrorMessage(getResourceBundleString(TOPC_REFERENCE_NOT_FOUND));
-	      return gotoMain();
-	    }
-	    // Message message=forumManager.getMessageById(Long.valueOf(messageId));
-	    Message threadMessage = messageManager.getMessageByIdWithAttachments(Long.valueOf(
-	        threadId));
+	    Message threadMessage = messageManager.getMessageByIdWithAttachments(Long.valueOf(threadId));
 	    if (threadMessage == null)
 	    {
 	      setErrorMessage(getResourceBundleString(MESSAGE_WITH_ID) + threadId + getResourceBundleString(NOT_FOUND_WITH_QUOTE));
 	      return gotoMain();
 	    }
-	    //threadMessage = messageManager.getMessageByIdWithAttachments(threadMessage.getId());
+	    Optional<DiscussionTopic> topic = forumManager.getDiscussionTopicForMessage(threadMessage);
+		if (!topic.isPresent())
+		{
+			return gotoMain();
+		}
+		Optional<DiscussionForum> forum = forumManager.getDiscussionForumForTopic(topic.get());
+		if (!forum.isPresent())
+		{
+			return gotoMain();
+		}
+		if (!uiPermissionsManager.hasAccessPrivileges(threadMessage, topic.get()))
+		{
+			setErrorMessage(getResourceBundleString(MESSAGE_WITH_ID) + threadId + getResourceBundleString(NOT_FOUND_WITH_QUOTE));
+			return gotoMain();
+		}
+
+		// the thread head is not validated separately, but not aware of any situations where validating the child message access is not enough
 	    selectedThreadHead = getThreadHeadForMessage(threadMessage);
 	    threadMessage = selectedThreadHead.getMessage();
 
-	    DiscussionTopic topic=forumManager.getTopicById(Long.valueOf(topicId));
 	    selectedMessage = selectedThreadHead;
-	    setSelectedForumForCurrentTopic(topic);
-	    selectedTopic = new DiscussionTopicBean(topic, selectedForum.getForum(), forumManager, rubricsService, userTimeService);
-	    loadTopicDataInTopicBean(topic, selectedTopic);
-	    if(topic == null || selectedTopic == null)
-	    {
-	    	log.debug("topic or selectedTopic is null in processActionDisplayThread.");
-	    	return gotoMain();
-	    }
-	    if("true".equalsIgnoreCase(ServerConfigurationService.getString("mc.defaultLongDescription")))
-	    {
-	    	selectedTopic.setReadFullDesciption(true);
-	    }
-	    setTopicBeanAssign();
-	    String currentForumId = getExternalParameterByKey(FORUM_ID);
-	    if (currentForumId != null && (!"".equals(currentForumId.trim()))
-	        && (!"null".equals(currentForumId.trim())))
-	    {
-	      DiscussionForum forum = forumManager
-	          .getForumById(Long.valueOf(currentForumId));
-	      selectedForum = new DiscussionForumBean(forum, forumManager, userTimeService);
-	      loadForumDataInForumBean(forum, selectedForum);
-	      setForumBeanAssign();
-	      selectedTopic.getTopic().setBaseForum(forum);
-	    }
+	    setSelectedForumAfterValidation(forum.get());
+		topic.get().setBaseForum(forum.get()); // prefer getOpenForum() but some code will still use getBaseForum()
+
 	    // don't need this here b/c done in processActionGetDisplayThread();
 	    // selectedTopic = getDecoratedTopic(topic);
 	    LRS_Statement statement = forumManager.getStatementForUserReadViewed(threadMessage.getTitle(), "thread").orElse(null);
@@ -2544,7 +2576,10 @@ public class DiscussionForumTool {
   public String processActionDisplayThreadAnchor()
   {
 	  String returnString = processActionDisplayThread();
-	  threadAnchorMessageId = getExternalParameterByKey(MESSAGE_ID);
+	  if (!gotoMain().equals(returnString))
+	  {
+		  threadAnchorMessageId = getExternalParameterByKey(MESSAGE_ID);
+	  }
 	  return returnString;
   }
 
@@ -2558,66 +2593,49 @@ public class DiscussionForumTool {
    selectedMessageCount ++;
 
     String messageId = getExternalParameterByKey(MESSAGE_ID);
-    String topicId = getExternalParameterByKey(TOPIC_ID);
     if (messageId == null || "".equals(messageId))
     {
       setErrorMessage(getResourceBundleString(MESSAGE_REFERENCE_NOT_FOUND));
       return gotoMain();
     }
-    if (topicId == null || "".equals(topicId))
-    {
-      setErrorMessage(getResourceBundleString(TOPC_REFERENCE_NOT_FOUND));
-      return gotoMain();
-    }
-    // Message message=forumManager.getMessageById(Long.valueOf(messageId));
-    messageManager.markMessageReadForUser(Long.valueOf(topicId),
-            Long.valueOf(messageId), true);
-    Message message = messageManager.getMessageByIdWithAttachments(Long.valueOf(
-        messageId));
-
+    Message message = messageManager.getMessageByIdWithAttachments(Long.valueOf(messageId));
     if (message == null)
     {
       setErrorMessage(getResourceBundleString(MESSAGE_WITH_ID) + messageId + getResourceBundleString(NOT_FOUND_WITH_QUOTE));
       return gotoMain();
     }
-
+	Optional<DiscussionTopic> topic = forumManager.getDiscussionTopicForMessage(message);
+	if (!topic.isPresent())
+	{
+		return gotoMain();
+	}
+	Optional<DiscussionForum> forum = forumManager.getDiscussionForumForTopic(topic.get());
+	if (!forum.isPresent())
+	{
+		return gotoMain();
+	}
+	if (!uiPermissionsManager.hasAccessPrivileges(message, topic.get()))
+	{
+		// error message doesn't really matter (gotoMain() generally will not result in any UI messages appearing)
+		setErrorMessage(getResourceBundleString(MESSAGE_WITH_ID) + messageId + getResourceBundleString(NOT_FOUND_WITH_QUOTE));
+		return gotoMain();
+	}
+	messageManager.markMessageReadForUser(topic.get().getId(), message.getId(), true);
     selectedMessage = new DiscussionMessageBean(message, messageManager);
-    DiscussionTopic topic=forumManager.getTopicById(Long.valueOf(topicId));
-    setSelectedForumForCurrentTopic(topic);
-    selectedTopic = new DiscussionTopicBean(topic, selectedForum.getForum(), forumManager, rubricsService, userTimeService);
-    loadTopicDataInTopicBean(topic, selectedTopic);
-    if(topic == null || selectedTopic == null)
-    {
-    	log.debug("topic or selectedTopic is null in processActionDisplayMessage.");
-    	return gotoMain();
-    }
-    if("true".equalsIgnoreCase(ServerConfigurationService.getString("mc.defaultLongDescription")))
-    {
-    	selectedTopic.setReadFullDesciption(true);
-    }
-    setTopicBeanAssign();
-    String currentForumId = getExternalParameterByKey(FORUM_ID);
-    if (currentForumId != null && (!"".equals(currentForumId.trim()))
-        && (!"null".equals(currentForumId.trim())))
-    {
-      DiscussionForum forum = forumManager
-          .getForumById(Long.valueOf(currentForumId));
-      selectedForum = new DiscussionForumBean(forum, forumManager, userTimeService);
-      loadForumDataInForumBean(forum, selectedForum);
-      setForumBeanAssign();
-      selectedTopic.getTopic().setBaseForum(forum);
-    }
-    selectedTopic = getDecoratedTopic(topic);
+	selectedMessage.setRead(true);
+    setSelectedForumAfterValidation(forum.get());
+	topic.get().setBaseForum(forum.get()); // prefer getOpenForum() but some code will still use getBaseForum()
+    selectedTopic = getDecoratedTopic(topic.get());
     setTopicBeanAssign();
     selectedTopic = getSelectedTopic();
-    //get thread from message
     getThreadFromMessage();
     refreshSelectedMessageSettings(message);
-    // selectedTopic= new DiscussionTopicBean(message.getTopic()); 
+ 
     LRS_Statement statement = forumManager.getStatementForUserReadViewed(message.getTitle(), "thread").orElse(null);
 	Event event = eventTrackingService.newEvent(DiscussionForumService.EVENT_FORUMS_READ, getEventReference(message), null, true, NotificationService.NOTI_OPTIONAL, statement);
     eventTrackingService.post(event);
 
+	setFromMainOrForumOrTopic();
     return MESSAGE_VIEW;
   }
   
@@ -2631,6 +2649,7 @@ public class DiscussionForumTool {
 	    	mes = messageManager.getMessageById(mes.getInReplyTo().getId());
 	    }
 	    selectedThreadHead = new DiscussionMessageBean(mes, messageManager);
+		selectedThreadHead.setRead(messageManager.isMessageReadForUser(mes.getTopic().getId(), mes.getId()));
 	    
 	    if(selectedTopic == null)
 	    {
@@ -2703,7 +2722,7 @@ public class DiscussionForumTool {
 			
 	    messageManager.markMessageReadForUser(selectedTopic.getTopic().getId(),
 	        selectedMessage.getMessage().getId(), true);
-	    
+	    selectedMessage.setRead(true);
 	    refreshSelectedMessageSettings(message);  
     }
     LRS_Statement statement = forumManager.getStatementForUserReadViewed(selectedMessage.getMessage().getTitle(), "thread").orElse(null);
@@ -2747,7 +2766,7 @@ public class DiscussionForumTool {
 			
 	    messageManager.markMessageReadForUser(selectedTopic.getTopic().getId(),
 	        selectedMessage.getMessage().getId(), true);
-	    
+	    selectedMessage.setRead(true);
 	    refreshSelectedMessageSettings(message);  
     }
     LRS_Statement statement = forumManager.getStatementForUserReadViewed(selectedMessage.getMessage().getTitle(), "thread").orElse(null);
@@ -2950,7 +2969,21 @@ public class DiscussionForumTool {
       {
         return null;
       }
-      selectedForum = getDecoratedForum(forum);
+      if (uiPermissionsManager.hasAccessPrivileges(forum))
+	  {
+		  // if the user has access but the forum belongs to another site it is rendered in the current site,
+		  // which is strange. However, there is virtually no chance of this happening without tampering.
+		  // Adding a check that the requested forum belongs to the current site might improve this
+		  // but it could present issues for scenarios where there is no current site, such as with rest endpoints.
+		  selectedForum = getDecoratedForum(forum);
+	  }
+	  else
+	  {
+		  // maybe do something else here like throw an exception that redirects to an error page. There could be
+		  // cases where the user is presented with a legitimate link that is not currently valid, like an entity link
+		  // to a forum that is currently date restricted.
+		  log.warn("Attempted access to forum {} but user {} does not have permission", forum.getId(), getUserId());
+	  }
       return selectedForum;
     }
     return null;
@@ -2960,6 +2993,7 @@ public class DiscussionForumTool {
   /**
    * @return
    */
+  @Deprecated
   private String displayHomeWithExtendedForumDescription()
   {
     log.debug("displayHomeWithExtendedForumDescription()");
@@ -3168,8 +3202,6 @@ public class DiscussionForumTool {
     		decoTopic.setUnreadNoMessages(forumManager.getNumUnreadViewableMessagesWhenMod(topic));
     	}
 
-        setTopicGradeAssign(decoTopic, selectedForum.getForum().getDefaultAssignName());
-
     	Iterator iter = temp_messages.iterator();
 
     	final boolean isRead = decoTopic.getIsRead();
@@ -3225,6 +3257,8 @@ public class DiscussionForumTool {
     		}
     	}
     }
+		setTopicGradeAssign(decoTopic, selectedForum.getForum().getDefaultAssignName());
+	
 		  //  now add moved messages to decoTopic
     	if(moved_messages != null){
 		  for (Iterator msgIter = moved_messages.iterator(); msgIter.hasNext();) {
@@ -3348,37 +3382,26 @@ public class DiscussionForumTool {
 
   private Boolean resetTopicById(String externalTopicId)
   {
-	  String topicId = null;
-	    //threaded = true;
 	    selectedTopic = null;
 	    try
 	    {
-	      topicId = getExternalParameterByKey(externalTopicId);
-
-	      if (topicId != null && topicId.trim().length() > 0)
-	      {
-	        DiscussionTopic topic = null;
-	        try
-	        {
-	          Long.parseLong(topicId);
-	          topic = forumManager.getTopicById(Long.valueOf(topicId));
-	        }
-	        catch (NumberFormatException e)
-	        {
-	          log.error(e.getMessage(), e);
-	          setErrorMessage(getResourceBundleString(UNABLE_RETRIEVE_TOPIC));
+	      String topicId = getExternalParameterByKey(externalTopicId);
+		  long id = NumberUtils.toLong(topicId, -1L);
+		  if (id < 0)
+		  {
+			  log.error("Topic with id '" + externalTopicId + "' not found");
+			  setErrorMessage(getResourceBundleString(TOPIC_WITH_ID) + externalTopicId + getResourceBundleString(NOT_FOUND_WITH_QUOTE));
+			  return false;
+		  }
+		  DiscussionTopic topic = forumManager.getTopicById(id);
+		  Optional<DiscussionForum> forum = forumManager.getDiscussionForumForTopic(topic);
+		  if (!forum.isPresent() || !uiPermissionsManager.hasAccessPrivileges(topic, forum.get()))
+		  {
+			  setErrorMessage(getResourceBundleString(UNABLE_RETRIEVE_TOPIC));
 	          return false;
-	        }
-
-	        setSelectedForumForCurrentTopic(topic);
-	        selectedTopic = getDecoratedTopic(topic);
-	      }
-	      else
-	      {
-	        log.error("Topic with id '" + externalTopicId + "' not found");
-	        setErrorMessage(getResourceBundleString(TOPIC_WITH_ID) + externalTopicId + getResourceBundleString(NOT_FOUND_WITH_QUOTE));
-	        return false;
-	      }
+		  }
+		  setSelectedForumAfterValidation(forum.get());
+		  selectedTopic = getDecoratedTopic(topic);
 	    }
 	    catch (Exception e)
 	    {
@@ -3437,6 +3460,14 @@ public class DiscussionForumTool {
     {
       setErrorMessage(getResourceBundleString(PARENT_TOPIC_NOT_FOUND));
       return null;
+    }
+	// pulling the forum here is a bit wasteful but there are other workflows that call createTopic
+	// and this one is only called when someone creates a new topic from the UI, so not that often
+	DiscussionForum forum = forumManager.getForumById(Long.valueOf(forumId));
+	if(forum != null && !uiPermissionsManager.isNewTopic(forum))
+    {
+      setErrorMessage(getResourceBundleString(INSUFFICIENT_PRIVILEGES_CREATE_TOPIC));
+	  return null;
     }
     return createTopic(Long.valueOf(forumId));
   }
@@ -3500,6 +3531,7 @@ public class DiscussionForumTool {
   // compose
   public String processAddMessage()
   {
+	setFromMainOrForumOrTopic();
     return MESSAGE_COMPOSE;
   }
 
@@ -3606,7 +3638,25 @@ public class DiscussionForumTool {
 
     this.attachments.clear();
 
-    return ALL_MESSAGES;
+    setFromMainOrForumOrTopic();
+    return returnFromPageOrAllMessages(ALL_MESSAGES);
+  }
+
+  /**
+   * Returns to the page fromPage is set to, or if not set, return to ALL_PAGES
+   * @param defaultReturnPage if not empty or null, return to defaultReturnPage if fromPage is not set.
+   *    If fromPage and defaultReturnPage are both not set, return to ALL_MESSAGES.
+   */
+  private String returnFromPageOrAllMessages(String defaultReturnPage)
+  {
+    if (!"".equals(fromPage)) {
+        final String where = fromPage;
+        fromPage = null;
+        return where;
+    }
+    else {
+        return StringUtils.isNotBlank(defaultReturnPage) ? defaultReturnPage : ALL_MESSAGES;
+    }
   }
 
   public String processDfMsgPost()
@@ -3652,7 +3702,7 @@ public class DiscussionForumTool {
     	return gotoMain();
     }
 
-    return ALL_MESSAGES;
+    return returnFromPageOrAllMessages(ALL_MESSAGES);
   }
   
   private void updateThreadLastUpdatedValue(Message message, int numOfAttempts) throws Exception{
@@ -3947,30 +3997,25 @@ public class DiscussionForumTool {
   /**
    * @return
    */
+  @Deprecated // seems this method is unused?
   public String processDfMsgMarkMsgAsRead()
   {
 	    String messageId = getExternalParameterByKey(MESSAGE_ID);
-	    String topicId = getExternalParameterByKey(TOPIC_ID);
 	    if (messageId == null)
 	    {
 	      setErrorMessage(getResourceBundleString(MESSAGE_REFERENCE_NOT_FOUND));
 	      return gotoMain();
 	    }
-	    if (topicId == null)
-	    {
-	      setErrorMessage(getResourceBundleString(TOPC_REFERENCE_NOT_FOUND));
-	      return gotoMain();
-	    }
-	    // Message message=forumManager.getMessageById(Long.valueOf(messageId));
-	    Message message = messageManager.getMessageByIdWithAttachments(Long.valueOf(
-	        messageId));
-	    messageManager.markMessageReadForUser(Long.valueOf(topicId),
-	        Long.valueOf(messageId), true);
-	    if (message == null)
-	    {
+	    Message message = messageManager.getMessageByIdWithAttachments(Long.valueOf(messageId));
+		Optional<DiscussionTopic> topic = forumManager.getDiscussionTopicForMessage(message);
+	    if (message == null || !topic.isPresent())
+		{
 	      setErrorMessage(getResourceBundleString(MESSAGE_WITH_ID) + messageId + getResourceBundleString(NOT_FOUND_WITH_QUOTE));
 	      return gotoMain();
 	    }
+		// marking a message as read applies only to the current user, so it is relatively harmless and doesn't really need validation
+		// resetTopicById provides validation on the topic access
+		messageManager.markMessageReadForUser(topic.get().getId(), message.getId(), true);
 	    if(resetTopicById(TOPIC_ID)){ // reconstruct topic again;
 	    	return null;
 	    } else {
@@ -3981,48 +4026,37 @@ public class DiscussionForumTool {
   /**
    * @return
    */
+  @Deprecated // seems this method is unused?
   public String processDfMsgMarkMsgAsReadFromThread()
   {
 	    String messageId = getExternalParameterByKey(MESSAGE_ID);
-	    String topicId = getExternalParameterByKey(TOPIC_ID);
 	    if (messageId == null)
 	    {
 	      setErrorMessage(getResourceBundleString(MESSAGE_REFERENCE_NOT_FOUND));
 	      return gotoMain();
 	    }
-	    if (topicId == null)
-	    {
-	      setErrorMessage(getResourceBundleString(TOPC_REFERENCE_NOT_FOUND));
-	      return gotoMain();
-	    }
-	    // Message message=forumManager.getMessageById(Long.valueOf(messageId));
-	    Message message = messageManager.getMessageByIdWithAttachments(Long.valueOf(
-	        messageId));
-	    messageManager.markMessageReadForUser(Long.valueOf(topicId),
-	        Long.valueOf(messageId), true);
-	    if (message == null)
+	    
+	    Message message = messageManager.getMessageByIdWithAttachments(Long.valueOf(messageId));
+	    Optional<DiscussionTopic> topic = forumManager.getDiscussionTopicForMessage(message);
+	    if (message == null || !topic.isPresent())
 	    {
 	      setErrorMessage(getResourceBundleString(MESSAGE_WITH_ID) + messageId + getResourceBundleString(NOT_FOUND_WITH_QUOTE));
 	      return gotoMain();
 	    }
+		// marking a message as read applies only to the current user, so it is relatively harmless and doesn't really need validation
+		messageManager.markMessageReadForUser(topic.get().getId(), message.getId(), true);
 	    return processActionGetDisplayThread(); // reconstruct thread again;
   }
   
   public String processDfMsgReplyMsgFromEntire()
   {
 	  	String messageIdStr = getExternalParameterByKey(MESSAGE_ID);
-	    String topicIdStr = getExternalParameterByKey(TOPIC_ID);
 	    if (messageIdStr == null || "".equals(messageIdStr))
 	    {
 	      setErrorMessage(getResourceBundleString(MESSAGE_REFERENCE_NOT_FOUND));
 	      return gotoMain();
 	    }
-	    if (topicIdStr == null || "".equals(topicIdStr))
-	    {
-	      setErrorMessage(getResourceBundleString(TOPC_REFERENCE_NOT_FOUND));
-	      return gotoMain();
-	    }
-	    long messageId, topicId;
+	    long messageId;
 	    try{
 	    	messageId = Long.valueOf(messageIdStr);
 	    }catch (NumberFormatException e) {
@@ -4030,24 +4064,22 @@ public class DiscussionForumTool {
 	    	setErrorMessage(getResourceBundleString(MESSAGE_REFERENCE_NOT_FOUND));
 	    	return gotoMain();
 		}
-	    try{
-	    	topicId = Long.valueOf(topicIdStr);
-	    }catch (NumberFormatException e) {
-	    	log.error(e.getMessage());
-	    	setErrorMessage(getResourceBundleString(TOPC_REFERENCE_NOT_FOUND));
-	    	return gotoMain();
-		}
 	    
-	    // Message message=forumManager.getMessageById(Long.valueOf(messageId));
-	    messageManager.markMessageReadForUser(topicId, messageId, true);
 	    Message message = messageManager.getMessageByIdWithAttachments(messageId);
-	    if (message == null)
+	    Optional<DiscussionTopic> topic = forumManager.getDiscussionTopicForMessage(message);
+		Optional<DiscussionForum> forum = forumManager.getDiscussionForumForTopic(topic.orElse(null));
+	    if (message == null || !topic.isPresent() || !forum.isPresent())
 	    {
 	      setErrorMessage(getResourceBundleString(MESSAGE_WITH_ID) + messageId + getResourceBundleString(NOT_FOUND_WITH_QUOTE));
 	      return gotoMain();
 	    }
-
+		if (!uiPermissionsManager.isNewResponseToResponse(topic.get(), forum.get()) || !uiPermissionsManager.hasAccessPrivileges(message, topic.get()))
+		{
+			return gotoMain();
+		}
+		messageManager.markMessageReadForUser(topic.get().getId(), messageId, true);
 	    selectedMessage = new DiscussionMessageBean(message, messageManager);
+		selectedMessage.setRead(true);
 	    
 	    return processDfMsgReplyMsg();
   }
@@ -4059,7 +4091,8 @@ public class DiscussionForumTool {
 	  this.composeTitle = getResourceBundleString(MSG_REPLY_PREFIX) + " " + selectedMessage.getMessage().getTitle() + " ";
     else
       this.composeTitle = selectedMessage.getMessage().getTitle();
-  	
+
+	setFromMainOrForumOrTopic();
     return "dfMessageReply";
   }
 
@@ -4073,6 +4106,8 @@ public class DiscussionForumTool {
   	}
 	  // we have to get the first message that is not a response
 	  selectedMessage = getThreadHeadForMessage(selectedMessage.getMessage());
+	  messageManager.markMessageReadForUser(selectedTopic.getTopic().getId(), selectedMessage.getMessage().getId(), true);
+	  selectedMessage.setRead(true);
 	  
 	  List tempMsgs = selectedTopic.getMessages();
 	    if(tempMsgs != null)
@@ -4099,7 +4134,8 @@ public class DiscussionForumTool {
   {
     return "dfTopicReply";
   }
-  
+
+  @Deprecated // this is believed to be dead code
   public String processDfMsgGrdFromThread()
   {
 	  String messageId = getExternalParameterByKey(MESSAGE_ID);
@@ -4119,27 +4155,44 @@ public class DiscussionForumTool {
   }
   
   public String processDfMsgGrdFromThread(String messageId, String topicId, String forumId, String userId){
-	  
+
+	  // we have to do validation in this method, the code that reads the params is above (not used) and in a JSP,
+	  // so we can't trust the args for this method.
+	  // this method is tricky because it allows null/empty ids. seems like this is due to the strange way grading is done in forums.
+	  // to keep the same logic, instead of deriving the topic/forum from the message and ignoring those params, we have to instead validate all three separately
+
+	  if (StringUtils.isNotBlank(userId))
+	  {
+		  // make sure userId at least belongs to someone in the current site before we set the selectedGradedUserId,
+		  // to be on the safe side. There appear to be some grading permission checks later in processDfMsgGrdHelper().
+		  if (!isUserActiveInCurrentSite(userId)) {
+			  log.error("Attempt to grade user {} in site {}", userId, toolManager.getCurrentPlacement().getContext());
+			  return gotoMain();
+		  }
+	  }
 	  selectedGradedUserId = userId;
   
-	  // Message message=forumManager.getMessageById(Long.valueOf(messageId));
 	  if(messageId != null && !"".equals(messageId)){
-		  Message message = messageManager.getMessageByIdWithAttachments(Long.valueOf(
-				  messageId));
-		  if (message == null)
+		  Message message = messageManager.getMessageByIdWithAttachments(NumberUtils.toLong(messageId, -1L));
+		  if (message == null || !uiPermissionsManager.hasAccessPrivileges(message))
 		  {
 			  setErrorMessage(getResourceBundleString(MESSAGE_WITH_ID) + messageId + getResourceBundleString(NOT_FOUND_WITH_QUOTE));
 			  return gotoMain();
 		  }
 
 		  selectedMessage = new DiscussionMessageBean(message, messageManager);
+		  selectedMessage.setRead(true);  // it will be marked as read later in processDfMsgGrd()
 
 	  }else{
 		  selectedMessage = null;
 	  }
 
 	  if(selectedForum == null || (forumId != null && !selectedForum.getForum().getId().toString().equals(forumId))){
-		  DiscussionForum forum = forumManager.getForumById(Long.parseLong(forumId));
+		  DiscussionForum forum = forumManager.getForumById(NumberUtils.toLong(forumId, -1L));
+		  if (forum == null || !uiPermissionsManager.hasAccessPrivileges(forum))
+		  {
+			  return gotoMain();
+		  }
 		  selectedForum = new DiscussionForumBean(forum, forumManager, userTimeService);
 		  loadForumDataInForumBean(forum, selectedForum);
 	  }
@@ -4147,7 +4200,11 @@ public class DiscussionForumTool {
 	  if(topicId == null || "".equals(topicId)){
 		  selectedTopic = null;
 	  }else if(selectedTopic == null || !selectedTopic.getTopic().getId().toString().equals(topicId)){
-		  DiscussionTopic topic = forumManager.getTopicById(Long.parseLong(topicId));
+		  DiscussionTopic topic = forumManager.getTopicById(NumberUtils.toLong(topicId, -1L));
+		  if (topic == null || !uiPermissionsManager.hasAccessPrivileges(topic))
+		  {
+			  return gotoMain();
+		  }
 		  selectedTopic = getDecoratedTopic(topic);
 	  }    
 	    
@@ -4157,6 +4214,18 @@ public class DiscussionForumTool {
 		  return processDfMsgGrdHelper(userId, null);
 	  }
   }
+
+  public boolean isUserActiveInCurrentSite(String userId) {
+		String currentSiteId = toolManager.getCurrentPlacement().getContext();
+		try {
+			Site s = siteService.getSite(currentSiteId);
+			Member member = s.getMember(userId);
+			return member != null && member.isActive();
+		} catch (IdUnusedException e) {
+			log.error("Cannot determine current site, can't determine if user {} is an active site member", userId);
+		}
+		return false;
+	}
   
   public String processDfMsgGrd()
   {
@@ -4281,33 +4350,37 @@ public class DiscussionForumTool {
   
   public String processDfMsgRvsFromThread()
   {
-	  String messageId = getExternalParameterByKey(MESSAGE_ID);
-	    String topicId = getExternalParameterByKey(TOPIC_ID);
-	    if (messageId == null)
-	    {
-	      setErrorMessage(getResourceBundleString(MESSAGE_REFERENCE_NOT_FOUND));
-	      return gotoMain();
-	    }
-	    if (topicId == null)
-	    {
-	      setErrorMessage(getResourceBundleString(TOPC_REFERENCE_NOT_FOUND));
-	      return gotoMain();
-	    }
-	    // Message message=forumManager.getMessageById(Long.valueOf(messageId));
-	    Message message = messageManager.getMessageByIdWithAttachments(Long.valueOf(
-	        messageId));
-	    if (message == null)
-	    {
-	      setErrorMessage(getResourceBundleString(MESSAGE_WITH_ID) + messageId + getResourceBundleString(NOT_FOUND_WITH_QUOTE));
-	      return gotoMain();
-	    }
-	    message = messageManager.getMessageByIdWithAttachments(message.getId());
-	    selectedMessage = new DiscussionMessageBean(message, messageManager);
-	  return processDfMsgRvs();
+	String messageId = getExternalParameterByKey(MESSAGE_ID);
+	if (messageId == null)
+	{
+	  setErrorMessage(getResourceBundleString(MESSAGE_REFERENCE_NOT_FOUND));
+	  return gotoMain();
+	}
+	Message message = messageManager.getMessageByIdWithAttachments(Long.valueOf(messageId));
+	if (message == null)
+	{
+	  setErrorMessage(getResourceBundleString(MESSAGE_WITH_ID) + messageId + getResourceBundleString(NOT_FOUND_WITH_QUOTE));
+	  return gotoMain();
+	}
+	Optional<DiscussionTopic> topic = forumManager.getDiscussionTopicForMessage(message);
+	if (!topic.isPresent() || !uiPermissionsManager.hasAccessPrivileges(message, topic.get()))
+	{
+		return gotoMain();
+	}
+
+	selectedMessage = new DiscussionMessageBean(message, messageManager);
+	selectedMessage.setRead(messageManager.isMessageReadForUser(topic.get().getId(), message.getId()));
+	return processDfMsgRvs();
   }
 
   public String processDfMsgRvs()
   {
+	// make sure the current user is allowed to revise this message
+	if (!canRevise(selectedMessage.getMessage()))
+	{
+		selectedMessage = null; // something is up, clear this to be safe
+		return gotoMain();
+	}
 	selectedMessageCount = 0;
 	
     attachments.clear();
@@ -4324,7 +4397,22 @@ public class DiscussionForumTool {
       }
     }
 
+	setFromMainOrForumOrTopic();
     return "dfMsgRevise";
+  }
+
+  private boolean canRevise(Message message)
+  {
+	  Optional<DiscussionTopic> topic = forumManager.getDiscussionTopicForMessage(message);
+	  Optional<DiscussionForum> forum = topic.isPresent() ? forumManager.getDiscussionForumForTopic(topic.get()) : Optional.empty();
+	  if (!topic.isPresent() || !forum.isPresent())
+	  {
+		  log.error("Cannot find topic/forum for message {}.", message.getId());
+		  return false;
+	  }
+
+	  boolean isOwn = message.getCreatedBy().equals(getUserId());
+	  return uiPermissionsManager.isReviseAny(topic.get(), forum.get()) || (isOwn && uiPermissionsManager.isReviseOwn(topic.get(), forum.get()));
   }
 
   public String processDfMsgMove()
@@ -4358,11 +4446,21 @@ public class DiscussionForumTool {
     	processActionDisplayMessage();
     }
 
-    deleteMsg = true;
-    setErrorMessage(getResourceBundleString(CONFIRM_DELETE_MESSAGE));
+    if (selectedMessage != null && selectedMessage.getMessage() != null)
+	{
+		Long msgId = selectedMessage.getMessage().getId();
+		deleteMsg = msgId == null ? NO_MESSAGE : msgId;
+	}
+    setFromMainOrForumOrTopic();
     return MESSAGE_VIEW;
   }
 
+  public String processDfMsgDeleteConfirmNo()
+  {
+	  deleteMsg = NO_MESSAGE;
+      setFromMainOrForumOrTopic();
+      return returnFromPageOrAllMessages(MESSAGE_VIEW);
+  }
 
   public String processDfReplyMsgPost()
   {
@@ -4442,6 +4540,12 @@ public class DiscussionForumTool {
   		setErrorMessage(getResourceBundleString(ERROR_POSTING_THREAD));
   		return gotoMain();
   	}
+
+	if (StringUtils.isNotBlank(fromPage) && FLAT_VIEW.equals(fromPage) && selectedTopic != null){
+        processActionDisplayTopic();
+        return processActionDisplayFlatView();
+    }
+
     return processActionGetDisplayThread();
   }
 
@@ -4498,7 +4602,7 @@ public class DiscussionForumTool {
 
 	  this.attachments.clear();
 	  
-	  return MESSAGE_VIEW;
+	  return returnFromPageOrAllMessages(MESSAGE_VIEW);
   }
   
   
@@ -4656,7 +4760,8 @@ public class DiscussionForumTool {
       }
       return gotoMain();
     }
-    return MESSAGE_VIEW;
+    processActionDisplayThread();
+    return returnFromPageOrAllMessages(MESSAGE_VIEW);
   }
 
 	/**
@@ -4696,6 +4801,11 @@ public class DiscussionForumTool {
 
 	    this.attachments.clear();
 
+		if (StringUtils.isNotBlank(fromPage) && FLAT_VIEW.equals(fromPage) && selectedTopic != null){
+			processActionDisplayTopic();
+			return processActionDisplayFlatView();
+		}
+
 	    return processActionGetDisplayThread();
   }
 
@@ -4704,7 +4814,19 @@ public class DiscussionForumTool {
    */
   public boolean getDeleteMsg()
   {
-    return deleteMsg;
+	  if (deleteMsg == NO_MESSAGE)
+	  {
+		  return false;
+	  }
+
+	  // if we don't have a selected message or if deleteMsg is set to a different message, reset it
+	  boolean noSelectedMsg = selectedMessage == null || selectedMessage.getMessage() == null || selectedMessage.getMessage().getId() == null;
+	  if (noSelectedMsg || !selectedMessage.getMessage().getId().equals(deleteMsg))
+	  {
+		  deleteMsg = NO_MESSAGE;
+	  }
+
+	  return deleteMsg != NO_MESSAGE;
   }
 
   /**
@@ -4757,7 +4879,7 @@ public class DiscussionForumTool {
 	  if(!uiPermissionsManager.isDeleteAny(topic, forum) && !(selectedMessage.getIsOwn() && uiPermissionsManager.isDeleteOwn(topic, forum)))
 	  {
 		  setErrorMessage(getResourceBundleString(INSUFFICIENT_PRIVILEGES_TO_DELETE));
-		  this.deleteMsg = false;
+		  this.deleteMsg = NO_MESSAGE;
 		  return null;
 	  }
 	  
@@ -4779,7 +4901,7 @@ public class DiscussionForumTool {
 			  .getTopicByIdWithMessages(selectedTopic.getTopic().getId()));   
 	  selectedTopic.getTopic().setBaseForum(selectedForum.getForum());
 
-	  this.deleteMsg = false;
+	  this.deleteMsg = NO_MESSAGE;
 
 	  //Synoptic Message/Forums tool
 	  //Compare previous new message counts to current new message counts after
@@ -4794,9 +4916,15 @@ public class DiscussionForumTool {
 	  // go to thread view or all messages depending on
 	  // where come from
 	  if (!"".equals(fromPage)) {
-		  final String where = fromPage;
+		  String where = fromPage;
 		  fromPage = null;
 		  processActionGetDisplayThread();
+
+		  // If there are no messages in the thread after deletion, return to dfAllMessages/dfFlatView rather than an empty dfThreadView
+		  if (selectedThread.isEmpty()) {
+		      where = FLAT_VIEW.equals(where) ? FLAT_VIEW : ALL_MESSAGES;
+		  }
+
 		  return where;
 	  }
 	  else {
@@ -4826,7 +4954,7 @@ public class DiscussionForumTool {
 
       // Avoid the expensive queries below if there are no moderated topics
       if (moderatedTopics != null && !moderatedTopics.isEmpty()) {
-        membershipList = uiPermissionsManager.getCurrentUserMemberships();
+        membershipList = uiPermissionsManager.getCurrentUserMemberships(getSiteId());
         int numModTopicWithPerm = forumManager.getNumModTopicsWithModPermissionByPermissionLevel(membershipList, moderatedTopics);
 
         if (numModTopicWithPerm < 1) {
@@ -5041,6 +5169,7 @@ public class DiscussionForumTool {
 
 		  messageManager.markMessageApproval(msgId, false);
 		  selectedMessage = new DiscussionMessageBean(messageManager.getMessageByIdWithAttachments(msgId), messageManager);
+		  selectedMessage.setRead(true);
 		  refreshSelectedMessageSettings(selectedMessage.getMessage());
 		  setSuccessMessage(getResourceBundleString("cdfm_denied_alert"));
 		  getThreadFromMessage();
@@ -5115,6 +5244,7 @@ public class DiscussionForumTool {
 		  
 		  
 		  selectedMessage = new DiscussionMessageBean(messageManager.getMessageByIdWithAttachments(msgId), messageManager);
+		  selectedMessage.setRead(true);
 		  refreshSelectedMessageSettings(selectedMessage.getMessage());
 		  setSuccessMessage(getResourceBundleString("cdfm_approved_alert"));
 		  getThreadFromMessage();
@@ -5881,6 +6011,7 @@ public class DiscussionForumTool {
             selectedMessage = new DiscussionMessageBean(
                 messageManager.getMessageByIdWithAttachments(selectedMessage.getMessage().getId()),
                 messageManager);
+			selectedMessage.setRead(true);
 
         	Message msg = selectedMessage.getMessage();
         //SAK-30711
@@ -6260,6 +6391,14 @@ public class DiscussionForumTool {
 	    //return displayTopicById(TOPIC_ID); // reconstruct topic again;
 	    setSelectedForumForCurrentTopic(selectedTopic.getTopic());
         selectedTopic = getDecoratedTopic(selectedTopic.getTopic());
+
+		// find out if we came from threaded view or flat view and return there
+		String viewId = FacesContext.getCurrentInstance().getViewRoot().getViewId();
+		if (viewId.endsWith("dfAllMessages.jsp"))  // a bit brittle but still relatively safe
+		{
+			return processActionDisplayThreadedView();
+		}
+
 	    return processActionDisplayFlatView();
   }
   
@@ -6397,7 +6536,7 @@ public class DiscussionForumTool {
               selectedRole = role.getId();
               i=1;
             }
-            DBMembershipItem item = forumManager.getAreaDBMember(membershipItems, role.getId(), MembershipItem.TYPE_ROLE);
+            DBMembershipItem item = forumManager.getAreaDBMember(membershipItems, role.getId(), MembershipItem.TYPE_ROLE, getContextSiteId());
             String level = item.getPermissionLevelName();
             siteMembers.add(new SelectItem(role.getId(), role.getId() + " (" + getResourceBundleString("perm_level_" + level.replaceAll(" ", "_").toLowerCase()) + ")"));
             permissions.add(new PermissionBean(item, permissionLevelManager));
@@ -6416,7 +6555,7 @@ public class DiscussionForumTool {
     	  for (Iterator groupIterator = groups.iterator(); groupIterator.hasNext();)
     	  {
     		  Group currentGroup = (Group) groupIterator.next();  
-    		  DBMembershipItem item = forumManager.getAreaDBMember(membershipItems,currentGroup.getTitle(), MembershipItem.TYPE_GROUP);
+    		  DBMembershipItem item = forumManager.getAreaDBMember(membershipItems,currentGroup.getTitle(), MembershipItem.TYPE_GROUP, getContextSiteId());
     		  String level = item.getPermissionLevelName();
     		  siteMembers.add(new SelectItem(currentGroup.getTitle(), currentGroup.getTitle() + " (" + getResourceBundleString("perm_level_" + level.replaceAll(" ", "_").toLowerCase()) + ")"));
     		  permissions.add(new PermissionBean(item, permissionLevelManager));
@@ -6477,40 +6616,31 @@ public class DiscussionForumTool {
     return ("/site/" + toolManager.getCurrentPlacement().getContext());
   }
 
+  // use this method to set the selected forum once it has been validated for access already, to avoid looking it up twice
+  private void setSelectedForumAfterValidation(DiscussionForum forum)
+  {
+	selectedForum = new DiscussionForumBean(forum, forumManager, userTimeService);
+    loadForumDataInForumBean(forum, selectedForum);
+	if("true".equalsIgnoreCase(ServerConfigurationService.getString("mc.defaultLongDescription")))
+	{
+		selectedForum.setReadFullDesciption(true);
+	}
+
+	setForumBeanAssign();
+  }
+
   /**
    * @param topic
    */
   private void setSelectedForumForCurrentTopic(DiscussionTopic topic)
   {
-    DiscussionForumBean oldSelectedForum = selectedForum;
-    DiscussionForum forum = (DiscussionForum) topic.getBaseForum();
-    if (forum == null)
-    {
+    Optional<DiscussionForum> forum = forumManager.getDiscussionForumForTopic(topic);
+	if (!forum.isPresent() || !uiPermissionsManager.hasAccessPrivileges(forum.get()))
+	{
+		return; // can't find a forum or don't have access to it, do nothing (maybe log it?)
+	}
 
-      String forumId = getExternalParameterByKey(FORUM_ID);
-      if (forumId == null || forumId.trim().length() < 1)
-      {
-        selectedForum = oldSelectedForum;
-        return;
-      }
-      forum = forumManager.getForumById(Long.valueOf(forumId));
-      if (forum == null)
-      {
-        selectedForum = oldSelectedForum;
-        return;
-      }
-    }
-    selectedForum = new DiscussionForumBean(forum, forumManager, userTimeService);
-    loadForumDataInForumBean(forum, selectedForum);
-    if (selectedForum == null) {
-    	selectedForum = oldSelectedForum;
-    }
-    if("true".equalsIgnoreCase(ServerConfigurationService.getString("mc.defaultLongDescription")))
-    {
-    	selectedForum.setReadFullDesciption(true);
-    }
-
-    setForumBeanAssign();
+	setSelectedForumAfterValidation(forum.get());
   }
 
   /**
@@ -7020,6 +7150,11 @@ public class DiscussionForumTool {
 			   selectedTopic = getDecoratedTopic(selectedTopic.getTopic());
 			   return ALL_MESSAGES;
 		   }
+		   if(FLAT_VIEW.equals(returnToPage) && selectedTopic != null)
+			{
+				selectedTopic = getDecoratedTopic(selectedTopic.getTopic());
+				return FLAT_VIEW;
+			}
 		   if(FORUM_DETAILS.equals(returnToPage) && selectedForum != null)
 		   {
 			   selectedForum = getDecoratedForum(selectedForum.getForum());
@@ -7235,22 +7370,36 @@ public class DiscussionForumTool {
 	 
 	 public String processActionDisplayInThread() {
 
-		 String forumId = getExternalParameterByKey("forumId");
-		 String topicId = getExternalParameterByKey("topicId");
-		 selectedMsgId = getExternalParameterByKey("msgId");
-		 DiscussionForum forum = forumManager.getForumById(Long.valueOf(forumId));
-		 DiscussionTopic topic = forumManager.getTopicById(Long.valueOf(topicId));
-		 setSelectedForumForCurrentTopic(topic);		
-		 selectedTopic = getDecoratedTopic(topic);
-		 selectedForum = getDecoratedForum(forum);
+		 String paramMsgId = getExternalParameterByKey("msgId");
+		 Message paramMsg = messageManager.getMessageByIdWithAttachments(Long.valueOf(paramMsgId));
+		 if (paramMsg == null) {
+			setErrorMessage(getResourceBundleString(MESSAGE_WITH_ID) + paramMsgId + getResourceBundleString(NOT_FOUND_WITH_QUOTE));
+			return gotoMain();
+		 }
+		 Optional<DiscussionTopic> topic = forumManager.getDiscussionTopicForMessage(paramMsg);
+		 if (!topic.isPresent()) {
+			return gotoMain();
+		 }
+		 Optional<DiscussionForum> forum = forumManager.getDiscussionForumForTopic(topic.get());
+		 if (!forum.isPresent()) {
+			return gotoMain();
+		 }
+		 if (!uiPermissionsManager.hasAccessPrivileges(paramMsg, topic.get())) {
+			setErrorMessage(getResourceBundleString(MESSAGE_WITH_ID) + paramMsgId + getResourceBundleString(NOT_FOUND_WITH_QUOTE));
+			return gotoMain();
+		 }
 
-		 if (uiPermissionsManager.isRead((DiscussionTopic)topic, forum)) {
-			 List messageList = messageManager.findMessagesByTopicId(topic.getId());
-			 Iterator messageIter = messageList.iterator();
-			 while(messageIter.hasNext()){
-				 Message mes = (Message) messageIter.next();					
-				 messageManager.markMessageReadForUser(topic.getId(), mes.getId(), true, getUserId());
-			 }
+		 selectedMsgId = paramMsgId;
+
+		 setSelectedForumForCurrentTopic(topic.get());
+		 selectedTopic = getDecoratedTopic(topic.get());
+		 selectedForum = getDecoratedForum(forum.get());
+
+		 List messageList = messageManager.findMessagesByTopicId(topic.get().getId());
+		 Iterator messageIter = messageList.iterator();
+		 while(messageIter.hasNext()){
+			 Message mes = (Message) messageIter.next();
+			 messageManager.markMessageReadForUser(topic.get().getId(), mes.getId(), true, getUserId());
 		 }
 
 		 return "dfStatisticsDisplayInThread";
@@ -7540,8 +7689,17 @@ public class DiscussionForumTool {
 
 	  String forumId = getExternalParameterByKey(FORUM_ID);
 	  DiscussionForum forum = forumManager.getForumById(Long.valueOf(forumId));
-	  selectedForum = new DiscussionForumBean(forum, forumManager, userTimeService);
-	  loadForumDataInForumBean(forum, selectedForum);
+
+	  // make sure the user has permission to duplicate forums and the forum to copy belongs to the current site
+	  // and the user has read access to it
+	  String currentSiteId = StringUtils.trimToEmpty(toolManager.getCurrentPlacement().getContext());
+	  if (!getNewForum() || currentSiteId.isEmpty() || !currentSiteId.equals(forumManager.getSiteIdForForum(forum))
+			  || !uiPermissionsManager.hasAccessPrivileges(forum))
+	  {
+		  log.error("Forum {} could not be duplicated. Forum does not belong to current site or user does not have permission.");
+		  return gotoMain();
+	  }
+	  selectedForum = getDecoratedForum(forum);
       selectedForum.getForum().setTitle(getResourceBundleString(DUPLICATE_COPY_TITLE, new Object[] {selectedForum.getForum().getTitle()}));
 	  selectedForum.setMarkForDuplication(true);
 	  return FORUM_SETTING;
@@ -7609,32 +7767,33 @@ public class DiscussionForumTool {
    */
   public String processActionDuplicateTopicMainConfirm()
   {
-	  {
-		  log.debug("processActionDuplicateTopicMainConfirm()");
+	log.debug("processActionDuplicateTopicMainConfirm()");
 
-		  DiscussionTopic topic = null;
-		  String topicId = getExternalParameterByKey(TOPIC_ID);
-		  if(StringUtils.isNotBlank(topicId) && !"null".equals(topicId)){
-			  topic = (DiscussionTopic) forumManager.getTopicByIdWithAttachments(Long.valueOf(topicId));
-		  } else if(selectedTopic != null) {
-			  topic = selectedTopic.getTopic();
-		  }
-		  if (topic == null)
-		  {
-			  return gotoMain();
-		  }
-		  setSelectedForumForCurrentTopic(topic);
-		  if(!uiPermissionsManager.isNewTopic(selectedForum.getForum()))
-		  {
-			  setErrorMessage(getResourceBundleString(INSUFFICIENT_PRIVILEGES_NEW_TOPIC));
-			  return gotoMain();
-		  }
-		  selectedTopic = new DiscussionTopicBean(topic, selectedForum.getForum(), forumManager, rubricsService, userTimeService);
-		  loadTopicDataInTopicBean(topic, selectedTopic);
-          selectedTopic.getTopic().setTitle(getResourceBundleString(DUPLICATE_COPY_TITLE, new Object[] {selectedTopic.getTopic().getTitle()}));
-		  selectedTopic.setMarkForDuplication(true);
-		  return TOPIC_SETTING;
-	  }
+	DiscussionTopic topic = null;
+	String topicId = getExternalParameterByKey(TOPIC_ID);
+	if(StringUtils.isNotBlank(topicId) && !"null".equals(topicId)){
+	  topic = (DiscussionTopic) forumManager.getTopicByIdWithAttachments(Long.valueOf(topicId));
+	} else if(selectedTopic != null) {
+	  topic = selectedTopic.getTopic();
+	}
+	if (topic == null)
+	{
+	  return gotoMain();
+	}
+
+	Optional<DiscussionForum> forum = forumManager.getDiscussionForumForTopic(topic);
+	if (!forum.isPresent() || !uiPermissionsManager.isNewTopic(forum.get()) || !uiPermissionsManager.hasAccessPrivileges(topic))
+	{
+		setErrorMessage(getResourceBundleString(INSUFFICIENT_PRIVILEGES_NEW_TOPIC));
+		return gotoMain();
+	}
+	setSelectedForumAfterValidation(forum.get());
+	selectedTopic = getDecoratedTopic(topic);
+
+	selectedTopic.getTopic().setTitle(getResourceBundleString(DUPLICATE_COPY_TITLE, new Object[] {selectedTopic.getTopic().getTitle()}));
+	selectedTopic.setMarkForDuplication(true);
+	setTopicGradeAssign(selectedTopic, selectedForum.getForum().getDefaultAssignName());
+	return TOPIC_SETTING;
   }
 
   public String processActionDuplicateTopic()
@@ -8226,6 +8385,7 @@ public class DiscussionForumTool {
 	}
 	
 	// MSGCNTR-241 move threads
+	@Deprecated
 	public String processMoveMessage() {
 		return MESSAGE_MOVE_THREADS;
 	}
@@ -8255,6 +8415,8 @@ public class DiscussionForumTool {
 							// do nothing. Skip forums that are locked. topics in locked forums should not show in the dialog
 						} else if (topic.getLocked() == null || topic.getLocked().equals(Boolean.TRUE)) {
 							// do nothing, skip locked topics. do not show them in move thread dialog
+						} else if (!uiPermissionsManager.hasAccessPrivileges(topic, tmpforum)) {
+							// do nothing, user can't see this topic.
 						} else {
 							parseTopics(topic, topicMap, tmpforum);
 						}
@@ -8345,7 +8507,35 @@ public class DiscussionForumTool {
 		if (log.isDebugEnabled()) log.debug("Calling processMoveThread checkReminder is " + checkReminder);
 
 		Long desttopicId = Long.parseLong(desttopicIdstr);
+
+		/*
+		 * May be possible to craft "Move Conversation(s)" call while the selected topic doesn't have isMoveThread permission.
+		 * Verify that we in fact have isMovePostings permission:
+		 */
+		DiscussionTopic sourceTopic = selectedTopic.getTopic();
+		Optional<DiscussionForum> sourceForum = forumManager.getDiscussionForumForTopic(sourceTopic);
+		if (!sourceForum.isPresent() || !uiPermissionsManager.isMovePostings(sourceTopic, sourceForum.get())) {
+			return gotoMain();
+		}
+
+		/*
+		 * The topics available in the UI are sent over with JSON;
+		 * The JSON is populated in getMoveThreadJSON().
+		 * Used its criteria for a topics' inclusion to validate desttopicId here.
+		 *     Criteria: They are queried from this.getSiteId().
+		 *     They are then filtered to include only Boolean.FALSE.equals(tmpForum.getLocked()) && Boolean.FALSE.equals(topic.getLocked(). The parseTopics() method does no filtering.
+		 *     Nothing currently filters out topics the user can't access.
+		 */
 		DiscussionTopic desttopic = forumManager.getTopicById(desttopicId);
+		Optional<DiscussionForum> destforum = forumManager.getDiscussionForumForTopic(desttopic);
+		if (!destforum.isPresent() ||
+				!Boolean.FALSE.equals(desttopic.getLocked()) ||
+				!Boolean.FALSE.equals(destforum.get().getLocked()) ||
+				!forumManager.getSiteIdForForum(sourceForum.get()).equals(forumManager.getSiteIdForForum(destforum.get())) ||
+				!uiPermissionsManager.hasAccessPrivileges(desttopic, destforum.get())) {
+			return gotoMain();
+		}
+
 		// now update topic id in mfr_message_t table, including all childrens (direct and indirect),
 		// For each move, also add a row to the mfr_move_history_t table.
 
@@ -8976,97 +9166,61 @@ public class DiscussionForumTool {
     		DiscussionForumBean tmpSelectedForum = selectedForum;
     		DiscussionMessageBean tmpSelectedThreadHead = selectedThreadHead;
     		String forumContextId = getSiteId();
-    		//Check Message input field
     		if(checkCurrentMessageId){
-    			try{	
-    				String msgIdStr = getExternalParameterByKey(CURRENT_MESSAGE_ID);
-    				long msgId = Long.parseLong(msgIdStr);
-    				if(tmpSelectedMessage == null || tmpSelectedMessage.getMessage() == null 
-    						|| (!tmpSelectedMessage.getMessage().getId().equals(msgId))){
-    					Message threadMessage = messageManager.getMessageByIdWithAttachments(msgId);
-    					tmpSelectedMessage = new DiscussionMessageBean(threadMessage, messageManager);
-    					//selected message has changed, make sure we set the selected thread head
-    					tmpSelectedThreadHead = new DiscussionMessageBean(tmpSelectedMessage.getMessage(), messageManager);
-    				    //make sure we have the thread head of depth 0
-    				    while(tmpSelectedThreadHead.getMessage().getInReplyTo() != null){
-    				    	threadMessage = messageManager.getMessageByIdWithAttachments(tmpSelectedThreadHead.getMessage().getInReplyTo().getId());
-    				    	tmpSelectedThreadHead = new DiscussionMessageBean(threadMessage, messageManager);
-    				    }
-    				}
-    			}catch(Exception e){
-    				log.error(e.getMessage(), e);
-    			}
-    		}
-    		//Check Forum input field
-    		try{
-    			String forumIdStr = getExternalParameterByKey(CURRENT_FORUM_ID);
-    			long forumId = Long.parseLong(forumIdStr);
-    			if(tmpSelectedForum == null || tmpSelectedForum.getForum() == null 
-    					|| (!tmpSelectedForum.getForum().getId().equals(forumId))){
-    				DiscussionForum forum = forumManager.getForumById(forumId);
-    				tmpSelectedForum = getDecoratedForum(forum);
-    				//forum changed, so make sure you use that forum's site id:
-    				forumContextId = forumManager.getContextForForumById(forum.getId());
-    			}
-    		}catch(Exception e){
-    			log.error(e.getMessage(), e);
-    		}
+                //Check Message input field
+    			String msgIdStr = getExternalParameterByKey(CURRENT_MESSAGE_ID);
+    			long msgId = Long.parseLong(msgIdStr);
+    			if(tmpSelectedMessage == null || tmpSelectedMessage.getMessage() == null
+    					|| (!tmpSelectedMessage.getMessage().getId().equals(msgId))){
+    				//selected message has changed, make sure we set the selected thread head
+    				Message threadMessage = messageManager.getMessageByIdWithAttachments(msgId);
 
-    		//Check Topic: input field
-    		try{
+    				// Build hierarchy and confirm access:
+    				if (threadMessage == null) {
+    					return false;
+    				}
+    				Optional<DiscussionTopic> topic = forumManager.getDiscussionTopicForMessage(threadMessage);
+    				if (!topic.isPresent()) {
+    					return false;
+    				}
+    				Optional<DiscussionForum> forum = forumManager.getDiscussionForumForTopic(topic.get());
+    				if (!forum.isPresent()) {
+    					return false;
+    				}
+    				if (!uiPermissionsManager.hasAccessPrivileges(threadMessage, topic.get())) {
+    					return false;
+    				}
+    				tmpSelectedMessage = new DiscussionMessageBean(threadMessage, messageManager);
+    				tmpSelectedTopic = getDecoratedTopic(topic.get());
+    				tmpSelectedForum = getDecoratedForum(forum.get());
+
+    				tmpSelectedThreadHead = new DiscussionMessageBean(tmpSelectedMessage.getMessage(), messageManager);
+    				//make sure we have the thread head of depth 0
+    				while(tmpSelectedThreadHead.getMessage().getInReplyTo() != null){
+    					threadMessage = messageManager.getMessageByIdWithAttachments(tmpSelectedThreadHead.getMessage().getInReplyTo().getId());
+    					tmpSelectedThreadHead = new DiscussionMessageBean(threadMessage, messageManager);
+    				}
+    			}
+    		} else {
+    			// Message param is ignored; user must be authorized only against the topic
     			String topicIdStr = getExternalParameterByKey(CURRENT_TOPIC_ID);
     			long topicId = Long.parseLong(topicIdStr);
-    			if(tmpSelectedTopic == null || tmpSelectedTopic.getTopic() == null || tmpSelectedTopic.getTopic().getBaseForum() == null
-    					|| (!tmpSelectedTopic.getTopic().getId().equals(topicId))){
-    				//selected message doesn't match the current message input,
-    				//verify user has access to parameter message and use that one
-
+    			if(tmpSelectedTopic == null || tmpSelectedTopic.getTopic() == null
+    					|| (!tmpSelectedTopic.getTopic().getId().equals(topicId))) {
     				DiscussionTopic topicWithMsgs = (DiscussionTopic) forumManager.getTopicByIdWithMessages(topicId);
-    				tmpSelectedTopic = getDecoratedTopic(topicWithMsgs);    			
+    				if (topicWithMsgs == null) {
+    					return false;
+    				}
+    				Optional<DiscussionForum> forum = forumManager.getDiscussionForumForTopic(topicWithMsgs);
+    				if (!forum.isPresent()) {
+    					return false;
+    				}
+    				if (!uiPermissionsManager.hasAccessPrivileges(topicWithMsgs, forum.get())) {
+    					return false;
+    				}
+    				tmpSelectedTopic = getDecoratedTopic(topicWithMsgs);
+    				tmpSelectedForum = getDecoratedForum(forum.get());
     			}
-    		}catch(Exception e){
-    			log.error(e.getMessage(), e);
-    		}
-    		//verify everything is set properly
-    		//Obviously this could be done in one huge if statement, but it's not as easy to ready and understand the logic,
-    		//so I left it broken out
-
-    		//is message set
-    		if(checkCurrentMessageId && (tmpSelectedMessage == null || tmpSelectedMessage.getMessage() == null)){
-    			log.info(methodCalled + ": can not check permissions against a null message. user: " + getUserId());
-    			return false;
-    		}
-    		//is forum set
-    		if(tmpSelectedForum == null || tmpSelectedForum.getForum() == null){
-    			log.info(methodCalled + ": can not check permissions against a null forum. user: " + getUserId());
-    			return false;
-    		}
-    		//is topic set
-    		if(tmpSelectedTopic == null || tmpSelectedTopic.getTopic() == null){
-    			log.info(methodCalled + ": can not check permissions against a null topic. user: " + getUserId());
-    			return false;
-    		}
-    		//check topic belongs to the forum
-    		if(!tmpSelectedForum.getForum().getId().equals(tmpSelectedTopic.getTopic().getBaseForum().getId())){
-    			log.info(methodCalled + ": topic: " + tmpSelectedTopic.getTopic().getId() + " does not belong to the forum: " + tmpSelectedForum.getForum().getId() + ". user: " + getUserId());
-    			return false;    				
-    		}
-    		//check message belongs to the topic
-    		if(checkCurrentMessageId && !tmpSelectedMessage.getMessage().getTopic().getId().equals(tmpSelectedTopic.getTopic().getId())){
-    			log.info(methodCalled + ": message: " + tmpSelectedMessage.getMessage().getId() + " does not belong to the topic: " + tmpSelectedTopic.getTopic().getId() + ".  user: " + getUserId());
-    			return false;
-    		}
-    		//is topic locked?
-    		if(tmpSelectedTopic.getTopic().getLocked()){
-    			setErrorMessage(getResourceBundleString(TOPIC_LOCKED, new Object[]{tmpSelectedTopic.getTopic().getTitle()}));
-    			log.info(methodCalled + ": Topic is locked: " + tmpSelectedTopic.getTopic().getTitle() + ".  user: " + getUserId());
-    			return false;
-    		}
-    		//is forum locked?
-    		if(tmpSelectedForum != null && tmpSelectedForum.getForum().getLocked()){
-    			setErrorMessage(getResourceBundleString(FORUM_LOCKED, new Object[]{tmpSelectedForum.getForum().getTitle()}));
-    			log.info(methodCalled + ": Forum is locked: " + tmpSelectedForum.getForum().getTitle() + ".  user: " + getUserId());
-    			return false;
     		}
     		
     		//can the user reply to only existing messages (Check this first)
@@ -9098,7 +9252,7 @@ public class DiscussionForumTool {
     			return false;
     		}
 
-    		//ok Everything matched, so set the current values in case they changed:
+    		// action is authorized, so set the current values in case they changed:
     		selectedMessage = tmpSelectedMessage;
     		selectedThreadHead = tmpSelectedThreadHead;
     		selectedTopic = tmpSelectedTopic;
@@ -9192,5 +9346,50 @@ public class DiscussionForumTool {
     public String getAttachmentReadableSize(final String attachmentSize) {
       return FileUtils.byteCountToDisplaySize(Long.parseLong(attachmentSize));
     }
+
+	public List<DiscussionForumBean> getSelectedForumAsList() {
+		DiscussionForumBean forum = getSelectedForum();
+		return forum == null ? Collections.emptyList() : Collections.singletonList(forum);
+	}
+
+	private Optional<Date> getMostRecentMsgDateForTopic(DiscussionTopicBean topic)
+	{
+		List<DiscussionMessageBean> msgs = topic.getMessages();
+		if (msgs == null)
+		{
+			msgs = Collections.emptyList();
+		}
+
+		return msgs.stream().filter(m -> m.getMessage() != null && m.getMessage().getCreated() != null)
+				.map(m -> m.getMessage().getCreated()).sorted(Comparator.reverseOrder()).findFirst();
+	}
+
+	public String getConfirmDeleteSelectedTopicWarning()
+	{
+		int numMsgs = getSelectedTopic().getTotalNoMessages();
+		String first = getResourceBundleString("cdfm_delete_topic", new Object[]{numMsgs});
+		String mid = numMsgs > 0 ? formatMidDate(getMostRecentMsgDateForTopic(getSelectedTopic()), "cdfm_delete_topic_most_recent") : "";
+		String last = getResourceBundleString("cdfm_delete_topic_sure");
+
+		return String.format("%s %s %s", first, mid, last);
+	}
+
+	public String getConfirmDeleteSelectedForumWarning()
+	{
+		DiscussionForumBean forum = getSelectedForum();
+		int numTopics = forum.getTopicCount();
+		int numMsgs = forum.getTopics().stream().map(DiscussionTopicBean::getTotalNoMessages).reduce(0, Integer::sum);
+		String first = getResourceBundleString("cdfm_delete_forum", new Object[]{numTopics, numMsgs});
+		String last = getResourceBundleString("cdfm_delete_forum_sure");
+
+		return String.format("%s %s", first, last);
+	}
+
+	private String formatMidDate(Optional<Date> date, String bundleKey)
+	{
+		final SimpleDateFormat formatter = new SimpleDateFormat(getResourceBundleString("date_format_date"), getUserLocale());
+		formatter.setTimeZone(getUserTimeZone());
+		return date.map(d -> getResourceBundleString(bundleKey, new Object[]{formatter.format(d)})).orElse("");
+	}
 
 }
