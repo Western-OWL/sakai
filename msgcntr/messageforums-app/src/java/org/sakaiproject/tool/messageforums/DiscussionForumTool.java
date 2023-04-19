@@ -5138,7 +5138,7 @@ public class DiscussionForumTool {
 		  setErrorMessage(getResourceBundleString(NO_MSG_SEL_FOR_APPROVAL));
 	  else
 	  {
-		  refreshPendingMessages(uiPermissionsManager.getCurrentUserMemberships() , forumManager.getModeratedTopicsInSite());
+		  refreshPendingMessages(uiPermissionsManager.getCurrentUserMemberships(getSiteId()) , forumManager.getModeratedTopicsInSite());
 		  if (approved)
 			  setSuccessMessage(getResourceBundleString(MSGS_APPROVED));
 		  else
@@ -5179,7 +5179,7 @@ public class DiscussionForumTool {
 	  
 	  }
 	  
-	  refreshPendingMessages(uiPermissionsManager.getCurrentUserMemberships() , forumManager.getModeratedTopicsInSite());
+	  refreshPendingMessages(uiPermissionsManager.getCurrentUserMemberships(getSiteId()) , forumManager.getModeratedTopicsInSite());
 	  
 	  return MESSAGE_VIEW;
   }
@@ -5214,7 +5214,7 @@ public class DiscussionForumTool {
 		  
 	  }
 	  
-	  refreshPendingMessages(uiPermissionsManager.getCurrentUserMemberships() , forumManager.getModeratedTopicsInSite());
+	  refreshPendingMessages(uiPermissionsManager.getCurrentUserMemberships(getSiteId()) , forumManager.getModeratedTopicsInSite());
 	  
 	  return ADD_COMMENT;
   }
@@ -5262,7 +5262,7 @@ public class DiscussionForumTool {
 	      		updateSynopticMessagesForForumComparingOldMessagesCount(getSiteId(), msg.getTopic().getBaseForum().getId(), msg.getTopic().getId(), beforeChangeHM, SynopticMsgcntrManager.NUM_OF_ATTEMPTS);
 	  }
 	  
-	  refreshPendingMessages(uiPermissionsManager.getCurrentUserMemberships() , forumManager.getModeratedTopicsInSite());
+	  refreshPendingMessages(uiPermissionsManager.getCurrentUserMemberships(getSiteId()) , forumManager.getModeratedTopicsInSite());
 	  
 	  return MESSAGE_VIEW;
   }

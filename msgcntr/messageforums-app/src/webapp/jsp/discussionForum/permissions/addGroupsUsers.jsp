@@ -9,8 +9,8 @@
 
   <sakai:view title="#{msgs.cdfm_container_title}">
          		<script>includeLatestJQuery("msgcntr");</script>
-       		<script src="/messageforums-tool/js/sak-10625.js"></script>
-       		<script src="/messageforums-tool/js/messages.js"></script>
+       		<script src="/messageforums-tool/js/sak-10625.js<h:outputText value="#{ForumTool.CDNQuery}" />"></script>
+       		<script src="/messageforums-tool/js/messages.js<h:outputText value="#{ForumTool.CDNQuery}" />"></script>
     <h:form id="addGroupsUsers"> 
 <!--jsp/discussionForum/permissions/addGroupsUsers.jsp-->                
       <sakai:tool_bar_message value="#{msgs.cdfm_button_bar_add_groups_users}" />
