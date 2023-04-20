@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 import java.util.Vector;
+import java.util.stream.Collectors;
 
 import org.azeckoski.reflectutils.annotations.ReflectIgnoreClassFields;
 import org.azeckoski.reflectutils.annotations.ReflectTransient;
@@ -124,6 +125,10 @@ public class EntitySite implements Site {
 
     private transient Site site;
 
+    // it is difficult to work with this class externally to partially sanitize it, so we resort
+    // to tracking a sanitize flag internally and reference it when necessary to modify output
+    private boolean sanitize = false;
+
     public EntitySite() {
     }
 
@@ -166,6 +171,10 @@ public class EntitySite implements Site {
 
 
     public EntitySite(Site site, boolean includeGroups) {
+        this(site, includeGroups, false, Collections.emptyList());
+    }
+
+    public EntitySite(Site site, boolean includeGroups, boolean sanitize, List<String> groupIds) {
         this.site = site;
         this.id = site.getId();
         this.title = site.getTitle();
@@ -183,24 +192,37 @@ public class EntitySite implements Site {
         this.pubView = site.isPubView();
         this.type = site.getType();
         this.customPageOrdered = site.isCustomPageOrdered();
-        this.maintainRole = site.getMaintainRole();
-        this.providerGroupId = site.getProviderGroupId();
-        this.owner = site.getCreatedBy() == null ? null : site.getCreatedBy().getId();
         this.lastModified = site.getModifiedDate() == null ? System.currentTimeMillis() : site.getModifiedDate().getTime();
-        getUserRoles(); // populate the user roles
+        this.sanitize = sanitize;
+
+        if (!sanitize) {
+            this.maintainRole = site.getMaintainRole();
+            getUserRoles(); // populate the user roles
+            this.owner = site.getCreatedBy() == null ? null : site.getCreatedBy().getId();
+            this.providerGroupId = site.getProviderGroupId();
+        }
+
         // properties
         ResourceProperties rp = site.getProperties();
         for (Iterator<String> iterator = rp.getPropertyNames(); iterator.hasNext(); ) {
             String name = iterator.next();
             String value = rp.getProperty(name);
+            if (sanitize && !PROP_SITE_CONTACT_NAME.equals(name) && !PROP_SITE_CONTACT_EMAIL.equals(name))
+            {
+                continue; // only show contact name/email props, skip any others
+            }
             this.setProperty(name, value);
         }
+
         // add in the groups
         if (includeGroups) {
             Collection<Group> groups = site.getGroups();
+            if (sanitize) { // filter groups to include only the passed in group ids
+                groups = groups.stream().filter(g -> groupIds.contains(g.getId())).collect(Collectors.toList());
+            }
             siteGroupsList = new Vector<EntityGroup>(groups.size());
             for (Group group : groups) {
-                EntityGroup eg = new EntityGroup(group);
+                EntityGroup eg = new EntityGroup(group, sanitize);
                 siteGroupsList.add(eg);
             }
         }
@@ -257,6 +279,11 @@ public class EntitySite implements Site {
             owner = new Owner(user.getId(), user.getDisplayName());
         } else {
             owner = new Owner(this.owner, this.owner);
+        }
+        if (sanitize)
+        {
+            owner.setUserEntityURL("");
+            owner.setUserId("");
         }
         return owner;
     }
@@ -421,6 +448,9 @@ public class EntitySite implements Site {
     }
 
     public String[] getUserRoles() {
+        if (sanitize) {
+            return new String[0];
+        }
         if (userRoles == null) {
             if (site == null) {
                 userRoles = new String[]{maintainRole, joinerRole};
