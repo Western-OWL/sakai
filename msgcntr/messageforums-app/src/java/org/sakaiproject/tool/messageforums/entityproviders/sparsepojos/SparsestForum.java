@@ -44,7 +44,7 @@ public class SparsestForum {
 	@Getter
 	private Long createdDate;
 	
-	@Getter
+	@Getter @Setter
 	private String creator;
 	
 	@Getter
@@ -62,7 +62,7 @@ public class SparsestForum {
 	@Getter
 	private Long modifiedDate;
 	
-	@Getter
+	@Getter @Setter
 	private String modifier;
 	
 	@Getter @Setter

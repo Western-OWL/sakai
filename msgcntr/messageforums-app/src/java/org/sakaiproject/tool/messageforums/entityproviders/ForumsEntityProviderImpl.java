@@ -16,12 +16,14 @@
 package org.sakaiproject.tool.messageforums.entityproviders;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.sakaiproject.api.app.messageforums.AnonymousManager;
 
 import org.sakaiproject.user.api.UserDirectoryService;
 import org.sakaiproject.user.api.UserNotDefinedException;
@@ -80,6 +82,9 @@ public class ForumsEntityProviderImpl extends AbstractEntityProvider implements 
 
 	@Setter
 	private SecurityService securityService;
+
+	@Setter
+	private AnonymousManager anonymousManager;
 
 	public String getEntityPrefix() {
 		return ENTITY_PREFIX;
@@ -213,6 +218,71 @@ public class ForumsEntityProviderImpl extends AbstractEntityProvider implements 
 		
 		return sparseFora;
 	}
+
+	private boolean isInstructor(String userId, DiscussionForum forum)
+	{
+		String realSiteId = forumManager.getSiteIdForForum(forum);
+		return forumManager.isInstructor(userId, realSiteId);
+	}
+
+	private boolean isInstructor(String userId, DiscussionTopic topic)
+	{
+		String realSiteId = forumManager.getSiteIdForTopic(topic);
+		return forumManager.isInstructor(userId, realSiteId);
+	}
+
+	private void sanitizeSparseTopic(SparsestTopic sparseTopic, String userId)
+	{
+		if (!userId.equals(sparseTopic.getCreator()))
+		{
+			sparseTopic.setCreator("");
+		}
+		if (!userId.equals(sparseTopic.getModifier()))
+		{
+			sparseTopic.setModifier("");
+		}
+	}
+
+	private void sanitizeSparseMessage(SparseMessage message, String userId, boolean anon, String siteId, boolean isInstructor, boolean swapForDisplayName)
+	{
+		String authorId = message.getAuthorId();
+		String author = message.getAuthoredBy();
+		String creatorId = message.getCreatedBy();
+		String modifierId = message.getModifiedBy();
+
+		String newAuthorId = isInstructor || userId.equals(authorId) ? authorId : "";
+		String newAuthor = anon ? swapForDisplayName(authorId, true, siteId) : author;
+		String newCreator = swapForDisplayName ? swapForDisplayName(creatorId, anon, siteId) : (isInstructor || userId.equals(creatorId)? creatorId : "");
+		String newModifier = swapForDisplayName ? swapForDisplayName(modifierId, anon, siteId) : (isInstructor || userId.equals(modifierId) ? modifierId : "");
+
+		message.setAuthorId(newAuthorId);
+		message.setAuthoredBy(newAuthor);
+		message.setCreatedBy(newCreator);
+		message.setModifiedBy(newModifier);
+	}
+
+	// returns the display name or anon id for the given user id
+	private String swapForDisplayName(String uuid, boolean anon, String siteId)
+	{
+		String name = "";
+		if (anon)
+		{
+			name = anonymousManager.getAnonId(siteId, uuid);
+		}
+		else
+		{
+			try
+			{
+				name =  userDirectoryService.getUser(uuid).getDisplayName();
+			}
+			catch (UserNotDefinedException e)
+			{
+				log.debug("User not defined for id '{}'.", uuid);
+			}
+		}
+
+		return name;
+	}
 	
 	/**
 	 * This will return a SparseForum populated down to the topics with their
@@ -225,10 +295,19 @@ public class ForumsEntityProviderImpl extends AbstractEntityProvider implements 
 		}
 		
 		DiscussionForum fatForum = forumManager.getForumByIdWithTopicsAttachmentsAndMessages(forumId);
+		boolean isInstructor = isInstructor(userId, fatForum);
 		
 		if(checkAccess(fatForum,userId,siteId)) {
 			
 			SparseForum sparseForum = new SparseForum(fatForum,developerHelperService);
+			if (!isInstructor && !userId.equals(sparseForum.getCreator()))
+			{
+				sparseForum.setCreator("");
+			}
+			if (!isInstructor && !userId.equals(sparseForum.getModifier()))
+			{
+				sparseForum.setModifier("");
+			}
 			
 			List<DiscussionTopic> fatTopics = (List<DiscussionTopic>) fatForum.getTopics();
 			
@@ -255,12 +334,12 @@ public class ForumsEntityProviderImpl extends AbstractEntityProvider implements 
 			sparseForum.setReadMessages(totalForumReadMessages);
 			
 			// Reduce the fat topics to sparse topics while setting the total and read
-			// counts. A SparseTopic will only be created if the currrent user has read access.
+			// counts. A SparseTopic will only be created if the currrent user has access.
 			List<SparsestTopic> sparseTopics = new ArrayList<SparsestTopic>();
 			for(DiscussionTopic fatTopic : fatTopics) {
 				
 				// Only add this topic to the list if the current user has read permission
-				if( ! uiPermissionsManager.isRead(fatTopic,fatForum,userId,siteId)) {
+				if( ! uiPermissionsManager.hasAccessPrivileges(fatTopic, fatForum)) {
 					// No read permission, skip this topic.
 					continue;
 				}
@@ -283,6 +362,11 @@ public class ForumsEntityProviderImpl extends AbstractEntityProvider implements 
 					attachments.add(new SparseAttachment(attachment.getAttachmentName(),url));
 				}
 				sparseTopic.setAttachments(attachments);
+
+				if (!isInstructor)
+				{
+					sanitizeSparseTopic(sparseTopic, userId);
+				}
 				
 				sparseTopics.add(sparseTopic);
 			}
@@ -305,12 +389,19 @@ public class ForumsEntityProviderImpl extends AbstractEntityProvider implements 
 		// This call gets the attachments for the messages but not the topic. Unexpected, yes. Cool, not.
 		DiscussionTopic fatTopic = (DiscussionTopic)forumManager.getTopicByIdWithMessagesAndAttachments(topicId);
 		
-		if(!uiPermissionsManager.isRead(fatTopic, (DiscussionForum) fatTopic.getBaseForum(), userId, forumManager.getContextForTopicById(topicId))) {
+		if(!uiPermissionsManager.hasAccessPrivileges(fatTopic)) {
 			log.error("'" + userId + "' is not authorised to read topic '" + topicId + "'.");
 			throw new EntityException("You are not authorised to read this topic.","",HttpServletResponse.SC_UNAUTHORIZED);
 		}
 		
 		SparseTopic sparseTopic = new SparseTopic(fatTopic);
+
+		boolean isInstructor = isInstructor(userId, fatTopic);
+		boolean isAnon = anonymousManager.displayAnonIdsToUser(userId, fatTopic);
+		if (!isInstructor)
+		{
+			sanitizeSparseTopic(sparseTopic, userId);
+		}
 		
 		// Setup the total and read message counts on the topic
 		List<Long> topicIds = new ArrayList<Long>();
@@ -331,9 +422,14 @@ public class ForumsEntityProviderImpl extends AbstractEntityProvider implements 
 		}
 		
 		List<SparseMessage> messages = new ArrayList<SparseMessage>();
-		for(Message fatMessage : (List<Message>) fatTopic.getMessages()) {
-			SparseMessage sparseMessage = new SparseMessage(fatMessage,/* readStatus = */ false,/* addAttachments = */ true,developerHelperService.getServerURL());
-			messages.add(sparseMessage);
+		List<Message> fatMessages = fatTopic.getMessages();
+		List<Long> allowedMessages = uiPermissionsManager.hasAccessPrivileges(fatMessages, fatTopic);
+		for(Message fatMessage : fatMessages) {
+			if (allowedMessages.contains(fatMessage.getId())) {
+				SparseMessage sparseMessage = new SparseMessage(fatMessage,/* readStatus = */ false,/* addAttachments = */ true,developerHelperService.getServerURL());
+				sanitizeSparseMessage(sparseMessage, userId, isAnon, siteId, isInstructor, false);
+				messages.add(sparseMessage);
+			}
 		}
 		
 		List<SparseThread> threads = new MessageUtils().getThreadsWithCounts(messages, forumManager, userId);
@@ -352,26 +448,37 @@ public class ForumsEntityProviderImpl extends AbstractEntityProvider implements 
 		
 		Message fatMessage = forumManager.getMessageById(messageId);
 		
-		Topic fatTopic = forumManager.getTopicByIdWithMessagesAndAttachments(fatMessage.getTopic().getId());
+		DiscussionTopic fatTopic = (DiscussionTopic) forumManager.getTopicByIdWithMessagesAndAttachments(fatMessage.getTopic().getId());
 		
 		// This sets the attachments on the message.We have to do this as
         // getMessageById doesn't populate the attachments.
 		setAttachments(fatMessage,fatTopic.getMessages());
 		
-		if(!uiPermissionsManager.isRead((DiscussionTopic) fatTopic, (DiscussionForum) fatTopic.getBaseForum(), userId, forumManager.getContextForTopicById(fatTopic.getId()))) {
+		if(!uiPermissionsManager.hasAccessPrivileges(fatMessage) || fatMessage.getDeleted()) {
 			log.error("'" + userId + "' is not authorised to read message '" + messageId + "'.");
 			throw new EntityException("You are not authorised to read this message.","",HttpServletResponse.SC_UNAUTHORIZED);
 		}
 		
+		String realSiteId = forumManager.getSiteIdForTopic(fatTopic);
+		boolean isInstructor = forumManager.isInstructor(userId, realSiteId);
+		boolean isAnon = anonymousManager.displayAnonIdsToUser(userId, fatTopic);
+
 		List<SparseMessage> messages = new ArrayList<SparseMessage>();
-		
-		for(Message fm : (List<Message>) fatTopic.getMessages()) {
-			messages.add(new SparseMessage(fm,/* readStatus =*/ false,/* addAttachments =*/ true, developerHelperService.getServerURL()));
+		List<Message> fatMessages = fatTopic.getMessages();
+		List<Long> allowedMessages = uiPermissionsManager.hasAccessPrivileges(fatMessages, fatTopic);
+		for(Message fm : fatMessages) {
+			if (allowedMessages.contains(fm.getId()))
+			{
+				SparseMessage sm = new SparseMessage(fm,/* readStatus =*/ false,/* addAttachments =*/ true, developerHelperService.getServerURL());
+				sanitizeSparseMessage(sm, userId, isAnon, realSiteId, isInstructor, false);
+				messages.add(sm);
+			}
 		}
 		
 		SparseMessage sparseThread = new SparseMessage(fatMessage,false,/* readStatus =*/ true,developerHelperService.getServerURL());
-		
-		new MessageUtils().attachReplies(sparseThread,messages, forumManager, userId);
+		sanitizeSparseMessage(sparseThread, userId, isAnon, realSiteId, isInstructor, false);
+
+		new MessageUtils().attachReplies(sparseThread,messages, forumManager, userId); // this filters out the deleted replies
 		
 		return sparseThread;
 		
@@ -379,24 +486,8 @@ public class ForumsEntityProviderImpl extends AbstractEntityProvider implements 
 	
 	private boolean checkAccess(BaseForum baseForum, String userId, String siteId) {
 		
-		if(baseForum instanceof OpenForum) {
-			
-			// If the supplied user is the super user or an instructor, return true.
-			if(securityService.isSuperUser(userId) || forumManager.isInstructor(userId, Entity.SEPARATOR + SiteService.SITE_SUBTYPE + Entity.SEPARATOR + siteId)) {
-				return true;
-			}
-			
-			OpenForum of = (OpenForum) baseForum;
-			
-			// If this is not a draft and is available, return true.
-			if(!of.getDraft() && of.getAvailability()) {
-				return true;
-			}
-			
-			// If this is a draft/unavailable forum AND was authored by the current user, return true.
-			if((of.getDraft() || !of.getAvailability()) && of.getCreatedBy().equals(userId)) {
-				return true;
-			}
+		if(baseForum instanceof DiscussionForum) {
+			return uiPermissionsManager.hasAccessPrivileges((DiscussionForum) baseForum);
 		}
 		else if(baseForum instanceof PrivateForum) {
 			PrivateForum pf = (PrivateForum) baseForum;
@@ -488,6 +579,7 @@ public class ForumsEntityProviderImpl extends AbstractEntityProvider implements 
 		}
 
 		checkSiteAndToolAccess(siteId);
+		boolean isInstructor = forumManager.isInstructor(userId, siteId);
 		List<SparseMessage> messages = new ArrayList<SparseMessage>();
 		//List of topicIds from all forums which are accessible to the user
 		List<Long> topicIds = new ArrayList<Long>();
@@ -503,7 +595,7 @@ public class ForumsEntityProviderImpl extends AbstractEntityProvider implements 
 
 			for(Topic topic : (List<Topic>) forum.getTopics()) {
 				//check if user can see this topic
-				if(!uiPermissionsManager.isRead((DiscussionTopic) topic, forum, userId, siteId)) {
+				if(!uiPermissionsManager.hasAccessPrivileges((DiscussionTopic) topic, forum)) {
 					//user has no permission so skip adding this topicId into the list.
 					continue;
 				}
@@ -511,27 +603,30 @@ public class ForumsEntityProviderImpl extends AbstractEntityProvider implements 
 			}
 		}
 		//For given 'topicIds' fetch recently updated threads
-		for(Message fm : (List<Message>) forumManager.getRecentDiscussionForumThreadsByTopicIds(topicIds, numberOfMessages)) {
-			//message has user_Id set in the 'modifiedBy' field, setting it to 'displayId' for display purpose
-			try {
-				String createdByDisplayName =  userDirectoryService.getUser(fm.getCreatedBy()).getDisplayName();
-				fm.setCreatedBy(createdByDisplayName);
-			} catch (UserNotDefinedException e) {
-				log.debug("User not defined for id '{}'.", fm.getCreatedBy());
+		List<Message> recentThreads = forumManager.getRecentDiscussionForumThreadsByTopicIds(topicIds, numberOfMessages); // this filters out deleted messages
+		Map<DiscussionTopic, List<Message>> partitionedThreads = new HashMap<>();
+		for (Message t : recentThreads)
+		{
+			DiscussionTopic topic = (DiscussionTopic) t.getTopic();
+			if (partitionedThreads.get(topic) == null)
+			{
+				partitionedThreads.put(topic, new ArrayList<>());
 			}
-			try {
-				String modifiedByDisplayName =  userDirectoryService.getUser(fm.getModifiedBy()).getDisplayName();
-				fm.setModifiedBy(modifiedByDisplayName);
-			} catch (UserNotDefinedException e) {
-				log.debug("User not defined for id '{}'.", fm.getModifiedBy());
+			partitionedThreads.get(topic).add(t);
+		}
+		for (DiscussionTopic topic : partitionedThreads.keySet())
+		{
+			List<Message> topicThreads = partitionedThreads.get(topic);
+			List<Long> allowedThreadIds = uiPermissionsManager.hasAccessPrivileges(topicThreads, topic);
+			List<Message> filteredThreads = topicThreads.stream().filter(t -> allowedThreadIds.contains(t.getId())).collect(Collectors.toList());
+			boolean isAnon = anonymousManager.displayAnonIdsToUser(userId, topic);
+			for (Message fm : filteredThreads)
+			{
+				SparseMessage sm = new SparseMessage(fm,/* readStatus =*/ false,/* addAttachments =*/ true, developerHelperService.getServerURL());
+				sanitizeSparseMessage(sm, userId, isAnon, siteId, isInstructor, true);
+				sm.setForumId(fm.getTopic().getOpenForum().getId());
+				messages.add(sm);
 			}
-			SparseMessage sm = new SparseMessage(fm,/* readStatus =*/ false,/* addAttachments =*/ true, developerHelperService.getServerURL());
-			Topic topic = fm.getTopic();
-			//setting forumId for the sparse message
-			if(topic != null && topic.getBaseForum() != null) {
-				sm.setForumId(topic.getBaseForum().getId());
-			}
-			messages.add(sm);
 		}
 		return messages;
 	}

@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Map;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.BooleanUtils;
+import org.sakaiproject.api.app.messageforums.AnonymousManager;
 import org.springframework.orm.hibernate5.HibernateOptimisticLockingFailureException;
 
 import org.sakaiproject.api.app.messageforums.Attachment;
@@ -71,6 +73,7 @@ public class ForumMessageEntityProviderImpl implements ForumMessageEntityProvide
   private SecurityService securityService;
   private SiteService siteService;
   private UserDirectoryService userDirectoryService;
+  private AnonymousManager anonymousManager;
 
 private RequestStorage requestStorage;
   public void setRequestStorage(RequestStorage requestStorage) {
@@ -222,7 +225,7 @@ private RequestStorage requestStorage;
 	}
 
 
-	public List<DecoratedMessage> findReplies(List<Message> messages, Long messageId, Long topicId, Map msgIdReadStatusMap){
+	public List<DecoratedMessage> findReplies(List<Message> messages, Long messageId, Long topicId, Map msgIdReadStatusMap, boolean showAnonIds, String siteId){
 	  List<DecoratedMessage> replies = new ArrayList<DecoratedMessage>();
 
 	  for (Message message : messages) {
@@ -235,17 +238,8 @@ private RequestStorage requestStorage;
 							  attachments.add(attachment.getAttachmentName());
 						  }
 					  }
-					  Boolean readStatus = (Boolean)msgIdReadStatusMap.get(message.getId());
-					  if(readStatus == null)
-						  readStatus = Boolean.FALSE;
-
-					  DecoratedMessage dMessage = new DecoratedMessage(message
-							  .getId(), topicId, message.getTitle(),
-							  message.getBody(), "" + message.getModified().getTime(),
-							  attachments, findReplies(messages, message.getId(),
-									  topicId, msgIdReadStatusMap), message.getAuthor(), message.getInReplyTo() == null ? null : message.getInReplyTo().getId(),
-							  getProfileImageURL(message.getAuthorId()),
-											  "" + message.getCreated().getTime(), readStatus.booleanValue(), "", "");
+					   List<DecoratedMessage> msgReplies = findReplies(messages, message.getId(), topicId, msgIdReadStatusMap, showAnonIds, siteId);
+					  DecoratedMessage dMessage = buildDecoMsg(message, msgReplies, topicId, attachments, msgIdReadStatusMap, showAnonIds, siteId);
 					  replies.add(dMessage);
 				  }		  
 			  }
@@ -264,6 +258,21 @@ private RequestStorage requestStorage;
 	  
 	  return replies;
   }
+
+	private DecoratedMessage buildDecoMsg(Message message, List<DecoratedMessage> replies, Long topicId, List<String> attachments,
+			Map<Long, Boolean> msgIdReadStatusMap, boolean showAnonIds, String siteId)
+	{
+		String author = showAnonIds ? anonymousManager.getAnonId(siteId, message.getAuthorId()) : message.getAuthor();
+		String profileUrl = showAnonIds ? "" : getProfileImageURL(message.getAuthorId());
+		Long inReplyTo = message.getInReplyTo() == null ? null : message.getInReplyTo().getId();
+		boolean readStatus = BooleanUtils.toBooleanDefaultIfNull(msgIdReadStatusMap.get(message.getId()), false);
+		String created = message.getCreated() == null ? "" : String.valueOf(message.getCreated().getTime());
+		String modified = message.getModified() == null ? "" : String.valueOf(message.getModified().getTime());
+
+		return new DecoratedMessage(message.getId(), topicId, message.getTitle(), message.getBody(),
+				modified, attachments, replies, author, inReplyTo, profileUrl, created, readStatus, "", "");
+
+	}
   
   public List<DecoratedMessage> generateFlattenedMessagesListHelper(List<DecoratedMessage> messages, int indent){
 		List<DecoratedMessage> flattenedList = new ArrayList<DecoratedMessage>();
@@ -314,11 +323,8 @@ private RequestStorage requestStorage;
 		  DiscussionForum dForum = forumManager.getForumById(dTopic.getBaseForum().getId());
 		  siteId = forumManager.getContextForForumById(dForum.getId());
 
-		  //make sure the user has access too this forum and topic and site:
-		  if(dForum.getDraft().equals(Boolean.FALSE) && dTopic.getDraft().equals(Boolean.FALSE) && securityService.unlock(userId, SiteService.SITE_VISIT, "/site/" + siteId)){
-
-			  if (getUiPermissionsManager().isRead(dTopic, dForum, userId, siteId))
-			  {
+		  //make sure the user has access to this forum and topic and site:
+		  if(uiPermissionsManager.hasAccessPrivileges(dTopic, dForum) && securityService.unlock(userId, SiteService.SITE_VISIT, "/site/" + siteId)){
 
 				  messages = filterModeratedMessages(messages, dTopic, dForum, userId, siteId);
 				  List<Long> messageIds = new ArrayList<Long>();
@@ -340,23 +346,14 @@ private RequestStorage requestStorage;
 									  attachments.add(attachment.getAttachmentName());
 								  }
 							  }
-							  Boolean readStatus = (Boolean)msgIdReadStatusMap.get(message.getId());
-							  if(readStatus == null)
-								  readStatus = Boolean.FALSE;
-
-							  DecoratedMessage dMessage = new DecoratedMessage(message
-									  .getId(), new Long(topicId), message.getTitle(),
-									  message.getBody(), "" + message.getModified().getTime(),
-									  attachments, findReplies(messages, message.getId(),
-											  new Long(topicId), msgIdReadStatusMap), message.getAuthor(), message.getInReplyTo() == null ? null : message.getInReplyTo().getId(),
-									  getProfileImageURL(message.getAuthorId()),
-													  "" + message.getCreated().getTime(), readStatus.booleanValue(), "", "");				  
+							  boolean showAnonIds = anonymousManager.displayAnonIdsToUser(userId, dTopic);
+							  List<DecoratedMessage> msgReplies = findReplies(messages, message.getId(), new Long(topicId), msgIdReadStatusMap, showAnonIds, siteId);
+							  DecoratedMessage dMessage = buildDecoMsg(message, msgReplies, new Long(topicId), attachments, msgIdReadStatusMap, showAnonIds, siteId);
 
 							  dMessages.add(dMessage);
 						  }
 					  }
 				  }
-			  }
 		  }
 		  //return a sorted list
 		  Collections.sort(dMessages, new Comparator<DecoratedMessage>(){
@@ -799,5 +796,8 @@ public void setMessageManager(MessageForumsMessageManager messageManager) {
 		this.userDirectoryService = userDirectoryService;
 	}
 	
-	
+	public void setAnonymousManager(AnonymousManager anon)
+	{
+		anonymousManager = anon;
+	}
 }

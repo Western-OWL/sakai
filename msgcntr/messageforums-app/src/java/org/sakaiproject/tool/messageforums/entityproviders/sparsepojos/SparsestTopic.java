@@ -35,13 +35,13 @@ public class SparsestTopic {
 	@Getter
 	private Long createdDate;
 	
-	@Getter
+	@Getter @Setter
 	private String creator;
 	
 	@Getter
 	private Long modifiedDate;
 	
-	@Getter
+	@Getter @Setter
 	private String modifier;
 	
 	@Getter
