@@ -70,6 +70,10 @@ public class EntityGroup implements Group {
     private long lastModified;
     private String[] userRoles;
 
+    // it is difficult to work with this class externally to partially sanitize it, so we resort
+    // to tracking a sanitize flag internally and reference it when necessary to modify output
+    private boolean sanitize = false;
+
     public Map<String, String> props;
     public Map<String, String> getProps() {
         if (props == null) {
@@ -116,6 +120,10 @@ public class EntityGroup implements Group {
     }
 
     public EntityGroup(Group group) {
+        this(group, false);
+    }
+
+    public EntityGroup(Group group, boolean sanitize) {
         this.group = group;
         Site site = group.getContainingSite();
         this.siteId = site.getId();
@@ -123,17 +131,21 @@ public class EntityGroup implements Group {
         this.title = group.getTitle();
         this.description = group.getDescription();
         this.joinerRole = site.getJoinerRole();
-        this.maintainRole = group.getMaintainRole();
-        this.providerGroupId = group.getProviderGroupId();
-        this.owner = group.getCreatedBy() == null ? null : group.getCreatedBy().getId();
+
         this.lastModified = group.getModifiedDate() == null ? System.currentTimeMillis() : group.getModifiedDate().getTime();
-        getUserRoles(); // populate the user roles
-        // properties
-        ResourceProperties rp = group.getProperties();
-        for (Iterator<String> iterator = rp.getPropertyNames(); iterator.hasNext();) {
-            String name = iterator.next();
-            String value = rp.getProperty(name);
-            this.setProperty(name, value);
+        this.sanitize = sanitize;
+        if (!sanitize) {
+            this.maintainRole = group.getMaintainRole();
+            this.providerGroupId = group.getProviderGroupId();
+            this.owner = group.getCreatedBy() == null ? null : group.getCreatedBy().getId();
+            getUserRoles(); // populate the user roles
+            // properties
+            ResourceProperties rp = group.getProperties();
+            for (Iterator<String> iterator = rp.getPropertyNames(); iterator.hasNext();) {
+                String name = iterator.next();
+                String value = rp.getProperty(name);
+                this.setProperty(name, value);
+            }
         }
     }
 
@@ -179,6 +191,11 @@ public class EntityGroup implements Group {
             owner = new Owner(user.getId(), user.getDisplayName());
         } else {
             owner = new Owner(this.owner, this.owner);
+        }
+        if (sanitize)
+        {
+            owner.setUserEntityURL("");
+            owner.setUserId("");
         }
         return owner;
     }
@@ -240,6 +257,9 @@ public class EntityGroup implements Group {
     }
 
     public String[] getUserRoles() {
+        if (sanitize) {
+            return new String[0];
+        }
         if (userRoles == null) {
             if (group == null) {
                 userRoles = new String[] {maintainRole, joinerRole};
@@ -422,7 +442,7 @@ public class EntityGroup implements Group {
 
     public Set getUsers() {
         if (group != null) {
-            return group.getUsers();
+            return sanitize ? Collections.emptySet() : group.getUsers();
         }
         throw new UnsupportedOperationException();
     }
@@ -480,7 +500,7 @@ public class EntityGroup implements Group {
     @Override
     public List<String[]> getRealmLocks() {
         if (group != null) {
-            return group.getRealmLocks();
+            return sanitize ? Collections.emptyList() : group.getRealmLocks();
         }
         return Collections.emptyList();
     }
