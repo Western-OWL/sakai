@@ -50,6 +50,7 @@ import org.sakaiproject.entity.api.HttpAccess;
 import org.sakaiproject.entity.api.Reference;
 import org.sakaiproject.entity.api.ResourceProperties;
 import org.sakaiproject.entity.api.EntityManager;
+import org.sakaiproject.site.api.SiteService;
 import org.sakaiproject.tool.api.ActiveTool;
 import org.sakaiproject.tool.api.Session;
 import org.sakaiproject.tool.api.Tool;
@@ -125,6 +126,7 @@ public class AccessServlet extends VmServlet
 	protected SessionManager sessionManager;
 	protected FormattedText formattedText;
 	protected EncryptionUtilityService encryptionUtilityService;
+	protected SiteService siteService;
 
 	/** init thread - so we don't wait in the actual init() call */
 	public class AccessServletInit extends Thread
@@ -168,6 +170,7 @@ public class AccessServlet extends VmServlet
 		sessionManager = ComponentManager.get(SessionManager.class);
 		formattedText = ComponentManager.get(FormattedText.class);
 		encryptionUtilityService = ComponentManager.get(EncryptionUtilityService.class);
+		siteService = ComponentManager.get(SiteService.class);
 	}
 
 	/**
@@ -380,7 +383,12 @@ public class AccessServlet extends VmServlet
 					boolean isValidSession = sessionManager.getCurrentSession().getId().equals(decryptedSessionValue);
 					boolean isValidTime = LocalDateTime.now().isBefore(decryptedTokenValidity);
 					// If the time-based token is correct and the file contains the secured property, serve the file.
-					if (isValidSession && isValidTime) {
+					// Tokens are generated only if the resource is in the same site as the assessment.
+					// Enforce that the user is a participant in the ref's context:
+					String contextId = ref == null ? "" : ref.getContext();
+					boolean isUserInRefContext = siteService.isCurrentUserMemberOfSite(contextId);
+
+					if (isValidSession && isValidTime && isUserInRefContext) {
 						log.debug("The token {} is valid for the ref {}", secureTokenParameter, ref);
 						// get the properties - but use a security advisor to avoid needing end-user permission to the resource
 						SecurityAdvisor securityAdvisor = new SecurityAdvisor() {
@@ -400,6 +408,8 @@ public class AccessServlet extends VmServlet
 						} finally {
 							securityService.popAdvisor(securityAdvisor);
 						}
+					} else {
+						log.warn("SecureAccess token invalid for ref: {}\nuserId: {}\nisValidSession: {}\nisValidTime: {}\nisUserInRefContext: {}", ref.getReference(), sessionManager.getCurrentSessionUserId(), isValidSession, isValidTime, isUserInRefContext);
 					}
 				} catch (Exception e) {
 					// Do not reveal failed requests.

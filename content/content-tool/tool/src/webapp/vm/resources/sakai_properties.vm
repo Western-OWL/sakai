@@ -537,7 +537,7 @@ button.btn.btn-default.multiselect-clear-filter{
 									</div>
 								</div>
 							#end
-							#if (!$item.isCollection())
+							#if (!$item.isCollection() && !$model.isUserSite())
 								<div class="row">
 									<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
 										<label for="allowSecuredAccess${DOT}$i">
@@ -549,7 +549,6 @@ button.btn.btn-default.multiselect-clear-filter{
 											/>
 											$tlang.getString("access.secured")
 										</label>
-										<span id="infoTooltip" class="fa fa-info-circle" tabindex="0" title="$tlang.getString('access.secured.tooltip')"></span
 									</div>
 								</div>
 							#end
