@@ -68,6 +68,7 @@ public class UserPrefsEntityProvider extends AbstractEntityProvider implements C
 	public String getEntityPrefix() {
 		return PREFIX;
 	}
+
 	public boolean entityExists(String id) {
 
 		boolean rv = false;
@@ -100,12 +101,12 @@ public class UserPrefsEntityProvider extends AbstractEntityProvider implements C
 		}
 	}
 	
-    /**
+	/**
 	 * Set editing mode on for user and add user if not existing
 	 */
 	private PreferencesEdit getPreferencesEdit(String userId) {
 
-		PreferencesEdit edit = null;
+		PreferencesEdit edit;
 		try {
 			edit = preferencesService.edit(userId);
 		} catch (IdUnusedException e) {
@@ -118,27 +119,34 @@ public class UserPrefsEntityProvider extends AbstractEntityProvider implements C
 		} catch (InUseException | PermissionException e) {
 			log.error("getPreferencesEdit: " + e.getMessage());
 			return null;
-        }
+		}
 		
 		return edit;
 	}
-	
+
 	public Object getEntity(EntityReference ref) {
-		
+		String sessionUserID = getUserId();
+		if (sessionUserID == null) {
+			throw new SecurityException("You must be logged in to use this action.");
+		}
+
 		Entity rv = null;
-		
 		if (ref != null)
 		{
 			log.debug(this + ".getEntity() " + ref.getReference());
 			
 			if (PREFIX.equals(ref.getPrefix()))
 			{
-				String userId = ref.getId();
-				rv = preferencesService.getPreferences(userId);
+				String requestedUserID = ref.getId();
+				if (!requestedUserID.equals(sessionUserID) && !developerHelperService.isUserAdmin(developerHelperService.getCurrentUserReference())) {
+					throw new SecurityException("You can't use this action to view other users' preferences.");
+				}
+
+				rv = preferencesService.getPreferences(requestedUserID);
 				if (rv == null)
 				{
 					try {
-						rv = preferencesService.add(userId);
+						rv = preferencesService.add(requestedUserID);
 					} catch (Exception ee) {
 						log.error(" getEntity: " + ee.getMessage());
 					}
@@ -155,10 +163,19 @@ public class UserPrefsEntityProvider extends AbstractEntityProvider implements C
 	 */
 	public void deleteEntity(EntityReference ref, Map<String, Object> params) {
 		log.debug(this + ".deleteEntity of user  " + ref);
-		String refId = ref.getId();
+		String sessionUserID = getUserId();
+		if (sessionUserID == null) {
+			throw new SecurityException("You must be logged in to use this action.");
+		}
+
+		String requestedUserID = ref.getId();
+		if (!requestedUserID.equals(sessionUserID) && !developerHelperService.isUserAdmin(developerHelperService.getCurrentUserReference())) {
+			throw new SecurityException("You can't use this action to delete other users' preferences.");
+		}
+
 		try
 		{
-			PreferencesEdit edit = preferencesService.edit(refId);
+			PreferencesEdit edit = preferencesService.edit(requestedUserID);
 			
 			// now remove the preference 
 			preferencesService.remove(edit);
@@ -166,23 +183,22 @@ public class UserPrefsEntityProvider extends AbstractEntityProvider implements C
 		catch (IdUnusedException e)
 		{
 			log.warn(this + ".deleteEntity of user  " + ref + " " + e.getMessage());
-			throw new EntityException("UserPrefsEntityProvider get UserPreference not found for ", refId, 404);
+			throw new EntityException("UserPrefsEntityProvider get UserPreference not found for ", requestedUserID, 404);
 		}
 		catch (PermissionException e)
 		{
 			log.warn(this + ".deleteEntity of user  " + ref + " " + e.getMessage());
-			throw new EntityException("UserPrefsEntityProvider get UserPreference not permitted for ", refId, 403);
+			throw new EntityException("UserPrefsEntityProvider get UserPreference not permitted for ", requestedUserID, 403);
 		}
 		catch (InUseException e)
 		{
 			log.warn(this + ".deleteEntity of user  " + ref + " " + e.getMessage());
-			throw new EntityException("UserPrefsEntityProvider get UserPreference not found for", refId, 404);
+			throw new EntityException("UserPrefsEntityProvider get UserPreference not found for", requestedUserID, 404);
 		}
 
 	}
 
 	public List<?> getEntities(EntityReference ref, Search search) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -194,28 +210,28 @@ public class UserPrefsEntityProvider extends AbstractEntityProvider implements C
 		 return new String[] {Formats.XML, Formats.JSON, Formats.HTML };
 	}
 
-    /**
-     * Save key-value pair as current user preferences. 
-     * Here is the request url pattern: /direct/userPrefs/saveDivState/{key_name}/{state_value}
-     * @param view
-     */
-    @EntityCustomAction(action="saveDivState", viewKey=EntityView.VIEW_EDIT)
-    public void doSaveDivState(EntityView view) {
-    	
-    	String key = requestStorage.getStoredValueAsType(String.class, "key");
-    	String state = requestStorage.getStoredValueAsType(String.class, "state");
-    	log.debug("key: " + key);
-    	log.debug("state: " + state);
-    	
-    	PreferencesEdit prefs = getPrefsEdit();
-    	ResourcePropertiesEdit expandProps = prefs.getPropertiesEdit(UserPrefsTool.PREFS_EXPAND);
+	/**
+	 * Save key-value pair as current user preferences.
+	 * Here is the request url pattern: /direct/userPrefs/saveDivState/{key_name}/{state_value}
+	 * @param view
+	 */
+	@EntityCustomAction(action="saveDivState", viewKey=EntityView.VIEW_EDIT)
+	public void doSaveDivState(EntityView view) {
+
+		String key = requestStorage.getStoredValueAsType(String.class, "key");
+		String state = requestStorage.getStoredValueAsType(String.class, "state");
+		log.debug("key: " + key);
+		log.debug("state: " + state);
+
+		PreferencesEdit prefs = getPrefsEdit();
+		ResourcePropertiesEdit expandProps = prefs.getPropertiesEdit(UserPrefsTool.PREFS_EXPAND);
 		if (expandProps != null) {
 			expandProps.addProperty(key, state);
 		}
 		preferencesService.commit(prefs);
-    }
-    
-    /**
+	}
+
+	/**
 	 * @return Returns the userId.
 	 */
 	private String getUserId()
@@ -261,22 +277,30 @@ public class UserPrefsEntityProvider extends AbstractEntityProvider implements C
 	 */
 	@EntityCustomAction(action = "key", viewKey = EntityView.VIEW_LIST)
 	public Map<String, Object> getKeyProperties(EntityView view) {
-		
-		Map<String, Object> rv = new HashMap<String, Object>();
-		
+
+		String sessionUserID = getUserId();
+		if (sessionUserID == null) {
+			throw new SecurityException("You must be logged in to use this action.");
+		}
+
+		Map<String, Object> rv = new HashMap<>();
+
 		// get userId
-		String userId = view.getPathSegment(2);
+		String requestedUserID = view.getPathSegment(2);
 		String key = view.getPathSegment(3);
+		if (!requestedUserID.equals(sessionUserID) && !developerHelperService.isUserAdmin(developerHelperService.getCurrentUserReference())) {
+			throw new SecurityException("You can't use this action to view other users' preferences.");
+		}
 
 		if(log.isDebugEnabled()) {
-			log.debug(this + " getKeyProperties for userId=" + userId + " key=" + key);
+			log.debug(this + " getKeyProperties for userId=" + requestedUserID + " key=" + key);
 		}
 		
-		Preferences pref = preferencesService.getPreferences(userId);
+		Preferences pref = preferencesService.getPreferences(requestedUserID);
 		if (pref == null)
 		{
 			try {
-				pref = preferencesService.add(userId);
+				pref = preferencesService.add(requestedUserID);
 			} catch (Exception ee) {
 				log.error(this + " getKeyProperties: " + ee.getMessage());
 			}
@@ -313,13 +337,21 @@ public class UserPrefsEntityProvider extends AbstractEntityProvider implements C
 	 */
 	@EntityCustomAction(action = "updateKey", viewKey = EntityView.VIEW_EDIT)
 	public void updateKeyProperties(EntityView view) {
-		
+
+		String sessionUserID = getUserId();
+		if (sessionUserID == null) {
+			throw new SecurityException("You must be logged in to use this action.");
+		}
+
 		// get all params
-		final String userId = view.getPathSegment(2);
+		final String requestedUserID = view.getPathSegment(2);
+		if (!requestedUserID.equals(sessionUserID) && !developerHelperService.isUserAdmin(developerHelperService.getCurrentUserReference())) {
+			throw new SecurityException("You can't use this action to update other users' preferences.");
+		}
 		final String key = view.getPathSegment(3);
 		final Map<String, Object> params = requestStorage.getStorageMapCopy();
 
-		log.debug("updateKeyProperties for userId={} key={}", userId, key);
+		log.debug("updateKeyProperties for userId={} key={}", requestedUserID, key);
 		
 		String queryString = (String) params.get("queryString");
 		log.debug("queryString = {}", queryString);
@@ -337,8 +369,8 @@ public class UserPrefsEntityProvider extends AbstractEntityProvider implements C
 					}
 				}
 				// get the edit object
-				Preferences existingPrefs = getPreferences(userId);
-				Map<String, String> propsToSet = null;
+				Preferences existingPrefs = getPreferences(requestedUserID);
+				Map<String, String> propsToSet;
 				if (existingPrefs != null) {
 					ResourceProperties existingProps = existingPrefs.getProperties(key);
 					propsToSet = suppliedProps.entrySet().stream().filter(e -> {
@@ -350,9 +382,9 @@ public class UserPrefsEntityProvider extends AbstractEntityProvider implements C
 					propsToSet = suppliedProps;
 				}
 
-				if (propsToSet.size() > 0) {
+				if (!propsToSet.isEmpty()) {
 					log.debug("We have some props to set. Getting edit lock ...");
-					PreferencesEdit editPrefs = getPreferencesEdit(userId);
+					PreferencesEdit editPrefs = getPreferencesEdit(requestedUserID);
 
 					if (editPrefs != null) {
 						ResourcePropertiesEdit editProps = editPrefs.getPropertiesEdit(key);
@@ -360,7 +392,7 @@ public class UserPrefsEntityProvider extends AbstractEntityProvider implements C
 						log.debug("Props set! Committing preferences edit ...");
 						preferencesService.commit(editPrefs);
 					} else {
-						log.warn("Could not get a lock on prefs to update for user: {}", userId);
+						log.warn("Could not get a lock on prefs to update for user: {}", requestedUserID);
 					}
 
 				} else {
