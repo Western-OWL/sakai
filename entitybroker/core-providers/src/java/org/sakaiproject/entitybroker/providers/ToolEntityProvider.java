@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.sakaiproject.entitybroker.EntityReference;
@@ -66,11 +67,11 @@ public class ToolEntityProvider extends AbstractEntityProvider implements CoreEn
      */
     @Override
     public Object getEntity(EntityReference ref) {
-        if (ref == null || ref.getId() == null || getTool(ref.getId()) == null) {
+        if (ref == null || ref.getId() == null || !getTool(ref.getId()).isPresent()) {
             return new EntityTool();
         }
 
-        return getToolEntity(getTool(ref.getId()));
+        return getToolEntity(getTool(ref.getId()).get());
     }
 
     /* (non-Javadoc)
@@ -90,13 +91,9 @@ public class ToolEntityProvider extends AbstractEntityProvider implements CoreEn
             return false;
         }
 
-        Tool tool = getTool(id);
+        Optional<Tool> tool = getTool(id);
 
-        if (tool != null) {
-            return true;
-        }
-
-        return false;
+        return tool.isPresent();
     }
 
     /* (non-Javadoc)
@@ -104,17 +101,18 @@ public class ToolEntityProvider extends AbstractEntityProvider implements CoreEn
      */
     @Override
     public List<?> getEntities(EntityReference ref, Search search) {
-        List<EntityTool> tools = new ArrayList<EntityTool>();
+        List<EntityTool> tools = new ArrayList<>();
+        boolean isAdmin = developerHelperService.isUserAdmin(developerHelperService.getCurrentUserReference());
         if (search.getRestrictionByProperty("id") != null) {
             String id = search.getRestrictionByProperty("id").getStringValue();
 
-            EntityTool entityTool = getToolEntity(getTool(id));
+            EntityTool entityTool = getToolEntity(getTool(id).orElse(null));
             if (entityTool != null) {
                 tools.add(entityTool);
             }
         } else if (search.getRestrictionByProperty("keywords") != null) {
             String[] keywords = (String[]) search.getRestrictionByProperty("keywords").getArrayValue();
-            Set<Tool> found = toolManager.findTools(null, new HashSet<String>(Arrays.asList(keywords)));
+            Set<Tool> found = toolManager.findTools(isAdmin ? null : Collections.emptySet(), new HashSet<>(Arrays.asList(keywords)));
 
             for (Tool tool : found) {
                 EntityTool entityTool = getToolEntity(tool);
@@ -124,7 +122,7 @@ public class ToolEntityProvider extends AbstractEntityProvider implements CoreEn
             }
         } else if (search.getRestrictionByProperty("categories") != null) {
             String[] categories = (String[]) search.getRestrictionByProperty("categories").getArrayValue();
-            Set<Tool> found = toolManager.findTools(new HashSet<String>(Arrays.asList(categories)), null);
+            Set<Tool> found = toolManager.findTools(new HashSet<>(Arrays.asList(categories)), null);
 
             for (Tool tool : found) {
                 EntityTool entityTool = getToolEntity(tool);
@@ -133,7 +131,7 @@ public class ToolEntityProvider extends AbstractEntityProvider implements CoreEn
                 }
             }
         } else {
-            Set<Tool> found = toolManager.findTools(null, null);
+            Set<Tool> found = toolManager.findTools(isAdmin ? null : Collections.emptySet(), null);
 
             for (Tool tool : found) {
                 EntityTool entityTool = getToolEntity(tool);
@@ -148,8 +146,9 @@ public class ToolEntityProvider extends AbstractEntityProvider implements CoreEn
 
     @EntityCustomAction(action="allToolIds",viewKey=EntityView.VIEW_LIST)
     public Object getAllToolIds(EntityReference ref) {
-        Set<Tool> tools = toolManager.findTools(null, null);
-        List<String> toolIds = new ArrayList<String>(tools.size());
+        boolean isAdmin = developerHelperService.isUserAdmin(developerHelperService.getCurrentUserReference());
+        Set<Tool> tools = toolManager.findTools(isAdmin ? null : Collections.emptySet(), null);
+        List<String> toolIds = new ArrayList<>(tools.size());
 
         for (Tool tool : tools) {
             toolIds.add(tool.getId());
@@ -160,12 +159,18 @@ public class ToolEntityProvider extends AbstractEntityProvider implements CoreEn
 
     @EntityCustomAction(action="hiddenToolIds",viewKey=EntityView.VIEW_LIST)
     public Object getHiddenToolIds(EntityReference ref) {
+        String currentUserRef = developerHelperService.getCurrentUserReference();
+        boolean isAdmin = developerHelperService.isUserAdmin(currentUserRef);
+        if (!isAdmin) {
+            throw new SecurityException("Only admins can access hidden tools, user is not an admin: " + currentUserRef);
+        }
+
         Set<Tool> allTools = toolManager.findTools(null, null);
         Set<Tool> publicTools = toolManager.findTools(Collections.<String> emptySet(), null);
 
-        List<String> allToolIds = new ArrayList<String>(allTools.size());
-        List<String> publicToolIds = new ArrayList<String>(publicTools.size());
-        List<String> hiddenToolIds = new ArrayList<String>(allTools.size() - publicToolIds.size());
+        List<String> allToolIds = new ArrayList<>(allTools.size());
+        List<String> publicToolIds = new ArrayList<>(publicTools.size());
+        List<String> hiddenToolIds = new ArrayList<>(allTools.size() - publicToolIds.size());
 
         for (Tool tool : allTools) {
             allToolIds.add(tool.getId());
@@ -186,7 +191,7 @@ public class ToolEntityProvider extends AbstractEntityProvider implements CoreEn
     public Object getPublicToolIds(EntityReference ref) {
         Set<Tool> publicTools = toolManager.findTools(Collections.<String> emptySet(), null);
 
-        List<String> publicToolIds = new ArrayList<String>(publicTools.size());
+        List<String> publicToolIds = new ArrayList<>(publicTools.size());
 
         for (Tool tool : publicTools) {
             publicToolIds.add(tool.getId());
@@ -200,11 +205,25 @@ public class ToolEntityProvider extends AbstractEntityProvider implements CoreEn
         this.toolManager = toolManager;
     }
 
-    private Tool getTool(String id) {
+    /**
+     * Return the Tool object for the given tool ID. Only returns stealthed Tools for admin users
+     * @param id the id of the tool requested
+     * @return An Optional of the Tool, or an empty Optional if not found (or tool was stealthed and user was not admin)
+     */
+    private Optional<Tool> getTool(String id) {
         if (! "".equals(id)) {
-            return toolManager.getTool(id);
+            boolean isAdmin = developerHelperService.isUserAdmin(developerHelperService.getCurrentUserReference());
+            if (isAdmin) {
+                return Optional.of(toolManager.getTool(id));
+            } else {
+                Set<Tool> publicTools = toolManager.findTools(Collections.<String> emptySet(), null);
+                boolean isPublic = publicTools.stream().anyMatch(t -> t.getId().equals(id));
+                if (isPublic) {
+                    return Optional.of(toolManager.getTool(id));
+                }
+            }
         }
-        return null;
+        return Optional.empty();
     }
 
     private EntityTool getToolEntity(Tool tool) {
