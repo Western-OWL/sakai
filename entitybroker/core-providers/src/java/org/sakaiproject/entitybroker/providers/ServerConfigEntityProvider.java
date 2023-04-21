@@ -102,7 +102,7 @@ public class ServerConfigEntityProvider extends AbstractEntityProvider implement
     @EntityCustomAction(action="values",viewKey=EntityView.VIEW_LIST)
     public Object getAllValues() {
         checkAllowed();
-        TreeMap<String, Object> tm = new TreeMap<String, Object>( getKnownSettings() );
+        TreeMap<String, Object> tm = new TreeMap<>( getKnownSettings() );
         // wrapped the data in an ActionReturn object so it is encoded as is
         return new ActionReturn(tm);
     }
@@ -111,7 +111,7 @@ public class ServerConfigEntityProvider extends AbstractEntityProvider implement
     public Object getAllNames(EntityReference ref) {
         checkAllowed();
         Map<String, Object> tm = getKnownSettings();
-        ArrayList<String> names = new ArrayList<String>( tm.keySet() );
+        ArrayList<String> names = new ArrayList<>( tm.keySet() );
         Collections.sort(names);
         // wrapped the data in an ActionReturn object so it is encoded as is
         return new ActionReturn(names);
@@ -132,10 +132,7 @@ public class ServerConfigEntityProvider extends AbstractEntityProvider implement
             return true;
         }
         Object config = getConfig(id);
-        if (config != null) {
-            return true;
-        }
-        return false;
+        return config != null;
     }
 
     public Object getEntity(EntityReference ref) {
@@ -152,7 +149,7 @@ public class ServerConfigEntityProvider extends AbstractEntityProvider implement
     }
 
     public List<?> getEntities(EntityReference ref, Search search) {
-        List<EntityServerConfig> escs = new ArrayList<EntityServerConfig>();
+        List<EntityServerConfig> escs = new ArrayList<>();
         if (search != null 
                 && ! search.isEmpty() 
                 && search.getRestrictionByProperty("name") != null) {
@@ -206,7 +203,7 @@ public class ServerConfigEntityProvider extends AbstractEntityProvider implement
      * @return a map of name -> value
      */
     public Map<String, Object> getKnownSettings() {
-        Map<String, Object> m = new HashMap<String, Object>();
+        Map<String, Object> m = new HashMap<>();
         m.put("accessPath", serverConfigurationService.getAccessPath());
         m.put("accessUrl", serverConfigurationService.getAccessUrl());
         m.put("gatewaySiteId", serverConfigurationService.getGatewaySiteId());
@@ -220,23 +217,30 @@ public class ServerConfigEntityProvider extends AbstractEntityProvider implement
         m.put("serverUrl", serverConfigurationService.getServerUrl());
         m.put("toolUrl", serverConfigurationService.getToolUrl());
         m.put("userHomeUrl", serverConfigurationService.getUserHomeUrl());
-        // added in server IP address and hostname
-        try {
-            InetAddress i4 = Inet4Address.getLocalHost();
-            m.put("serverHostName", i4.getHostName());
-            m.put("serverHostAddress", i4.getHostAddress()); // IP address
-        } catch (UnknownHostException e) {
-            // could not get address, do nothing?
+        // Admin only: server IP address, hostname, DB vendor
+        boolean isAdmin = developerHelperService.isUserAdmin(developerHelperService.getCurrentUserReference());
+        if (isAdmin) {
+            try {
+                InetAddress i4 = Inet4Address.getLocalHost();
+                m.put("serverHostName", i4.getHostName());
+                m.put("serverHostAddress", i4.getHostAddress()); // IP address
+            } catch (UnknownHostException e) {
+                // could not get address, do nothing?
+            }
+
+            Object o = getConfigValue("vendor@org.sakaiproject.db.api.SqlService");
+            if (o != null) m.put("database.vendor", o);
         }
 
-        // special handling for DB properties
-        Object o = getConfigValue("vendor@org.sakaiproject.db.api.SqlService");
-        if (o != null) m.put("database.vendor", o);
-        o = getConfigValue("webdav.ignore");
+        Object o = getConfigValue("webdav.ignore");
         if (o != null) m.put("webdav.ignore", o);
+
         // now we get the known String settings
         for (int i = 0; i < includedStringSettings.length; i++) {
             String name = includedStringSettings[i];
+            if ("force.url.secure".equals(name) && !isAdmin) {
+                continue;
+            }
             String value = serverConfigurationService.getString(name);
             if (value != null) {
                 m.put(name, value);
@@ -277,8 +281,7 @@ public class ServerConfigEntityProvider extends AbstractEntityProvider implement
             if (sValue.length() > 0) {
                 // try to convert this to an integer first
                 try {
-                    Integer i = Integer.parseInt(sValue);
-                    value = i.intValue();
+                    value = Integer.parseInt(sValue);
                 } catch (NumberFormatException e) {
                     // next try to convert it to a boolean
                     if (sValue.equalsIgnoreCase("true")) {
