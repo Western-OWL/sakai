@@ -108,7 +108,7 @@ public class RosterSiteEntityProvider extends AbstractEntityProvider implements
 
         String siteId = reference.getId();
 
-		if (null == siteId || DEFAULT_ID.equals(siteId)) {
+		if (null == siteId || DEFAULT_ID.equals(siteId) || !sakaiProxy.isSiteMaintainer(siteId)) {
 			throw new EntityException(ERROR_INVALID_SITE, reference.getReference());
 		}
 
@@ -238,7 +238,7 @@ public class RosterSiteEntityProvider extends AbstractEntityProvider implements
 
 		String siteId = reference.getId();
 
-		if (null == siteId || DEFAULT_ID.equals(siteId)) {
+		if (null == siteId || DEFAULT_ID.equals(siteId) || !sakaiProxy.isSiteMaintainer(siteId)) {
 			throw new EntityException(ERROR_INVALID_SITE, reference.getReference());
 		}
 
@@ -304,7 +304,7 @@ public class RosterSiteEntityProvider extends AbstractEntityProvider implements
 	@EntityCustomAction(action = "get-site", viewKey = EntityView.VIEW_SHOW)
 	public Object getSite(EntityReference reference) {
 		
-		if (null == reference.getId() || DEFAULT_ID.equals(reference.getId())) {
+		if (null == reference.getId() || DEFAULT_ID.equals(reference.getId()) || !sakaiProxy.isSiteMaintainer(reference.getId())) {
 			throw new EntityException(ERROR_INVALID_SITE, reference.getReference());
 		}
 		
@@ -316,7 +316,7 @@ public class RosterSiteEntityProvider extends AbstractEntityProvider implements
 
 		final String siteId = reference.getId();
 
-		if (null == siteId || DEFAULT_ID.equals(siteId)) {
+		if (null == siteId || DEFAULT_ID.equals(siteId) || !sakaiProxy.isSiteMaintainer(siteId)) {
 			throw new EntityException(ERROR_INVALID_SITE, reference.getReference());
 		}
 
