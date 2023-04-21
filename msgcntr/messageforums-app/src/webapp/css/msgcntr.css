@@ -259,7 +259,10 @@ h2 + .forumsCollapseTrigger,
 	margin-right: 4px;
 	font-weight: bold;
 }
-.forumHeader .shortDescription,.topicBloc .shortDescription{
+.forumTitle .shortDescription,
+.forumHeader .shortDescription,
+.topicTitle .shortDescription,
+.topicBloc .shortDescription{
 	/*	short description whenever one occurs - do not use padding */
 	display: block;
 	margin: 4px 0 0 0;

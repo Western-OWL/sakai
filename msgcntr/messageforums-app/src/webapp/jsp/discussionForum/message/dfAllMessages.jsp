@@ -220,13 +220,6 @@
 					</h:outputLink>
 				</h:column>
 				<%-- author column --%>
-				<h:column rendered="#{ForumTool.selectedTopic.isMarkAsRead}">
-					<f:facet name="header"><h:outputText value="#{msgs.cdfm_mark_as_read}" escape="false"/></f:facet>
-					<h:outputLink rendered="#{!message.read}" value="javascript:void(0);" title="#{msgs.cdfm_mark_as_read}" styleClass="markAsReadIcon button"
-								  onclick="doAjax(#{message.message.id}, #{ForumTool.selectedTopic.topic.id}, this);">
-						<h:outputText value="#{msgs.cdfm_mark_as_read}"/>
-					</h:outputLink>
-				</h:column>
 				<h:column>
 					<f:facet name="header">
 						<h:outputLink value="#" title="#{msgs.sort_author}">

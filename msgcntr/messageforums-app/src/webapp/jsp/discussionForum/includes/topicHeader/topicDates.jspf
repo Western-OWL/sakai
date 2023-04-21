@@ -3,4 +3,4 @@
 		<h:outputText value="#{msgs.openDate}: #{topic.formattedOpenDate}" />
 		<h:outputText value="#{msgs.closeDate}: #{topic.formattedCloseDate}" />
 	</h:panelGrid>
-</f:subview
+</f:subview>

@@ -103,7 +103,7 @@
 		<sakai:tool_bar_message value="#{msgs.cdfm_discussion_topic_settings}" />
 		<h3 class="specialLink">
 			<h:commandLink immediate="true" action="#{ForumTool.processActionHome}" value="#{msgs.cdfm_message_forums}" rendered="#{ForumTool.messagesandForums}" />
-			<h:commandLink immediate="true" action="#{ForumTool.processActionHome}" value="#{msgs.cdfm_discussion_forums}" rendered="#{ForumTool.forumsTool}" />
+			<h:commandLink immediate="true" action="#{ForumTool.processActionHome}" value="#{msgs.cdfm_discussions}" rendered="#{ForumTool.forumsTool}" />
 			<h:outputText value=" " /><h:outputText value=" / " /><h:outputText value=" " />
 			<h:commandLink immediate="true" action="#{ForumTool.processActionDisplayForum}" rendered="#{ForumTool.showForumLinksInNav}">
 				<f:param value="#{ForumTool.selectedForum.forum.id}" name="forumId"/>

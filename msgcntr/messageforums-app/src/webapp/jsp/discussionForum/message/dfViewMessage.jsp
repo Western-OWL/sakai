@@ -79,7 +79,6 @@
 			<%-- If deleting, tells where to go back to --%>	
 			<h:inputHidden value="#{ForumTool.fromPage}" />
 			<h:panelGroup layout="block" rendered="#{ForumTool.deleteMsg && ForumTool.selectedMessage.userCanDelete}" styleClass="act">
-			<h:panelGroup layout="block" rendered="#{ForumTool.deleteMsg && ForumTool.selectedMessage.userCanDelete}" styleClass="act">
 				<h:commandButton id="post" action="#{ForumTool.processDfMsgDeleteConfirmYes}" value="#{msgs.cdfm_button_bar_delete}" accesskey="s" styleClass="active blockMeOnClick" />
 				<h:commandButton id="cancelDelete" action="#{ForumTool.processDfMsgDeleteConfirmNo}" value="#{msgs.cdfm_button_bar_cancel}" immediate="true" accesskey="x" />
 				<h:outputText styleClass="sak-banner-info" style="display:none" value="#{msgs.cdfm_processing_submit_message}" />
