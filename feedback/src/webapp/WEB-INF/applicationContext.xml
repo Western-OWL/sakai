@@ -17,12 +17,4 @@
     <bean id="org.sakaiproject.feedback.db.Database" class="org.sakaiproject.feedback.db.Database" init-method="init" depends-on="org.sakaiproject.site.api.SiteService">
         <property name="sqlService"><ref bean="org.sakaiproject.db.api.SqlService" /></property>
     </bean>
-
-	<bean parent="org.sakaiproject.entitybroker.entityprovider.AbstractEntityProvider" 
-        class="org.sakaiproject.feedback.tool.entityproviders.FeedbackEntityProvider"
-        init-method="init">
-        <property name="db"><ref bean="org.sakaiproject.feedback.db.Database" /></property>
-        <property name="sakaiProxy"><ref bean="org.sakaiproject.feedback.util.SakaiProxy" /></property>
-	</bean>
-
 </beans>
