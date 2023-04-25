@@ -96,7 +96,7 @@ class SakaiRubricsManager extends RubricsElement {
       
         <hr>
         <h3>${tr("public_rubrics_title")}</h3>
-        <p>${tr("public_rubrics_info")}</p>
+        <span>${tr("public_rubrics_info")}</span>
 
         <div id="shared-rubrics-title" aria-expanded="${this.sharedRubricsExpanded}" role="tab" aria-multiselectable="true" class="manager-collapse-title" title="${tr("toggle_shared_rubrics")}" tabindex="0" @click="${this.toggleSharedRubrics}">
           <div>
