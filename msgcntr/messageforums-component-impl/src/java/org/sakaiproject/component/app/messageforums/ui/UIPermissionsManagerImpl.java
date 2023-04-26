@@ -122,10 +122,8 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
     private boolean isChangeSettings(DiscussionForum forum, String siteId) {
         if (isSuperUser()) return true;
         // if restricted or instructor belongs to group or is forum owner
-        if (isInstructor(siteId)
-                && (!forum.getRestrictPermissionsForGroups()
-                || isInstructorForAllowedGroup(forum.getId(), true, siteId, getCurrentUserId())
-                || forumManager.isForumOwner(forum, getCurrentUserId(), siteId))) { // this allows a brand new forum object that doesn't even have an id or area yet to pass this check
+        if (isInstructor(siteId) && (!forum.getRestrictPermissionsForGroups() || isInstructorForAllowedGroup(forum.getId(), true, siteId, getCurrentUserId()))
+                || forumManager.isForumOwner(forum, getCurrentUserId(), siteId)) { // this allows a brand new forum object that doesn't even have an id or area yet to pass this check
             return true;
         }
 

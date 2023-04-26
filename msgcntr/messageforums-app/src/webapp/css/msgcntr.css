@@ -733,7 +733,7 @@ form{
 }
 .messageCommentWrap{
 	max-width: max-content;
-	border: 1px solid var(--sakai-border-color-1) !important;
+	border: 1px solid var(--sakai-border-color) !important;
 	border-radius: 4px;
 	background: var(--sakai-background-color-1);
 	color: var(--sakai-text-color-1);
@@ -744,8 +744,8 @@ form{
 .messageCommentMD{
 	display: inline-block;
 	margin-bottom: 4px;
-	border-bottom: 1px solid var(--sakai-border-color-1);
-	color: var(-sakai-text-color-disabled);
+	border-bottom: 1px solid var(--sakai-border-color);
+	color: var(--sakai-text-color-disabled);
 }
 .threadMovedMsg{
     font-size:1em;

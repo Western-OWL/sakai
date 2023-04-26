@@ -306,8 +306,11 @@ function setupMessageNav(messageType){
             tonext = $("#nextPendingItemTitleHolder").text();
             last = $("#lastPendingItemTitleHolder").text();
         }
-		//go to first new or pending message
-        $('#messNavHolder').append("<span class='jumpToNew specialLink'><a class='button' href='#" + messageType + "newMess0'>" + tofirst + "</a></span>");
+		//create go to first pending message link
+		if (messageType === "messagePending")
+		{
+			$('#messNavHolder').prepend("<a id='jumpToNewPending' class='button jumpToNew' href='#messagePendingnewMess0'>" + tofirst + "</a>");
+		}
         //instrument link targets (clicking on "New" goes to next one, same with "Pending")
 		$("." + messageType).each(function(intIndex){
             var parentRow = $(this).parents('tr');
