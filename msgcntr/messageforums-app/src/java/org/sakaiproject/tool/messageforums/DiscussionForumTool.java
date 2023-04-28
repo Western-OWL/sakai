@@ -9165,7 +9165,6 @@ public class DiscussionForumTool {
     		DiscussionTopicBean tmpSelectedTopic = selectedTopic;
     		DiscussionForumBean tmpSelectedForum = selectedForum;
     		DiscussionMessageBean tmpSelectedThreadHead = selectedThreadHead;
-    		String forumContextId = getSiteId();
     		if(checkCurrentMessageId){
                 //Check Message input field
     			String msgIdStr = getExternalParameterByKey(CURRENT_MESSAGE_ID);
@@ -9222,7 +9221,9 @@ public class DiscussionForumTool {
     				tmpSelectedForum = getDecoratedForum(forum.get());
     			}
     		}
-    		
+
+			String forumContextId = forumManager.getSiteIdForTopic(tmpSelectedTopic.getTopic());
+
     		//can the user reply to only existing messages (Check this first)
     		if (tmpSelectedMessage != null && (canReply && !uiPermissionsManager.isNewResponseToResponse(tmpSelectedTopic.getTopic(), tmpSelectedForum.getForum(), getUserId(), forumContextId))) {
     			setErrorMessage(getResourceBundleString(INSUFFICIENT_PRIVILEAGES_TO_POST_THREAD, new Object[]{tmpSelectedTopic.getTopic().getTitle()}));
