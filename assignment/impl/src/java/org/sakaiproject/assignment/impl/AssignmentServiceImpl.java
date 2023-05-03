@@ -1178,7 +1178,9 @@ public class AssignmentServiceImpl implements AssignmentService, EntityTransferr
             throw new PermissionException(sessionManager.getCurrentSessionUserId(), SECURE_REMOVE_ASSIGNMENT, null);
         }
 
-        taskService.removeTaskByReference(reference);
+        if (taskService.isTaskServiceEnabled()) {
+            taskService.removeTaskByReference(reference);
+        }
 
         assignmentDueReminderService.removeScheduledReminder(assignment.getId());
         assignmentRepository.softDeleteAssignment(assignment.getId());
@@ -1472,7 +1474,7 @@ public class AssignmentServiceImpl implements AssignmentService, EntityTransferr
             task.setDue(updatedAssingment.getDueDate());
         }
 
-        if (!updatedAssingment.getDraft()) {
+        if (!updatedAssingment.getDraft() && taskService.isTaskServiceEnabled()) {
             taskService.createTask(task, allowAddSubmissionUsers(reference)
                     .stream().map(User::getId).collect(Collectors.toSet()),
                     Priorities.HIGH);
@@ -1574,7 +1576,9 @@ public class AssignmentServiceImpl implements AssignmentService, EntityTransferr
                 List<String> submitterIds
                     = submission.getSubmitters().stream()
                         .map(ass -> ass.getSubmitter()).collect(Collectors.toList());
-                taskService.completeUserTaskByReference(assignmentReference, submitterIds);
+                if (taskService.isTaskServiceEnabled()) {
+                    taskService.completeUserTaskByReference(assignmentReference, submitterIds);
+                }
             }
         }
     }

@@ -16,7 +16,6 @@ package org.sakaiproject.webapi.controllers;
 import lombok.extern.slf4j.Slf4j;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.sakaiproject.authz.api.Member;
 import org.sakaiproject.entity.api.Entity;
 import org.sakaiproject.entity.api.EntityManager;
@@ -56,7 +55,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.sakaiproject.authz.api.SecurityService;
@@ -90,6 +88,10 @@ public class TasksController extends AbstractSakaiApiController {
 
     @GetMapping(value = "/tasks", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<UserTaskAdapterBean> getTasks() throws UserNotDefinedException {
+        if (!taskService.isTaskServiceEnabled()) {
+            log.warn("Usage of TasksController, but TaskService is disabled; aborting.");
+            return Collections.emptyList();
+        }
 
         checkSakaiSession();
 
@@ -112,6 +114,10 @@ public class TasksController extends AbstractSakaiApiController {
     
     @GetMapping(value = "/tasks/site/{siteId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<UserTaskAdapterBean> getSiteTasks(@PathVariable String siteId) throws UserNotDefinedException, IdUnusedException {
+        if (!taskService.isTaskServiceEnabled()) {
+            log.warn("Usage of TasksController, but TaskService is disabled; aborting.");
+            return Collections.emptyList();
+        }
 
         checkSakaiSession();
         
@@ -133,6 +139,10 @@ public class TasksController extends AbstractSakaiApiController {
     
     @GetMapping(value = "/sites/{siteId}/users/current/isSiteUpdater", produces = MediaType.APPLICATION_JSON_VALUE)
     public boolean isInstructorUser(@PathVariable String siteId) {
+        if (!taskService.isTaskServiceEnabled()) {
+            log.warn("Usage of TasksController, but TaskService is disabled; aborting.");
+            return false;
+        }
         checkSakaiSession();
 
         try {
@@ -147,6 +157,10 @@ public class TasksController extends AbstractSakaiApiController {
 
     @GetMapping(value = "/tasks/site/groups/{siteId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Object[] getSiteGroups(@PathVariable String siteId) throws IdUnusedException {
+        if (!taskService.isTaskServiceEnabled()) {
+            log.warn("Usage of TasksController, but TaskService is disabled; aborting.");
+            return new Object[0];
+        }
         checkSakaiSession();
 
         Site currentSite = siteService.getSite(siteId);
@@ -162,6 +176,10 @@ public class TasksController extends AbstractSakaiApiController {
 
     @PostMapping(value = "/tasks", produces = MediaType.APPLICATION_JSON_VALUE)
     public UserTaskAdapterBean createTask(@RequestBody UserTaskAdapterBean taskTransfer) {
+        if (!taskService.isTaskServiceEnabled()) {
+            log.warn("Usage of TasksController, but TaskService is disabled; aborting.");
+            return null;
+        }
 
         checkSakaiSession();
 
@@ -228,6 +246,10 @@ public class TasksController extends AbstractSakaiApiController {
 
     @PutMapping(value = "/tasks/{userTaskId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public UserTaskAdapterBean updateTask(@RequestBody UserTaskAdapterBean taskTransfer ) {
+        if (!taskService.isTaskServiceEnabled()) {
+            log.warn("Usage of TasksController, but TaskService is disabled; aborting.");
+            return null;
+        }
 
         checkSakaiSession();
 
@@ -246,12 +268,19 @@ public class TasksController extends AbstractSakaiApiController {
 
     @DeleteMapping("/tasks/{userTaskId}")
     public void deleteTask(@PathVariable Long userTaskId) {
-
+        if (!taskService.isTaskServiceEnabled()) {
+            log.warn("Usage of TasksController, but TaskService is disabled; aborting.");
+            return;
+        }
         checkSakaiSession();
         taskService.removeUserTask(userTaskId);
     }
 
     private String getTaskAssignedDescription(Long taskId, Site site) {
+        if (!taskService.isTaskServiceEnabled()) {
+            log.warn("Usage of TasksController, but TaskService is disabled; aborting.");
+            return "";
+        }
         List<TaskAssigned> taskAssignedList = taskService.getTaskAssignments(taskId);
         String result = USER_REPLACE;
         for (TaskAssigned taskAssigned : taskAssignedList) {

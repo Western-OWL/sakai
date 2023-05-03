@@ -2772,6 +2772,8 @@ extends VelocityPortletStateAction
 		
 		// output the real time
 		context.put("realDate", TimeService.newTime());
+
+		context.put("taskServiceEnabled", taskService.isTaskServiceEnabled());
 		
 	} // buildReviseContext
 	
@@ -3183,6 +3185,7 @@ extends VelocityPortletStateAction
 		context.put("savedData",state.getNewData());
 		context.put("helper",new Helper());
 		context.put("realDate", TimeService.newTime());
+		context.put("taskServiceEnabled", taskService.isTaskServiceEnabled());
 
 		buildMenu(portlet, context, runData, state);
 	} // buildNewContext
@@ -4286,9 +4289,13 @@ extends VelocityPortletStateAction
 				}
 				state.setState("delete");
 
-				// Delete task
-				String reference = "/calendar/dashboard/" + calendarObj.getContext() + Entity.SEPARATOR + calendarObj.getId() + Entity.SEPARATOR + eventId;
-				taskService.removeTaskByReference(reference);
+				// If task service is enabled
+				if (taskService.isTaskServiceEnabled())
+				{
+					// Delete task
+					String reference = "/calendar/dashboard/" + calendarObj.getContext() + Entity.SEPARATOR + calendarObj.getId() + Entity.SEPARATOR + eventId;
+					taskService.removeTaskByReference(reference);
+				}
 			}
 			catch (IdUnusedException err)
 			{
@@ -4938,7 +4945,11 @@ extends VelocityPortletStateAction
 					if (users.size() == 0) {
 						users.add(UserDirectoryService.getCurrentUser().getId());
 					}
-					taskService.createTask(task, users, Priorities.HIGH);
+					// If task service is enabled
+					if (taskService.isTaskServiceEnabled())
+					{
+						taskService.createTask(task, users, Priorities.HIGH);
+					}
 				}
 			} catch (IdUnusedException e) {
 				addAlert(sstate, rb.getString("java.alert.noexist"));
@@ -5328,42 +5339,47 @@ extends VelocityPortletStateAction
 						// clean state
 						sstate.removeAttribute(STATE_SCHEDULE_TO);
 						sstate.removeAttribute(STATE_SCHEDULE_TO_GROUPS);
-						
-						// Create task
-						String reference = "/calendar/dashboard/" + calendarObj.getContext() + Entity.SEPARATOR + calendarObj.getId() + Entity.SEPARATOR + edit.getId();
-						Optional<Task> optTask = taskService.getTask(reference);
-						if (optTask.isPresent()) {
-							Task task = optTask.get(); 
-							task.setDescription(title);
-							Date dueDate = new Date(timeObj.getTime());
-							task.setDue(dueDate == null ? null : dueDate.toInstant());
-							taskService.saveTask(task);
-						} else if (createTask) {
-							Task task = new Task();
-							task.setSiteId(calendarObj.getContext());
-							task.setReference(reference);
-							task.setSystem(true);
-							task.setDescription(title);
-							Date dueDate = new Date(timeObj.getTime());
-							task.setDue(dueDate == null ? null : dueDate.toInstant());
-							Set<String> users = new HashSet();
-							if ("site".equals(scheduleTo)) {
-								Site site = SiteService.getSite(calendarObj.getContext());
-								users = site.getUsersIsAllowed("section.role.student");
-							} else if ("groups".equals(scheduleTo)){
-								for (Iterator groupsIter = groups.iterator(); groupsIter.hasNext();) {
-									Group groupTask = (Group) groupsIter.next();
-									Set<Member> members = groupTask.getMembers();
-									for (Iterator membersIter = members.iterator(); membersIter.hasNext();) {
-										Member member = (Member) membersIter.next();
-										users.add(member.getUserId());
+
+						// If task service is enabled
+						if (taskService.isTaskServiceEnabled())
+						{
+							String reference = "/calendar/dashboard/" + calendarObj.getContext() + Entity.SEPARATOR + calendarObj.getId() + Entity.SEPARATOR + edit.getId();
+							Optional<Task> optTask = taskService.getTask(reference);
+							if (optTask.isPresent()) {
+								// Update task
+								Task task = optTask.get();
+								task.setDescription(title);
+								Date dueDate = new Date(timeObj.getTime());
+								task.setDue(dueDate == null ? null : dueDate.toInstant());
+								taskService.saveTask(task);
+							} else if (createTask) {
+								// Create task
+								Task task = new Task();
+								task.setSiteId(calendarObj.getContext());
+								task.setReference(reference);
+								task.setSystem(true);
+								task.setDescription(title);
+								Date dueDate = new Date(timeObj.getTime());
+								task.setDue(dueDate == null ? null : dueDate.toInstant());
+								Set<String> users = new HashSet();
+								if ("site".equals(scheduleTo)) {
+									Site site = SiteService.getSite(calendarObj.getContext());
+									users = site.getUsersIsAllowed("section.role.student");
+								} else if ("groups".equals(scheduleTo)){
+									for (Iterator groupsIter = groups.iterator(); groupsIter.hasNext();) {
+										Group groupTask = (Group) groupsIter.next();
+										Set<Member> members = groupTask.getMembers();
+										for (Iterator membersIter = members.iterator(); membersIter.hasNext();) {
+											Member member = (Member) membersIter.next();
+											users.add(member.getUserId());
+										}
 									}
 								}
+								if (users.size() == 0) {
+									users.add(UserDirectoryService.getCurrentUser().getId());
+								}
+								taskService.createTask(task, users, Priorities.HIGH);
 							}
-							if (users.size() == 0) {
-								users.add(UserDirectoryService.getCurrentUser().getId());
-							}
-							taskService.createTask(task, users, Priorities.HIGH);
 						}
 					}
 					catch (IdUnusedException  e)
