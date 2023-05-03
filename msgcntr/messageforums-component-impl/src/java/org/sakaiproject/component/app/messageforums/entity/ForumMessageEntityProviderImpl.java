@@ -324,7 +324,8 @@ private RequestStorage requestStorage;
 		  siteId = forumManager.getContextForForumById(dForum.getId());
 
 		  //make sure the user has access to this forum and topic and site:
-		  if(uiPermissionsManager.hasAccessPrivileges(dTopic, dForum) && securityService.unlock(userId, SiteService.SITE_VISIT, "/site/" + siteId)){
+		  if(uiPermissionsManager.hasAccessPrivileges(dTopic, dForum) && securityService.unlock(userId, SiteService.SITE_VISIT, "/site/" + siteId)
+				  && getUiPermissionsManager().isRead(dTopic.getId(), false, false, userId, siteId) && !uiPermissionsManager.isUserDeniedByPostFirst(userId, dTopic)){
 
 				  messages = filterModeratedMessages(messages, dTopic, dForum, userId, siteId);
 				  List<Long> messageIds = new ArrayList<Long>();
