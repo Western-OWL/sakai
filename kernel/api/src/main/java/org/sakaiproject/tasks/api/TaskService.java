@@ -22,4 +22,5 @@ public interface TaskService {
     void assignTask(Task task, AssignationType type, String objectId);
     void assignTask(Task task, AssignationType type, List<String> objectIds);
     List<TaskAssigned> getTaskAssignments(Long taskId);
+    boolean isTaskServiceEnabled();
 }

@@ -24,7 +24,6 @@ package org.sakaiproject.tasks.impl;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 
 import java.util.Arrays;
 import java.util.List;
@@ -37,6 +36,7 @@ import java.util.stream.Collectors;
 import org.sakaiproject.authz.api.AuthzGroupReferenceBuilder;
 import org.sakaiproject.authz.api.AuthzGroupService;
 import org.sakaiproject.authz.api.GroupNotDefinedException;
+import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.entity.api.EntityManager;
 import org.sakaiproject.event.api.Event;
 import org.sakaiproject.event.api.EventTrackingService;
@@ -74,12 +74,19 @@ public class TaskServiceImpl implements TaskService, Observer {
     @Autowired private TaskRepository taskRepository;
     @Autowired private UserTaskRepository userTaskRepository;
     @Autowired private TaskAssignedRepository taskAssignedRepository;
+    @Autowired private ServerConfigurationService serverConfigurationService;
 
     @Setter private TransactionTemplate transactionTemplate;
+
+    private static final String SAK_PROP_TASK_SERVICE_ENABLED = "task.service.enabled";
+    private static final boolean SAK_PROP_TASK_SERVICE_ENABLED_DEFAULT = true;
+    private static boolean taskServiceEnabled;
+    public boolean isTaskServiceEnabled() { return taskServiceEnabled; }
 
     public void init() {
 
         eventTrackingService.addObserver(this);
+        taskServiceEnabled = serverConfigurationService.getBoolean(SAK_PROP_TASK_SERVICE_ENABLED, SAK_PROP_TASK_SERVICE_ENABLED_DEFAULT);
     }
 
     public void update(Observable o, Object arg) {

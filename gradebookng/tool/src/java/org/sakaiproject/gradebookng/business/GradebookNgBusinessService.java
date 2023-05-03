@@ -2138,19 +2138,22 @@ public class GradebookNgBusinessService {
 
 			EventHelper.postAddAssignmentEvent(gradebook, assignmentId, assignment, getUserRoleOrNone());
 			
-			// Create the task if it is released
-                        if(assignment.isReleased()) {
-                            String reference =  GradebookService.REFERENCE_ROOT + Entity.SEPARATOR + "a" + Entity.SEPARATOR + getCurrentSiteId() + Entity.SEPARATOR + assignmentId;
-                            Task task = new Task();
-                            task.setSiteId(getCurrentSiteId());
-                            task.setReference(reference);
-                            task.setSystem(true);
-                            task.setDescription(assignment.getName());
-                            task.setDue((assignment.getDueDate() == null) ? null : assignment.getDueDate().toInstant());
-                            Set<String> users = new HashSet<>(this.getGradeableUsers());
-                            taskService.createTask(task, users, Priorities.HIGH);
-                        }
-                        
+			// If task service is enabled
+			if(taskService.isTaskServiceEnabled()) {
+				// Create the task if it is released
+				if(assignment.isReleased()) {
+					String reference =  GradebookService.REFERENCE_ROOT + Entity.SEPARATOR + "a" + Entity.SEPARATOR + getCurrentSiteId() + Entity.SEPARATOR + assignmentId;
+					Task task = new Task();
+					task.setSiteId(getCurrentSiteId());
+					task.setReference(reference);
+					task.setSystem(true);
+					task.setDescription(assignment.getName());
+					task.setDue((assignment.getDueDate() == null) ? null : assignment.getDueDate().toInstant());
+					Set<String> users = new HashSet<>(this.getGradeableUsers());
+					taskService.createTask(task, users, Priorities.HIGH);
+				}
+			}
+
 			return assignmentId;
 
 			// TODO wrap this so we can catch any runtime exceptions
@@ -2394,26 +2397,29 @@ public class GradebookNgBusinessService {
 
 		this.gradebookService.updateAssignment(gradebook.getUid(), original.getId(), assignment);
 		
-		// Update task
-		String reference =  GradebookService.REFERENCE_ROOT + Entity.SEPARATOR + "a" + Entity.SEPARATOR + getCurrentSiteId() + Entity.SEPARATOR + original.getId();
-		Optional<Task> optTask = taskService.getTask(reference);
-		if (optTask.isPresent()) {
-			Task task = optTask.get();
-			task.setDescription(assignment.getName());
-			task.setDue((assignment.getDueDate() == null) ? null : assignment.getDueDate().toInstant());
-			taskService.saveTask(task);
-		} else if(assignment.isReleased()) {
-			// Create the task
-			Task task = new Task();
-			task.setSiteId(getCurrentSiteId());
-			task.setReference(reference);
-			task.setSystem(true);
-			task.setDescription(assignment.getName());
-			task.setDue((assignment.getDueDate() == null) ? null : assignment.getDueDate().toInstant());
-			Set<String> users = new HashSet<>(this.getGradeableUsers());
-			taskService.createTask(task, users, Priorities.HIGH);
+		// If task service is enabled
+		if(taskService.isTaskServiceEnabled()) {
+			String reference =  GradebookService.REFERENCE_ROOT + Entity.SEPARATOR + "a" + Entity.SEPARATOR + getCurrentSiteId() + Entity.SEPARATOR + original.getId();
+			Optional<Task> optTask = taskService.getTask(reference);
+			if (optTask.isPresent()) {
+				// Update task
+				Task task = optTask.get();
+				task.setDescription(assignment.getName());
+				task.setDue((assignment.getDueDate() == null) ? null : assignment.getDueDate().toInstant());
+				taskService.saveTask(task);
+			} else if(assignment.isReleased()) {
+				// Create the task
+				Task task = new Task();
+				task.setSiteId(getCurrentSiteId());
+				task.setReference(reference);
+				task.setSystem(true);
+				task.setDescription(assignment.getName());
+				task.setDue((assignment.getDueDate() == null) ? null : assignment.getDueDate().toInstant());
+				Set<String> users = new HashSet<>(this.getGradeableUsers());
+				taskService.createTask(task, users, Priorities.HIGH);
+			}
 		}
-        
+
 		EventHelper.postUpdateAssignmentEvent(gradebook, assignment, getUserRoleOrNone());
 
 		if (original.getCategoryId() != null && assignment.getCategoryId() != null
@@ -2812,9 +2818,12 @@ public class GradebookNgBusinessService {
 	 */
 	public void removeAssignment(final Long assignmentId) {
 
-		// Delete task
-		String reference =  GradebookService.REFERENCE_ROOT + Entity.SEPARATOR + "a" + Entity.SEPARATOR + getCurrentSiteId() + Entity.SEPARATOR + assignmentId; 
-		taskService.removeTaskByReference(reference);
+		// If task service is enabled
+		if(taskService.isTaskServiceEnabled()) {
+			// Delete task
+			String reference = GradebookService.REFERENCE_ROOT + Entity.SEPARATOR + "a" + Entity.SEPARATOR + getCurrentSiteId() + Entity.SEPARATOR + assignmentId;
+			taskService.removeTaskByReference(reference);
+		}
 
 		rubricsService.deleteRubricAssociationsByItemIdPrefix(assignmentId.toString(), RubricsConstants.RBCS_TOOL_GRADEBOOKNG);
 		this.gradebookService.removeAssignment(assignmentId);
