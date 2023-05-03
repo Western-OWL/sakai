@@ -1,5 +1,6 @@
 import {RubricsElement} from "./rubrics-element.js";
 import {html} from "/webcomponents/assets/lit-element/lit-element.js";
+import {unsafeHTML} from "/webcomponents/assets/lit-html/directives/unsafe-html.js"
 import {SakaiRubricsLanguage, tr} from "./sakai-rubrics-language.js";
 import "./sakai-rubrics-list.js";
 import "./sakai-rubrics-shared-list.js";
@@ -96,7 +97,7 @@ class SakaiRubricsManager extends RubricsElement {
       
         <hr>
         <h3>${tr("public_rubrics_title")}</h3>
-        <span>${tr("public_rubrics_info")}</span>
+        <span id="public_rubrics_info">${unsafeHTML(tr("public_rubrics_info"))}</span>
 
         <div id="shared-rubrics-title" aria-expanded="${this.sharedRubricsExpanded}" role="tab" aria-multiselectable="true" class="manager-collapse-title" title="${tr("toggle_shared_rubrics")}" tabindex="0" @click="${this.toggleSharedRubrics}">
           <div>

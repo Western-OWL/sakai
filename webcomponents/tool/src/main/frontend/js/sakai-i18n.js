@@ -88,9 +88,10 @@ function loadProperties(suppliedOptions) {
 
           data.split("\n").forEach((pair) => {
 
-            const keyValue = pair.split('=');
-            if (keyValue.length == 2) {
-              window.sakai.translations[options.bundle][keyValue[0]] = keyValue[1];
+            const [key, ...rest] = pair.split('=');
+            const value = rest.join('=');
+            if (key && value) {
+              window.sakai.translations[options.bundle][key] = value;
             }
           });
 

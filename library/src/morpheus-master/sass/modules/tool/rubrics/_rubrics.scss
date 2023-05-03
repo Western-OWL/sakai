@@ -69,6 +69,10 @@
         }
     }
 
+    #public_rubrics_info span {
+        color: $rubrics-link-color;
+    }
+
     #shared-rubrics-title {
         @include display-flex;
         @include justify-content(space-between);
