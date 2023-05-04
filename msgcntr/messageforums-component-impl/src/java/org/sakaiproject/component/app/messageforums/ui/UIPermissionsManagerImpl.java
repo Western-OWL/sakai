@@ -112,22 +112,34 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
         return isChangeSettings(forum, forumManager.getSiteIdForForum(forum));
     }
 
+    @Override
+    public boolean isChangeSettings(DiscussionForum forum, String userId) {
+        return isChangeSettings(forum, forumManager.getSiteIdForForum(forum), userId);
+    }
+
     /**
    * Determines if the current user is allowed to change forum settings.
    * This method is private because it trusts the forum and siteid match, do not call this without first validating this is true
    * @param forum the forum in question
    * @param siteId the site the forum belongs to
+   * @param userId the UUID of the user in question
    * @return true if the user is admin/instructor/owner, or has change settings permission
    */
-    private boolean isChangeSettings(DiscussionForum forum, String siteId) {
+    private boolean isChangeSettings(DiscussionForum forum, String siteId, String userId) {
         if (isSuperUser()) return true;
-        // if restricted or instructor belongs to group or is forum owner
-        if (isInstructor(siteId) && (!forum.getRestrictPermissionsForGroups() || isInstructorForAllowedGroup(forum.getId(), true, siteId, getCurrentUserId()))
-                || forumManager.isForumOwner(forum, getCurrentUserId(), siteId)) { // this allows a brand new forum object that doesn't even have an id or area yet to pass this check
-            return true;
+
+        try {
+            User user = userDirectoryService.getUser(userId);
+            // if restricted or instructor belongs to group or is forum owner
+            if (isInstructor(user, siteId) && (!forum.getRestrictPermissionsForGroups() || isInstructorForAllowedGroup(forum.getId(), true, siteId, userId))
+                    || forumManager.isForumOwner(forum, userId, siteId)) { // this allows a brand new forum object that doesn't even have an id or area yet to pass this check
+                return true;
+            }
+        } catch (UserNotDefinedException ex) {
+            return false;
         }
 
-        return getForumItemsByCurrentUser(forum).stream().anyMatch(ifChangeSettings);
+        return getForumItemsForUser(forum, userId).stream().anyMatch(ifChangeSettings);
     }
 
     private boolean isInstructorForAllowedGroup(Long forumId, boolean isForum, String siteId, String userId) {
@@ -162,7 +174,7 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
             return true;
         }
         Predicate<DBMembershipItem> ifNewTopic = item -> item.getPermissionLevel().getNewTopic();
-        return getForumItemsByCurrentUser(forum).stream().anyMatch(ifNewTopic);
+        return getForumItemsForUser(forum, getCurrentUserId()).stream().anyMatch(ifNewTopic);
     }
 
     @Override
@@ -242,7 +254,14 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
 			return false;
 		}
 
-        if (isInstructor(siteId)
+        User user;
+        try {
+            user = userDirectoryService.getUser(userId);
+        } catch (UserNotDefinedException ex) {
+            return false;
+        }
+
+        if (isInstructor(user, siteId)
                 && ((!forum.getRestrictPermissionsForGroups() && !topic.getRestrictPermissionsForGroups())
                 || (forum.getRestrictPermissionsForGroups() && isInstructorForAllowedGroup(forum.getId(), true, siteId, userId))
                 || (topic.getRestrictPermissionsForGroups() && isInstructorForAllowedGroup(topic.getId(), false, siteId, userId)))) {
@@ -491,7 +510,7 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
         return areaItems;
     }
 
-    private List<DBMembershipItem> getForumItemsByCurrentUser(DiscussionForum forum) {
+    private List<DBMembershipItem> getForumItemsForUser(DiscussionForum forum, String userId) {
         List<DBMembershipItem> forumItems = new ArrayList<>();
 
 		String siteId = forumManager.getSiteIdForForum(forum);
@@ -508,12 +527,12 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
             forum.getMembershipItemSet().stream().filter(item -> ".anon".equals(item.getName())).forEach(thisForumItemSet::add);
         }
 
-        forumItems.add(forumManager.getDBMember(thisForumItemSet, getCurrentUserRole(siteId), MembershipItem.TYPE_ROLE, toSiteRef(siteId)));
+        forumItems.add(forumManager.getDBMember(thisForumItemSet, getUserRole(siteId, userId), MembershipItem.TYPE_ROLE, toSiteRef(siteId)));
 
         //  for group awareness
         try {
             Site site = siteService.getSite(siteId);
-            Set<String> groups = getGroupsWithMember(site, getCurrentUserId());
+            Set<String> groups = getGroupsWithMember(site, userId);
 
             if (groups != null) {
                 groups.stream().map(site::getGroup)

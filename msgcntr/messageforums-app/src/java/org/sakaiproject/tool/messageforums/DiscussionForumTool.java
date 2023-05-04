@@ -45,10 +45,11 @@ import java.util.SortedSet;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
-import javax.faces.bean.ManagedProperty;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.SessionScoped;
 import javax.faces.component.UIData;
 import javax.faces.component.UIInput;
@@ -60,9 +61,21 @@ import javax.persistence.OptimisticLockException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+
+import net.sf.json.JSON;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+import net.sf.json.JSONSerializer;
+import net.sf.json.JsonConfig;
+
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang3.StringUtils;
+
 import org.sakaiproject.api.app.messageforums.AnonymousManager;
 import org.sakaiproject.api.app.messageforums.Area;
 import org.sakaiproject.api.app.messageforums.AreaManager;
@@ -75,6 +88,7 @@ import org.sakaiproject.api.app.messageforums.DiscussionForumService;
 import org.sakaiproject.api.app.messageforums.DiscussionTopic;
 import org.sakaiproject.api.app.messageforums.EmailNotification;
 import org.sakaiproject.api.app.messageforums.EmailNotificationManager;
+import org.sakaiproject.api.app.messageforums.MembershipItem;
 import org.sakaiproject.api.app.messageforums.MembershipManager;
 import org.sakaiproject.api.app.messageforums.Message;
 import org.sakaiproject.api.app.messageforums.MessageForumsMessageManager;
@@ -90,6 +104,8 @@ import org.sakaiproject.api.app.messageforums.SynopticMsgcntrManager;
 import org.sakaiproject.api.app.messageforums.Topic;
 import org.sakaiproject.api.app.messageforums.cover.ForumScheduleNotificationCover;
 import org.sakaiproject.api.app.messageforums.cover.SynopticMsgcntrManagerCover;
+import org.sakaiproject.api.app.messageforums.events.ForumsMessageEventParams;
+import org.sakaiproject.api.app.messageforums.events.ForumsTopicEventParams;
 import org.sakaiproject.api.app.messageforums.ui.DiscussionForumManager;
 import org.sakaiproject.api.app.messageforums.ui.UIPermissionsManager;
 import org.sakaiproject.authz.api.AuthzGroup;
@@ -98,7 +114,6 @@ import org.sakaiproject.authz.api.GroupNotDefinedException;
 import org.sakaiproject.authz.api.Member;
 import org.sakaiproject.authz.api.Role;
 import org.sakaiproject.authz.api.SecurityService;
-import org.sakaiproject.api.app.messageforums.MembershipItem;
 import org.sakaiproject.component.app.messageforums.dao.hibernate.DBMembershipItemImpl;
 import org.sakaiproject.component.app.messageforums.dao.hibernate.util.comparator.ForumBySortIndexAscAndCreatedDateDesc;
 import org.sakaiproject.component.cover.ComponentManager;
@@ -119,6 +134,8 @@ import org.sakaiproject.event.api.LearningResourceStoreService.LRS_Verb.SAKAI_VE
 import org.sakaiproject.event.api.NotificationService;
 import org.sakaiproject.exception.IdUnusedException;
 import org.sakaiproject.portal.util.PortalUtils;
+import org.sakaiproject.rubrics.api.RubricsConstants;
+import org.sakaiproject.rubrics.api.RubricsService;
 import org.sakaiproject.service.gradebook.shared.Assignment;
 import org.sakaiproject.service.gradebook.shared.GradeDefinition;
 import org.sakaiproject.service.gradebook.shared.GradebookService;
@@ -147,20 +164,6 @@ import org.sakaiproject.util.comparator.GroupTitleComparator;
 import org.sakaiproject.util.comparator.RoleIdComparator;
 
 import org.springframework.orm.hibernate5.HibernateOptimisticLockingFailureException;
-import org.sakaiproject.rubrics.api.RubricsConstants;
-import org.sakaiproject.rubrics.api.RubricsService;
-
-import lombok.Getter;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
-import net.sf.json.JSON;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
-import net.sf.json.JSONSerializer;
-import net.sf.json.JsonConfig;
-import org.apache.commons.lang.math.NumberUtils;
-import org.sakaiproject.api.app.messageforums.events.ForumsMessageEventParams;
-import org.sakaiproject.api.app.messageforums.events.ForumsTopicEventParams;
 
 /**
  * @author <a href="mailto:rshastri@iupui.edu">Rashmi Shastri</a>
@@ -7473,18 +7476,13 @@ public class DiscussionForumTool {
 
 		// get all users with notification level = 2
 		List<String> userlist = emailNotificationManager.getUsersToBeNotifiedByLevel( EmailNotification.EMAIL_REPLY_TO_ANY_MESSAGE);
-		
 		if (log.isDebugEnabled()){
-			log.debug("total count of Level 2 users = " + userlist.size());
-			Iterator iter1 = userlist.iterator();
-			while (iter1.hasNext()){
-				log.debug("level 2 users notify all msg:  sendEmailNotification: sending to  " + (String) iter1.next());
-			}
+			log.debug("total count of Level 2 users = {}", userlist.size());
+			userlist.stream().forEach(userUUID -> log.debug("level 2 users notify all msg:  sendEmailNotification: sending to  {}", userUUID));
 		}
-		
+
 		// need to get a list of authors for all messages on the current thread, and then check their notification level. 
 		//selectedThread  is a list of DiscussionMessageBean in the current thread.
-		
 		Iterator iter = selectedThread.iterator();
 		while (iter.hasNext()){
 			DiscussionMessageBean decoMessage = (DiscussionMessageBean) iter.next();
@@ -7501,84 +7499,84 @@ public class DiscussionForumTool {
 		}
 
 		//MSGCNTR-375 if this post needs to be moderated, only send the email notification to those with moderator permission
-		if(needsModeration) {
-			DiscussionTopic topic = (DiscussionTopic)reply.getTopic();
-			DiscussionForum forum = (DiscussionForum)topic.getBaseForum();
+		DiscussionTopic topic = (DiscussionTopic)reply.getTopic();
+		DiscussionForum forum = (DiscussionForum)topic.getBaseForum();
+		if (needsModeration) {
+			log.debug("Filtering userlist to only return moderators. Had: {}", userlist.size());
 
-			log.debug("Filtering userlist to only return moderators. Had: " + userlist.size());
-
-			List<String> nonModerators = new ArrayList<String>();
-			for(String userId: userlist) {
-				if(!uiPermissionsManager.isModeratePostings(topic, forum, userId)) {
-					log.debug("userId: " + userId + " is not a moderator");
+			List<String> nonModerators = new ArrayList<>();
+			for (String userId: userlist) {
+				if (!uiPermissionsManager.isModeratePostings(topic, forum, userId)) {
+					log.debug("userId: {} is not a moderator", userId);
 					nonModerators.add(userId);
 				}
 			}
 
 			userlist.removeAll(nonModerators);
-			log.debug("filtering complete. Now have: " + userlist.size());
-
+			log.debug("filtering complete. Now have: {}", userlist.size());
 		}
-		
+
+		// now printing out all users = # of messages in the thread - level 2 users
+		if (log.isDebugEnabled()) {
+			log.debug("now printing out all users, including duplicates count = {}", userlist.size());
+			userlist.stream().forEach(userUUID -> log.debug("sendEmailNotification: should include both level 1 and level 2 sending to  {}", userUUID));
+		}
+
 		// now we need to remove duplicates:
 		Set<String> set = new HashSet<String>();
 		set.addAll(userlist);
-		
-//		avoid overhead :D
-			log.debug("set size " + set.size());
-			log.debug("userlist size " + userlist.size());
+
+		// avoid overhead :D
+		log.debug("set size {}", set.size());
+		log.debug("userlist size {}", userlist.size());
 		if(set.size() < userlist.size()) {
 			userlist.clear();
 			userlist.addAll(set);
 		}
-		
-		//MSGCNTR-741 need to filter out post first users
-		if (((DiscussionTopic)reply.getTopic()).getPostFirst()) {
-		    Topic topicWithMessages = forumManager.getTopicByIdWithMessagesAndAttachments(reply.getTopic().getId());
-		    userlist.removeAll(getNeedToPostFirst(userlist, (DiscussionTopic)reply.getTopic(), topicWithMessages.getMessages()));
+
+		// now printing out all users again after removing duplicate
+		if (log.isDebugEnabled()) {
+			log.debug("now printing out all users again after removing duplicate count = {}", userlist.size());
+			userlist.stream().forEach(userUUID -> log.debug("{}", userUUID));
 		}
 
-		// now printing out all users = # of messages in the thread - level 2 users
-		if (log.isDebugEnabled()){
-			log.debug("now printing out all users, including duplicates count = " + userlist.size());
-			Iterator iter1 = userlist.iterator();
-			while (iter1.hasNext()){
-				log.debug("sendEmailNotification: should include both level 1 and level 2 sending to  " + (String) iter1.next());
-			}
+		//MSGCNTR-741 need to filter out post first users
+		if (topic.getPostFirst()) {
+			Topic topicWithMessages = forumManager.getTopicByIdWithMessagesAndAttachments(reply.getTopic().getId());
+			userlist.removeAll(getNeedToPostFirst(userlist, (DiscussionTopic)reply.getTopic(), topicWithMessages.getMessages()));
 		}
-		
-		// now printing out all users again after removing duplicate
-		if (log.isDebugEnabled()){
-			log.debug("now printing out all users again after removing duplicate count = " + userlist.size());
-			Iterator iter1 = userlist.iterator();
-			while (iter1.hasNext()){
-				log.debug("" + (String) iter1.next());
-			}
+
+		// Filter recipients if topic is date restricted
+		if (!topic.getAvailability()) {
+			// If the topic is not currently open, and the user does not have permission to change its' settings (they can't see the topic and can't change it to be visible),
+			// so they should not receive notificaitons
+			userlist.removeAll(userlist.stream().filter(userUUID -> !uiPermissionsManager.isChangeSettings(topic, forum, userUUID)).collect(Collectors.toList()));
 		}
-		
-		//now we need to filer the list\
-		if (log.isDebugEnabled())
-			log.debug("About to filter list");
+
+		// Filter recipients if forum is date restricted
+		if (!forum.getAvailability()) {
+			// If the forum is not currently open, and the user does not have permission to change its' settings (they can't see the forum and can't change it to be visible),
+			// so they should not receive notificaitons
+			userlist.removeAll(userlist.stream().filter(userUUID -> !uiPermissionsManager.isChangeSettings(forum, userUUID)).collect(Collectors.toList()));
+		}
+
+		//now we need to filer the list
+		log.debug("About to filter list");
 		List<String> finalList = emailNotificationManager.filterUsers(userlist, currthread.getMessage().getTopic());
-		
 		List<String> useremaillist =  getUserEmailsToBeNotifiedByLevel(finalList);
 
-		if (log.isDebugEnabled()){
-			log.debug("now printint unique emails , count = " + useremaillist.size());
-			Iterator useremaillistiter = useremaillist.iterator();
-			while (useremaillistiter.hasNext()){
-				log.debug("sendEmailNotification: sending to  " + (String) useremaillistiter.next());
-			}
+		if (log.isDebugEnabled()) {
+			log.debug("now printint unique emails , count = {}", useremaillist.size());
+			useremaillist.stream().forEach(email -> log.debug("sendEmailNotification: sending to  {}", email));
 		}
-		
+
 		if (userlist.isEmpty()) {
 			log.debug("No users need to notified.");
 			return;
 		}
-		
+
 		ForumsEmailService emailService = new ForumsEmailService(useremaillist, reply, currthread);
 		emailService.send();
-
 	}
 	
 	DeveloperHelperService developerHelperService;

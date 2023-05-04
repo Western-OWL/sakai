@@ -46,6 +46,7 @@ public interface UIPermissionsManager
    * @return
    */
   public boolean isChangeSettings(DiscussionForum forum);
+  public boolean isChangeSettings(DiscussionForum forum, String userId);
   
   /**     
    * @param forum
