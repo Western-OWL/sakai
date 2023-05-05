@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
@@ -8474,7 +8475,7 @@ public class DiscussionForumTool {
 
 	public String processMoveThread() {
 		Long sourceTopicId = this.selectedTopic.getTopic().getId();
-		if (log.isDebugEnabled()) log.debug("Calling processMoveThread source topic is " + sourceTopicId);
+		log.debug("Calling processMoveThread source topic is {}", sourceTopicId);
 		List checkedThreads = getRequestParamArray("moveCheckbox");
 		List destTopicList = getRequestParamArray("selectedTopicid");
 
@@ -8490,7 +8491,7 @@ public class DiscussionForumTool {
 				return gotoMain();
 			}
 		}
-		if (log.isDebugEnabled()) log.debug("Calling processMoveThread dest topic is " + desttopicIdstr);
+		log.debug("Calling processMoveThread dest topic is {}", desttopicIdstr);
 
 		List checkbox_reminder = getRequestParamArray("moveReminder");
 		boolean checkReminder = false;
@@ -8502,7 +8503,7 @@ public class DiscussionForumTool {
 			// reminderVal = Boolean.parseBoolean(checkReminder);
 		}
 
-		if (log.isDebugEnabled()) log.debug("Calling processMoveThread checkReminder is " + checkReminder);
+		log.debug("Calling processMoveThread checkReminder is {}", checkReminder);
 
 		Long desttopicId = Long.parseLong(desttopicIdstr);
 
@@ -8537,14 +8538,20 @@ public class DiscussionForumTool {
 		// now update topic id in mfr_message_t table, including all childrens (direct and indirect),
 		// For each move, also add a row to the mfr_move_history_t table.
 
-		Message mes = null;
 		Iterator mesiter = checkedThreads.iterator();
-		if (log.isDebugEnabled()) log.debug("processMoveThread checkedThreads size = " + checkedThreads.size());
+		log.debug("processMoveThread checkedThreads size = {}", checkedThreads.size());
 		while (mesiter.hasNext()) {
-			Long messageId = new Long((String) mesiter.next());
-			mes = messageManager.getMessageById(messageId);
-			if (log.isDebugEnabled()) log.debug("processMoveThread messageId = " + mes.getId());
-			if (log.isDebugEnabled()) log.debug("processMoveThread message title = " + mes.getTitle());
+			Long messageId = Long.valueOf((String) mesiter.next());
+			Message mes = messageManager.getMessageById(messageId);
+
+			// Disallow moving message that don't actually belong to the source topic (block malicious HTML manipulation)
+			if (!Objects.equals(sourceTopicId, mes.getTopic().getId())) {
+				log.warn("Attempt to move message user doesn't have permission to move: userId={}, messageId={}, sourceTopicID={}, destinationTopicID={}",
+						 userDirectoryService.getCurrentUser().getId(), messageId, sourceTopicId, mes.getTopic().getId());
+				continue;
+			}
+			log.debug("processMoveThread messageId = {}", mes.getId());
+			log.debug("processMoveThread message title = {}", mes.getTitle());
 			mes.setTopic(desttopic);
 			mes = messageManager.saveOrUpdateMessage(mes);
 
@@ -8557,14 +8564,14 @@ public class DiscussionForumTool {
 
 			List childrenMsg = new ArrayList(); // will store a list of child messages
 			messageManager.getChildMsgs(messageId, childrenMsg);
-			if (log.isDebugEnabled()) log.debug("processMoveThread childrenMsg for  " + messageId + "   size = " + childrenMsg.size());
+			log.debug("processMoveThread childrenMsg for  {}   size = {}", messageId, childrenMsg.size());
 			Iterator childiter = childrenMsg.iterator();
 
 			// update topic id for each child msg.
 			while (childiter.hasNext()) {
 				Message childMsg = (Message) childiter.next();
-				if (log.isDebugEnabled()) log.debug("processMoveThread messageId = " + childMsg.getId());
-				if (log.isDebugEnabled()) log.debug("processMoveThread message title = " + childMsg.getTitle());
+				log.debug("processMoveThread messageId = {}", childMsg.getId());
+				log.debug("processMoveThread message title = {}", childMsg.getTitle());
 				childMsg.setTopic(desttopic);
 				childMsg = messageManager.saveOrUpdateMessage(childMsg);
 				messageManager.saveMessageMoveHistory(childMsg.getId(), desttopicId, sourceTopicId, checkReminder);
