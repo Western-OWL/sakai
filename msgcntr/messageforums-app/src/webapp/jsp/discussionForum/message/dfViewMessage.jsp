@@ -1,4 +1,4 @@
-// <%@ taglib uri="http://java.sun.com/jsf/html" prefix="h" %>
+<%@ taglib uri="http://java.sun.com/jsf/html" prefix="h" %>
 <%@ taglib uri="http://java.sun.com/jsf/core" prefix="f" %>
 <%@ taglib uri="http://myfaces.apache.org/tomahawk" prefix="t"%>
 <%@ taglib uri="http://sakaiproject.org/jsf2/sakai" prefix="sakai" %>
@@ -10,10 +10,9 @@
 <f:view>
 	<sakai:view>
 		<h:form id="msgForum" styleClass="specialLink" prependId = "false">
-			<h:inputHidden id="currentMessageId" value="#{ForumTool.selectedMessage.message.id}"/>
-			<h:inputHidden id="currentTopicId" value="#{ForumTool.selectedTopic.topic.id}"/>
-			<h:inputHidden id="currentForumId" value="#{ForumTool.selectedForum.forum.id}"/>
-			<h:inputHidden id="deletedMessage" value="#{ForumTool.selectedMessage.message.deleted}"/>
+			<input type="hidden" id="currentMessageId" name="currentMessageId" value="<h:outputText value="#{ForumTool.selectedMessage.message.id}" />"/>
+			<input type="hidden" id="currentTopicId" name="currentTopicId" value="<h:outputText value="#{ForumTool.selectedTopic.topic.id}" />"/>
+			<input type="hidden" id="currentForumId" name="currentForumId" value="<h:outputText value="#{ForumTool.selectedForum.forum.id}" />"/>
 			<script>includeLatestJQuery("msgcntr");</script>
 			<script>includeWebjarLibrary("qtip2");</script>
 			<link rel="stylesheet" href="/messageforums-tool/css/msgcntr.css<h:outputText value="#{ForumTool.CDNQuery}" />" type="text/css" />
