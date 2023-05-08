@@ -109,7 +109,7 @@ public class UIPermissionsManagerImpl implements UIPermissionsManager {
 
     @Override
     public boolean isChangeSettings(DiscussionForum forum) {
-        return isChangeSettings(forum, forumManager.getSiteIdForForum(forum));
+        return isChangeSettings(forum, getCurrentUserId());
     }
 
     @Override
