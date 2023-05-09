@@ -59,7 +59,7 @@ public class SparsestTopic {
         @Getter
         private Boolean isPostFirst;
         
-        @Getter
+        @Getter @Setter
         private String assocGradebookItemName;
         
         @Getter

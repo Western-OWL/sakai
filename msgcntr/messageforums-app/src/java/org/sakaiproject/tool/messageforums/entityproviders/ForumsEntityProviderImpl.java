@@ -241,6 +241,7 @@ public class ForumsEntityProviderImpl extends AbstractEntityProvider implements 
 		{
 			sparseTopic.setModifier("");
 		}
+		sparseTopic.setAssocGradebookItemName("");
 	}
 
 	private void sanitizeSparseMessage(SparseMessage message, String userId, boolean anon, String siteId, boolean isInstructor, boolean swapForDisplayName)
@@ -300,13 +301,17 @@ public class ForumsEntityProviderImpl extends AbstractEntityProvider implements 
 		if(checkAccess(fatForum,userId,siteId)) {
 			
 			SparseForum sparseForum = new SparseForum(fatForum,developerHelperService);
-			if (!isInstructor && !userId.equals(sparseForum.getCreator()))
+			if (!isInstructor)
 			{
-				sparseForum.setCreator("");
-			}
-			if (!isInstructor && !userId.equals(sparseForum.getModifier()))
-			{
-				sparseForum.setModifier("");
+				if (!userId.equals(sparseForum.getCreator()))
+				{
+					sparseForum.setCreator("");
+				}
+				if (!userId.equals(sparseForum.getModifier()))
+				{
+					sparseForum.setModifier("");
+				}
+				sparseForum.setAssocGradebookItemName("");
 			}
 			
 			List<DiscussionTopic> fatTopics = (List<DiscussionTopic>) fatForum.getTopics();

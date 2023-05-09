@@ -95,7 +95,7 @@ public class SparsestForum {
 	@Getter
 	private Boolean isPostFirst;
 	
-	@Getter
+	@Getter @Setter
 	private String assocGradebookItemName;
 	
 	@Getter

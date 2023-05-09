@@ -989,7 +989,7 @@ public class DiscussionForumManagerImpl extends HibernateDaoSupport implements
   {
     log.debug("isInstructor(userId={}, siteId={})", user.getId(), siteId);
     if (user != null)
-      return securityService.unlock(user, "site.upd", siteId);
+      return securityService.unlock(user, "site.upd", siteId.startsWith("/") ? siteId : "/site/" + siteId);
     else
       return false;
   }
