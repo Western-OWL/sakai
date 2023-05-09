@@ -228,6 +228,8 @@ private RequestStorage requestStorage;
 	public List<DecoratedMessage> findReplies(List<Message> messages, Long messageId, Long topicId, Map msgIdReadStatusMap, boolean showAnonIds, String siteId){
 	  List<DecoratedMessage> replies = new ArrayList<DecoratedMessage>();
 
+	  boolean isInstructor = forumManager.isInstructor(userDirectoryService.getCurrentUser(), "/site/" + siteId);
+
 	  for (Message message : messages) {
 		  if(message.getInReplyTo() != null){
 			  if(messageId.equals(message.getInReplyTo().getId())){
@@ -238,8 +240,8 @@ private RequestStorage requestStorage;
 							  attachments.add(attachment.getAttachmentName());
 						  }
 					  }
-					   List<DecoratedMessage> msgReplies = findReplies(messages, message.getId(), topicId, msgIdReadStatusMap, showAnonIds, siteId);
-					  DecoratedMessage dMessage = buildDecoMsg(message, msgReplies, topicId, attachments, msgIdReadStatusMap, showAnonIds, siteId);
+					  List<DecoratedMessage> msgReplies = findReplies(messages, message.getId(), topicId, msgIdReadStatusMap, showAnonIds, siteId);
+					  DecoratedMessage dMessage = buildDecoMsg(message, msgReplies, topicId, attachments, msgIdReadStatusMap, showAnonIds, siteId, isInstructor);
 					  replies.add(dMessage);
 				  }		  
 			  }
@@ -260,10 +262,11 @@ private RequestStorage requestStorage;
   }
 
 	private DecoratedMessage buildDecoMsg(Message message, List<DecoratedMessage> replies, Long topicId, List<String> attachments,
-			Map<Long, Boolean> msgIdReadStatusMap, boolean showAnonIds, String siteId)
+			Map<Long, Boolean> msgIdReadStatusMap, boolean showAnonIds, String siteId, boolean isInstructor)
 	{
 		String author = showAnonIds ? anonymousManager.getAnonId(siteId, message.getAuthorId()) : message.getAuthor();
-		String profileUrl = showAnonIds ? "" : getProfileImageURL(message.getAuthorId());
+		// profileUrl contains the uuid of message authors, suppress it if anon ids are to be shown, or if user is not an instructor
+		String profileUrl = showAnonIds || !isInstructor? "" : getProfileImageURL(message.getAuthorId());
 		Long inReplyTo = message.getInReplyTo() == null ? null : message.getInReplyTo().getId();
 		boolean readStatus = BooleanUtils.toBooleanDefaultIfNull(msgIdReadStatusMap.get(message.getId()), false);
 		String created = message.getCreated() == null ? "" : String.valueOf(message.getCreated().getTime());
@@ -337,6 +340,7 @@ private RequestStorage requestStorage;
 				  }
 
 				  Map msgIdReadStatusMap = forumManager.getReadStatusForMessagesWithId(messageIds, userId);
+				  boolean isInstructor = forumManager.isInstructor(userId, "/site/" + siteId);
 				  for (Message message : messages) {
 					  if(message.getInReplyTo() == null){
 						  if(!message.getDeleted()){
@@ -349,7 +353,7 @@ private RequestStorage requestStorage;
 							  }
 							  boolean showAnonIds = anonymousManager.displayAnonIdsToUser(userId, dTopic);
 							  List<DecoratedMessage> msgReplies = findReplies(messages, message.getId(), new Long(topicId), msgIdReadStatusMap, showAnonIds, siteId);
-							  DecoratedMessage dMessage = buildDecoMsg(message, msgReplies, new Long(topicId), attachments, msgIdReadStatusMap, showAnonIds, siteId);
+							  DecoratedMessage dMessage = buildDecoMsg(message, msgReplies, new Long(topicId), attachments, msgIdReadStatusMap, showAnonIds, siteId, isInstructor);
 
 							  dMessages.add(dMessage);
 						  }
