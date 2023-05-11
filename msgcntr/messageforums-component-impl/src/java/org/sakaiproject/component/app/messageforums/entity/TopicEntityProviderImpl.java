@@ -376,7 +376,6 @@ AutoRegisterEntityProvider, PropertyProvideable, RESTful, RequestStorable, Reque
 			}else if ((siteId != null && !"".equals(siteId)) || (forumId != null && !"".equals(forumId))) {
 
 				List<DiscussionForum> forums = new ArrayList<DiscussionForum>();
-				boolean isInstructor = forumManager.isInstructor(userId, siteId);
 				if(forumId != null && !"".equals(forumId)){
 					DiscussionForum forum = forumManager.getForumByIdWithTopicsAttachmentsAndMessages(new Long(forumId));					
 					siteId = forumManager.getContextForForumById(forum.getId());
@@ -384,7 +383,7 @@ AutoRegisterEntityProvider, PropertyProvideable, RESTful, RequestStorable, Reque
 				}else{
 					forums = forumManager.getDiscussionForumsWithTopics(siteId);
 				}
-				
+				boolean isInstructor = forumManager.isInstructor(userId, siteId);
 				// retrieve all of the gradebook items here so we aren't checking repeatedly
 				Map<String, Long> gbItemNameToId = new HashMap<String, Long>();
 				try {
