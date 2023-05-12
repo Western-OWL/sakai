@@ -311,7 +311,7 @@ $Id$
             </h:panelGroup>
          </h:panelGroup>
   </h:panelGroup>
-    <sakai:pager id="pager1" totalItems="#{questionScores.dataRows}" firstItem="#{questionScores.firstRow}" pageSize="#{questionScores.maxDisplayedRows}" pageSizes="5,10,20,50,100,200" textStatus="#{evaluationMessages.paging_status}" >
+    <sakai:pager id="pager1" totalItems="#{questionScores.dataRows}" firstItem="#{questionScores.firstRow}" pageSize="#{questionScores.maxDisplayedRows}" pageSizes="5,10,20,50,100,200,1000" textStatus="#{evaluationMessages.paging_status}" >
 	  <f:valueChangeListener type="org.sakaiproject.tool.assessment.ui.listener.evaluation.QuestionScorePagerListener" />
   </sakai:pager>
   </h:panelGroup>
@@ -352,7 +352,7 @@ $Id$
       </h:outputLink>
   </h:panelGroup>
 
-    <sakai:pager id="pager2" totalItems="#{questionScores.dataRows}" firstItem="#{questionScores.firstRow}" pageSize="#{questionScores.maxDisplayedRows}" pageSizes="5,10,20,50,100,200" textStatus="#{evaluationMessages.paging_status}" >
+    <sakai:pager id="pager2" totalItems="#{questionScores.dataRows}" firstItem="#{questionScores.firstRow}" pageSize="#{questionScores.maxDisplayedRows}" pageSizes="5,10,20,50,100,200,1000" textStatus="#{evaluationMessages.paging_status}" >
 	  <f:valueChangeListener type="org.sakaiproject.tool.assessment.ui.listener.evaluation.QuestionScorePagerListener" />
   </sakai:pager>
 </h:panelGroup>

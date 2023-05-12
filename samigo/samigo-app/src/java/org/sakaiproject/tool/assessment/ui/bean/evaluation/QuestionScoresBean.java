@@ -56,6 +56,7 @@ import org.sakaiproject.tool.assessment.ui.listener.evaluation.QuestionScoreList
 import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
 import org.sakaiproject.tool.assessment.util.AttachmentUtil;
 import org.sakaiproject.component.cover.ServerConfigurationService;
+import org.sakaiproject.samigo.util.SamigoConstants;
 import org.sakaiproject.util.ResourceLoader;
 
 /* For evaluation: Question Scores backing bean. */
@@ -141,7 +142,7 @@ public class QuestionScoresBean implements Serializable, PhaseAware {
   @Getter @Setter
   private int firstRow;
   @Getter @Setter
-  private int maxDisplayedRows = PagerRenderer.MAX_PAGE_SIZE;
+  private int maxDisplayedRows = SamigoConstants.SCORING_DEFAULT_PAGE_SIZE;
   @Getter @Setter
   private int dataRows;
   @Getter @Setter

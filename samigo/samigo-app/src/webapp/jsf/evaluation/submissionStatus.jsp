@@ -102,7 +102,7 @@ $Id$
 	    </div>
 	  </h:panelGroup>
     </h:panelGroup>
-	  <sakai:pager id="pager" totalItems="#{submissionStatus.dataRows}" firstItem="#{submissionStatus.firstRow}" pageSize="#{submissionStatus.maxDisplayedRows}" pageSizes="5,10,20,50,100,200" textStatus="#{evaluationMessages.paging_status}" />
+	  <sakai:pager id="pager" totalItems="#{submissionStatus.dataRows}" firstItem="#{submissionStatus.firstRow}" pageSize="#{submissionStatus.maxDisplayedRows}" pageSizes="5,10,20,50,100,200,1000" textStatus="#{evaluationMessages.paging_status}" />
   </h:panelGroup>
 
   <!-- STUDENT RESPONSES AND GRADING -->

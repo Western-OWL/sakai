@@ -146,6 +146,9 @@ public final class SamigoConstants {
     public static final     String      EVAL_BUNDLE                                         = "org.sakaiproject.tool.assessment.bundle.EvaluationMessages";
     public static final     String      AUTHOR_BUNDLE                                       = "org.sakaiproject.tool.assessment.bundle.AuthorMessages";
 
+    // Scoring pages
+    public static final int SCORING_DEFAULT_PAGE_SIZE = 200;
+
     private SamigoConstants() {
     	throw new AssertionError();
     }

@@ -223,7 +223,7 @@ $(document).ready(function(){
 	</h:panelGroup>
   </h:panelGroup>
    
-    <sakai:pager id="pager1" totalItems="#{totalScores.dataRows}" firstItem="#{totalScores.firstRow}" pageSize="#{totalScores.maxDisplayedRows}" pageSizes="5,10,20,50,100,200" textStatus="#{evaluationMessages.paging_status}" />
+    <sakai:pager id="pager1" totalItems="#{totalScores.dataRows}" firstItem="#{totalScores.firstRow}" pageSize="#{totalScores.maxDisplayedRows}" pageSizes="5,10,20,50,100,200,1000" textStatus="#{evaluationMessages.paging_status}" />
 </h:panelGroup>
 
 <h:panelGroup styleClass="sakai-table-toolBar total-scores-anon" layout="block" rendered="#{totalScores.anonymous eq 'true'}">
@@ -253,7 +253,7 @@ $(document).ready(function(){
         </h:selectOneMenu>
     </h:panelGroup>
   </h:panelGroup>
-  <sakai:pager id="pager2" totalItems="#{totalScores.dataRows}" firstItem="#{totalScores.firstRow}" pageSize="#{totalScores.maxDisplayedRows}" pageSizes="5,10,20,50,100,200" textStatus="#{evaluationMessages.paging_status}" />
+  <sakai:pager id="pager2" totalItems="#{totalScores.dataRows}" firstItem="#{totalScores.firstRow}" pageSize="#{totalScores.maxDisplayedRows}" pageSizes="5,10,20,50,100,200,1000" textStatus="#{evaluationMessages.paging_status}" />
 </h:panelGroup>
 
   <!-- STUDENT RESPONSES AND GRADING -->
