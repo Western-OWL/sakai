@@ -30,13 +30,16 @@ class SakaiRubricStudent extends RubricsElement {
       rubric: { type: Object },
       rubricId: { attribute: "rubric-id", type: String },
       forcePreview: { attribute: "force-preview", type: Boolean },
-      enablePdfExport: { attribute: "enable-pdf-export", type: Object },
+      enablePdfExport: { attribute: "enable-pdf-export", type: Object }
     };
   }
 
   set toolId(value) {
 
     this._toolId = value;
+    if (this._toolId === "sakai.assignment.grades") {
+      this._toolId = "sakai.assignment";
+    }
 
     if (this.toolId && this.entityId) {
       this.init();
@@ -146,7 +149,7 @@ class SakaiRubricStudent extends RubricsElement {
 
     fetch(url, {
       credentials: "include",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json" }
     })
     .then(r => {
 
@@ -166,7 +169,7 @@ class SakaiRubricStudent extends RubricsElement {
         const rubricUrl = `/api/sites/${association.siteId}/rubrics/${rubricId}`;
         fetch(rubricUrl, {
           credentials: "include",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json" }
         })
         .then(r => {
 
@@ -181,7 +184,7 @@ class SakaiRubricStudent extends RubricsElement {
           const evalUrl = `/api/sites/${association.siteId}/rubric-evaluations/tools/${this.toolId}/items/${this.entityId}/evaluations/${this.evaluatedItemId}`;
           fetch(evalUrl, {
             credentials: "include",
-            headers: { "Content-Type": "application/json" },
+            headers: { "Content-Type": "application/json" }
           })
           .then(r => {
 
