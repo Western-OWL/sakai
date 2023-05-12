@@ -53,7 +53,6 @@ import org.sakaiproject.portal.util.PortalUtils;
 import org.sakaiproject.service.gradebook.shared.Assignment;
 import org.sakaiproject.service.gradebook.shared.CategoryDefinition;
 import org.sakaiproject.service.gradebook.shared.GradebookInformation;
-import org.sakaiproject.service.gradebook.shared.GradeDefinition;
 import org.sakaiproject.service.gradebook.shared.GradingType;
 import org.sakaiproject.rubrics.api.RubricsConstants;
 import org.sakaiproject.rubrics.api.beans.AssociationTransferBean;
@@ -430,13 +429,13 @@ public class GradeSummaryTablePanel extends BasePanel implements IAjaxIndicatorA
 											}
 											sakaiRubricButton.add(AttributeModifier.append("entity-id", assignmentId));
 	
-											String submissionId = rubricsService.getRubricEvaluationObjectId(assignmentId, ownerId, AssignmentConstants.TOOL_ID, getCurrentSiteId());
+											String submissionId = rubricsService.getRubricEvaluationObjectId(assignmentId, ownerId, "sakai.assignment", getCurrentSiteId());
 	                                        if (submissionId != null) {
 											    sakaiRubricButton.add(AttributeModifier.append("evaluated-item-id", submissionId));
 	                                        }
 	
-											rubricsService.getAssociationForToolAndItem(AssignmentConstants.TOOL_ID, assignmentId, getCurrentSiteId())
-												.ifPresent(assoc -> sakaiRubricButton.add(AttributeModifier.append("rubric-id", assoc.getRubricId())));
+											rubricsService.getAssociationForToolAndItem("sakai.assignment", assignmentId, getCurrentSiteId())
+												.ifPresent(assoc -> sakaiRubricButton.add(AttributeModifier.append("rubric-id", assoc.getRubricId())).setVisible(true));
 											
 										} catch (Exception e) {
 											log.error("Failed to configure rubric button for submission: {}", e.toString());
