@@ -38,6 +38,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -143,6 +144,38 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
         functionManager.registerFunction(RubricsConstants.RBCS_PERMISSIONS_MANAGER_VIEW, true);
     }
 
+    /**
+     * Null safe way to retrieve a rubric given a rubricId.
+     * NB: doesn't check for authz, so always do a suitable check on the result
+     */
+    private Optional<Rubric> getRepoRubricForRubricId(Long rubricId) {
+        return rubricId == null ? Optional.empty() : rubricRepository.findById(rubricId);
+    }
+
+    /**
+     * Null safe way to retrieve an association given an associationId.
+     * NB: doesn't check for authz, so always do a suitable check on the result
+     */
+    private Optional<ToolItemRubricAssociation> getRepoAssociationForAssociationId(Long associationId) {
+        return associationId == null ? Optional.empty() : associationRepository.findById(associationId);
+    }
+
+    /**
+     * Null safe way to retrieve a rubric given an associationId.
+     * NB: doesn't check for authz, so always do a suitable check on the result
+     */
+    private Optional<Rubric> getRepoRubricForAssociationId(Long associationId) {
+        return getRepoAssociationForAssociationId(associationId).map(a -> a.getRubric());
+    }
+
+    /**
+     * Null safe way to retrieve a rubric given an evaluation.
+     * NB: doesn't check for authz, so always do a suitable check on the result
+     */
+    private Optional<Rubric> getRepoRubricForEvaluation(Evaluation evaluation) {
+        return evaluation == null ? Optional.empty() : getRepoRubricForAssociationId(evaluation.getAssociationId());
+    }
+
     public RubricTransferBean createDefaultRubric(String siteId) {
 
         String currentUserId = sessionManager.getCurrentSessionUserId();
@@ -234,7 +267,10 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
             throw new SecurityException("You need to be a rubrics editor to get a site's rubrics");
         }
 
-        return rubricRepository.findById(rubricId).map(source -> {
+        return getRepoRubricForRubricId(rubricId).map(source -> {
+            if (!isRubricVisible(source)) {
+                throw new IllegalArgumentException("No rubric with id: " + rubricId);
+            }
 
             Rubric copy = source.clone(toSiteId);
             Instant now = Instant.now();
@@ -265,6 +301,10 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
     }
 
     public void deleteRubric(Long rubricId) {
+
+        getRepoRubricForRubricId(rubricId).filter(this::canEdit).orElseThrow(()->
+            new SecurityException("To delete a rubric, you must be a rubrics editor, and the rubric must not be locked")
+        );
 
         // SAK-42944 removing the soft-deleted associations
         associationRepository.findByRubricId(rubricId).forEach(ass -> evaluationRepository.deleteByToolItemRubricAssociation_Id(ass.getId()));
@@ -297,11 +337,12 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
 
     public CriterionTransferBean copyCriterion(Long rubricId, Long sourceId) {
 
-        Criterion criterion = criterionRepository.findById(sourceId)
-            .orElseThrow(() -> new IllegalArgumentException("No source criterion with id " + sourceId));
+        Criterion criterion = criterionRepository.findById(sourceId).filter(c -> {
+            return isRubricVisible(c.getRubric());
+        }).orElseThrow(() -> new IllegalArgumentException("No source criterion with id " + sourceId));
 
-        Rubric rubric = rubricRepository.findById(rubricId)
-            .orElseThrow(() -> new IllegalArgumentException("No rubric with id " + rubricId));
+        Rubric rubric = getRepoRubricForRubricId(rubricId).filter(this::canEdit)
+            .orElseThrow(() -> new SecurityException("You must be a rubrics editor to modify a rubric"));
 
         List<Long> criterionIds = rubric.getCriteria().stream().map(Criterion::getId).collect(Collectors.toList());
 
@@ -320,6 +361,12 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
 
     public void sortRubricCriteria(Long rubricId, List<Long> sortedCriterionIds) {
 
+        /*
+         * OWLTODO: the following implementation doesn't persist any ordering, and can erase criteria.
+         * Commented out to do a no-op until we prioritize re-adding an ordering to the DB.
+         * Don't forget to authz check canEdit(rubric).
+         */
+        /*
         rubricRepository.findById(rubricId).ifPresent(rubric -> {
 
             Map<Long, Criterion> current = rubric.getCriteria().stream().collect(Collectors.toMap(Criterion::getId, c -> c));
@@ -328,10 +375,17 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
             rubric.getCriteria().addAll(sorted);
             rubricRepository.save(rubric);
         });
+        */
     }
 
     public void sortCriterionRatings(Long criterionId, List<Long> sortedRatingIds) {
 
+        /*
+         * OWLTODO: the following implementation doesn't persist any ordering, and can erase criteria.
+         * Commented out to do a no-op until we prioritize re-adding an ordering to the DB.
+         * Don't forget to authz check canEdit(rubric).
+         */
+        /*
         criterionRepository.findById(criterionId).ifPresent(criterion -> {
             Map<Long, Rating> current = criterion.getRatings().stream().collect(Collectors.toMap(Rating::getId, r -> r));
             List<Rating> sorted = sortedRatingIds.stream().map(current::get).collect(Collectors.toList());
@@ -339,17 +393,27 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
             criterion.getRatings().addAll(sorted);
             criterionRepository.save(criterion);
         });
+        */
     }
 
     public Optional<CriterionTransferBean> createDefaultCriterion(String siteId, Long rubricId) {
+        return createDefaultCriterion(rubricId);
+    }
+
+    public Optional<CriterionTransferBean> createDefaultCriterion(Long rubricId) {
 
         String currentUserId = sessionManager.getCurrentSessionUserId();
 
-        if (StringUtils.isBlank(currentUserId) || !isEditor(siteId)) {
+        if (StringUtils.isBlank(currentUserId)) {
             throw new SecurityException("You must be a rubrics editor to create/edit criteria");
         }
 
-        return rubricRepository.findById(rubricId).map(rubric -> {
+        Optional<Rubric> repoRubric = getRepoRubricForRubricId(rubricId);
+        if (!canEdit(repoRubric.orElse(null))) {
+            throw new SecurityException("You must be a rubrics editor to create/edit criteria");
+        }
+
+        return repoRubric.map(rubric -> {
 
             List<Long> criterionIds = rubric.getCriteria().stream().map(Criterion::getId).collect(Collectors.toList());
 
@@ -383,7 +447,7 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
             Criterion newCriterion = savedRubric.getCriteria().stream()
                     .filter(c -> !criterionIds.contains(c.getId()))
                     .findAny()
-                    .orElseThrow(() -> new RuntimeException("create criterion failed to create a new criterion, siteId: [" + siteId + "], rubric: [" + rubricId + "]"));
+                    .orElseThrow(() -> new RuntimeException("create criterion failed to create a new criterion, siteId: [" + savedRubric.getOwnerId() + "], rubric: [" + rubricId + "]"));
 
             CriterionTransferBean bean = new CriterionTransferBean(newCriterion);
             bean.setNew(true);
@@ -392,14 +456,23 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
     }
 
     public Optional<CriterionTransferBean> createDefaultEmptyCriterion(String siteId, Long rubricId) {
+        return createDefaultEmptyCriterion(rubricId);
+    }
+
+    public Optional<CriterionTransferBean> createDefaultEmptyCriterion(Long rubricId) {
 
         String currentUserId = sessionManager.getCurrentSessionUserId();
 
-        if (StringUtils.isBlank(currentUserId) || !isEditor(siteId)) {
+        if (StringUtils.isBlank(currentUserId)) {
             throw new SecurityException("You must be a rubrics editor to create/edit criteria");
         }
 
-        return rubricRepository.findById(rubricId).map(rubric -> {
+        Optional<Rubric> repoRubric = getRepoRubricForRubricId(rubricId);
+        if (!canEdit(repoRubric.orElse(null))) {
+            throw new SecurityException("You must be a rubrics editor to create/edit criteria");
+        }
+
+        return repoRubric.map(rubric -> {
             List<Long> criterionIds = rubric.getCriteria().stream().map(Criterion::getId).collect(Collectors.toList());
 
             Criterion criterion = new Criterion();
@@ -411,21 +484,27 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
             Criterion newCriterion = savedRubric.getCriteria().stream()
                     .filter(c -> !criterionIds.contains(c.getId()))
                     .findAny()
-                    .orElseThrow(() -> new RuntimeException("default criterion create failed, siteId: [" + siteId + "], rubric: [" + rubricId + "]"));
+                    .orElseThrow(() -> new RuntimeException("default criterion create failed, siteId: [" + savedRubric.getOwnerId() + "], rubric: [" + rubricId + "]"));
 
             return new CriterionTransferBean(newCriterion);
         });
     }
 
     public Optional<RatingTransferBean> createDefaultRating(String siteId, Long criterionId, int position) {
+        return createDefaultRating(criterionId, position);
+    }
+
+    public Optional<RatingTransferBean> createDefaultRating(Long criterionId, int position) {
 
         String currentUserId = sessionManager.getCurrentSessionUserId();
 
-        if (StringUtils.isBlank(currentUserId) || !isEditor(siteId)) {
+        Optional<Criterion> repoCriterion = criterionRepository.findById(criterionId);
+
+        if (StringUtils.isBlank(currentUserId) || !canEdit(repoCriterion.orElse(null))) {
             throw new SecurityException("You must be a rubrics editor to create/edit ratings");
         }
 
-        return criterionRepository.findById(criterionId).map(criterion -> {
+        return repoCriterion.map(criterion -> {
 
             Rating rating = new Rating();
             rating.setTitle(resourceLoader.getString("default_rating_title"));
@@ -464,6 +543,21 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
             }).collect(Collectors.toList()));
         } else {
             rubric = rubricRepository.getById(bean.getId());
+            /*
+             * We've checked isEditor(bean.ownerId), but this attribute may be getting updated.
+             * Ensure the user can edit the rubric given its original ownerId.
+             */
+            if (!isEditor(rubric.getOwnerId())) {
+                throw new SecurityException("You must be a rubrics editor to create/edit rubrics");
+            }
+
+            if (rubric.getLocked()) {
+                // Only permitted modifications: shared, date modified
+                rubric.setShared(bean.getShared());
+                rubric.setModified(bean.getModified());
+                return new RubricTransferBean(rubricRepository.save(rubric));
+            }
+
             rubric.getCriteria().forEach(c -> bean.getCriteria().stream()
                     .filter(bc -> bc.getId().equals(c.getId()))
                     .findAny()
@@ -493,16 +587,23 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
     }
 
     public CriterionTransferBean updateCriterion(CriterionTransferBean bean, String siteId) {
+        return updateCriterion(bean);
+    }
+
+    public CriterionTransferBean updateCriterion(CriterionTransferBean bean) {
 
         String currentUserId = sessionManager.getCurrentSessionUserId();
 
-        if (StringUtils.isBlank(currentUserId) || !isEditor(siteId)) {
+        if (StringUtils.isBlank(currentUserId)) {
             throw new SecurityException("You must be a rubrics editor to create/edit criteria");
         }
 
         if (bean.getId() != null) {
             // we can use getById since a bean with an id should exist
-            Criterion criterion = criterionRepository.getById(bean.getId());
+            Criterion criterion = criterionRepository.findById(bean.getId()).filter(this::canEdit).orElseThrow(()->
+                new SecurityException("You must be a rubrics editor to create/edit criteria")
+            );
+
             criterion.setTitle(bean.getTitle());
             criterion.setDescription(bean.getDescription());
             criterion.setWeight(bean.getWeight());
@@ -525,13 +626,16 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
     }
 
     public void deleteCriterion(Long rubricId, Long criterionId, String siteId) {
+        deleteCriterion(criterionId);
+    }
 
-        if (!isEditor(siteId)) {
-            throw new SecurityException("You must be a rubrics editor to delete criteria");
-        }
+    public void deleteCriterion(Long criterionId) {
 
-        Rubric rubric = rubricRepository.findById(rubricId)
-            .orElseThrow(() -> new IllegalArgumentException("No rubric for id " + rubricId));
+        Criterion criterion = criterionRepository.findById(criterionId).filter(this::canEdit).orElseThrow(()->
+            new SecurityException("You must be a rubrics editor to delete criteria")
+        );
+
+        Rubric rubric = criterion.getRubric();
 
         rubric.getCriteria().removeIf(c -> c.getId().equals(criterionId));
 
@@ -539,37 +643,49 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
     }
 
     public RatingTransferBean updateRating(RatingTransferBean bean, String siteId) {
+        return updateRating(bean);
+    }
+
+    public RatingTransferBean updateRating(RatingTransferBean bean) {
+
+        if (bean.getId() == null) {
+            return bean;
+        }
 
         String currentUserId = sessionManager.getCurrentSessionUserId();
 
-        if (StringUtils.isBlank(currentUserId) || !isEditor(siteId)) {
+        Rating rating = ratingRepository.findById(bean.getId()).orElse(null);
+
+        if (StringUtils.isBlank(currentUserId) || !canEdit(rating)) {
             throw new SecurityException("You must be a rubrics editor to create/edit ratings");
         }
 
-        if (bean.getId() != null) {
-            Rating rating = ratingRepository.getById(bean.getId());
-            rating.setTitle(bean.getTitle());
-            rating.setDescription(bean.getDescription());
-            rating.setPoints(bean.getPoints());
+        rating.setTitle(bean.getTitle());
+        rating.setDescription(bean.getDescription());
+        rating.setPoints(bean.getPoints());
 
-            // persist the changes to the rating first as it is needed to create updated transfer bean
-            Rating updatedRating = ratingRepository.save(rating);
+        // persist the changes to the rating first as it is needed to create updated transfer bean
+        Rating updatedRating = ratingRepository.save(rating);
 
-            // since the rating points may have changed a rubric update may be needed
-            rubricRepository.save(updatedRating.getCriterion().getRubric());
+        // since the rating points may have changed a rubric update may be needed
+        rubricRepository.save(updatedRating.getCriterion().getRubric());
 
-            return new RatingTransferBean(updatedRating);
-        }
-        return bean;
+        return new RatingTransferBean(updatedRating);
     }
 
     public CriterionTransferBean deleteRating(Long ratingId, Long criterionId, String siteId) {
+        return deleteRating(ratingId, criterionId);
+    }
 
-        if (!isEditor(siteId)) {
+    public CriterionTransferBean deleteRating(Long ratingId, Long criterionId) {
+
+        Optional<Criterion> repoCriterion = criterionRepository.findById(criterionId);
+
+        if (!canEdit(repoCriterion.orElse(null))) {
             throw new SecurityException("You must be a rubrics editor to create/edit ratings");
         }
 
-        return criterionRepository.findById(criterionId).map(criterion -> {
+        return repoCriterion.map(criterion -> {
 
             criterion.getRatings().removeIf(r -> r.getId().equals(ratingId));
             return new CriterionTransferBean(criterionRepository.save(criterion));
@@ -579,78 +695,101 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
     @Transactional(readOnly = true)
     public Optional<RubricTransferBean> getRubric(Long rubricId) {
 
-        return rubricRepository.findById(rubricId).map(rubric -> {
-
-            String currentUserId = userDirectoryService.getCurrentUser().getId();
-
-            if (rubric.getShared()
-                || isEditor(rubric.getOwnerId())
-                || isEvaluee(rubric.getOwnerId())
-                || rubric.getCreatorId().equalsIgnoreCase(currentUserId)) {
-                return decorateRubricBean(new RubricTransferBean(rubric));
-            } else {
-                return null;
-            }
+        return getRepoRubricForRubricId(rubricId).map(rubric -> {
+            return isRubricVisible(rubric) ? decorateRubricBean(new RubricTransferBean(rubric)) : null;
         });
     }
 
     @Transactional(readOnly = true)
     public Optional<CriterionTransferBean> getCriterion(Long criterionId, String siteId) {
+        return getCriterion(criterionId);
+    }
 
-        if (!isEditor(siteId)) {
-            throw new SecurityException("You must be a rubrics editor to get criteria");
-        }
+    @Transactional(readOnly = true)
+    public Optional<CriterionTransferBean> getCriterion(Long criterionId) {
 
-        return criterionRepository.findById(criterionId).map(CriterionTransferBean::new);
+        return criterionRepository.findById(criterionId).map(criterion -> {
+
+            if (!isRubricVisible(criterion.getRubric())) {
+                throw new SecurityException("You must be a rubrics editor to get criteria");
+            }
+            return criterion;
+        }).map(CriterionTransferBean::new);
     }
 
     @Transactional(readOnly = true)
     public Optional<AssociationTransferBean> getAssociationForToolAndItem(String toolId, String itemId, String siteId) {
 
-        return associationRepository.findByToolIdAndItemId(toolId, itemId).map(AssociationTransferBean::new);
+        return associationRepository.findByToolIdAndItemId(toolId, itemId).filter(this::canViewAssociation)
+            .map(AssociationTransferBean::new);
     }
 
     @Transactional(readOnly = true)
     public Optional<EvaluationTransferBean> getEvaluation(Long evaluationId, String siteId) {
+        return getEvaluation(evaluationId);
+    }
 
-        return evaluationRepository.findById(evaluationId).map(e -> {
+    @Transactional(readOnly = true)
+    public Optional<EvaluationTransferBean> getEvaluation(Long evaluationId) {
 
-                String currentUserId = sessionManager.getCurrentSessionUserId();
-                if (isEvaluator(siteId)
-                    || (e.getStatus() == EvaluationStatus.RETURNED && e.getEvaluatedItemOwnerId().equals(currentUserId))) {
-                    return new EvaluationTransferBean(e);
-                } else {
-                    return null;
-                }
-            });
+        return evaluationRepository.findById(evaluationId).filter(this::canViewEvaluation).map(EvaluationTransferBean::new);
     }
 
     @Transactional(readOnly = true)
     public Optional<EvaluationTransferBean> getEvaluationForToolAndItemAndEvaluatedItemId(String toolId, String itemId, String evaluatedItemId, String siteId) {
 
-        ToolItemRubricAssociation association = associationRepository.findByToolIdAndItemId(toolId, itemId)
-            .orElseThrow(() -> new IllegalArgumentException("No association for toolId " + toolId + " and itemId " + itemId));
+        Optional<Long> associationId = associationRepository.findByToolIdAndItemId(toolId, itemId).map(ToolItemRubricAssociation::getId);
 
-        return evaluationRepository.findByAssociationIdAndEvaluatedItemId(association.getId(), evaluatedItemId)
-            .map(eval -> {
+        if (!associationId.isPresent()) {
+            return Optional.empty();
+        }
 
-                if (canViewEvaluation(eval, siteId)) {
-                    return new EvaluationTransferBean(eval);
-                } else {
-                    return null;
-                }
-            });
+        return evaluationRepository.findByAssociationIdAndEvaluatedItemId(associationId.get(), evaluatedItemId).map(eval -> {
+
+            return canViewEvaluation(eval) ? new EvaluationTransferBean(eval) : null;
+        });
     }
 
     public EvaluationTransferBean saveEvaluation(EvaluationTransferBean evaluationBean, String siteId) {
+        return saveEvaluation(evaluationBean);
+    }
 
-        if (!isEvaluator(siteId)) {
+    public EvaluationTransferBean saveEvaluation(EvaluationTransferBean evaluationBean) {
+
+        // Validate evaluationBean's rating -> criterion -> association -> rubric hierarchy
+        Optional<Rubric> optRubric = getRepoRubricForAssociationId(evaluationBean.getAssociationId());
+        String siteId = optRubric.map(Rubric::getOwnerId).orElse(null);
+        if (!optRubric.isPresent() || !isEvaluator(siteId)) {
             throw new SecurityException("You must be an evaluator to evaluate rubrics");
         }
 
+        Rubric rubric = optRubric.get();
+
+        // Contains all criterion IDs including criterion groups (criteria without ratings).
+        Set<Long> criterionIDs = rubric.getCriteria().stream().map(Criterion::getId).collect(Collectors.toSet());
+        // Maps ratingIDs to their associated criterionID.
+        Map<Long, Long> ratingCriterionMap = rubric.getCriteria().stream().flatMap(criterion -> criterion.getRatings().stream()).collect(Collectors.toMap(Rating::getId, rating -> rating.getCriterion().getId()));
+
+        evaluationBean.getCriterionOutcomes().stream().forEach(criterionOutcome -> {
+            Long criterionId = criterionOutcome.getCriterionId();
+            if (!criterionIDs.contains(criterionId)) {
+                throw new IllegalArgumentException("Evaluation's criteria do not belong to the evaluated rubric");
+            }
+
+            Long ratingId = criterionOutcome.getSelectedRatingId();
+            if (ratingId != null && (!ratingCriterionMap.keySet().contains(ratingId) || !ratingCriterionMap.get(ratingId).equals(criterionId))) {
+                throw new IllegalArgumentException("Evaluation's rating does not belong to its expected criterion");
+            }
+        });
+        // Validated; proceed
+
         Evaluation evaluation;
         if (evaluationBean.getId() != null) {
-            evaluation = evaluationRepository.getById(evaluationBean.getId());
+
+            // Validate the target evaluation, in case the user is moving an existing evaluation they're not authorized to access onto an association they're authorized to evaluate.
+            evaluation = evaluationRepository.findById(evaluationBean.getId()).filter(eval -> {
+                return isEvaluator(getRepoRubricForEvaluation(eval).map(Rubric::getOwnerId).orElse(null));
+            }).orElseThrow(()->new SecurityException("You must be an evaluator to evaluate rubrics"));
 
             List<CriterionOutcome> outcomes = evaluation.getCriterionOutcomes();
             List<Long> outcomeIds = outcomes.stream().map(CriterionOutcome::getCriterionId).collect(Collectors.toList());
@@ -746,8 +885,9 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
 
     public EvaluationTransferBean cancelDraftEvaluation(Long draftEvaluationId) {
 
-        Evaluation evaluation = evaluationRepository.findById(draftEvaluationId)
-            .orElseThrow(() -> new IllegalArgumentException("No evaluation for id " + draftEvaluationId));
+        Evaluation evaluation = evaluationRepository.findById(draftEvaluationId).filter(eval -> {
+            return isEvaluator(getRepoRubricForEvaluation(eval).map(Rubric::getOwnerId).orElse(null));
+        }).orElseThrow(() -> new IllegalArgumentException("No evaluation for id " + draftEvaluationId));
 
         if (evaluation.getStatus() != EvaluationStatus.DRAFT) {
             log.info("{} is not a draft evaluation. Returning it as is.", draftEvaluationId);
@@ -799,6 +939,9 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
 
             if (existingAssociation.isPresent()) {
                 final ToolItemRubricAssociation association = existingAssociation.get();
+                if (!canEditAssociation(association)) {
+                    throw new SecurityException("Only Rubrics editors can edit rubric associations");
+                }
                 final Rubric existingRubric = association.getRubric();
                 final boolean isSameRubric = StringUtils.equals(optionRubricId, existingRubric.getId().toString());
 
@@ -832,6 +975,10 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
                     return Optional.empty();
                 }
             } else {
+                if (!canCreateAssociationWithRubric(getRepoRubricForRubricId(requestedRubricId).orElse(null))) {
+                    throw new SecurityException("User not authorized to create a rubric association, or the rubric does not exist");
+                }
+
                 // if existingAssociation is not present, it could just mean that it was deactivated previously
                 // the specific getRubricAssociation impl that we used earlier to load it will ignore deactivated ones.
                 Optional<ToolItemRubricAssociation> optionalExistingAssociation = findAssociationByItemIdAndRubricId(toolItemId, requestedRubricId);    // this will include inactive [soft-deleted] ones
@@ -853,6 +1000,9 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
         log.debug("Creating new association for rubric [{}], tool [{}], item[{}]", requestedRubricId, toolId, toolItemId);
         Optional<Rubric> rubric = rubricRepository.findById(requestedRubricId);
         if (rubric.isPresent()) {
+            if (!canCreateAssociationWithRubric(rubric.get())) {
+                throw new SecurityException("User not authorized to create a rubric association, or the rubric does not exist");
+            }
             ToolItemRubricAssociation newAssociation = new ToolItemRubricAssociation();
             newAssociation.setRubric(rubric.get());
             newAssociation.setToolId(toolId);
@@ -871,19 +1021,7 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
 
     private Optional<ToolItemRubricAssociation> findAssociationByItemIdAndRubricId(String toolItemId, Long rubricId) {
 
-        return associationRepository.findByItemIdAndRubricId(toolItemId, rubricId).map(assoc -> {
-
-            String siteId = assoc.getRubric().getOwnerId();
-
-            String currentUserId = userDirectoryService.getCurrentUser().getId();
-
-            if (securityService.unlock(currentUserId, RubricsConstants.RBCS_PERMISSIONS_EDITOR, "/site/" + siteId)
-                || assoc.getCreatorId().equalsIgnoreCase(currentUserId)) {
-                return assoc;
-            } else {
-                return null;
-            }
-        });
+        return associationRepository.findByItemIdAndRubricId(toolItemId, rubricId).filter(this::canViewAssociation);
     }
 
     /**
@@ -918,25 +1056,21 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
     @Transactional(readOnly = true)
     public Optional<ToolItemRubricAssociation> getRubricAssociation(String toolId, String associatedToolItemId) {
 
-        Predicate<ToolItemRubricAssociation> canEdit = tira -> isEditor(tira.getRubric().getOwnerId());
-        Predicate<ToolItemRubricAssociation> isCreator = tira -> tira.getCreatorId().equalsIgnoreCase(sessionManager.getCurrentSessionUserId());
-
-        return associationRepository.findByToolIdAndItemId(toolId, associatedToolItemId).filter(canEdit.or(isCreator));
+        return associationRepository.findByToolIdAndItemId(toolId, associatedToolItemId).filter(this::canViewAssociation);
     }
 
     @Transactional(readOnly = true)
     public String getRubricEvaluationObjectId(String itemId, String userId, String toolId, String siteId) {
 
-        ToolItemRubricAssociation association = associationRepository.findByToolIdAndItemId(toolId, itemId)
-            .orElseThrow(() -> new IllegalArgumentException("No association for toolId " + toolId + " and itemId " + itemId));
-
-        Optional<Evaluation> optEvaluation = evaluationRepository.findByAssociationIdAndUserId(association.getId(), userId);
-
-        if (optEvaluation.isPresent() && canViewEvaluation(optEvaluation.get(), siteId)) {
-            return optEvaluation.get().getEvaluatedItemId();
-        } else {
+        Optional<Long> associationId = associationRepository.findByToolIdAndItemId(toolId, itemId).map(ToolItemRubricAssociation::getId);
+        if (associationId.isEmpty()) {
             return null;
         }
+
+        return evaluationRepository.findByAssociationIdAndUserId(associationId.get(), userId).map(evaluation ->
+        {
+            return canViewEvaluation(evaluation, siteId) ? evaluation.getEvaluatedItemId() : null;
+        }).orElse(null);
     }
 
     /**
@@ -945,21 +1079,19 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
      */
     public void deleteRubricAssociationsByItemIdPrefix(String itemId, String toolId) {
 
-        associationRepository.findByItemIdPrefix(toolId, itemId).forEach(assoc -> {
+        associationRepository.findByItemIdPrefix(toolId, itemId).stream().filter(this::canEditAssociation).forEach(assoc -> {
 
-            if (securityService.unlock(RubricsConstants.RBCS_PERMISSIONS_EDITOR, siteService.siteReference(assoc.getRubric().getOwnerId()))) {
-                try {
-                    evaluationRepository.deleteByToolItemRubricAssociation_Id(assoc.getId());
-                } catch (Exception e) {
-                    log.warn("Error deleting rubric association for id {} : {}", itemId, e.toString());
-                }
+            try {
+                evaluationRepository.deleteByToolItemRubricAssociation_Id(assoc.getId());
+            } catch (Exception e) {
+                log.warn("Error deleting rubric association for id {} : {}", itemId, e.toString());
             }
         });
     }
 
     public void softDeleteRubricAssociationsByItemIdPrefix(String itemId, String toolId) {
 
-        associationRepository.findByItemIdPrefix(toolId, itemId).forEach(assoc -> {
+        associationRepository.findByItemIdPrefix(toolId, itemId).stream().filter(this::canEditAssociation).forEach(assoc -> {
 
             try {
                 assoc.getParameters().put(RubricsConstants.RBCS_SOFT_DELETED, true);
@@ -972,7 +1104,7 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
 
     public void restoreRubricAssociation(String toolId, String itemId) {
 
-        associationRepository.findByToolIdAndItemId(toolId, itemId).ifPresent(assoc -> {
+        associationRepository.findByToolIdAndItemId(toolId, itemId).filter(this::canEditAssociation).ifPresent(assoc -> {
 
             try {
                 assoc.getParameters().put(RubricsConstants.RBCS_SOFT_DELETED, false);
@@ -985,7 +1117,7 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
 
     public void restoreRubricAssociationsByItemIdPrefix(String itemId, String toolId) {
 
-        associationRepository.findByItemIdPrefix(toolId, itemId).forEach(assoc -> {
+        associationRepository.findByItemIdPrefix(toolId, itemId).stream().filter(this::canEditAssociation).forEach(assoc -> {
 
             try {
                 assoc.getParameters().put(RubricsConstants.RBCS_SOFT_DELETED, false);
@@ -1002,7 +1134,7 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
 
     public void softDeleteRubricAssociation(String toolId, String id){
 
-        getRubricAssociation(toolId, id).ifPresent(assoc -> {
+        associationRepository.findByToolIdAndItemId(toolId, id).filter(this::canEditAssociation).ifPresent(assoc -> {
 
             try {
                 assoc.getParameters().put(RubricsConstants.RBCS_SOFT_DELETED, true);
@@ -1016,7 +1148,7 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
     public void deleteRubricAssociation(String tool, String id) {
 
         try {
-            getRubricAssociation(tool, id).ifPresent(assoc -> {
+            associationRepository.findByToolIdAndItemId(tool, id).filter(this::canEditAssociation).ifPresent(assoc -> {
                 evaluationRepository.deleteByToolItemRubricAssociation_Id(assoc.getId());
                 associationRepository.delete(assoc);
             });
@@ -1028,18 +1160,36 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
     @Transactional(readOnly = true)
     public byte[] createPdf(String siteId, Long rubricId, String toolId, String itemId, String evaluatedItemId)
             throws IOException {
+        return createPdf(rubricId, toolId, itemId, evaluatedItemId);
+    }
+
+    @Transactional(readOnly = true)
+    public byte[] createPdf(Long rubricId, String toolId, String itemId, String evaluatedItemId)
+            throws IOException {
 
         Rubric rubric = rubricRepository.findById(rubricId)
-                .orElseThrow(() -> new IllegalArgumentException("No rubric for id " + rubricId));
+            .orElseThrow(() -> new IllegalArgumentException("No rubric for id " + rubricId));
 
+        String siteId = rubric.getOwnerId();
         if (!isEvaluator(siteId) && !isEvaluee(siteId) && !rubric.getShared()) {
             throw new SecurityException("You must be either an evaluator or evaluee to create PDFs");
+        }
+
+        if (!isRubricVisible(rubric)) {
+            throw new SecurityException("You must be either an editor, evaluator, or evaluee to create PDFs");
         }
 
         Optional<Evaluation> optEvaluation = Optional.empty();
         if (toolId != null && itemId != null && evaluatedItemId != null) {
             ToolItemRubricAssociation association = associationRepository.findByToolIdAndItemId(toolId, itemId)
                 .orElseThrow(() -> new IllegalArgumentException("No association for toolId " + toolId + " and itemId " + itemId));
+
+            Rubric associationRubric = association.getRubric();
+            if (associationRubric == null || associationRubric.getId() != rubric.getId()) {
+                // Association doesn't fall under the rubric (keep messaging consistent)
+                throw new IllegalArgumentException("No association for toolId " + toolId + " and itemId " + itemId);
+            }
+
             optEvaluation = evaluationRepository.findByAssociationIdAndEvaluatedItemId(association.getId(), evaluatedItemId);
         }
 
@@ -1059,7 +1209,7 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
         }
 
         // Create pdf document
-        Document document = new Document(PageSize.A4.rotate());
+        Document document = new Document(PageSize.A3.rotate());
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         PdfWriter.getInstance(document, out);
         document.open();
@@ -1238,6 +1388,7 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
     @Override
     public void updateEntityReferences(String toContext, Map<String, String> transversalMap) {
 
+        // OWLTODO: add authz to this and a couple of the above methods (unless this business already requires site.upd)
         if (transversalMap != null && !transversalMap.isEmpty()) {
             for (Map.Entry<String, String> entry : transversalMap.entrySet()) {
                 String key = entry.getKey();
@@ -1348,39 +1499,192 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
     }
 
     private boolean isEditor(String siteId) {
+        if (siteId == null) {
+            return false;
+        }
 
         return securityService.unlock(RubricsConstants.RBCS_PERMISSIONS_EDITOR, siteService.siteReference(siteId));
     }
 
     private boolean isEvaluator(String siteId) {
+        if (siteId == null) {
+            return false;
+        }
 
         String siteRef = siteService.siteReference(siteId);
         return securityService.unlock(RubricsConstants.RBCS_PERMISSIONS_EVALUATOR, siteRef);
     }
 
     private boolean isEvaluee(String siteId) {
+        if (siteId == null) {
+            return false;
+        }
 
         String siteRef = siteService.siteReference(siteId);
         return securityService.unlock(RubricsConstants.RBCS_PERMISSIONS_EVALUEE, siteRef);
     }
 
-    private boolean canViewEvaluation(Evaluation eval, String siteId) {
+    private boolean isRubricVisible(Rubric rubric) {
+
+        if (rubric == null)  {
+            return false;
+        }
 
         String currentUserId = sessionManager.getCurrentSessionUserId();
+
+        if (rubric.getShared()
+            || isEditor(rubric.getOwnerId())
+            || isEvaluator(rubric.getOwnerId())
+            || rubric.getCreatorId().equalsIgnoreCase(currentUserId)) {
+            return true;
+        }
+
+        if (isEvaluee(rubric.getOwnerId())) {
+            // Check if all rubric's associations are hidden from the student.
+            List<ToolItemRubricAssociation> associations = rubric.getAssociations();
+
+            // Assume hidden from students until we find one that's revealed.
+            return associations.stream().anyMatch(assoc -> {
+
+                // Find any association that isn't hidden
+                if (!isAssociationHiddenFromStudents(assoc)) {
+                    return true;
+                }
+
+                // It's hidden. Now, we could check if the student has a non-draft evaluation like so:
+                /*
+                String userId = sessionManager.getCurrentSessionUserId();
+                return evaluationRepository.findByAssociationIdAndUserId(assoc.getId(), userId)
+                    .map(eval -> canEvalueeViewEvaluation(userId, eval)).orElse(false);
+                */
+                // But I've compared to Sakai 20: despite the constant named "hideStudentPreview" in code, it doesn't only hide the preview - the UI option "hide from students" = hide from students, even after evaluation --bbailla2
+                return false;
+            });
+        }
+
+        return false;
+    }
+
+    /**
+     * Considering authz and locked status, determines if the current user
+     * can edit the specified rubric
+     */
+    private boolean canEdit(Rubric rubric) {
+        return rubric == null ? false : securityService.isSuperUser() || (!rubric.getLocked() && isEditor(rubric.getOwnerId()));
+    }
+
+    /**
+     * Considering authz and locked status, determines if the current user
+     * can edit the specified criterion
+     */
+    private boolean canEdit(Criterion criterion) {
+        return criterion == null ? false : canEdit(criterion.getRubric());
+    }
+
+    /**
+     * Considering authz and locked status, determines if the current user
+     * can edit the specified rating
+     */
+    private boolean canEdit(Rating rating) {
+        return rating == null ? false : canEdit(rating.getCriterion());
+    }
+
+    private boolean canViewEvaluation(Evaluation eval, String siteId) {
+        return canViewEvaluation(eval);
+    }
+
+    private boolean canViewEvaluation(Evaluation eval) {
+
+        if (eval == null) {
+            return false;
+        }
+
+        String currentUserId = sessionManager.getCurrentSessionUserId();
+
+        String siteId = getRepoRubricForEvaluation(eval).map(Rubric::getOwnerId).orElse(null);
+        if (siteId == null) {
+            return false;
+        }
 
         if (isEvaluator(siteId)) {
             return true;
         }
 
-        if (isEvaluee(siteId)) {
-            if (eval.getEvaluatedItemOwnerType() == EvaluatedItemOwnerType.USER && currentUserId.equals(eval.getEvaluatedItemOwnerId())) {
+        return isEvaluee(siteId) && canEvalueeViewEvaluation(currentUserId, eval);
+    }
+
+    private boolean canEvalueeViewEvaluation(String userId, Evaluation eval) {
+        if (userId == null || eval == null) {
+            return false;
+        }
+
+        if (getRepoAssociationForAssociationId(eval.getAssociationId()).map(this::isAssociationHiddenFromStudents).orElse(true)) {
+            // Never show evaluations if the association is hidden.
+            return false;
+        }
+
+        if (EvaluationStatus.RETURNED == eval.getStatus()) {
+            if (eval.getEvaluatedItemOwnerType() == EvaluatedItemOwnerType.USER && userId.equals(eval.getEvaluatedItemOwnerId())) {
                 return true;
             }
             if (eval.getEvaluatedItemOwnerType() == EvaluatedItemOwnerType.GROUP) {
-                return authzGroupService.getUserRole(currentUserId, eval.getEvaluatedItemOwnerId()) != null;
+                return authzGroupService.getUserRole(userId, eval.getEvaluatedItemOwnerId()) != null;
             }
         }
 
         return false;
+    }
+
+    private boolean canCreateAssociationWithRubric(Rubric rubric) {
+        // For creation, the visibility of the rubric is sufficient to use it.
+        return isRubricVisible(rubric);
+    }
+
+    private boolean canEditAssociation(ToolItemRubricAssociation association) {
+        Rubric rubric = association == null ? null : association.getRubric();
+        if (rubric == null) {
+            return false;
+        }
+
+        // For editing, rubric visibility is an inappropriate check, because students could modify associations (pointing them at different things, changing their parameters, etc.)
+        // Association creation's authz is weaker (checks isRubricVisible), so a creator check allows users to modify their own associations.
+        return isEditor(rubric.getOwnerId()) || StringUtils.equalsIgnoreCase(association.getCreatorId(), sessionManager.getCurrentSessionUserId());
+    }
+
+    /**
+     * Determines if the current user is authorized to view the specified association
+     */
+    private boolean canViewAssociation(ToolItemRubricAssociation association) {
+        Rubric rubric = association == null ? null : association.getRubric();
+        if (rubric == null) {
+            return false;
+        }
+
+        /*
+         * Checking isRubricVisible is not sufficient, since the association itself can be hidden from students.
+         * Rubrics editors, evaluators can always view associations; evaluees can view an association only if it's not hidden.
+         */
+
+        // OWLTODO: test if you can create an association with a shared Rubric from a different site in Sakai 20
+        if (isEditor(rubric.getOwnerId())
+            || isEvaluator(rubric.getOwnerId())
+            || rubric.getCreatorId().equalsIgnoreCase(sessionManager.getCurrentSessionUserId())) {
+            return true;
+        }
+
+        return isEvaluee(rubric.getOwnerId()) && !isAssociationHiddenFromStudents(association);
+    }
+
+    /**
+     * Checks only the hideStudentPreview property on the association. See canViewAssociation for the association's effective visibility.
+     */
+    private boolean isAssociationHiddenFromStudents(ToolItemRubricAssociation association) {
+        if (association == null) {
+            return true;
+        }
+
+        Map<String, Boolean> params = association.getParameters();
+        // Boolean.TRUE.equals for null handling.
+        return params != null && Boolean.TRUE.equals(params.get(RubricsConstants.RBCS_HIDE_STUDENT_PREVIEW));
     }
 }
