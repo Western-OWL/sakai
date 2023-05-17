@@ -55,4 +55,6 @@ public interface RubricsConstants {
 	public static final	String RBCS_TOPIC_ENTITY_PREFIX = "top.";
 	public static final	String RBCS_MSG_ENTITY_PREFIX = "msg.";
 	
+	// Rubric association parameter
+	public static final String RBCS_HIDE_STUDENT_PREVIEW = "hideStudentPreview";
 }

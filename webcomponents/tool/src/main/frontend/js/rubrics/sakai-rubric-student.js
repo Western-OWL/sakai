@@ -180,6 +180,14 @@ class SakaiRubricStudent extends RubricsElement {
         })
         .then(rubric => {
 
+          if (!this.evaluatedItemId || this.evaluatedItemId == "undefined") {
+            // No item to be evaluated
+            this.evaluation = { criterionOutcomes: [] };
+            this.preview = true;
+            this.rubric = rubric;
+            return;
+          }
+
           // Now, get the evaluation
           const evalUrl = `/api/sites/${association.siteId}/rubric-evaluations/tools/${this.toolId}/items/${this.entityId}/evaluations/${this.evaluatedItemId}`;
           fetch(evalUrl, {
