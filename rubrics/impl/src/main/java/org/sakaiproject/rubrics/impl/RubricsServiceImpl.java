@@ -1080,10 +1080,7 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
     @Transactional(readOnly = true)
     public Map<String, String> getRubricEvaluationObjectIds(Map<String, String> itemIdToOwnerIdMap, Map<String, AssociationTransferBean> associationMap, Set<String> toolIds, String siteId) {
         if (CollectionUtils.isEmpty(associationMap)) {
-            associationMap = associationRepository.findByToolIdsAndItemIds(toolIds, itemIdToOwnerIdMap.keySet())
-                    .entrySet().stream().collect(Collectors.toMap(
-                            entry -> entry.getKey(),
-                            entry -> new AssociationTransferBean(entry.getValue())));
+            associationMap = getAssociationsForToolsAndItems(toolIds, itemIdToOwnerIdMap.keySet(), siteId);
         }
         Map<Long, Evaluation> evaluationMap = evaluationRepository.findByAssociationIdsAndUserId(
                 associationMap.values().stream().map(association -> association.getId()).collect(Collectors.toList()),
@@ -1534,7 +1531,7 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
         return securityService.unlock(RubricsConstants.RBCS_PERMISSIONS_EDITOR, siteService.siteReference(siteId));
     }
 
-    private boolean isEvaluator(String siteId) {
+    public boolean isEvaluator(String siteId) {
         if (siteId == null) {
             return false;
         }
@@ -1543,13 +1540,17 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
         return securityService.unlock(RubricsConstants.RBCS_PERMISSIONS_EVALUATOR, siteRef);
     }
 
-    public boolean isEvaluee(String siteId) {
-        if (siteId == null) {
+    private boolean isEvaluee(String siteId) {
+        return isEvaluee(siteId, userDirectoryService.getCurrentUser().getId());
+    }
+
+    public boolean isEvaluee(String siteId, String userId) {
+        if (siteId == null || userId == null) {
             return false;
         }
 
         String siteRef = siteService.siteReference(siteId);
-        return securityService.unlock(RubricsConstants.RBCS_PERMISSIONS_EVALUEE, siteRef);
+        return securityService.unlock(userId, RubricsConstants.RBCS_PERMISSIONS_EVALUEE, siteRef);
     }
 
     private boolean isRubricVisible(Rubric rubric) {

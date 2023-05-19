@@ -146,6 +146,6 @@ public interface RubricsService {
 
     void deleteSiteRubrics(String siteId);
 
-    boolean isEvaluee(String siteId);
-
+    boolean isEvaluator(String siteId);
+    boolean isEvaluee(String siteId, String userId);
 }
