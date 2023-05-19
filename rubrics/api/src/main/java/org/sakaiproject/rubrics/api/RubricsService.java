@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.sakaiproject.entity.api.Entity;
 import org.sakaiproject.rubrics.api.beans.AssociationTransferBean;
@@ -101,6 +102,9 @@ public interface RubricsService {
 
     Optional<AssociationTransferBean> getAssociationForToolAndItem(String toolId, String itemId, String siteId);
 
+    Map<String, AssociationTransferBean> getAssociationsForToolAndItems(String toolId, Set<String> itemIds, String siteId);
+    Map<String, AssociationTransferBean> getAssociationsForToolsAndItems(Set<String> toolIds, Set<String> itemIds, String siteId);
+
     Optional<EvaluationTransferBean> getEvaluation(Long evaluationId, String siteId);
 
     Optional<EvaluationTransferBean> getEvaluationForToolAndItemAndEvaluatedItemId(String toolId, String itemId, String evaluatedItemId, String siteId);
@@ -130,6 +134,7 @@ public interface RubricsService {
             throws IOException;
 
     String getRubricEvaluationObjectId(String itemId, String userId, String toolId, String siteId);
+    Map<String, String> getRubricEvaluationObjectIds(Map<String, String> itemIdToOwnerIdMap, Map<String, AssociationTransferBean> associationMap, Set<String> toolIds, String siteId);
 
     void deleteRubricAssociation(String toolId, String itemId);
     void softDeleteRubricAssociation(String toolId, String itemId);
@@ -140,5 +145,7 @@ public interface RubricsService {
     void restoreRubricAssociationsByItemIdPrefix(String itemId, String toolId);
 
     void deleteSiteRubrics(String siteId);
+
+    boolean isEvaluee(String siteId);
 
 }

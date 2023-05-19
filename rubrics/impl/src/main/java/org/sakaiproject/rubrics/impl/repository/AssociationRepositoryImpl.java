@@ -22,8 +22,12 @@
 
 package org.sakaiproject.rubrics.impl.repository;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaDelete;
@@ -36,21 +40,32 @@ import org.sakaiproject.rubrics.api.model.Rubric;
 import org.sakaiproject.rubrics.api.model.ToolItemRubricAssociation;
 import org.sakaiproject.rubrics.api.repository.AssociationRepository;
 import org.sakaiproject.springframework.data.SpringCrudRepositoryImpl;
+import org.springframework.util.CollectionUtils;
 
 public class AssociationRepositoryImpl extends SpringCrudRepositoryImpl<ToolItemRubricAssociation, Long> implements AssociationRepository {
 
     public Optional<ToolItemRubricAssociation> findByToolIdAndItemId(String toolId, String itemId) {
 
-        Session session = sessionFactory.getCurrentSession();
+        return Optional.ofNullable(findByToolIdAndItemIds(toolId, Collections.singleton(itemId)).get(itemId));
+    }
 
+    public Map<String, ToolItemRubricAssociation> findByToolIdAndItemIds(String toolId, Set<String> itemIds) {
+        return findByToolIdsAndItemIds(Collections.singleton(toolId), itemIds);
+    }
+
+    public Map<String, ToolItemRubricAssociation> findByToolIdsAndItemIds(Set<String> toolIds, Set<String> itemIds) {
+        if (CollectionUtils.isEmpty(toolIds) || CollectionUtils.isEmpty(itemIds)) {
+            return Collections.emptyMap();
+        }
+
+        Session session = sessionFactory.getCurrentSession();
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaQuery<ToolItemRubricAssociation> query = cb.createQuery(ToolItemRubricAssociation.class);
         Root<ToolItemRubricAssociation> ass = query.from(ToolItemRubricAssociation.class);
-        query.where(cb.and(cb.equal(ass.get("toolId"), toolId),
-                            cb.equal(ass.get("itemId"), itemId),
+        query.where(cb.and(ass.get("toolId").in(toolIds),
+                            ass.get("itemId").in(itemIds),
                             cb.equal(ass.get("active"), Boolean.TRUE)));
-
-        return session.createQuery(query).uniqueResultOptional();
+        return session.createQuery(query).getResultList().stream().collect(Collectors.toMap(ToolItemRubricAssociation::getItemId, tira -> tira));
     }
 
     public Optional<ToolItemRubricAssociation> findByItemIdAndRubricId(String itemId, Long rubricId) {

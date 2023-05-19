@@ -13,16 +13,17 @@
  ******************************************************************************/
 package org.sakaiproject.rubrics.api.beans;
 
+import java.io.Serializable;
 import java.util.Map;
-
-import org.sakaiproject.rubrics.api.model.ToolItemRubricAssociation;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import org.sakaiproject.rubrics.api.model.ToolItemRubricAssociation;
+
 @Data
 @NoArgsConstructor
-public class AssociationTransferBean {
+public class AssociationTransferBean implements Serializable {
     private Long id;
     private String itemId;
     private Map<String, Boolean> parameters;

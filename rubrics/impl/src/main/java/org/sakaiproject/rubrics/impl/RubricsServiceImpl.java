@@ -38,8 +38,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.BooleanUtils;
@@ -102,6 +100,9 @@ import com.lowagie.text.Phrase;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
+import java.util.HashSet;
+import java.util.Map.Entry;
+import java.util.Set;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -720,8 +721,20 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
     @Transactional(readOnly = true)
     public Optional<AssociationTransferBean> getAssociationForToolAndItem(String toolId, String itemId, String siteId) {
 
-        return associationRepository.findByToolIdAndItemId(toolId, itemId).filter(this::canViewAssociation)
-            .map(AssociationTransferBean::new);
+        return Optional.ofNullable(getAssociationsForToolAndItems(toolId, Collections.singleton(itemId), siteId).get(itemId));
+    }
+
+    @Transactional(readOnly = true)
+    public Map<String, AssociationTransferBean> getAssociationsForToolAndItems(String toolId, Set<String> itemIds, String siteId) {
+
+        return getAssociationsForToolsAndItems(Collections.singleton(toolId), itemIds, siteId);
+    }
+
+    @Transactional(readOnly = true)
+    public Map<String, AssociationTransferBean> getAssociationsForToolsAndItems(Set<String> toolIds, Set<String> itemIds, String siteId) {
+        return associationRepository.findByToolIdsAndItemIds(toolIds, itemIds).entrySet().stream().collect(Collectors.toMap(
+                entry -> entry.getKey(),
+                entry -> new AssociationTransferBean(entry.getValue())));
     }
 
     @Transactional(readOnly = true)
@@ -1061,16 +1074,31 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
 
     @Transactional(readOnly = true)
     public String getRubricEvaluationObjectId(String itemId, String userId, String toolId, String siteId) {
+        return getRubricEvaluationObjectIds(Collections.singletonMap(itemId, userId), Collections.emptyMap(), Collections.singleton(toolId), siteId).get(itemId);
+    }
 
-        Optional<Long> associationId = associationRepository.findByToolIdAndItemId(toolId, itemId).map(ToolItemRubricAssociation::getId);
-        if (associationId.isEmpty()) {
-            return null;
+    @Transactional(readOnly = true)
+    public Map<String, String> getRubricEvaluationObjectIds(Map<String, String> itemIdToOwnerIdMap, Map<String, AssociationTransferBean> associationMap, Set<String> toolIds, String siteId) {
+        if (CollectionUtils.isEmpty(associationMap)) {
+            associationMap = associationRepository.findByToolIdsAndItemIds(toolIds, itemIdToOwnerIdMap.keySet())
+                    .entrySet().stream().collect(Collectors.toMap(
+                            entry -> entry.getKey(),
+                            entry -> new AssociationTransferBean(entry.getValue())));
         }
-
-        return evaluationRepository.findByAssociationIdAndUserId(associationId.get(), userId).map(evaluation ->
-        {
-            return canViewEvaluation(evaluation, siteId) ? evaluation.getEvaluatedItemId() : null;
-        }).orElse(null);
+        Map<Long, Evaluation> evaluationMap = evaluationRepository.findByAssociationIdsAndUserId(
+                associationMap.values().stream().map(association -> association.getId()).collect(Collectors.toList()),
+                new HashSet<>(itemIdToOwnerIdMap.values()));
+        Map<String, String> retMap = new HashMap(associationMap.size());
+        for (Entry<String, AssociationTransferBean> entry : associationMap.entrySet()) {
+            String itemId = entry.getKey();
+            AssociationTransferBean association = entry.getValue();
+            Long associationId = association.getId();
+            Evaluation eval = evaluationMap.get(associationId);
+            if (eval != null && canViewEvaluation(eval, siteId, association)) {
+                retMap.put(itemId, eval.getEvaluatedItemId());
+            }
+        }
+        return retMap;
     }
 
     /**
@@ -1515,7 +1543,7 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
         return securityService.unlock(RubricsConstants.RBCS_PERMISSIONS_EVALUATOR, siteRef);
     }
 
-    private boolean isEvaluee(String siteId) {
+    public boolean isEvaluee(String siteId) {
         if (siteId == null) {
             return false;
         }
@@ -1589,11 +1617,15 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
         return rating == null ? false : canEdit(rating.getCriterion());
     }
 
-    private boolean canViewEvaluation(Evaluation eval, String siteId) {
+    private boolean canViewEvaluation(Evaluation eval, String siteIdUnvalidated) {
         return canViewEvaluation(eval);
     }
 
     private boolean canViewEvaluation(Evaluation eval) {
+        return canViewEvaluation(eval, null, null);
+    }
+
+    private boolean canViewEvaluation(Evaluation eval, String siteIdUnvalidated, AssociationTransferBean association) {
 
         if (eval == null) {
             return false;
@@ -1601,7 +1633,13 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
 
         String currentUserId = sessionManager.getCurrentSessionUserId();
 
-        String siteId = getRepoRubricForEvaluation(eval).map(Rubric::getOwnerId).orElse(null);
+        String siteId;
+        if (association == null) {
+            siteId = getRepoRubricForEvaluation(eval).map(Rubric::getOwnerId).orElse(null);
+        } else {
+            siteId = association.getSiteId();
+        }
+
         if (siteId == null) {
             return false;
         }
@@ -1610,16 +1648,23 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
             return true;
         }
 
-        return isEvaluee(siteId) && canEvalueeViewEvaluation(currentUserId, eval);
+        return isEvaluee(siteId) && canEvalueeViewEvaluation(currentUserId, eval, association);
     }
 
-    private boolean canEvalueeViewEvaluation(String userId, Evaluation eval) {
+    private boolean canEvalueeViewEvaluation(String userId, Evaluation eval, AssociationTransferBean association) {
         if (userId == null || eval == null) {
             return false;
         }
 
-        if (getRepoAssociationForAssociationId(eval.getAssociationId()).map(this::isAssociationHiddenFromStudents).orElse(true)) {
-            // Never show evaluations if the association is hidden.
+        boolean isAssociationHiddenFromStudents;
+        if (association != null) {
+            isAssociationHiddenFromStudents = association.getParameters().getOrDefault(RubricsConstants.RBCS_HIDE_STUDENT_PREVIEW, false);
+        } else {
+            isAssociationHiddenFromStudents = getRepoAssociationForAssociationId(eval.getAssociationId()).map(this::isAssociationHiddenFromStudents).orElse(false);
+        }
+
+        // Never show evaluations if the association is hidden.
+        if (isAssociationHiddenFromStudents) {
             return false;
         }
 

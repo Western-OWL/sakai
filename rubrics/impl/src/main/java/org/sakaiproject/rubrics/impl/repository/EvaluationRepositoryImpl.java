@@ -22,8 +22,12 @@
 
 package org.sakaiproject.rubrics.impl.repository;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.sakaiproject.rubrics.api.model.Evaluation;
 import org.sakaiproject.rubrics.api.model.ToolItemRubricAssociation;
@@ -37,6 +41,7 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Root;
 
 import org.hibernate.Session;
+import org.springframework.util.CollectionUtils;
 
 public class EvaluationRepositoryImpl extends SpringCrudRepositoryImpl<Evaluation, Long> implements EvaluationRepository {
 
@@ -55,16 +60,21 @@ public class EvaluationRepositoryImpl extends SpringCrudRepositoryImpl<Evaluatio
 
     public Optional<Evaluation> findByAssociationIdAndUserId(Long associationId, String userId) {
 
-        Session session = sessionFactory.getCurrentSession();
+        return Optional.ofNullable(findByAssociationIdsAndUserId(Collections.singletonList(associationId), Collections.singleton(userId)).get(associationId));
+    }
 
+    public Map<Long, Evaluation> findByAssociationIdsAndUserId(List<Long> associationIds, Set<String> userIds) {
+        if (CollectionUtils.isEmpty(associationIds) || CollectionUtils.isEmpty(userIds)) {
+            return Collections.emptyMap();
+        }
+
+        Session session = sessionFactory.getCurrentSession();
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaQuery<Evaluation> query = cb.createQuery(Evaluation.class);
         Root<Evaluation> eval = query.from(Evaluation.class);
-        //Join<Evaluation, ToolItemRubricAssociation> ass = eval.join("association");
-        query.where(cb.and(cb.equal(eval.get("associationId"), associationId),
-                            cb.equal(eval.get("evaluatedItemOwnerId"), userId)));
-
-        return session.createQuery(query).uniqueResultOptional();
+        query.where(cb.and(eval.get("associationId").in(associationIds),
+                            eval.get("evaluatedItemOwnerId").in(userIds)));
+        return session.createQuery(query).getResultList().stream().collect(Collectors.toMap(Evaluation::getAssociationId, evaluation -> evaluation));
     }
 
     public Optional<Evaluation> findByAssociation_ItemIdAndUserId(String itemId, String userId) {

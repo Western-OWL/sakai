@@ -23,7 +23,9 @@
 package org.sakaiproject.rubrics.api.repository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.sakaiproject.rubrics.api.model.Evaluation;
 import org.sakaiproject.springframework.data.SpringCrudRepository;
@@ -32,6 +34,7 @@ public interface EvaluationRepository extends SpringCrudRepository<Evaluation, L
 
     Optional<Evaluation> findByAssociationIdAndEvaluatedItemId(Long associationId, String evaluatedItemId);
     Optional<Evaluation> findByAssociationIdAndUserId(Long associationId, String userId);
+    Map<Long, Evaluation> findByAssociationIdsAndUserId(List<Long> associationIds, Set<String> userIds);
     Optional<Evaluation> findByAssociation_ItemIdAndUserId(String itemId, String userId);
     int deleteByToolItemRubricAssociation_Id(Long associationId);
     int deleteByOwnerId(String ownerId);
