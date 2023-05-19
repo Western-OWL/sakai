@@ -30,7 +30,7 @@
  		<property name="autoDdl"><value>${auto.ddl}</value></property>
 	</bean>
 	
-	<bean id="org.sakaiproject.user.api.UserNotificationPreferencesRegistration.mailarchive"
+<!--	<bean id="org.sakaiproject.user.api.UserNotificationPreferencesRegistration.mailarchive"
       parent="org.sakaiproject.user.api.UserNotificationPreferencesRegistration"
       class="org.sakaiproject.mailarchive.user.prefs.MailArchiveUserNotificationPreferencesRegistrationImpl"
       init-method="init">
@@ -51,6 +51,6 @@
       </property>
      <property name="overrideBySite"><value>false</value></property>
      <property name="expandByDefault"><value>true</value></property>
-   </bean>
+   </bean>-->
 
 </beans>
