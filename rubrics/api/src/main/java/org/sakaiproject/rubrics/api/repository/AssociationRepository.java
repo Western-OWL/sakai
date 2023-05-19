@@ -23,7 +23,9 @@
 package org.sakaiproject.rubrics.api.repository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.sakaiproject.rubrics.api.model.ToolItemRubricAssociation;
 import org.sakaiproject.springframework.data.SpringCrudRepository;
@@ -31,6 +33,8 @@ import org.sakaiproject.springframework.data.SpringCrudRepository;
 public interface AssociationRepository extends SpringCrudRepository<ToolItemRubricAssociation, Long> {
 
     Optional<ToolItemRubricAssociation> findByToolIdAndItemId(String toolId, String itemId);
+    Map<String, ToolItemRubricAssociation> findByToolIdAndItemIds(String toolId, Set<String> itemIds);
+    Map<String, ToolItemRubricAssociation> findByToolIdsAndItemIds(Set<String> toolIds, Set<String> itemIds);
     Optional<ToolItemRubricAssociation> findByItemIdAndRubricId(String itemId, Long rubricId);
     List<ToolItemRubricAssociation> findByRubricId(Long rubricId);
     List<ToolItemRubricAssociation> findByItemIdPrefix(String toolId, String itemId);
