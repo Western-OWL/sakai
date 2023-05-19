@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -169,6 +170,24 @@ public class GradeSummaryTablePanel extends BasePanel implements IAjaxIndicatorA
 		addOrReplace(new WebMarkupContainer("dateColumnHeader")
 				.add(AttributeModifier.append("class", catColVisible ? "col-md-1" : "col-md-2")));
 
+		String currentSiteId = getCurrentSiteId();
+		Map<String, AssociationTransferBean> rubricAssociationMap;
+		Map<String, String> rubricEvaluationObjectIdMap;
+		if (rubricsService.isEvaluee(currentSiteId, studentUuid) || rubricsService.isEvaluator(currentSiteId)) {
+			Set<String> toolIds = Stream.of(RubricsConstants.RBCS_TOOL_GRADEBOOKNG, "sakai.assignment").collect(Collectors.toSet());
+			Map<String, String> asnExternalIdsToOwnerIds = getAsnExternalIdToOwnerIdMap(categoryNamesToAssignments, studentUuid);
+			Set<String> assignmentIds = new HashSet<>();
+			for (List<Assignment> assignments : categoryNamesToAssignments.values()) {
+				assignmentIds.addAll(assignments.stream().map(asn -> asn.getId().toString()).collect(Collectors.toSet()));
+			}
+			assignmentIds.addAll(asnExternalIdsToOwnerIds.keySet());
+			rubricAssociationMap = rubricsService.getAssociationsForToolsAndItems(toolIds, assignmentIds, currentSiteId);
+			rubricEvaluationObjectIdMap = rubricsService.getRubricEvaluationObjectIds(asnExternalIdsToOwnerIds, rubricAssociationMap, toolIds, currentSiteId);
+		} else {
+			rubricAssociationMap = Collections.emptyMap();
+			rubricEvaluationObjectIdMap = Collections.emptyMap();
+		}
+
 		// output all of the categories
 		// within each we then add the assignments in each category
 		// if not grouped by category, render all assignments in one go!
@@ -234,21 +253,6 @@ public class GradeSummaryTablePanel extends BasePanel implements IAjaxIndicatorA
 				}
 				categoryRow.add(new Label("categoryWeight", categoryWeight)
 						.setVisible(isCategoryWeightEnabled && GradeSummaryTablePanel.this.isGroupedByCategory));
-
-				String currentSiteId = getCurrentSiteId();
-				Map<String, AssociationTransferBean> rubricAssociationMap;
-				Map<String, String> rubricEvaluationObjectIdMap;
-				if (rubricsService.isEvaluee(currentSiteId)) {
-					Set<String> toolIds = Stream.of(RubricsConstants.RBCS_TOOL_GRADEBOOKNG, "sakai.assignment").collect(Collectors.toSet());
-					Map<String, String> asnExternalIdsToOwnerIds = getAsnExternalIdToOwnerIdMap(categoryAssignments, studentUuid);
-					Set<String> assignmentIds = categoryAssignments.stream().map(asn -> asn.getId().toString()).collect(Collectors.toSet());
-					assignmentIds.addAll(asnExternalIdsToOwnerIds.keySet());
-					rubricAssociationMap = rubricsService.getAssociationsForToolsAndItems(toolIds, assignmentIds, currentSiteId);
-					rubricEvaluationObjectIdMap = rubricsService.getRubricEvaluationObjectIds(asnExternalIdsToOwnerIds, rubricAssociationMap, toolIds, currentSiteId);
-				} else {
-					rubricAssociationMap = Collections.emptyMap();
-					rubricEvaluationObjectIdMap = Collections.emptyMap();
-				}
 
 				categoryItem.add(new ListView<Assignment>("assignmentsForCategory", categoryAssignments) {
 					private static final long serialVersionUID = 1L;
@@ -504,9 +508,11 @@ public class GradeSummaryTablePanel extends BasePanel implements IAjaxIndicatorA
 	 * @param studentUuid The UUID of the student in question
 	 * @return a Map populated with asnExternalId -> ownerId. Only assignments that have an external ID will be populated in the map.
 	 */
-	private Map<String, String> getAsnExternalIdToOwnerIdMap(List<Assignment> assignments, String studentUuid) {
-		Map<String, String> asnExternalIdsToOwnerIds = new HashMap<>(assignments.size());
-		for (Assignment asn : assignments) {
+	private Map<String, String> getAsnExternalIdToOwnerIdMap(Map<String, List<Assignment>> categoryNamesToAssignments, String studentUuid) {
+		List<Assignment> allAssignments = new ArrayList<>();
+		categoryNamesToAssignments.values().forEach(allAssignments::addAll);
+		Map<String, String> asnExternalIdsToOwnerIds = new HashMap<>(allAssignments.size());
+		for (Assignment asn : allAssignments) {
 			String ownerId = studentUuid;
 			String externalId = getAssignmentExternalId(asn);
 			if (StringUtils.isNotBlank(externalId) && asn.getExternalAppName().equals(assignmentService.getToolId())) {
