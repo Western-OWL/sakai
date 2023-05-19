@@ -1148,3 +1148,25 @@ div.msgcntr-profile-qtip {
 	margin-left: 16px;
 	padding: 0 16px;
 }
+
+/* OWL: obliterate the tablesorter icons and border */
+.Mrphs-html .allMessages.tablesorter .header::before,
+.Mrphs-html .allMessages.tablesorter .tablesorter-header::before,
+.Mrphs-html .allMessages.tablesorter .headerSortUp::before,
+.Mrphs-html .allMessages.tablesorter .tablesorter-headerAsc::before,
+.Mrphs-html .allMessages.tablesorter .tablesorter-headerSortUp::before,
+.Mrphs-html .allMessages.tablesorter .tablesorter-headerDesc::before,
+.Mrphs-html .allMessages.tablesorter .tablesorter-headerSortDown::before,
+.Mrphs-html .allMessages.tablesorter .tablesorter-headerSortUp::before {
+	content: "";
+}
+.Mrphs-html .allMessages.tablesorter .header,
+.Mrphs-html .allMessages.tablesorter .tablesorter-header,
+.Mrphs-html .allMessages.tablesorter .headerSortUp,
+.Mrphs-html .allMessages.tablesorter .tablesorter-headerAsc,
+.Mrphs-html .allMessages.tablesorter .tablesorter-headerSortUp,
+.Mrphs-html .allMessages.tablesorter .tablesorter-headerDesc,
+.Mrphs-html .allMessages.tablesorter .tablesorter-headerSortDown,
+.Mrphs-html .allMessages.tablesorter .tablesorter-headerSortUp {
+	border-bottom-color: var(--sakai-border-color);
+}
