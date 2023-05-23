@@ -16,6 +16,7 @@ package org.sakaiproject.webapi.controllers;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.event.api.UsageSessionService;
 import org.sakaiproject.site.api.SiteService;
 import org.sakaiproject.tool.api.Session;
@@ -29,6 +30,7 @@ import org.sakaiproject.user.api.AuthenticationManager;
 import org.sakaiproject.user.api.User;
 import org.sakaiproject.user.api.UserDirectoryService;
 import org.sakaiproject.user.api.UserNotDefinedException;
+import org.sakaiproject.webapi.EndpointDisabledException;
 
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -66,8 +68,18 @@ public class LoginController extends AbstractSakaiApiController {
     @Resource
     private AuthenticationManager authenticationManager;
 
+	@Resource(name = "org.sakaiproject.component.api.ServerConfigurationService")
+	private ServerConfigurationService serverConfigurationService;
+
+	private static final String SAK_PROP_WEBAPI_LOGIN_ENABLED = "webapi.login.enabled";
+	private static final boolean SAK_PROP_WEBAPI_LOGIN_ENABLED_DEFAULT = true;
+
 	@GetMapping("/login")
     public String login(@RequestParam String username, @RequestParam String password, HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
+
+        if (!serverConfigurationService.getBoolean(SAK_PROP_WEBAPI_LOGIN_ENABLED, SAK_PROP_WEBAPI_LOGIN_ENABLED_DEFAULT)) {
+            throw new EndpointDisabledException("Webapi login is disabled");
+        }
 
         String cookieName = "JSESSIONID";
         boolean displayModJkWarning = true;

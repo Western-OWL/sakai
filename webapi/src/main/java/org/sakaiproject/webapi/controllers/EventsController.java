@@ -13,6 +13,7 @@
  ******************************************************************************/
 package org.sakaiproject.webapi.controllers;
 
+import org.sakaiproject.webapi.EndpointDisabledException;
 import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.entity.api.EntityManager;
@@ -59,8 +60,15 @@ public class EventsController extends AbstractSakaiApiController {
     @Resource
     private MessagingService messagingService;
 
+    private static final String SAK_PROP_SSE_PING_ENABLED = "sse.ping.enabled";
+    private static final boolean SAK_PROP_SSE_PING_ENABLED_DEFAULT = true;
+
     @GetMapping("/users/{userId}/events")
     public ResponseEntity<Flux<ServerSentEvent<String>>> streamEvents() {
+
+        if (!serverConfigurationService.getBoolean(SAK_PROP_SSE_PING_ENABLED, SAK_PROP_SSE_PING_ENABLED_DEFAULT)) {
+            throw new EndpointDisabledException("Streaming events is disabled");
+        }
 
         Session session = checkSakaiSession();
 

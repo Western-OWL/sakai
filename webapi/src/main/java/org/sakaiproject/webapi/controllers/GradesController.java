@@ -30,6 +30,8 @@ import org.sakaiproject.site.api.ToolConfiguration;
 import org.sakaiproject.tool.assessment.data.dao.grading.AssessmentGradingData;
 import org.sakaiproject.tool.assessment.services.GradingService;
 import org.sakaiproject.user.api.UserNotDefinedException;
+import org.sakaiproject.webapi.DashboardConfig;
+import org.sakaiproject.webapi.EndpointDisabledException;
 import org.sakaiproject.webapi.beans.GradeRestBean;
 
 import org.springframework.http.MediaType;
@@ -69,6 +71,9 @@ public class GradesController extends AbstractSakaiApiController {
     private SiteService siteService;
 
     private GradingService samigoGradingService;
+
+    @Resource
+    private DashboardConfig dashboardConfig;
 
     private Function<Site, List<GradeRestBean>> convert = (s) -> {
 
@@ -150,12 +155,20 @@ public class GradesController extends AbstractSakaiApiController {
     @GetMapping(value = "/users/{userId}/grades", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<GradeRestBean> getUserGrades(@PathVariable String userId) throws UserNotDefinedException {
 
+        if (!dashboardConfig.isDashboardEnabled()) {
+            throw new EndpointDisabledException("Dashboard is not enabled");
+        }
+
         checkSakaiSession();
         return siteService.getUserSites().stream().map(convert).flatMap(Collection::stream).collect(Collectors.toList());
     }
 
     @GetMapping(value = "/sites/{siteId}/grades", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<GradeRestBean> getSiteGrades(@PathVariable String siteId) throws UserNotDefinedException {
+
+        if (!dashboardConfig.isDashboardEnabled()) {
+            throw new EndpointDisabledException("Dashboard is not enabled");
+        }
 
         checkSakaiSession();
 
