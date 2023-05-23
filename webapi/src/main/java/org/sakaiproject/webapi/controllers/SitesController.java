@@ -20,6 +20,8 @@ import org.sakaiproject.site.api.SiteService;
 import org.sakaiproject.site.api.Site;
 import org.sakaiproject.tool.api.Session;
 import org.sakaiproject.user.api.UserNotDefinedException;
+import org.sakaiproject.webapi.DashboardConfig;
+import org.sakaiproject.webapi.EndpointDisabledException;
 
 import org.springframework.http.MediaType;
 
@@ -48,9 +50,16 @@ public class SitesController extends AbstractSakaiApiController {
 	@Resource
 	private SiteService siteService;
 
+	@Resource
+	private DashboardConfig dashboardConfig;
+
 	@GetMapping(value = "/users/{userId}/sites", produces = MediaType.APPLICATION_JSON_VALUE)
     public Map<String, List<Map<String, Object>>> getSites(@PathVariable String userId)
         throws UserNotDefinedException {
+
+		if (!dashboardConfig.isDashboardEnabled()) {
+			throw new EndpointDisabledException("Dashboard is disabled");
+		}
 
 		Session session = checkSakaiSession();
 

@@ -24,6 +24,8 @@ import org.sakaiproject.site.api.ToolConfiguration;
 import org.sakaiproject.tool.api.Session;
 import org.sakaiproject.user.api.UserDirectoryService;
 import org.sakaiproject.user.api.UserNotDefinedException;
+import org.sakaiproject.webapi.DashboardConfig;
+import org.sakaiproject.webapi.EndpointDisabledException;
 
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -65,6 +67,9 @@ public class ForumsController extends AbstractSakaiApiController {
 	@Resource
 	private UserDirectoryService userDirectoryService;
 
+	@Resource
+	private DashboardConfig dashboardConfig;
+
     private Function<SynopticMsgcntrItem, Map<String, Object>> handler = (item) -> {
 
         Map<String, Object> map = new HashMap<>();
@@ -97,6 +102,10 @@ public class ForumsController extends AbstractSakaiApiController {
 	@GetMapping(value = "/users/{userEid}/forums", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<Map<String, Object>> getUserForums(@PathVariable String userEid) throws UserNotDefinedException {
 
+		if (!dashboardConfig.isDashboardEnabled()) {
+			throw new EndpointDisabledException("Dashboard is disabled");
+		}
+
 		Session session = checkSakaiSession();
 
         List<String> sites = siteService.getUserSites().stream().map(s -> s.getId()).collect(Collectors.toList());
@@ -108,6 +117,10 @@ public class ForumsController extends AbstractSakaiApiController {
 
 	@GetMapping(value = "/sites/{siteId}/forums", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<Map<String, Object>> getSiteForums(@PathVariable String siteId) throws UserNotDefinedException {
+
+		if (!dashboardConfig.isDashboardEnabled()) {
+			throw new EndpointDisabledException("Dashboard is disabled");
+		}
 
 		Session session = checkSakaiSession();
 

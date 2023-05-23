@@ -33,6 +33,7 @@ import org.sakaiproject.site.api.SiteService;
 import org.sakaiproject.tool.api.Session;
 import org.sakaiproject.user.api.UserDirectoryService;
 import org.sakaiproject.user.api.UserNotDefinedException;
+import org.sakaiproject.webapi.EndpointDisabledException;
 import org.sakaiproject.webapi.beans.ConversationsRestBean;
 import org.sakaiproject.webapi.beans.SimpleGroup;
 
@@ -51,6 +52,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import javax.annotation.PostConstruct;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -92,8 +94,22 @@ public class ConversationsController extends AbstractSakaiApiController {
 	@Resource
 	private UserDirectoryService userDirectoryService;
 
+	private static final String SAK_PROP_WEBAPI_CONVERSATIONS_ENABLED = "webapi.conversations.enabled";
+	private static final boolean SAK_PROP_WEBAPI_CONVERSATIONS_ENABLED_DEFAULT = true;
+	private boolean conversationsEnabled;
+	public boolean isConversationsEnabled() { return conversationsEnabled; }
+
+	@PostConstruct
+	public void init() {
+		conversationsEnabled = serverConfigurationService.getBoolean(SAK_PROP_WEBAPI_CONVERSATIONS_ENABLED, SAK_PROP_WEBAPI_CONVERSATIONS_ENABLED_DEFAULT);
+	}
+
 	@GetMapping(value = "/sites/{siteId}/conversations", produces = MediaType.APPLICATION_JSON_VALUE)
     public EntityModel<ConversationsRestBean> getSiteConversations(@PathVariable String siteId) throws ConversationsPermissionsException {
+
+		if (!isConversationsEnabled()) {
+			throw new EndpointDisabledException("Conversations service is disabled");
+		}
 
 		String currentUserId = checkSakaiSession().getUserId();
 
@@ -145,6 +161,10 @@ public class ConversationsController extends AbstractSakaiApiController {
 	@PostMapping(value = "/sites/{siteId}/conversations/stats", produces = MediaType.APPLICATION_JSON_VALUE)
     public Map<String, Object> getSiteStats(@PathVariable String siteId, @RequestBody Map<String, Object> options) throws ConversationsPermissionsException {
 
+		if (!isConversationsEnabled()) {
+			throw new EndpointDisabledException("Conversations service is disabled");
+		}
+
 		checkSakaiSession();
 
         String interval = (String) options.get("interval");
@@ -157,6 +177,10 @@ public class ConversationsController extends AbstractSakaiApiController {
 	@PostMapping(value = "/sites/{siteId}/topics", produces = MediaType.APPLICATION_JSON_VALUE)
     public EntityModel createTopic(@PathVariable String siteId, @RequestBody TopicTransferBean topicBean) throws ConversationsPermissionsException {
 
+		if (!isConversationsEnabled()) {
+			throw new EndpointDisabledException("Conversations service is disabled");
+		}
+
 		checkSakaiSession();
 
         topicBean.siteId = siteId;
@@ -165,6 +189,10 @@ public class ConversationsController extends AbstractSakaiApiController {
 
 	@PutMapping(value = "/sites/{siteId}/topics/{topicId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public EntityModel updateTopic(@PathVariable String siteId, @PathVariable String topicId, @RequestBody TopicTransferBean topicBean) throws ConversationsPermissionsException {
+
+		if (!isConversationsEnabled()) {
+			throw new EndpointDisabledException("Conversations service is disabled");
+		}
 
 		checkSakaiSession();
 
@@ -176,6 +204,10 @@ public class ConversationsController extends AbstractSakaiApiController {
 	@DeleteMapping(value = "/sites/{siteId}/topics/{topicId}")
     public ResponseEntity deleteTopic(@PathVariable String topicId) throws ConversationsPermissionsException, UserNotDefinedException {
 
+		if (!isConversationsEnabled()) {
+			throw new EndpointDisabledException("Conversations service is disabled");
+		}
+
 		checkSakaiSession();
         conversationsService.deleteTopic(topicId);
         return new ResponseEntity(HttpStatus.OK);
@@ -183,6 +215,10 @@ public class ConversationsController extends AbstractSakaiApiController {
 
 	@PostMapping(value = "/sites/{siteId}/topics/{topicId}/pinned")
     public ResponseEntity pinTopic(@PathVariable String siteId, @PathVariable String topicId, @RequestBody Boolean pinned) throws ConversationsPermissionsException {
+
+		if (!isConversationsEnabled()) {
+			throw new EndpointDisabledException("Conversations service is disabled");
+		}
 
 		checkSakaiSession();
 
@@ -193,6 +229,10 @@ public class ConversationsController extends AbstractSakaiApiController {
 	@PostMapping(value = "/sites/{siteId}/topics/{topicId}/bookmarked")
     public ResponseEntity bookmarkTopic(@PathVariable String siteId, @PathVariable String topicId, @RequestBody Boolean bookmarked) throws ConversationsPermissionsException {
 
+		if (!isConversationsEnabled()) {
+			throw new EndpointDisabledException("Conversations service is disabled");
+		}
+
 		checkSakaiSession();
 
         conversationsService.bookmarkTopic(topicId, bookmarked);
@@ -201,6 +241,10 @@ public class ConversationsController extends AbstractSakaiApiController {
 
 	@PostMapping(value = "/sites/{siteId}/topics/{topicId}/hidden")
     public ResponseEntity hideTopic(@PathVariable String siteId, @PathVariable String topicId, @RequestBody Boolean hidden) throws ConversationsPermissionsException {
+
+		if (!isConversationsEnabled()) {
+			throw new EndpointDisabledException("Conversations service is disabled");
+		}
 
 		checkSakaiSession();
 
@@ -211,6 +255,10 @@ public class ConversationsController extends AbstractSakaiApiController {
 	@PostMapping(value = "/sites/{siteId}/topics/{topicId}/locked", produces = MediaType.APPLICATION_JSON_VALUE)
     public EntityModel lockTopic(@PathVariable String siteId, @PathVariable String topicId, @RequestBody Boolean locked) throws ConversationsPermissionsException {
 
+		if (!isConversationsEnabled()) {
+			throw new EndpointDisabledException("Conversations service is disabled");
+		}
+
 		checkSakaiSession();
 
         return entityModelForTopicBean(conversationsService.lockTopic(topicId, locked, true));
@@ -218,6 +266,10 @@ public class ConversationsController extends AbstractSakaiApiController {
 
 	@PostMapping(value = "/sites/{siteId}/topics/{topicId}/reactions", produces = MediaType.APPLICATION_JSON_VALUE)
     public Map<Reaction, Integer> postTopicReactions(@PathVariable String topicId, @RequestBody Map<Reaction, Boolean> reactions) throws ConversationsPermissionsException {
+
+		if (!isConversationsEnabled()) {
+			throw new EndpointDisabledException("Conversations service is disabled");
+		}
 
 		checkSakaiSession();
 
@@ -227,6 +279,10 @@ public class ConversationsController extends AbstractSakaiApiController {
 	@PostMapping(value = "/sites/{siteId}/topics/{topicId}/posts/markpostsviewed")
     public ResponseEntity markPostsViewed(@PathVariable String topicId, @RequestBody Set<String> postIds) throws ConversationsPermissionsException {
 
+		if (!isConversationsEnabled()) {
+			throw new EndpointDisabledException("Conversations service is disabled");
+		}
+
 		checkSakaiSession();
 
         conversationsService.markPostsViewed(postIds, topicId);
@@ -234,6 +290,10 @@ public class ConversationsController extends AbstractSakaiApiController {
     }
 
     private EntityModel entityModelForTopicBean(TopicTransferBean topicBean) {
+
+		if (!isConversationsEnabled()) {
+			throw new EndpointDisabledException("Conversations service is disabled");
+		}
 
         List<Link> links = new ArrayList<>();
         links.add(Link.of(topicBean.url, "self"));
@@ -252,6 +312,10 @@ public class ConversationsController extends AbstractSakaiApiController {
 	@PostMapping(value = "/sites/{siteId}/topics/{topicId}/posts", produces = MediaType.APPLICATION_JSON_VALUE)
     public EntityModel<PostTransferBean> createPost(@PathVariable String siteId, @PathVariable String topicId, @RequestBody PostTransferBean postBean) throws ConversationsPermissionsException {
 
+		if (!isConversationsEnabled()) {
+			throw new EndpointDisabledException("Conversations service is disabled");
+		}
+
 		checkSakaiSession();
         postBean.siteId = siteId;
         postBean.topic = topicId;
@@ -266,6 +330,10 @@ public class ConversationsController extends AbstractSakaiApiController {
             @RequestParam(required = false) PostSort sort,
             @RequestParam(required = false) String postId) throws ConversationsPermissionsException {
 
+		if (!isConversationsEnabled()) {
+			throw new EndpointDisabledException("Conversations service is disabled");
+		}
+
 		checkSakaiSession();
 
         return conversationsService.getPostsByTopicId(siteId, topicId, page, sort, postId).stream()
@@ -274,6 +342,10 @@ public class ConversationsController extends AbstractSakaiApiController {
 
 	@PutMapping(value = "/sites/{siteId}/topics/{topicId}/posts/{postId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public EntityModel<PostTransferBean> updatePost(@PathVariable String siteId, @PathVariable String topicId, @PathVariable String postId, @RequestBody PostTransferBean postBean) throws ConversationsPermissionsException {
+
+		if (!isConversationsEnabled()) {
+			throw new EndpointDisabledException("Conversations service is disabled");
+		}
 
 		checkSakaiSession();
 
@@ -285,6 +357,10 @@ public class ConversationsController extends AbstractSakaiApiController {
 	@DeleteMapping(value = "/sites/{siteId}/topics/{topicId}/posts/{postId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity deletePost(@PathVariable String siteId, @PathVariable String topicId, @PathVariable String postId) throws ConversationsPermissionsException {
 
+		if (!isConversationsEnabled()) {
+			throw new EndpointDisabledException("Conversations service is disabled");
+		}
+
 		checkSakaiSession();
 
         conversationsService.deletePost(siteId, topicId, postId, true);
@@ -294,6 +370,10 @@ public class ConversationsController extends AbstractSakaiApiController {
 	@GetMapping(value = "/sites/{siteId}/topics/{topicId}/posts/{postId}/upvote")
     public ResponseEntity upvotePost(@PathVariable String siteId, @PathVariable String topicId, @PathVariable String postId) throws ConversationsPermissionsException {
 
+		if (!isConversationsEnabled()) {
+			throw new EndpointDisabledException("Conversations service is disabled");
+		}
+
 		checkSakaiSession();
         conversationsService.upvotePost(siteId, topicId, postId);
         return new ResponseEntity(HttpStatus.OK);
@@ -301,6 +381,10 @@ public class ConversationsController extends AbstractSakaiApiController {
 
 	@GetMapping(value = "/sites/{siteId}/topics/{topicId}/posts/{postId}/unupvote")
     public ResponseEntity unUpvotePost(@PathVariable String siteId, @PathVariable String postId) throws ConversationsPermissionsException {
+
+		if (!isConversationsEnabled()) {
+			throw new EndpointDisabledException("Conversations service is disabled");
+		}
 
 		checkSakaiSession();
         conversationsService.unUpvotePost(siteId, postId);
@@ -310,6 +394,10 @@ public class ConversationsController extends AbstractSakaiApiController {
 	@PostMapping(value = "/sites/{siteId}/topics/{topicId}/posts/{postId}/reactions", produces = MediaType.APPLICATION_JSON_VALUE)
     public Map<Reaction, Integer> postPostReactions(@PathVariable String topicId, @PathVariable String postId, @RequestBody Map<Reaction, Boolean> reactions) throws ConversationsPermissionsException {
 
+		if (!isConversationsEnabled()) {
+			throw new EndpointDisabledException("Conversations service is disabled");
+		}
+
 		checkSakaiSession();
 
         return conversationsService.savePostReactions(topicId, postId, reactions);
@@ -318,6 +406,10 @@ public class ConversationsController extends AbstractSakaiApiController {
 	@PostMapping(value = "/sites/{siteId}/topics/{topicId}/posts/{postId}/locked", produces = MediaType.APPLICATION_JSON_VALUE)
     public EntityModel<PostTransferBean> lockPost(@PathVariable String siteId, @PathVariable String topicId, @PathVariable String postId, @RequestBody Boolean locked) throws ConversationsPermissionsException {
 
+		if (!isConversationsEnabled()) {
+			throw new EndpointDisabledException("Conversations service is disabled");
+		}
+
 		checkSakaiSession();
 
         return entityModelForPostBean(conversationsService.lockPost(siteId, topicId, postId, locked));
@@ -325,6 +417,10 @@ public class ConversationsController extends AbstractSakaiApiController {
 
 	@PostMapping(value = "/sites/{siteId}/topics/{topicId}/posts/{postId}/hidden")
     public EntityModel<PostTransferBean> hidePost(@PathVariable String siteId, @PathVariable String topicId, @PathVariable String postId, @RequestBody Boolean hidden) throws ConversationsPermissionsException {
+
+		if (!isConversationsEnabled()) {
+			throw new EndpointDisabledException("Conversations service is disabled");
+		}
 
 		checkSakaiSession();
 
@@ -361,6 +457,10 @@ public class ConversationsController extends AbstractSakaiApiController {
 	@PostMapping(value = "/sites/{siteId}/topics/{topicId}/posts/{postId}/comments", produces = MediaType.APPLICATION_JSON_VALUE)
     public CommentTransferBean createComment(@PathVariable String siteId, @PathVariable String topicId, @PathVariable String postId, @RequestBody CommentTransferBean commentBean) throws ConversationsPermissionsException  {
 
+		if (!isConversationsEnabled()) {
+			throw new EndpointDisabledException("Conversations service is disabled");
+		}
+
 		checkSakaiSession();
         commentBean.post = postId;
         commentBean.siteId = siteId;
@@ -369,6 +469,10 @@ public class ConversationsController extends AbstractSakaiApiController {
 
 	@PutMapping(value = "/sites/{siteId}/topics/{topicId}/posts/{postId}/comments/{commentId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public CommentTransferBean updateComment(@PathVariable String siteId, @PathVariable String topicId, @PathVariable String postId, @PathVariable String commentId, @RequestBody CommentTransferBean commentBean) throws ConversationsPermissionsException  {
+
+		if (!isConversationsEnabled()) {
+			throw new EndpointDisabledException("Conversations service is disabled");
+		}
 
 		checkSakaiSession();
 
@@ -381,6 +485,10 @@ public class ConversationsController extends AbstractSakaiApiController {
 	@DeleteMapping(value = "/sites/{siteId}/topics/{topicId}/posts/{postId}/comments/{commentId}")
     public ResponseEntity deleteComment(@PathVariable String siteId, @PathVariable String commentId) throws ConversationsPermissionsException  {
 
+		if (!isConversationsEnabled()) {
+			throw new EndpointDisabledException("Conversations service is disabled");
+		}
+
 		checkSakaiSession();
 
         conversationsService.deleteComment(siteId, commentId);
@@ -390,6 +498,10 @@ public class ConversationsController extends AbstractSakaiApiController {
 	@PostMapping(value = "/sites/{siteId}/conversations/tags", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<Tag> createTags(@PathVariable String siteId, @RequestBody List<Tag> tags) throws ConversationsPermissionsException {
 
+		if (!isConversationsEnabled()) {
+			throw new EndpointDisabledException("Conversations service is disabled");
+		}
+
 		checkSakaiSession();
         return conversationsService.createTags(tags);
     }
@@ -397,12 +509,20 @@ public class ConversationsController extends AbstractSakaiApiController {
 	@GetMapping(value = "/sites/{siteId}/conversations/tags", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<Tag> getTagsForSite(@PathVariable String siteId) throws ConversationsPermissionsException {
 
+		if (!isConversationsEnabled()) {
+			throw new EndpointDisabledException("Conversations service is disabled");
+		}
+
 		checkSakaiSession();
         return conversationsService.getTagsForSite(siteId);
     }
 
 	@PutMapping(value = "/sites/{siteId}/conversations/tags/{tagId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity updateTag(@PathVariable String siteId, @PathVariable Long tagId, @RequestBody Tag tag) throws ConversationsPermissionsException {
+
+		if (!isConversationsEnabled()) {
+			throw new EndpointDisabledException("Conversations service is disabled");
+		}
 
 		checkSakaiSession();
 
@@ -414,6 +534,10 @@ public class ConversationsController extends AbstractSakaiApiController {
 	@DeleteMapping(value = "/sites/{siteId}/conversations/tags/{tagId}")
     public ResponseEntity deleteTag(@PathVariable Long tagId) throws ConversationsPermissionsException  {
 
+		if (!isConversationsEnabled()) {
+			throw new EndpointDisabledException("Conversations service is disabled");
+		}
+
 		checkSakaiSession();
 
         conversationsService.deleteTag(tagId);
@@ -422,6 +546,10 @@ public class ConversationsController extends AbstractSakaiApiController {
 
 	@PostMapping(value = "/sites/{siteId}/conversations/settings/guidelines")
     public ResponseEntity saveSetting(@PathVariable String siteId, @RequestBody String guidelines) throws ConversationsPermissionsException {
+
+		if (!isConversationsEnabled()) {
+			throw new EndpointDisabledException("Conversations service is disabled");
+		}
 
 		checkSakaiSession();
 
@@ -434,6 +562,10 @@ public class ConversationsController extends AbstractSakaiApiController {
 
 	@PostMapping(value = "/sites/{siteId}/conversations/settings/{setting}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity saveSetting(@PathVariable String siteId, @PathVariable String setting, @RequestBody Boolean on) throws ConversationsPermissionsException {
+
+		if (!isConversationsEnabled()) {
+			throw new EndpointDisabledException("Conversations service is disabled");
+		}
 
 		checkSakaiSession();
 
@@ -471,6 +603,10 @@ public class ConversationsController extends AbstractSakaiApiController {
 
 	@GetMapping(value = "/sites/{siteId}/conversations/agree")
     public ResponseEntity agreeToGuidelines(@PathVariable String siteId) throws ConversationsPermissionsException {
+
+		if (!isConversationsEnabled()) {
+			throw new EndpointDisabledException("Conversations service is disabled");
+		}
 
 		String currentUserId = checkSakaiSession().getUserId();
         ConvStatus convStatus = conversationsService.getConvStatusForSiteAndUser(siteId, currentUserId);

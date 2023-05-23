@@ -17,6 +17,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import org.apache.commons.fileupload.FileItem;
 
+import org.sakaiproject.webapi.DashboardConfig;
+import org.sakaiproject.webapi.EndpointDisabledException;
 import org.sakaiproject.webapi.beans.DashboardRestBean;
 import org.sakaiproject.announcement.api.AnnouncementMessage;
 import org.sakaiproject.announcement.api.AnnouncementService;
@@ -91,6 +93,9 @@ public class DashboardController extends AbstractSakaiApiController {
 	@Resource
 	private PreferencesService preferencesService;
 
+    @Resource
+    private DashboardConfig dashboardConfig;
+
     private List<String> courseWidgets = new ArrayList<>();
     private List<String> homeWidgets = new ArrayList<>();
 
@@ -141,6 +146,10 @@ public class DashboardController extends AbstractSakaiApiController {
 
 	@GetMapping(value = "/users/{userId}/dashboard", produces = MediaType.APPLICATION_JSON_VALUE)
     public DashboardRestBean getUserDashboard(@PathVariable String userId) throws UserNotDefinedException {
+
+        if (!dashboardConfig.isDashboardEnabled()) {
+            throw new EndpointDisabledException("Dashboard is disabled");
+        }
 
 		Session session = checkSakaiSession();
 		String currentUserId = session.getUserId();
@@ -209,6 +218,10 @@ public class DashboardController extends AbstractSakaiApiController {
 	@PutMapping(value = "/users/{userId}/dashboard")
     public void saveUserDashboard(@PathVariable String userId, @RequestBody DashboardRestBean bean) throws UserNotDefinedException {
 
+        if (!dashboardConfig.isDashboardEnabled()) {
+            throw new EndpointDisabledException("Dashboard is disabled");
+        }
+
 		String currentUserId = checkSakaiSession().getUserId();
 		if (!securityService.isSuperUser() && (!StringUtils.isBlank(userId) && !StringUtils.equals(userId, currentUserId))) {
             log.error("You can only update your own user dashboard.");
@@ -227,6 +240,10 @@ public class DashboardController extends AbstractSakaiApiController {
 
 	@GetMapping(value = "/sites/{siteId}/dashboard", produces = MediaType.APPLICATION_JSON_VALUE)
     public DashboardRestBean getSiteDashboard(@PathVariable String siteId) throws UserNotDefinedException {
+
+        if (!dashboardConfig.isDashboardEnabled()) {
+            throw new EndpointDisabledException("Dashboard is disabled");
+        }
 
 		Session session = checkSakaiSession();
 
@@ -266,6 +283,10 @@ public class DashboardController extends AbstractSakaiApiController {
 	@PutMapping(value = "/sites/{siteId}/dashboard")
     public void saveSiteDashboard(@PathVariable String siteId, @RequestBody DashboardRestBean bean) throws UserNotDefinedException {
 
+        if (!dashboardConfig.isDashboardEnabled()) {
+            throw new EndpointDisabledException("Dashboard is disabled");
+        }
+
 		Session session = checkSakaiSession();
 
         try {
@@ -284,6 +305,9 @@ public class DashboardController extends AbstractSakaiApiController {
 
 	@PostMapping(value = "/sites/{siteId}/image", produces = "text/plain")
     public String saveSiteImage(HttpServletRequest req, @PathVariable String siteId) throws Exception {
+        if (!dashboardConfig.isDashboardEnabled()) {
+            throw new EndpointDisabledException("Dashboard is disabled");
+        }
 
         try {
             FileItem fi = (FileItem) req.getAttribute("siteImage");

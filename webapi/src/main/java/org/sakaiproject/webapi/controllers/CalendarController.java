@@ -13,6 +13,8 @@
  ******************************************************************************/
 package org.sakaiproject.webapi.controllers;
 
+import org.sakaiproject.webapi.DashboardConfig;
+import org.sakaiproject.webapi.EndpointDisabledException;
 import org.sakaiproject.webapi.beans.CalendarEventRestBean;
 import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.assignment.api.AssignmentReferenceReckoner;
@@ -80,6 +82,9 @@ public class CalendarController extends AbstractSakaiApiController {
 	@Resource
 	private UserDirectoryService userDirectoryService;
 
+	@Resource
+	private DashboardConfig dashboardConfig;
+
     private Function<CalendarEvent, CalendarEventRestBean> convert = (ce) -> {
 
         CalendarEventRestBean bean = new CalendarEventRestBean(ce, contentHostingService);
@@ -105,6 +110,10 @@ public class CalendarController extends AbstractSakaiApiController {
 	@GetMapping(value = "/users/{userId}/calendar", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<CalendarEventRestBean> getUserCalendar(@PathVariable String userId) throws UserNotDefinedException {
 
+		if (!dashboardConfig.isDashboardEnabled()) {
+			throw new EndpointDisabledException("Dashboard is disabled");
+		}
+
 		Session session = checkSakaiSession();
 
         return siteService.getUserSites().stream().map(s -> {
@@ -122,6 +131,10 @@ public class CalendarController extends AbstractSakaiApiController {
 
 	@GetMapping(value = "/sites/{siteId}/calendar", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<CalendarEventRestBean> getSiteCalendar(@PathVariable String siteId) throws UserNotDefinedException {
+
+		if (!dashboardConfig.isDashboardEnabled()) {
+			throw new EndpointDisabledException("Dashboard is disabled");
+		}
 
 		Session session = checkSakaiSession();
         try {

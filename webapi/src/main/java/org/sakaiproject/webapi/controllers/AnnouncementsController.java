@@ -15,6 +15,8 @@ package org.sakaiproject.webapi.controllers;
 
 import org.sakaiproject.announcement.api.AnnouncementMessage;
 import org.sakaiproject.announcement.api.AnnouncementService;
+import org.sakaiproject.webapi.DashboardConfig;
+import org.sakaiproject.webapi.EndpointDisabledException;
 import org.sakaiproject.webapi.beans.AnnouncementRestBean;
 import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.component.api.ServerConfigurationService;
@@ -69,8 +71,15 @@ public class AnnouncementsController extends AbstractSakaiApiController {
 	@Resource
 	private UserDirectoryService userDirectoryService;
 
+	@Resource
+	private DashboardConfig dashboardConfig;
+
 	@GetMapping(value = "/users/{userId}/announcements", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<AnnouncementRestBean> getUserAnnouncements(@PathVariable String userId) throws UserNotDefinedException {
+
+        if (!dashboardConfig.isDashboardEnabled()) {
+            throw new EndpointDisabledException("Dashboard is disabled");
+        }
 
         Session session = checkSakaiSession();
         return announcementService.getViewableAnnouncementsForCurrentUser(10).entrySet()
@@ -94,6 +103,10 @@ public class AnnouncementsController extends AbstractSakaiApiController {
 
 	@GetMapping(value = "/sites/{siteId}/announcements", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<AnnouncementRestBean> getSiteAnnouncements(@PathVariable String siteId) throws UserNotDefinedException {
+
+        if (!dashboardConfig.isDashboardEnabled()) {
+            throw new EndpointDisabledException("Dashboard is disabled");
+        }
 
 		Session session = checkSakaiSession();
 
