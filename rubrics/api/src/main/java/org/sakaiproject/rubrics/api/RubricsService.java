@@ -100,9 +100,12 @@ public interface RubricsService {
 
     Optional<CriterionTransferBean> getCriterion(Long criterionId, String siteId);
 
+    Optional<AssociationTransferBean> getAssociationForToolAndItem(String toolId, String itemId);
+    /** NB: the siteId is not validated; invoke only if you know the itemId belongs to the specified site */
     Optional<AssociationTransferBean> getAssociationForToolAndItem(String toolId, String itemId, String siteId);
-
+    /** NB: the siteId is not validated; invoke only if you know the itemIds belong to the specified site */
     Map<String, AssociationTransferBean> getAssociationsForToolAndItems(String toolId, Set<String> itemIds, String siteId);
+    /** NB: the siteId is not validated; invoke only if you know the itemIds belong to the specified site */
     Map<String, AssociationTransferBean> getAssociationsForToolsAndItems(Set<String> toolIds, Set<String> itemIds, String siteId);
 
     Optional<EvaluationTransferBean> getEvaluation(Long evaluationId, String siteId);

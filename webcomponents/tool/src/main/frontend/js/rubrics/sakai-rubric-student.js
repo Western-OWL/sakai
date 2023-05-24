@@ -180,7 +180,7 @@ class SakaiRubricStudent extends RubricsElement {
         })
         .then(rubric => {
 
-          if (!this.evaluatedItemId || this.evaluatedItemId == "undefined") {
+          if (!this.evaluatedItemId || this.evaluatedItemId === "undefined") {
             // No item to be evaluated
             this.evaluation = { criterionOutcomes: [] };
             this.preview = true;
