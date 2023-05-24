@@ -529,7 +529,11 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
         }
 
         Rubric rubric;
-        if (bean.getId() == null) {
+        final boolean locked;
+        boolean isNew = bean.getId() == null;
+
+        if (isNew) {
+            locked = false;
             rubric = new Rubric();
             rubric.setCriteria(bean.getCriteria().stream().map(c -> {
                 Criterion criterion = new Criterion();
@@ -552,12 +556,7 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
                 throw new SecurityException("You must be a rubrics editor to create/edit rubrics");
             }
 
-            if (rubric.getLocked()) {
-                // Only permitted modifications: shared, date modified
-                rubric.setShared(bean.getShared());
-                rubric.setModified(bean.getModified());
-                return new RubricTransferBean(rubricRepository.save(rubric));
-            }
+            locked = rubric.getLocked();
 
             rubric.getCriteria().forEach(c -> bean.getCriteria().stream()
                     .filter(bc -> bc.getId().equals(c.getId()))
@@ -565,24 +564,33 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
                     .ifPresent(bc -> {
                         c.setTitle(bc.getTitle());
                         c.setDescription(bc.getDescription());
-                        c.setWeight(bc.getWeight());
+                        if (!locked) {
+                            c.setWeight(bc.getWeight());
+                        }
                         c.getRatings().forEach(r -> bc.getRatings().stream()
                                 .filter(br -> br.getId().equals(r.getId()))
                                 .findAny()
                                 .ifPresent(br -> {
                                     r.setTitle(br.getTitle());
                                     r.setDescription(br.getDescription());
-                                    r.setPoints(br.getPoints());
+                                    if (!locked) {
+                                        r.setPoints(br.getPoints());
+                                    }
                                 }));
                     }));
         }
+
         rubric.setTitle(bean.getTitle());
-        rubric.setWeighted(false);
-        rubric.setCreated(bean.getCreated());
         rubric.setModified(bean.getModified());
-        rubric.setOwnerId(bean.getOwnerId());
-        rubric.setCreatorId(bean.getCreatorId());
         rubric.setShared(bean.getShared());
+        if (!locked) {
+            rubric.setWeighted(false);
+            rubric.setOwnerId(bean.getOwnerId());
+        }
+        if (isNew) {
+            rubric.setCreated(bean.getCreated());
+            rubric.setCreatorId(bean.getCreatorId());
+        }
 
         return new RubricTransferBean(rubricRepository.save(rubric));
     }
@@ -719,20 +727,29 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
     }
 
     @Transactional(readOnly = true)
+    public Optional<AssociationTransferBean> getAssociationForToolAndItem(String toolId, String itemId) {
+
+        return associationRepository.findByToolIdAndItemId(toolId, itemId).filter(this::canViewAssociation).map(AssociationTransferBean::new);
+    }
+
+    /** @inheritDoc */
+    @Transactional(readOnly = true)
     public Optional<AssociationTransferBean> getAssociationForToolAndItem(String toolId, String itemId, String siteId) {
 
         return Optional.ofNullable(getAssociationsForToolAndItems(toolId, Collections.singleton(itemId), siteId).get(itemId));
     }
 
+    /** @inheritDoc */
     @Transactional(readOnly = true)
     public Map<String, AssociationTransferBean> getAssociationsForToolAndItems(String toolId, Set<String> itemIds, String siteId) {
 
         return getAssociationsForToolsAndItems(Collections.singleton(toolId), itemIds, siteId);
     }
 
+    /** @inheritDoc */
     @Transactional(readOnly = true)
     public Map<String, AssociationTransferBean> getAssociationsForToolsAndItems(Set<String> toolIds, Set<String> itemIds, String siteId) {
-        return associationRepository.findByToolIdsAndItemIds(toolIds, itemIds).entrySet().stream().collect(Collectors.toMap(
+        return associationRepository.findByToolIdsAndItemIds(toolIds, itemIds).entrySet().stream().filter(entry -> canViewAssociation(entry.getValue(), siteId)).collect(Collectors.toMap(
                 entry -> entry.getKey(),
                 entry -> new AssociationTransferBean(entry.getValue())));
     }
@@ -1234,7 +1251,7 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
         }
 
         // Create pdf document
-        Document document = new Document(PageSize.A3.rotate());
+        Document document = new Document(PageSize.A4.rotate());
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         PdfWriter.getInstance(document, out);
         document.open();
@@ -1706,19 +1723,23 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
             return false;
         }
 
+        return canViewAssociation(association, rubric.getOwnerId());
+    }
+
+    /**
+     * NB: use only if you're certain that the association belongs to the siteId
+     */
+    private boolean canViewAssociation(ToolItemRubricAssociation association, String siteId) {
         /*
          * Checking isRubricVisible is not sufficient, since the association itself can be hidden from students.
          * Rubrics editors, evaluators can always view associations; evaluees can view an association only if it's not hidden.
          */
-
-        // OWLTODO: test if you can create an association with a shared Rubric from a different site in Sakai 20
-        if (isEditor(rubric.getOwnerId())
-            || isEvaluator(rubric.getOwnerId())
-            || rubric.getCreatorId().equalsIgnoreCase(sessionManager.getCurrentSessionUserId())) {
+         if (isEditor(siteId)
+            || isEvaluator(siteId)) {
             return true;
         }
 
-        return isEvaluee(rubric.getOwnerId()) && !isAssociationHiddenFromStudents(association);
+        return isEvaluee(siteId) && !isAssociationHiddenFromStudents(association);
     }
 
     /**

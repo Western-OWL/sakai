@@ -200,7 +200,7 @@ public class RubricsRestController extends AbstractSakaiApiController {
 
         checkSakaiSession();
 
-        Optional<AssociationTransferBean> optBean = rubricsService.getAssociationForToolAndItem(toolId, itemId, siteId);
+        Optional<AssociationTransferBean> optBean = rubricsService.getAssociationForToolAndItem(toolId, itemId);
         if (optBean.isPresent()) {
             return ResponseEntity.ok(optBean.get());
         } else {

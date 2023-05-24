@@ -170,6 +170,11 @@ public class RubricsServiceTests extends AbstractTransactionalJUnit4SpringContex
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        assignStudentPermissions(user1);
+        assignStudentPermissions(user2);
+        assignStudentPermissions(user3);
+        assignInstructorPermissions(instructor);
     }
 
     @Test
@@ -621,5 +626,17 @@ public class RubricsServiceTests extends AbstractTransactionalJUnit4SpringContex
             when(userDirectoryService.getUser(instructor)).thenReturn(instructorUser);
         } catch (UserNotDefinedException unde) {
         }
+    }
+
+    private void assignStudentPermissions(String userId) {
+        when(securityService.unlock(userId, RubricsConstants.RBCS_PERMISSIONS_EDITOR, siteRef)).thenReturn(false);
+        when(securityService.unlock(userId, RubricsConstants.RBCS_PERMISSIONS_EVALUATOR, siteRef)).thenReturn(false);
+        when(securityService.unlock(userId, RubricsConstants.RBCS_PERMISSIONS_EVALUEE, siteRef)).thenReturn(true);
+    }
+
+    private void assignInstructorPermissions(String userId) {
+        when(securityService.unlock(userId, RubricsConstants.RBCS_PERMISSIONS_EDITOR, siteRef)).thenReturn(true);
+        when(securityService.unlock(userId, RubricsConstants.RBCS_PERMISSIONS_EVALUATOR, siteRef)).thenReturn(true);
+        when(securityService.unlock(userId, RubricsConstants.RBCS_PERMISSIONS_EVALUEE, siteRef)).thenReturn(false);
     }
 }
