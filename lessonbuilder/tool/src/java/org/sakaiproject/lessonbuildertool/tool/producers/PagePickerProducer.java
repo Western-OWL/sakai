@@ -26,12 +26,10 @@ package org.sakaiproject.lessonbuildertool.tool.producers;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.function.Function;
@@ -69,6 +67,7 @@ import org.sakaiproject.lessonbuildertool.SimplePage;
 import org.sakaiproject.lessonbuildertool.SimplePageItem;
 import org.sakaiproject.lessonbuildertool.SimplePageLogEntry;
 import org.sakaiproject.lessonbuildertool.model.SimplePageToolDao;
+import org.sakaiproject.lessonbuildertool.service.LessonBuilderAccessService;
 import org.sakaiproject.lessonbuildertool.service.LessonsAccess;
 import org.sakaiproject.lessonbuildertool.tool.beans.SimplePageBean;
 import org.sakaiproject.lessonbuildertool.tool.view.GeneralViewParameters;
@@ -99,6 +98,12 @@ public class PagePickerProducer implements ViewComponentProducer, NavigationCase
     private MessageLocator messageLocator;
     private LocaleGetter localeGetter;
     private Map<String,String> imageToMimeMap;
+    private static LessonBuilderAccessService lessonBuilderAccessService;
+    public void setLessonBuilderAccessService (LessonBuilderAccessService a) {
+        if (lessonBuilderAccessService == null) {
+            lessonBuilderAccessService = a;
+        }
+    }
 
     private boolean somePagesHavePrerequisites = false;
     private long currentPageId = -1;
@@ -500,6 +505,12 @@ public class PagePickerProducer implements ViewComponentProducer, NavigationCase
                     Set<String> myGroups = simplePageBean.getMyGroups();
 
                     for (SimplePageItem pageItem : simplePageToolDao.findItemsOnPage(entry.pageId)) {
+
+                        // Don't show multimedia items if they're not available to the user
+                        if (!lessonBuilderAccessService.isMultimediaItemAvailable(pageItem, simplePageBean)) {
+                            continue;
+                        }
+
                         // if item is group controlled, skip if user isn't in one of the groups
                         Collection<String>itemGroups = null;
                         try {

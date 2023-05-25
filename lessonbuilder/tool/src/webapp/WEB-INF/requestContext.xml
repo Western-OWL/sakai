@@ -134,6 +134,7 @@
 		<property name="localeGetter" ref="requestLocaleProxy" />
 		<property name="lessonsAccess" ref="org.sakaiproject.lessonbuildertool.service.LessonsAccess" />
 		<property name="imageToMimeMap" ref="org.sakaiproject.lessonbuildertool.util.ImageToMimeMap"/>
+		<property name="lessonBuilderAccessService" ref="org.sakaiproject.lessonbuildertool.service.LessonBuilderAccessService" />
 	</bean>
 
 	<bean class="org.sakaiproject.lessonbuildertool.tool.producers.LinkTrackerProducer" >
