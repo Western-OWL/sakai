@@ -91,7 +91,7 @@ public class TaskServiceImpl implements TaskService, Observer {
 
     public void update(Observable o, Object arg) {
 
-        if (arg instanceof Event) {
+        if (taskServiceEnabled && arg instanceof Event) {
             Event event = (Event) arg;
             if (event.getEvent().equals(SiteService.SECURE_UPDATE_SITE_MEMBERSHIP)) {
                 try {
