@@ -294,8 +294,10 @@ public class ShowItemProducer implements ViewComponentProducer, NavigationCaseRe
 	    }
 
 		String name = "";
-	    if (item != null)
-		simplePageBean.adjustBackPath(params.getBackPath(), params.getSendingPage(), item.getId(), name);
+		if (item != null) {
+			name = Objects.toString(item.getName(), "");
+			simplePageBean.adjustBackPath(params.getBackPath(), params.getSendingPage(), item.getId(), name);
+		}
 
 	    UIComponent nav = UIOutput.make(tofill, "nav");
 	    if (inline)
