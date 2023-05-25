@@ -1254,24 +1254,17 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 			boolean forceButtonColor = false;
 			String color = null;
 			for (SimplePageItem i : itemList) {
+
+				// Don't show multimedia items if they're not available to the user
+				if (!lessonBuilderAccessService.isMultimediaItemAvailable(i, simplePageBean)) {
+					continue;
+				}
+
+				// break is not a normal item. handle it first
+				// this will work whether first item is break or not. Might be a section
+				// break or a normal item
 				String sakaiId = Objects.toString(i.getSakaiId(), "");
 				String itemName = Objects.toString(i.getName(), "");
-
-				// If the content is MULTIMEDIA (type 7) and the sakaiId is populated, then this is
-				// a Sakai content reference. We can then check if it's available to the current user
-				if (i.getType() == SimplePageItem.MULTIMEDIA && StringUtils.isNotBlank(sakaiId)) {
-				    if (!contentHostingService.isAvailable(sakaiId)) {
-						// The Lessons folder can be hidden by default via sakai.properties (lessonbuilder.folder.hidden = true).
-						// If this hidden resource is not Lessons uploaded content, it should be skipped.
-						if (!simplePageBean.isLessonsUpload(sakaiId))
-						{
-							continue;
-						}
-				    }
-				}
-				// break is not a normal item. handle it first
-			        // this will work whether first item is break or not. Might be a section
-			        // break or a normal item
 				if (first || i.getType() == SimplePageItem.BREAK) {
 				    boolean sectionbreak = false;
 				    forceButtonColor = BooleanUtils.toBoolean(i.getAttribute("forceBtn"));

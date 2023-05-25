@@ -59,6 +59,7 @@ import org.sakaiproject.time.api.UserTimeService;
 import org.sakaiproject.user.api.UserDirectoryService;
 import uk.org.ponder.messageutil.MessageLocator;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.sakaiproject.authz.api.AuthzGroupService;
 import org.sakaiproject.authz.api.SecurityAdvisor;
 import org.sakaiproject.authz.api.SecurityService;
@@ -1444,6 +1445,29 @@ public class LessonBuilderAccessService {
 	    if (parent != null)
 		return isAvailable(parent);
 	    else
+		return true;
+	}
+
+	/**
+	 * If the given SimplePageItem is multimedia, check to see if its available to the current user.
+	 * @param pageItem the item to be checked
+	 * @param simplePageBean the page bean to be used
+	 * @return true if the item is non-multimedia, or is available; false if the item is multimedia and not available to the current user
+	 */
+	public boolean isMultimediaItemAvailable(SimplePageItem pageItem, SimplePageBean simplePageBean) {
+		// If the content is MULTIMEDIA (type 7) and the sakaiId is populated, then this is
+		// a Sakai content reference. We can then check if it's available to the current user
+		if (pageItem.getType() == SimplePageItem.MULTIMEDIA) {
+			String sakaiId = Objects.toString(pageItem.getSakaiId(), "");
+			if (StringUtils.isNotBlank(sakaiId) && !contentHostingService.isAvailable(sakaiId) && simplePageBean != null) {
+				// The Lessons folder can be hidden by default via sakai.properties (lessonbuilder.folder.hidden = true).
+				// If this hidden resource is not Lessons uploaded content, it should be skipped.
+				if (!simplePageBean.isLessonsUpload(sakaiId)) {
+					return false;
+				}
+			}
+		}
+
 		return true;
 	}
 
