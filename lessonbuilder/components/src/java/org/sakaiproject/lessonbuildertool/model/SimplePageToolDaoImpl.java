@@ -36,7 +36,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
-import java.util.Iterator;
 import java.util.stream.Collectors;
 
 import lombok.Setter;
@@ -98,7 +97,6 @@ import org.sakaiproject.lessonbuildertool.api.LessonBuilderConstants;
 import org.sakaiproject.lessonbuildertool.api.LessonBuilderEvents;
 import org.sakaiproject.lessonbuildertool.util.LessonsSubNavBuilder;
 import org.sakaiproject.site.api.Group;
-import org.sakaiproject.site.api.Site;
 import org.sakaiproject.site.api.SitePage;
 import org.sakaiproject.site.api.SiteService;
 import org.sakaiproject.site.api.ToolConfiguration;
@@ -1041,7 +1039,7 @@ public class SimplePageToolDaoImpl extends HibernateDaoSupport implements Simple
 		Object [] fields = new Object[1];
 		fields[0] = itemId;
 
-		List<String> users = sqlService.dbRead("select a.userId from lesson_builder_log a where a.itemId = ? and a.complete = true", fields, null);
+		List<String> users = sqlService.dbRead("select a.userId from lesson_builder_log a where a.itemId = ? and a.complete = 1", fields, null);
 
 		return users;
 	}
