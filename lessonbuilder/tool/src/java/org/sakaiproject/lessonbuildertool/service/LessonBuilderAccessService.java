@@ -1457,7 +1457,7 @@ public class LessonBuilderAccessService {
 	public boolean isMultimediaItemAvailable(SimplePageItem pageItem, SimplePageBean simplePageBean) {
 		// If the content is MULTIMEDIA (type 7) and the sakaiId is populated, then this is
 		// a Sakai content reference. We can then check if it's available to the current user
-		if (pageItem.getType() == SimplePageItem.MULTIMEDIA) {
+		if (pageItem != null && pageItem.getType() == SimplePageItem.MULTIMEDIA) {
 			String sakaiId = Objects.toString(pageItem.getSakaiId(), "");
 			if (StringUtils.isNotBlank(sakaiId) && !contentHostingService.isAvailable(sakaiId) && simplePageBean != null) {
 				// The Lessons folder can be hidden by default via sakai.properties (lessonbuilder.folder.hidden = true).
