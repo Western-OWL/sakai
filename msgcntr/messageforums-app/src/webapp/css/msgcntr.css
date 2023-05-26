@@ -350,7 +350,7 @@ h2 + .forumsCollapseTrigger,
 .allMessages img {
 	max-width: none;
 }
-.allMessages thead th {
+.allMessages.tablesorter thead th {
 	padding: 8px;
 	border: 1px solid var(--sakai-border-color);
 	background-color: var(--sakai-background-color-2);
@@ -367,9 +367,10 @@ h2 + .forumsCollapseTrigger,
 .allMessages thead th.header{
 	text-align: left;
 }
-.allMessages tbody td {
+.allMessages.tablesorter tbody td {
 	padding: 8px;
 	border-left: 1px solid var(--sakai-border-color); /* column borders */
+	border-bottom: 0 none; /* to override tablesorter styles */ 
 }
 .allMessages tbody td.messageTitle {
 	border-left: 1px solid transparent; /* no column border between expanding arrows and Conversation title */
