@@ -11,12 +11,8 @@ $.ajaxSetup({
  calling template has dom placeholder for dialog,
  args:class of trigger, id of dialog, message strings
  */
-sakai.getSiteInfo = function(trigger, dialogTarget, nosd, nold){
-	$("." + trigger).click(function(e){
-		e.preventDefault();
-		$("#" + dialogTarget).modal('show');
-	});
-	const siteId = $("." + trigger).attr('id');
+sakai.getSiteInfo = function(element, dialogTarget, nosd, nold){
+	const siteId = $(element).attr('id');
 	if (!siteId) {
 		return;
 	}
@@ -69,7 +65,7 @@ sakai.getSiteInfo = function(trigger, dialogTarget, nosd, nold){
 				'</div>' +
 			'</div>'
 		);
-		$("#" + dialogTarget).html(content).attr('aria-hidden','true').attr('tabindex', '-1').attr('role', 'dialog').addClass('modal fade');
+		$("#" + dialogTarget).html(content).attr('aria-hidden','true').attr('tabindex', '-1').attr('role', 'dialog').addClass('modal fade').show();
 		return false;
 	});
 };

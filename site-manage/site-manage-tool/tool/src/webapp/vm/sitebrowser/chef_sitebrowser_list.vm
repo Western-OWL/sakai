@@ -2,7 +2,11 @@
 <div id="dialog"></div>
 <script type="text/javascript" language="JavaScript">
 	$(document).ready(function () {
-		sakai.getSiteInfo('getSiteDesc','dialog','$tlang.getString("sitegen.siteinfolist.nosd")','$tlang.getString("sitegen.siteinfolist.nold")');
+		$(".getSiteDesc").click(function(e) {
+			e.preventDefault();
+			$("#dialog").modal('show');
+			sakai.getSiteInfo(this, 'dialog', '$tlang.getString("sitegen.siteinfolist.nosd")', '$tlang.getString("sitegen.siteinfolist.nold")');
+		});
 	});
 </script>
 
