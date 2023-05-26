@@ -2,7 +2,11 @@
 </div>
 <script type="text/javascript">
 	$(document).ready(function(){
-		sakai.getSiteInfo('getSiteDesc','dialog','$tlang.getString("mb.nosd")','$tlang.getString("mb.nold")');
+		$(".getSiteDesc").click(function(e) {
+			e.preventDefault();
+			$("#dialog").modal('show');
+			sakai.getSiteInfo(this, 'dialog', '$tlang.getString("mb.nosd")', '$tlang.getString("mb.nosd")');
+		});
 		sakai.setupMessageListener("messageHolder", "messageInformation");
 	});
 </script>

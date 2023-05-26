@@ -2,8 +2,11 @@
 
 <script>
 	$(document).ready(function () {
-
-		sakai.getSiteInfo('getSiteDesc','desc-modal','$tlang.getString("sitegen.siteinfolist.nosd")','$tlang.getString("sitegen.siteinfolist.nold")');
+		$(".getSiteDesc").click(function(e) {
+			e.preventDefault();
+			$("#desc-modal").modal('show');
+			sakai.getSiteInfo(this, 'dialog', '$tlang.getString("sitegen.siteinfolist.nosd")', '$tlang.getString("sitegen.siteinfolist.nold")');
+		});
 		sakai.setupGroupModalLinks('group-modal','$tlang.getString("sinfo.list.groups.memb")','$tlang.getString("sinfo.list.groups.print")','$tlang.getString("sitegen.siteinfolist.name")','$tlang.getString("sitegen.siteinfolist.role")','$tlang.getString("sitegen.siteinfolist.email")');
 		sakai.setupSelectList('siteMembers','selunselallid','selectedSelected');
 		utils.setupUtils();
