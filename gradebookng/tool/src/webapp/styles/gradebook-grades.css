@@ -392,18 +392,10 @@ div.wicket-modal .gb-grade-summary-content .gb-summary-grade-panel .row
 #gbConnectionTimeoutFeedback {
   position: fixed;
   z-index: 99999999;
-  top: 80px;
-  padding: 5px;
+  top: 120px;
   box-shadow: var(--elevation-2dp);
-  font-size: 12px;
-  width: 350px;
   margin-left: -175px;
   left: 50%;
-}
-
-#gbConnectionTimeoutFeedback:before {
-  font-family: "gradebook-icons";
-  content: "\f071";
 }
 
 /* Summary styles */
