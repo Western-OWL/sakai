@@ -987,7 +987,7 @@ div.msgcntr-profile-qtip {
 	border-radius: 4px;
 	background-color: transparent;
 	line-height: 1;
-	color: var(--sakai-text-color-disabled); /* needed for colour contrast with badge background colours */
+	color: var(--sakai-color-gray--darker-4); /* needed for colour contrast with badge background colours */
 	font-size: 12px;
 	font-weight: bold;
 	white-space: nowrap;
@@ -1002,7 +1002,7 @@ div.msgcntr-profile-qtip {
 }
 .badge-locked {
 	background-color: #fbced0;
-	color: var(--sakai-text-color-3); /* needed for colour contrast with badge background colours */
+	color: var(--sakai-color-gray--darker-5); /* needed for colour contrast with badge background colours */
 }
 .badge-moderated {
 	background-color: #f5dfb0;
@@ -1013,11 +1013,11 @@ div.msgcntr-profile-qtip {
 }
 .badge-unavailable {
 	background-color: #fbbf72;
-	color: var(--sakai-text-color-3); /* needed for colour contrast with badge background colours */
+	color: var(--sakai-color-gray--darker-5); /* needed for colour contrast with badge background colours */
 }
 .badge-inactive {
 	background-color: #f3Afd6;
-	color: var(--sakai-text-color-3); /* needed for colour contrast with badge background colours */
+	color: var(--sakai-color-gray--darker-5); /* needed for colour contrast with badge background colours */
 }
 .badge-post-first {
 	background-color: #b5ffc8;
@@ -1027,7 +1027,7 @@ div.msgcntr-profile-qtip {
 }
 .messagePending{
 	background-color: #91d7ee;
-	color: var(--sakai-text-color-3); /* needed for colour contrast with badge background colours */
+	color: var(--sakai-color-gray--darker-5); /* needed for colour contrast with badge background colours */
 }
 .messageDenied{
 	background-color: #ffadbb;
