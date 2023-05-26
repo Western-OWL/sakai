@@ -8568,7 +8568,7 @@ public class AssignmentAction extends PagedResourceActionII {
 
                 //RUBRICS, Save the binding between the assignment and the rubric
                 Map<String, String> rubricParams = getRubricConfigurationParameters(params, gradeType);
-                if (!rubricParams.isEmpty()) {
+                if (!rubricParams.isEmpty() && "1".equals(rubricParams.get("rbcs-associate"))) {
                     rubricsService.saveRubricAssociation(RubricsConstants.RBCS_TOOL_ASSIGNMENT, a.getId(), rubricParams);
                 }
 
