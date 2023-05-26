@@ -293,7 +293,7 @@ h2 + .forumsCollapseTrigger,
 	margin-top: 16px;
 }
 .sakai-table-buttonContainer.threadOptions {
-	margin-bottom: 16px;
+	margin-bottom: 8px;
 }
 .sakai-table-buttonContainer.threadOptions > .button:last-of-type {
 	margin-right: 0;
@@ -370,7 +370,7 @@ h2 + .forumsCollapseTrigger,
 .allMessages.tablesorter tbody td {
 	padding: 8px;
 	border-left: 1px solid var(--sakai-border-color); /* column borders */
-	border-bottom: 0 none; /* to override tablesorter styles */ 
+	border-bottom: 0 none; /* to override tablesorter styles for tree message hierarchy */ 
 }
 .allMessages tbody td.messageTitle {
 	border-left: 1px solid transparent; /* no column border between expanding arrows and Conversation title */
@@ -1048,7 +1048,7 @@ div.msgcntr-profile-qtip {
 }
 .standardCrumbs > li + li::before {
 	content: "\f105";
-	padding: 0 16px;
+	padding: 0 8px;
 	font-family: FontAwesome;
 }
 .view-message-nav {
@@ -1060,7 +1060,7 @@ div.msgcntr-profile-qtip {
 }
 .view-message-nav > a[href].button,
 .view-message-nav > span {
-	margin: 16px 0 16px 4px;
+	margin: 8px 0 8px 4px;
 }
 
 .topicViewActions #messNavHolder

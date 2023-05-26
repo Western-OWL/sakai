@@ -70,12 +70,12 @@ table{
 	{
 		@include display-flex();
 		@include flex-direction(column);
-		margin: 0 auto 10px 0;
-		padding-right: 10px;
+		margin: 0 auto $standard-space-2x 0;
+		padding-right: $standard-spacing;
 
 		label
 		{
-			margin: 0 4px 0 0;
+			margin: 0 $standard-space 0 0;
 			white-space: nowrap;
 		}
 	}
@@ -86,7 +86,7 @@ table{
 	}
 	.sakai-table-viewFilter ~ .sakai-table-searchFilter
 	{
-		margin-top: 10px;
+		margin-top: $standard-space-2x;
 	}
 	.sakai-table-searchFilter
 	{
@@ -94,7 +94,7 @@ table{
 
 		.sakai-table-searchFilter-searchField, input[type="search"]
 		{
-			margin-right: 4px;
+			margin-right: $standard-space;
 			width: 200px;
 			@include flex-grow(1);
 			align-self: stretch;	// make the search field the same height as the buttons
@@ -104,16 +104,16 @@ table{
 		input[type=button]:disabled, input[type=submit]:disabled,
 		button, button:disabled
 		{
-			margin: 0 4px 0 0;
+			margin: 0 $standard-space 0 0;
 		}
 	}
 
 	.sakai-table-pagerContainer
 	{
-		margin-bottom: 10px;
+		margin-bottom: $standard-space-2x;
 		text-align: center;
 		margin-left: auto;
-		padding-left: 10px;
+		padding-left: $standard-spacing;
 	}
 	.sakai-table-pagerLabel
 	{
@@ -153,7 +153,7 @@ table{
 
 	.sakai-table-toolBar-centre
 	{
-		margin-bottom: 10px;
+		margin-bottom: $standard-space-2x;
 	}
 
 	.sakai-table-viewFilter
@@ -255,7 +255,7 @@ table{
 			{
 				order: -1;
 				width: 100%;
-				margin-bottom: 10px;
+				margin-bottom: $standard-space-2x;
 			}
 
 			button, input
