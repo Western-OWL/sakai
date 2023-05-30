@@ -138,6 +138,7 @@ public class SiteHandler extends WorksiteHandler
 
 	private static final long AUTO_FAVORITES_REFRESH_INTERVAL_MS = 30000;
 
+	private boolean profileEnabled = false;
 	protected ProfileImageLogic imageLogic;
 
 	public SiteHandler()
@@ -145,6 +146,8 @@ public class SiteHandler extends WorksiteHandler
 		setUrlFragment(SiteHandler.URL_FRAGMENT);
 		mutableSitename =  ServerConfigurationService.getString("portal.mutable.sitename", "-");
 		mutablePagename =  ServerConfigurationService.getString("portal.mutable.pagename", "-");
+		String profileTool = ServerConfigurationService.getString("portal.profiletool", "sakai.profile2");
+		profileEnabled = !"none".equals(StringUtils.trimToEmpty(profileTool)); // according to docs, "none" should be used to disable profile in portal
 		imageLogic = ComponentManager.get(ProfileImageLogic.class);
 	}
 
@@ -691,7 +694,7 @@ public class SiteHandler extends WorksiteHandler
 				{
 					includeLogo(rcontext, req, session, siteId);
 					includeTabs(rcontext, req, session, siteId, getUrlFragment(), false);
-					rcontext.put("picEditorEnabled", imageLogic.isPicEditorEnabled());
+					rcontext.put("picEditorEnabled", profileEnabled ? imageLogic.isPicEditorEnabled() : false);
 				}
 				else
 				{
