@@ -336,7 +336,7 @@ ALTER TABLE lti_tools ADD lti13_platform_private_next CLOB;
 ALTER TABLE FILE_CONVERSION_QUEUE ADD CONSTRAINT UK_j0t1gd58buw5b0cwxayincy09 UNIQUE (REFERENCE);
 -- End SAK-45692
 
-------- OWLTODO: Snippet below commented out for now, pending further investigation of impact ----------
+------- OWL: Snippet below commented out, it will break access to certain uploaded files. See OWL-5293 ----------
 -- Start SAK-46414
 -- ALTER TABLE SAM_MEDIA_T DROP COLUMN ISHTMLINLINE;
 -- ALTER TABLE SAM_MEDIA_T DROP COLUMN MEDIA;
