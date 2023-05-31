@@ -879,6 +879,22 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
                     re.setOverallComment(savedEvaluation.getOverallComment());
                     Map<Long, CriterionOutcome> outcomes = savedEvaluation.getCriterionOutcomes().stream()
                             .collect(Collectors.toMap(CriterionOutcome::getCriterionId, co -> co));
+                    // Remove returned criterion outcomes for any criteria that aren't in the evaluation we've just saved.
+                    re.getCriterionOutcomes().removeIf(rco -> {
+                        if (!outcomes.containsKey(rco.getCriterionId())) {
+                            log.warn("The previous returned evaluation with ID {} contains an outcome for criterion ID: {}. This ID is not in the evaluation with ID {} that we are retruning; it will be removed. If this happens, there may be a bug with Rubrics locking", re.getId(), rco.getCriterionId(), savedEvaluation.getId());
+                            return true;
+                        }
+                        return false;
+                    });
+                    // Add returned criterion outcomes for any criteria outcomes in the evaluation we've just saved that aren't already in the returned evaluation
+                    Set<Long> returnedCriterionIds = re.getCriterionOutcomes().stream().map(ReturnedCriterionOutcome::getCriterionId).collect(Collectors.toSet());
+                    savedEvaluation.getCriterionOutcomes().stream().filter(co -> !returnedCriterionIds.contains(co.getCriterionId())).forEach(co -> {
+                        // There isn't a returned outcome for this criterion yet, so create one
+                        log.warn("We are adding a returned criterion outcome for criterion ID {} to the returned evaluation with ID {} because it wasn't already present. If this happens, there may be a bug with Rubrics locking", co.getCriterionId(), re.getId());
+                        re.getCriterionOutcomes().add(new ReturnedCriterionOutcome(co));
+                    });
+                    // Update existing returned criterion outcomes
                     re.getCriterionOutcomes().forEach(rco -> {
                         CriterionOutcome o = outcomes.get(rco.getCriterionId());
                         rco.setSelectedRatingId(o.getSelectedRatingId());
@@ -949,19 +965,23 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
 
     public Optional<ToolItemRubricAssociation> saveRubricAssociation(String toolId, String toolItemId, final Map<String, String> params) {
 
+        /*
+         * Quick note: there's a number of code paths through this method that don't invoke associationRepository.save(...), etc.
+         * That's ok! RubricsServiceImpl is @Transactional, so changes are persisted when this method returns
+         * --bbailla2
+         */
         if (StringUtils.isNotBlank(toolId) && StringUtils.isNotBlank(toolItemId) && !CollectionUtils.isEmpty(params)) {
 
             final String optionRubricId = Optional.ofNullable(params.get(RubricsConstants.RBCS_LIST)).orElse(StringUtils.EMPTY);
             final String optionRubricAssociate = Optional.ofNullable(params.get(RubricsConstants.RBCS_ASSOCIATE)).orElse(StringUtils.EMPTY);
             final Optional<ToolItemRubricAssociation> existingAssociation = getRubricAssociation(toolId, toolItemId);
 
-            Long requestedRubricId;
-            try {
-                requestedRubricId = NumberUtils.createLong(optionRubricId);
-            } catch (NumberFormatException nfe) {
-                log.warn("requested rubric id [{}] could not be converted to a long", optionRubricId, nfe);
+            if (!existingAssociation.isPresent() && "0".equals(optionRubricAssociate)) {
+                // Association doesn't exist, and we're not associating; return early
                 return Optional.empty();
             }
+
+            Long requestedRubricId = NumberUtils.toLong(optionRubricId);
 
             if (existingAssociation.isPresent()) {
                 final ToolItemRubricAssociation association = existingAssociation.get();
@@ -984,22 +1004,46 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
                         Optional<ToolItemRubricAssociation> optionalExistingAssociation = findAssociationByItemIdAndRubricId(toolItemId, requestedRubricId);
 
                         if (optionalExistingAssociation.isPresent()) {
+                            if (!canEditAssociation(optionalExistingAssociation.get())) {
+                                throw new SecurityException("Only Rubrics editors can edit rubric associations");
+                            }
                             // if there's already an association for the requested rubric, reuse it
                             optionalExistingAssociation.get().setActive(true);
                         } else {
                             // if there is no association for the requested rubric create a new association
+                            getRepoRubricForRubricId(requestedRubricId).filter(this::canCreateAssociationWithRubric).orElseThrow(()->
+                                new SecurityException("User not authorized to create a rubric association, or the rubric does not exist")
+                            );
                             Optional<ToolItemRubricAssociation> newAssociation = createToolItemRubricAssociation(toolId, toolItemId, params, requestedRubricId);
                             if (newAssociation.isPresent()) {
                                 return Optional.of(associationRepository.save(newAssociation.get()));
                             }
                         }
                     }
+                } else if (requestedRubricId.equals(0L)){
+                    //deactivating an association without making a new one
+                    association.setActive(false);
+                    associationRepository.save(association);
+                    return Optional.empty();
                 }
             } else {
+                // if existingAssociation is not present, it could just mean that it was deactivated previously
+                // the specific getRubricAssociation impl that we used earlier to load it will ignore deactivated ones.
+                Optional<ToolItemRubricAssociation> optionalExistingAssociation = findAssociationByItemIdAndRubricId(toolItemId, requestedRubricId);    // this will include inactive [soft-deleted] ones
+                if (optionalExistingAssociation.isPresent()) {  // if there's already an old association for the requested rubric that was deactivated previously, reuse it
+
+                    if (!canEditAssociation(optionalExistingAssociation.get())) {
+                        throw new SecurityException("Only Rubrics editors can edit rubric associations");
+                    }
+                    optionalExistingAssociation.get().setActive(true);
+                    return Optional.of(associationRepository.save(optionalExistingAssociation.get()));
+                }
+
+                // association doesn't exist, so try to create one
                 if (!canCreateAssociationWithRubric(getRepoRubricForRubricId(requestedRubricId).orElse(null))) {
                     throw new SecurityException("User not authorized to create a rubric association, or the rubric does not exist");
                 }
-                // first association for this rubric
+
                 Optional<ToolItemRubricAssociation> newAssociation = createToolItemRubricAssociation(toolId, toolItemId, params, requestedRubricId);
                 if (newAssociation.isPresent()) {
                     return Optional.of(associationRepository.save(newAssociation.get()));
@@ -1033,6 +1077,7 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
         return Optional.empty();
     }
 
+    /** NB: result may be inactive */
     private Optional<ToolItemRubricAssociation> findAssociationByItemIdAndRubricId(String toolItemId, Long rubricId) {
 
         return associationRepository.findByItemIdAndRubricId(toolItemId, rubricId).filter(this::canViewAssociation);
@@ -1417,7 +1462,6 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
     @Override
     public void updateEntityReferences(String toContext, Map<String, String> transversalMap) {
 
-        // OWLTODO: add authz to this and a couple of the above methods (unless this business already requires site.upd)
         if (transversalMap != null && !transversalMap.isEmpty()) {
             for (Map.Entry<String, String> entry : transversalMap.entrySet()) {
                 String key = entry.getKey();

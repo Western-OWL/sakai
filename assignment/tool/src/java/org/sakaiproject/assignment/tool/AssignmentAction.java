@@ -8354,6 +8354,11 @@ public class AssignmentAction extends PagedResourceActionII {
         } else {
             // otherwise get the existing
             a = getAssignment(assignmentId, "post_save_assignment", state);
+            if (!assignmentService.allowUpdateAssignment(assignmentId)) {
+                log.warn("Could not revise assignment {} for site: {}", assignmentId, siteId);
+                addAlert(state, rb.getFormattedMessage("youarenot_editAssignment", siteId));
+                return;
+            }
         }
 
         if (a == null) {
@@ -8559,9 +8564,9 @@ public class AssignmentAction extends PagedResourceActionII {
                         submitReviewRepo, generateOriginalityReport, checkTurnitin, checkInternet, checkPublications, checkInstitution, excludeBibliographic, excludeQuoted,
                         excludeSelfPlag, storeInstIndex, studentPreview, excludeType, excludeValue, contentId, contentLaunchNewWindow, checkIsEstimate, checkEstimateRequired, timeEstimate);
 
-                //RUBRICS, Save the binding between the assignment and the rubric
+                // Rubrics: Save the binding between the assignment and the rubric. Handles both association and disassociation
                 Map<String, String> rubricParams = getRubricConfigurationParameters(params, gradeType);
-                if (!rubricParams.isEmpty() && "1".equals(rubricParams.get("rbcs-associate"))) {
+                if (!rubricParams.isEmpty()) {
                     rubricsService.saveRubricAssociation(RubricsConstants.RBCS_TOOL_ASSIGNMENT, a.getId(), rubricParams);
                 }
 
