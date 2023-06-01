@@ -76,6 +76,15 @@ function safeParseInt(s) {
     return parseInt(s);
 }
 
+// only allow pure integers
+function safeParseIntStrict(s)
+{
+    if (s.length > 10) return Infinity;
+    if (!/^[1-9][0-9]*$/.test(s)) return NaN;
+    if (parseInt(s) <= 0) return NaN;
+    return parseInt(s);
+}
+
 // get the right error message. called when ifFinite(i) returns false
 // that happens if it is not a number or is too big
 function intError(i) {
@@ -3272,8 +3281,8 @@ function checkPercent(x) {
 }
 
 function checkCommentsForm() {
-	if ($("#comments-graded").prop("checked") && !isFinite(safeParseInt($("#comments-max").val()))) {
-		$('#comments-error').text(intError(safeParseInt($("#comments-max").val())));
+	if ($("#comments-graded").prop("checked") && !isFinite(safeParseIntStrict($("#comments-max").val()))) {
+		$('#comments-error').text(intError(safeParseIntStrict($("#comments-max").val())));
 		$('#comments-error-container').show();
 		return false;
 	}
@@ -3281,13 +3290,13 @@ function checkCommentsForm() {
 }
 
 function checkStudentForm() {
-	if ($("#student-graded").prop("checked") && !isFinite(safeParseInt($("#student-max").val()))) {
-		$('#student-error').text(intError(safeParseInt($("#student-max").val())));
+	if ($("#student-graded").prop("checked") && !isFinite(safeParseIntStrict($("#student-max").val()))) {
+		$('#student-error').text(intError(safeParseIntStrict($("#student-max").val())));
 		$('#student-error-container').show();
 		return false;
 	}
-	else if ($("#student-comments-graded").prop("checked") && !isFinite(safeParseInt($("#student-comments-max").val()))) {
-		$('#student-error').text(intError(safeParseInt($("#student-comments-max").val())));
+	else if ($("#student-comments-graded").prop("checked") && !isFinite(safeParseIntStrict($("#student-comments-max").val()))) {
+		$('#student-error').text(intError(safeParseIntStrict($("#student-comments-max").val())));
 		$('#student-error-container').show();
 		return false;
 	}
@@ -3681,8 +3690,8 @@ function checkQuestionGradedForm() {
 // Prepares the question dialog to be submitted
 function prepareQuestionDialog() {
 	const gradebookItemTitle = $("#question-gradebook-title").val();
-	if ($("#question-graded").prop("checked") && !isFinite(safeParseInt($("#question-max").val()))) {
-	    $('#question-error').text(intError(safeParseInt($("#question-max").val())));
+	if ($("#question-graded").prop("checked") && !isFinite(safeParseIntStrict($("#question-max").val()))) {
+	    $('#question-error').text(intError(safeParseIntStrict($("#question-max").val())));
 	    $('#question-error-container').show();
 	    return false;
 	} else if($("#question-graded").prop("checked") && (!gradebookItemTitle || gradebookItemTitle.trim() === '')) {
