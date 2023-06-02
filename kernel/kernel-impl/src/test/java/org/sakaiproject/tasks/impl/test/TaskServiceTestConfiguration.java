@@ -27,6 +27,7 @@ import org.hibernate.dialect.HSQLDialect;
 import org.hibernate.SessionFactory;
 import org.hsqldb.jdbcDriver;
 import org.sakaiproject.authz.api.AuthzGroupService;
+import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.entity.api.EntityManager;
 import org.sakaiproject.event.api.EventTrackingService;
 import org.sakaiproject.site.api.SiteService;
@@ -136,6 +137,11 @@ public class TaskServiceTestConfiguration {
 
         return mock(SiteService.class);
     }
+
+	@Bean
+	public ServerConfigurationService serverConfigurationService() {
+		return mock(ServerConfigurationService.class);
+	}
 
     @Bean
     public SessionManager sessionManager() {
