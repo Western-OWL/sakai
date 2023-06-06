@@ -54,7 +54,7 @@ public class TextTemplateLogicUtils {
             } else if (value == null) {
                 retMap.put(entry.getKey(), "");
             } else {
-                retMap.put(entry.getKey(), entry.getValue());
+                retMap.put(entry.getKey(), value);
             }
         }
 
