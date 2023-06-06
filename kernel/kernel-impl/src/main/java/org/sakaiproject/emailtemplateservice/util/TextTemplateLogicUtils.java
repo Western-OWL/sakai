@@ -25,12 +25,17 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * This is a weird location but it will have to do for now,
@@ -39,6 +44,22 @@ import freemarker.template.TemplateException;
  * @author Aaron Zeckoski (aaronz@vt.edu)
  */
 public class TextTemplateLogicUtils {
+
+    private static Map<String, Object> trimNullValuesToEmptyString(Map<String, Object> replacementValues) {
+        Map<String, Object> retMap = new HashMap(replacementValues.size());
+        for (Entry<String, Object> entry : replacementValues.entrySet()) {
+            Object value = entry.getValue();
+            if (value instanceof String) {
+                retMap.put(entry.getKey(), StringUtils.trimToEmpty((String) value));
+            } else if (value == null) {
+                retMap.put(entry.getKey(), "");
+            } else {
+                retMap.put(entry.getKey(), entry.getValue());
+            }
+        }
+
+        return retMap;
+    }
 
    /**
     * Handles the replacement of the variable strings within textual templates and
@@ -57,11 +78,13 @@ public class TextTemplateLogicUtils {
     * @return the processed template
     */
    public static String processTextTemplate(String textTemplate, Map<String, Object> replacementValues, String templateName) {
-      if (replacementValues == null || replacementValues.size() == 0) {
+      if (MapUtils.isEmpty(replacementValues)) {
          return textTemplate;
+      } else {
+          replacementValues = trimNullValuesToEmptyString(replacementValues);
       }
 
-      if (textTemplate == null || "".equals(textTemplate)) {
+      if (StringUtils.isBlank(textTemplate)) {
          throw new IllegalArgumentException("The textTemplate cannot be null or empty string, " +
          		"please pass in at least something in the template or do not call this method");
       }
@@ -91,46 +114,4 @@ public class TextTemplateLogicUtils {
 
       return output.toString();
    }
-
-/************ commenting out the velocity version for now
-   public static String processTextTemplate(String textTemplate, Map<String, String> replacementValues) {
-      if (replacementValues == null) {
-         return textTemplate;
-      }
-
-      // setup velocity
-      VelocityEngine ve = null;
-      try {
-         // trying out creating a new instance of velocity -AZ
-         ve = new VelocityEngine();
-         ve.init();
-      } catch (Exception e) {
-         throw new RuntimeException("Could not initialize velocity", e);
-      }
-
-      // load in the passed in replacement values
-      VelocityContext context = new VelocityContext(replacementValues);
-
-      Writer output = new StringWriter();
-      boolean result = false;
-      try {
-         result = ve.evaluate(context, output, "textProcess", textTemplate);
-      } catch (ParseErrorException e) {
-         throw new RuntimeException("Velocity parsing error: ", e);
-      } catch (MethodInvocationException e) {
-         throw new RuntimeException("Velocity method invocation error: ", e);
-      } catch (ResourceNotFoundException e) {
-         throw new RuntimeException("Velocity resource not found error: ", e);
-      } catch (IOException e) {
-         throw new RuntimeException("Velocity IO error: ", e);
-      }
-
-      if ( result ) {
-         return output.toString();
-      } else {
-         throw new RuntimeException("Failed to process velocity text template");
-      }
-   }
-*********/
-
 }
