@@ -1060,6 +1060,10 @@ div.msgcntr-profile-qtip {
 }
 .view-message-nav > a[href].button,
 .view-message-nav > span {
+	margin: 16px 0 16px 4px;
+}
+.forumsTableFooter .view-message-nav > a[href].button,
+.forumsTableFooter .view-message-nav > span {
 	margin: 8px 0 8px 4px;
 }
 

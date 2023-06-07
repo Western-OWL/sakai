@@ -91,13 +91,13 @@
 		<div class="sakai-table-toolBar">
 			<div class="sakai-table-filterContainer">
 				<%@ include file="dfViewSearchBarThread.jsp"%>
-				<div class="sakai-table-searchFilter">
+				<h:panelGroup styleClass="sakai-table-searchFilter" rendered="#{(ForumTool.selectedTopic.isNewResponseToResponse && ForumTool.selectedThreadHead.msgApproved && !ForumTool.selectedTopic.locked && !ForumTool.selectedForum.locked == 'true') || (ForumTool.selectedTopic.isMarkAsRead && !ForumTool.selectedTopic.topic.autoMarkThreadsRead && (!ForumTool.selectedThreadHead.read || ForumTool.selectedThreadHead.childUnread > 0))}">
 					<h:commandLink styleClass="button" value="#{msgs.cdfm_reply_thread}" id="replyThread"
 						rendered="#{ForumTool.selectedTopic.isNewResponseToResponse && ForumTool.selectedThreadHead.msgApproved && !ForumTool.selectedTopic.locked && !ForumTool.selectedForum.locked == 'true'}"
 						action="#{ForumTool.processDfMsgReplyThread}" immediate="true"/>
 					<h:commandLink styleClass="button markAllAsRead" value=" #{msgs.cdfm_mark_all_as_read}" id="markAllRead" action="#{ForumTool.processActionMarkAllThreadAsRead}"
 						rendered="#{ForumTool.selectedTopic.isMarkAsRead && !ForumTool.selectedTopic.topic.autoMarkThreadsRead && (!ForumTool.selectedThreadHead.read || ForumTool.selectedThreadHead.childUnread > 0)}" />
-				</div>
+				</h:panelGroup>
 			</div>
 			<h:panelGroup layout="block" styleClass="sakai-table-buttonContainer threadOptions" rendered="#{!ForumTool.threadMoved}">
 				<div id="messNavHolder">
