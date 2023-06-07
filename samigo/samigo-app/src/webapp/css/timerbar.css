@@ -80,12 +80,7 @@
 #showHideText {
 	padding-right: 3px;
 	padding-left: 3px;
-	color: var(--sakai-text-color-inverted);
 	font-weight: bold;
-}
-
-.showHideSym {
-	color: var(--sakai-text-color-inverted);
 }
 
 .ajaxImg {
