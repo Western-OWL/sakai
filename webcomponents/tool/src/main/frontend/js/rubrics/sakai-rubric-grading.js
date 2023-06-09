@@ -250,7 +250,7 @@ export class SakaiRubricGrading extends RubricsElement {
       });
     });
 
-    this.updateTotalPoints(options);
+    return this.updateTotalPoints(options);
   }
 
   fineTuneRating(e) {
@@ -434,14 +434,17 @@ export class SakaiRubricGrading extends RubricsElement {
     // Make sure total points is not negative
     if (parseFloat(this.totalPoints) < 0) this.totalPoints = 0;
 
-    if (options.notify) {
+    if (options.notify || this.evaluation.status === "DRAFT") {
       const detail = {
         evaluatedItemId: this.evaluatedItemId,
         entityId: this.entityId,
         value: this.totalPoints.toLocaleString(this.locale, { maximumFractionDigits: 2 }),
       };
-
-      this.dispatchEvent(new CustomEvent('total-points-updated', { detail, bubbles: true, composed: true }));
+      if (options.notify) {
+        this.dispatchEvent(new CustomEvent('total-points-updated', { detail, bubbles: true, composed: true }));
+      } else {
+        return detail;
+      }
     }
   }
 
@@ -545,7 +548,10 @@ export class SakaiRubricGrading extends RubricsElement {
           c.pointrange = this.getHighLow(c.ratings);
         });
 
-        this.decorateCriteria();
+        const detail = this.decorateCriteria();
+        if (detail) {
+          this.dispatchEvent(new CustomEvent('rubric-draft-eval-loaded', { detail, bubbles: true, composed: true }));
+        }
       })
       .catch(error => console.error(error));
     })

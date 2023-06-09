@@ -136,20 +136,83 @@ function initRubricDialog(gradingId, doneText, cancelText, titleText) {
   });
 }
 
+function fixRubricsMismatch()
+{
+	const evalId = this.dataset.evalId;
+
+	// find the rubric score in our map, and find the grade field
+	const rubricGradingPoints = rubricGradingPointsMap.get(evalId);
+	const gradeField = document.querySelector(".adjustedScore" + evalId.replace("\.", "\\."));
+	if (rubricGradingPoints === undefined || gradeField === null)
+	{
+		console.log("Error updating grade for evalId" + evalId);
+		return;
+	}
+
+	// update
+	gradeField.value = rubricGradingPoints;
+
+	// toggle banners
+	toggleMismatchMsg(evalId, false);
+	toggleMismatchFixedMsg(evalId, true);
+}
+
+function toggleMismatchMsg(evalId, show)
+{
+	toggleMsgBanner(document.querySelector('.mismatchMsg[data-eval-id="' + evalId + '"]'), show);
+}
+
+function toggleMismatchFixedMsg(evalId, show)
+{
+	toggleMsgBanner(document.querySelector('.mismatchFixedMsg[data-eval-id="' + evalId + '"]'), show);
+}
+
+function toggleMsgBanner(banner, show)
+{
+	show ? banner && banner.classList.remove("is-hidden") : banner && banner.classList.add("is-hidden");
+}
+
 $(function () {
 
   $('body').on('total-points-updated', function (e) {
 
     e.stopPropagation();
 
+    const evalId = e.detail.evaluatedItemId;
     // handles point changes for assignments, updating the grade field if it exists.
-    var gradeField = $('.adjustedScore' + e.detail.evaluatedItemId.replace("\.", "\\."));
+    var gradeField = $('.adjustedScore' + evalId.replace("\.", "\\."));
     if (gradeField) {
       let score = e.detail.value;
       // In some locales Rubrics may set comma instead of dot as decimal separator.
       score = score.replace(",", ".");
       gradeField.val(score);
+
+	  toggleMismatchMsg(evalId, false);
+	  toggleMismatchFixedMsg(evalId, false);
     }
+  });
+  $('body').on('rubric-draft-eval-loaded', function (e) {
+
+    e.stopPropagation();
+
+    const evalId = e.detail.evaluatedItemId;
+	const rubricGradingPoints = e.detail.value.replace(",", ".");
+    // store the rubric points when loading the draft rubric
+    rubricGradingPointsMap && rubricGradingPointsMap.set(evalId, rubricGradingPoints);
+
+	// compare the points and display banner
+	const gradeField = document.querySelector(".adjustedScore" + evalId.replace("\.", "\\."));
+	if (gradeField === null)
+	{
+		console.log("Error finding grade field for " + evalId);
+		return;
+	}
+	
+	if (parseFloat(rubricGradingPoints) !== NaN && parseFloat(rubricGradingPoints) !== parseFloat(gradeField.value))
+	{
+		toggleMismatchMsg(evalId, true);
+	}
+
   });
 
   // SAK-38320: add scope to the table. Maybe can add these direct to the JSF table after JSF 2.3 upgrade?
@@ -162,6 +225,7 @@ $(function () {
   });
 
   const save = e => {
+
     [...document.getElementsByTagName("sakai-rubric-grading")].forEach(srb => srb.release());
   };
 
@@ -180,6 +244,8 @@ $(function () {
 
   cancelButton = document.getElementById("editTotalResults:cancel");
   cancelButton && cancelButton.addEventListener("click", cancel);
+
+  document.querySelectorAll(".mismatchFixBtn").forEach(btn => btn.addEventListener("click", fixRubricsMismatch));
 
   if ( $("#editform\\:questionpool-questions").length ) {
     $("#editform\\:questionpool-questions").tablesorter({

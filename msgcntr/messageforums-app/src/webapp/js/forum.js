@@ -839,9 +839,38 @@ $(document).ready(function(){
         var gradeField = document.getElementById("msgForum:dfMsgGradeGradePoint");
         if (gradeField) {
             gradeField.value = e.detail.value;
+			const mismatchMsg = document.getElementById("gradeMismatch");
+			mismatchMsg && mismatchMsg.classList.add("is-hidden");
+			const mismatchFixedMsg = document.getElementById("gradeMismatchFixed");
+			mismatchFixedMsg && mismatchFixedMsg.classList.add("is-hidden");
         }
     });
 
+	$('body').on('rubric-draft-eval-loaded', function (e) {
+
+        rubricGradingPoints = e.detail.value;
+		const gradeField = document.getElementById("msgForum:dfMsgGradeGradePoint");
+		if (gradeField && parseFloat(rubricGradingPoints) !== NaN && parseFloat(rubricGradingPoints) !== parseFloat(gradeField.value)) {
+            const mismatchMsg = document.getElementById("gradeMismatch");
+			mismatchMsg && mismatchMsg.classList.remove("is-hidden");
+        }
+    });
+	const fixit = document.getElementById("fixMismatch");
+	if (fixit !== null)
+	{
+		fixit.addEventListener("click", () =>
+		{
+			const gradeField = document.getElementById("msgForum:dfMsgGradeGradePoint");
+			const mismatchMsg = document.getElementById("gradeMismatch");
+			const mismatchFixedMsg = document.getElementById("gradeMismatchFixed");
+			if (gradeField !== null && mismatchMsg !== null && mismatchFixedMsg !== null)
+			{
+				gradeField.value = rubricGradingPoints;
+				mismatchMsg.classList.add("is-hidden");
+				mismatchFixedMsg.classList.remove("is-hidden");
+			}
+		});
+	}
 });
 
 var MFR = MFR || {};

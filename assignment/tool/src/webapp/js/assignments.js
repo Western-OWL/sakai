@@ -963,6 +963,22 @@ ASN.rubricsEventHandlers = () => {
 
     const gradeField = document.getElementById("grade");
     gradeField && (gradeField.value = e.detail.value);
+	const mismatchMsg = document.getElementById("gradeMismatch");
+	mismatchMsg && mismatchMsg.classList.add("is-hidden");
+	const mismatchFixedMsg = document.getElementById("gradeMismatchFixed");
+	mismatchFixedMsg && mismatchFixedMsg.classList.add("is-hidden");
+  });
+
+  document.body && document.body.addEventListener("rubric-draft-eval-loaded", e => {
+
+    e.stopPropagation();
+
+	rubricGradingPoints = e.detail.value;
+	const gradeField = document.getElementById("grade");
+	if (gradeField && parseFloat(rubricGradingPoints) !== NaN && parseFloat(rubricGradingPoints) !== parseFloat(gradeField.value)) {
+		const mismatchMsg = document.getElementById("gradeMismatch");
+		mismatchMsg && mismatchMsg.classList.remove("is-hidden");
+	}
   });
 };
 
@@ -1037,6 +1053,23 @@ $(document).ready(() => {
     const buttons = document.querySelectorAll(".prevsubmission, .prevUngraded, .nextsubmission, .nextUngraded");
     buttons && buttons.forEach(button => button.addEventListener("click", releaseRubric));
   }
+
+  	const fixit = document.getElementById("fixMismatch");
+	if (fixit !== null)
+	{
+		fixit.addEventListener("click", () =>
+		{
+			const gradeField = document.getElementById("grade");
+			const mismatchMsg = document.getElementById("gradeMismatch");
+			const mismatchFixedMsg = document.getElementById("gradeMismatchFixed");
+			if (gradeField !== null && mismatchMsg !== null && mismatchFixedMsg !== null)
+			{
+				gradeField.value = rubricGradingPoints;
+				mismatchMsg.classList.add("is-hidden");
+				mismatchFixedMsg.classList.remove("is-hidden");
+			}
+		});
+	}
 });
 
 ASN.cancelGradeSubmission = function () {

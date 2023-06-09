@@ -181,6 +181,8 @@
                         <h:inputText value="#{ForumTool.gradePoint}" id="dfMsgGradeGradePoint" size="5" rendered="#{ForumTool.allowedToGradeItem}" />
                         <h:outputText value="%" rendered="#{ForumTool.gradeByPercent}" />
                         <h:message for="dfMsgGradeGradePoint" styleClass="alertMessage"  rendered="#{ForumTool.allowedToGradeItem}"/>
+						<span id="gradeMismatch" class="sak-banner-warn is-hidden"><h:outputText value="#{msgs.cdfm_rbc_mismatch}"/> <button type="button" id="fixMismatch"><h:outputText value="#{msgs.cdfm_rbc_mismatch_fix_btn}"/></button></span>
+						<span id="gradeMismatchFixed" class="sak-banner-success is-hidden"><h:outputText value="#{msgs.cdfm_rbc_mismatch_fixed}"/></span>
                     </h:panelGroup>
 
                     <h:panelGroup rendered="#{!ForumTool.allowedToGradeItem}" >
@@ -196,6 +198,7 @@
             </h:panelGrid>
 
             <% if (hasAssociatedRubric) { %>
+			<script>var rubricGradingPoints;</script>
                 <sakai-rubric-grading
                     site-id='<h:outputText value="#{ForumTool.siteId}" />'
                     tool-id="sakai.gradebookng"

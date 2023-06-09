@@ -112,6 +112,7 @@ function toPoint(id)
     currentLink.html(currentLink.find('a').text());
   });
 </script>
+<script>var rubricGradingPointsMap = new Map();</script>
 
 <div class="portletBody container-fluid">
 <h:form id="editStudentResults">
@@ -213,6 +214,8 @@ function toPoint(id)
           </h:panelGroup>
 
       <h:panelGroup rendered="#{question.hasAssociatedRubric}">
+		<span class="sak-banner-warn is-hidden mismatchMsg" data-eval-id="<h:outputText value="#{studentScores.assessmentGradingId}.#{question.itemData.itemId}"/>"><h:outputText value="#{assessmentSettingsMessages.rubrics_grade_mismatch}"/> <button type="button" class="mismatchFixBtn" data-eval-id="<h:outputText value="#{studentScores.assessmentGradingId}.#{question.itemData.itemId}"/>"><h:outputText value="#{assessmentSettingsMessages.rubrics_grade_mismatch_fix_btn}"/></button></span>
+		<span class="sak-banner-success is-hidden mismatchFixedMsg" data-eval-id="<h:outputText value="#{studentScores.assessmentGradingId}.#{question.itemData.itemId}"/>"><h:outputText value="#{assessmentSettingsMessages.rubrics_grade_mismatch_fixed}"/></span>
         <ul class="nav nav-tabs">
           <li class="active">
             <a data-toggle="tab" href="<h:outputText value="#submition#{question.itemData.itemId}" />">

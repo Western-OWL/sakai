@@ -1529,3 +1529,9 @@ ul.sak-banner-success, ul.sak-banner-info, ul.sak-banner-warn, ul.sak-banner-err
   padding-left: 0;
   font-size: 1em;
 }
+
+.sak-banner-warn.mismatchMsg {
+  /* compensate for difference between button and text height to avoid jitter when button disappears: 16 - 7 = 9 */
+  padding-top: 9px;
+  padding-bottom: 9px;
+}

@@ -663,6 +663,16 @@ div.msgcntr-profile-qtip {
 	width:60%;
 }
 
+/* Rubric integration */
+#gradeMismatch, #gradeMismatchFixed {
+	margin-left: 16px;
+}
+#gradeMismatch {
+	/* compensate for difference between button and text height to avoid jitter when button disappears: 16 - 7 = 9 */
+	padding-top: 9px;
+	padding-bottom: 9px;
+}
+
 /* Styles for modal */
 .close-button {
 	float: right;

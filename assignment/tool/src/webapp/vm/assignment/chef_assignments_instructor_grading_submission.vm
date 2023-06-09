@@ -21,6 +21,7 @@
 
 <!-- RUBRICS JAVASCRIPT -->
 <script>
+  var rubricGradingPoints;
   ASN.rubricsEventHandlers();
 </script>
 
@@ -374,6 +375,7 @@
         #end
 
         #if ($withGrade)
+            <div id="flexGradeWrapper">
             <div class="assignmentSubmissionGradeContainer">
                 #if ($allowToGrade)
                     #if ($gradeType == 1)
@@ -544,6 +546,9 @@
                     <label for="grade">$tlang.getString("gen.gra2")</label>
                     $!value_grade
                 #end
+            </div>
+            <span id="gradeMismatch" class="sak-banner-warn is-hidden">$tlang.getString("rubrics.grade.mismatch") <button type="button" id="fixMismatch">$tlang.getString("rubrics.grade.mismatch.fix.btn")</button></span>
+			<span id="gradeMismatchFixed" class="sak-banner-success is-hidden">$tlang.getString("rubrics.grade.mismatch.fixed")</span>
             </div>
             ## the previous grades
             #set ($previousGrades = $submission.Properties.get($NamePropSubmissionScaledPreviousGrades))
