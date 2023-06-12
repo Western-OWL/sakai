@@ -933,7 +933,6 @@ create index TOOL_IDX on lti_content (TOOL_ID);
 ALTER TABLE rbc_returned_criterion_out DROP CONSTRAINT FK_RBC_RETURNED_CRITERION_ID;
 ALTER TABLE rbc_criterion_outcome DROP CONSTRAINT FKalvarr6g412wt7wto6tutsddu;
 
-ALTER TABLE rbc_rating DROP COLUMN order_index;
 ALTER TABLE rbc_criterion DROP COLUMN ownerId;
 ALTER TABLE rbc_tool_item_rbc_assoc DROP COLUMN siteId;
 -- OWL: we can't just not null this column because we still have nulls after running the migration script earlier
@@ -977,3 +976,17 @@ UPDATE gb_gradable_object_t SET EXTERNAL_APP_NAME = 'sakai.lessonbuildertool' WH
 UPDATE gb_gradable_object_t SET EXTERNAL_APP_NAME = 'sakai.attendance' WHERE EXTERNAL_ID LIKE 'sakai.attendance.%';
 UPDATE gb_gradable_object_t SET EXTERNAL_APP_NAME = 'sakai.samigo' WHERE REGEXP_LIKE(EXTERNAL_ID, '^[0-9]+$');
 -- END SAK-47291
+
+------------------- Begin 22.2 -> 22.3 ------------------------------
+
+-- SAK-43881 START
+alter table MFR_TOPIC_T add SEND_TO_CALENDAR NUMBER(1,0) null;
+alter table MFR_TOPIC_T add CALENDAR_BEGIN_ID VARCHAR2(255) null;
+alter table MFR_TOPIC_T add CALENDAR_END_ID VARCHAR2(255) null;
+alter table MFR_OPEN_FORUM_T add SEND_TO_CALENDAR NUMBER(1,0) null;
+alter table MFR_OPEN_FORUM_T add CALENDAR_BEGIN_ID VARCHAR2(255) null;
+alter table MFR_OPEN_FORUM_T add CALENDAR_END_ID VARCHAR2(255) null;
+-- SAK-43881 END
+
+-------------------- End 22.2 -> 22.3 -------------------------------
+

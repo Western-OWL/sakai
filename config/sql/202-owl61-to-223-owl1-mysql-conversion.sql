@@ -920,7 +920,6 @@ ALTER TABLE CONV_TOPIC_STATUS MODIFY TOPIC_ID VARCHAR(36);
 ALTER TABLE rbc_returned_criterion_out DROP FOREIGN KEY FK3sroha5yjh3cbvq0on02wf3fk;
 ALTER TABLE rbc_criterion_outcome DROP FOREIGN KEY FKalvarr6g412wt7wto6tutsddu;
 
-ALTER TABLE rbc_rating DROP COLUMN order_index;
 ALTER TABLE rbc_criterion DROP COLUMN ownerId;
 ALTER TABLE rbc_tool_item_rbc_assoc DROP COLUMN siteId;
 ALTER TABLE rbc_rating MODIFY criterion_id BIGINT NOT NULL;
@@ -942,3 +941,16 @@ UPDATE gb_gradable_object_t SET EXTERNAL_APP_NAME = 'sakai.lessonbuildertool' WH
 UPDATE gb_gradable_object_t SET EXTERNAL_APP_NAME = 'sakai.attendance' WHERE EXTERNAL_ID LIKE 'sakai.attendance.%';
 UPDATE gb_gradable_object_t SET EXTERNAL_APP_NAME = 'sakai.samigo' WHERE EXTERNAL_ID REGEXP '^[0-9]+$';
 -- END SAK-47291
+
+------------------- Begin 22.2 -> 22.3 ------------------------------
+
+-- SAK-43881 START
+alter table MFR_TOPIC_T add SEND_TO_CALENDAR bit null;
+alter table MFR_TOPIC_T add CALENDAR_BEGIN_ID varchar(255) null;
+alter table MFR_TOPIC_T add CALENDAR_END_ID varchar(255) null;
+alter table MFR_OPEN_FORUM_T add SEND_TO_CALENDAR bit null;
+alter table MFR_OPEN_FORUM_T add CALENDAR_BEGIN_ID varchar(255) null;
+alter table MFR_OPEN_FORUM_T add CALENDAR_END_ID varchar(255) null;
+-- SAK-43881 END
+
+-------------------- End 22.2 -> 22.3 -------------------------------
