@@ -68,12 +68,13 @@ public class UserMessagingServiceImpl implements UserMessagingService {
 
         private final User user;
         private final String subject;
-        private final String message;
+        private final String message, htmlMessage;
 
-        public EmailSender(User user, String subject, String message) {
+        public EmailSender(User user, String subject, String message, String htmlMessage) {
             this.user = user;
             this.subject = subject;
             this.message = message;
+            this.htmlMessage = htmlMessage;
         }
 
         // do it!
@@ -86,23 +87,23 @@ public class UserMessagingServiceImpl implements UserMessagingService {
 
             // do it
             emailService.sendToUsers(Collections.singleton(user), getHeaders(user.getEmail(), this.subject),
-                    formatMessage(this.subject, this.message));
+                    formatMessage(this.subject, this.message, this.htmlMessage));
 
             log.info("Email sent to: {}", user.getId());
         }
 
         /** helper methods for formatting the message */
-        private String formatMessage(final String subject, final String message) {
+        private String formatMessage(final String subject, final String message, final String htmlMessage) {
 
             StringBuilder sb = new StringBuilder();
             return sb.append(MIME_ADVISORY)
                 .append(BOUNDARY_LINE)
                 .append(PLAIN_TEXT_HEADERS)
-                .append(StringEscapeUtils.escapeHtml4(message))
+                .append(message)
                 .append(BOUNDARY_LINE)
                 .append(HTML_HEADERS)
                 .append(htmlPreamble(subject))
-                .append(message)
+                .append(htmlMessage)
                 .append(HTML_END)
                 .append(TERMINATION_LINE).toString();
         }
@@ -179,14 +180,14 @@ public class UserMessagingServiceImpl implements UserMessagingService {
                     switch (m) {
                         case EMAIL:
                             if (NotificationService.NOTI_REQUIRED == priority) {
-                                new EmailSender(user, template.getRenderedSubject(), template.getRenderedHtmlMessage()).send();
+                                new EmailSender(user, template.getRenderedSubject(), template.getRenderedMessage(), template.getRenderedHtmlMessage()).send();
                             } else {
                                 if (siteOverride != null) {
                                     if (siteOverride.equals(String.valueOf(NotificationService.PREF_IMMEDIATE))) {
-                                        new EmailSender(user, template.getRenderedSubject(), template.getRenderedHtmlMessage()).send();
+                                        new EmailSender(user, template.getRenderedSubject(), template.getRenderedMessage(), template.getRenderedHtmlMessage()).send();
                                     }
                                 } else if (noti.equals(String.valueOf(NotificationService.PREF_IMMEDIATE))) {
-                                    new EmailSender(user, template.getRenderedSubject(), template.getRenderedHtmlMessage()).send();
+                                    new EmailSender(user, template.getRenderedSubject(), template.getRenderedMessage(), template.getRenderedHtmlMessage()).send();
                                 }
                             }
                             break;
