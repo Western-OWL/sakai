@@ -1051,7 +1051,8 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
 
                 // association doesn't exist, so try to create one
                 if (!canCreateAssociationWithRubric(getRepoRubricForRubricId(requestedRubricId).orElse(null))) {
-                    throw new SecurityException("User not authorized to create a rubric association, or the rubric does not exist");
+                    log.warn("User not authorized to create a rubric association, or the rubric does not exist; requestedRubricID={}", requestedRubricId);
+                    return Optional.empty();
                 }
 
                 Optional<ToolItemRubricAssociation> newAssociation = createToolItemRubricAssociation(toolId, toolItemId, params, requestedRubricId);

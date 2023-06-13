@@ -33,7 +33,6 @@ import java.util.Optional;
 
 import org.hibernate.SessionFactory;
 import org.junit.Before;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.rubrics.api.RubricsConstants;
@@ -68,6 +67,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.util.AopTestUtils;
 
 import lombok.extern.slf4j.Slf4j;
+import org.junit.Test;
 
 @Slf4j
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -470,7 +470,7 @@ public class RubricsServiceTests extends AbstractTransactionalJUnit4SpringContex
         Map<String, String> rbcsParams4 = new HashMap<>();
         rbcsParams4.put(RubricsConstants.RBCS_ASSOCIATE, "1");
         rbcsParams4.put(RubricsConstants.RBCS_LIST, "one");
-        Optional<ToolItemRubricAssociation> association4 = rubricsService.saveRubricAssociation(toolId, toolItemId, rbcsParams3);
+        Optional<ToolItemRubricAssociation> association4 = rubricsService.saveRubricAssociation(toolId, toolItemId, rbcsParams4);
         assertFalse(association4.isPresent());
     }
 
