@@ -322,10 +322,10 @@ export class SakaiRubric extends RubricsElement {
 
     if (this.rubric.shared) {
       this.shareTitleKey = "revoke";
-      this.shareIcon = "fa-globe text-primary";
+      this.shareIcon = "fa-globe";
     } else {
       this.shareTitleKey = "share";
-      this.shareIcon = "fa-eye-slash text-muted";
+      this.shareIcon = "fa-eye-slash";
     }
     this.shareValues = this.rubric.title;
   }

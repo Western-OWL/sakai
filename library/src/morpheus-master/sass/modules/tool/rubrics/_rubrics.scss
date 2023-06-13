@@ -32,6 +32,11 @@
 
         &:hover, &.active, &:focus {
             background: $rubrics-title-active-bg;
+            color: $rubrics-title-active-text-color;
+
+            a, .rubric-name {
+                color: $rubrics-title-active-text-color;
+            }
         }
 
         .actions {
@@ -427,6 +432,10 @@
                         font-style: italic;
                     }
 
+                    &.selected .points {
+                        color: $rubrics-rating-active-text-color;
+                    }
+
                     .popover {
                         max-width: 300px;
                     }
@@ -454,6 +463,10 @@
                 color: $rubrics-crit-item-title-color;
             }
         }
+        .rating-item.selected .criterion-title, .rating-item.selected .criterion-item-title {
+            color: $rubrics-rating-active-text-color;
+        }
+
         .criterion-weight {
             margin-bottom: -5px;
             margin-top: 5px;
@@ -502,10 +515,16 @@
 
                 &:hover:not(.student), &:focus:not(.student) {
                     background: $rubrics-rating-hover-bg;
+                    color: $rubrics-rating-active-text-color;
+
+                    .criterion-item-title, p, .points {
+                        color: $rubrics-rating-active-text-color;
+                    }
                 }
 
                 &.selected {
                     background: $rubrics-rating-selected-bg;
+                    color: $rubrics-rating-active-text-color;
                 }
             }
 
