@@ -20,8 +20,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.apache.axis.client.Call;
 import org.apache.axis.client.Service;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.user.api.UserDirectoryProvider;
