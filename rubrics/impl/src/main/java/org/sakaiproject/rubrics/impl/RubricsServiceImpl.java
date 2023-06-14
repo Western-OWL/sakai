@@ -362,39 +362,40 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
 
     public void sortRubricCriteria(Long rubricId, List<Long> sortedCriterionIds) {
 
-        /*
-         * OWLTODO: the following implementation doesn't persist any ordering, and can erase criteria.
-         * Commented out to do a no-op until we prioritize re-adding an ordering to the DB.
-         * Don't forget to authz check canEdit(rubric).
-         */
-        /*
         rubricRepository.findById(rubricId).ifPresent(rubric -> {
-
+            if (!canEdit(rubric)) {
+                log.warn("Attempt to modify criteria but lacking edit permission for the rubric, rubricID={}, criterionIDs={}", rubricId, sortedCriterionIds);
+                return;
+            }
             Map<Long, Criterion> current = rubric.getCriteria().stream().collect(Collectors.toMap(Criterion::getId, c -> c));
             List<Criterion> sorted = sortedCriterionIds.stream().map(current::get).collect(Collectors.toList());
+            if (current.size() != sorted.size()) {
+                log.warn("Attemp to clear all criterions through sorting, aborting. RubricID={}, criterionIDs={}", rubricId, sortedCriterionIds);
+                return;
+            }
             rubric.getCriteria().clear();
             rubric.getCriteria().addAll(sorted);
             rubricRepository.save(rubric);
         });
-        */
     }
 
     public void sortCriterionRatings(Long criterionId, List<Long> sortedRatingIds) {
 
-        /*
-         * OWLTODO: the following implementation doesn't persist any ordering, and can erase criteria.
-         * Commented out to do a no-op until we prioritize re-adding an ordering to the DB.
-         * Don't forget to authz check canEdit(rubric).
-         */
-        /*
         criterionRepository.findById(criterionId).ifPresent(criterion -> {
+            if (!canEdit(criterion)) {
+                log.warn("Attempt to modify ratings but lacking edit permission for the criterion, criterionId={}, ratingIDs={}", criterionId, sortedRatingIds);
+                return;
+            }
             Map<Long, Rating> current = criterion.getRatings().stream().collect(Collectors.toMap(Rating::getId, r -> r));
             List<Rating> sorted = sortedRatingIds.stream().map(current::get).collect(Collectors.toList());
+            if (current.size() != sorted.size()) {
+                log.warn("Attemp to clear all criterions through sorting, aborting. CriterionId={}, ratingIDs={}", criterionId, sortedRatingIds);
+                return;
+            }
             criterion.getRatings().clear();
             criterion.getRatings().addAll(sorted);
             criterionRepository.save(criterion);
         });
-        */
     }
 
     public Optional<CriterionTransferBean> createDefaultCriterion(String siteId, Long rubricId) {
