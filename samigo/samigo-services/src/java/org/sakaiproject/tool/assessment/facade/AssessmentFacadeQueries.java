@@ -24,6 +24,7 @@ package org.sakaiproject.tool.assessment.facade;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1623,6 +1624,7 @@ public class AssessmentFacadeQueries extends HibernateDaoSupport implements Asse
 			int assessmentIdx = 0;
 
 			// authorization
+			boolean createGroupsOnImport = ServerConfigurationService.getBoolean("samigo.create.groups.on.import", true);
 			for (AssessmentData a : newList) {
 				Map<String, String> releaseToGroups = getReleaseToGroups(fromContext, list.get(assessmentIdx).getAssessmentBaseId());
 
@@ -1633,6 +1635,13 @@ public class AssessmentFacadeQueries extends HibernateDaoSupport implements Asse
 				if (!assessmentMetaDataMap.containsKey("markForReview_isInstructorEditable")) {
 					a.addAssessmentMetaData("markForReview_isInstructorEditable", "true");
 					a.getAssessmentAccessControl().setMarkForReview(1);
+				}
+
+				if (!createGroupsOnImport && !fromContext.equals(toContext) && AssessmentAccessControl.RELEASE_TO_SELECTED_GROUPS.equals(a.getAssessmentAccessControl().getReleaseTo()))
+				{
+					// switch from group release to site release since we're not creating groups in the new site
+					a.getAssessmentAccessControl().setReleaseTo(nSite.getTitle());
+					releaseToGroups = Collections.emptyMap();
 				}
 
 				if (!releaseToGroups.isEmpty()) {
