@@ -324,7 +324,6 @@ sakai.editor.editors.ckeditor.launch = function(targetId, config, w, h) {
             'uicolor',
             //'uploadfile',
             'widget',
-            'wsc', // re-enable wsc (webspellchecker) plugin which is now disabled by default --plukasew
             
             //These are additional plugins not included in the ckeditor4 webjar
             'audiorecorder',
@@ -340,6 +339,7 @@ sakai.editor.editors.ckeditor.launch = function(targetId, config, w, h) {
             (sakai.editor.enableSakaiPreview ? 'sakaipreview' : 'preview'),
             (sakai.editor.enableResourceSearch ? 'resourcesearch' : ''),
             (sakai.editor.enableSakaiOpenLink ? 'sakaiopenlink' : ''),
+            'wsc', // re-add wsc (webspellchecker) plugin which is no longer packaged with the CKEditor webjar --plukasew
             'aspell',
             `${ckeditor-extra-plugins}`,
             `${ckeditor-a11y-extra-plugins}`
@@ -473,6 +473,7 @@ sakai.editor.editors.ckeditor.launch = function(targetId, config, w, h) {
         //Autosave has a dependency on notification
         CKEDITOR.plugins.addExternal('autosave',webJars+'ckeditor-autosave/${ckeditor.autosave.version}/', 'plugin.js');
         CKEDITOR.plugins.addExternal('wordcount',webJars+'wordcount/${ckeditor.wordcount.version}/', 'plugin.js');
+        CKEDITOR.plugins.addExternal('wsc',basePath+'wsc/', 'plugin.js');
         CKEDITOR.plugins.addExternal('aspell',basePath+'aspell/', 'plugin.js');
         CKEDITOR.plugins.addExternal('notification',basePath+'notification/', 'plugin.js');
         // Accessibility checker has a dependency on balloonpanel
@@ -492,6 +493,8 @@ sakai.editor.editors.ckeditor.launch = function(targetId, config, w, h) {
         //ckconfig.atd_rpc='//localhost/proxy/spellcheck';
         //ckconfig.extraPlugins+="atd-ckeditor,";
         //ckconfig.contentsCss = [basePath+'atd-ckeditor/atd.css'];
+        ckconfig.contentsCss.push(basePath+'wsc/dialogs/wsc.css');
+        ckconfig.contentsCss.push(basePath+'wsc/skins/moono-lisa/wsc.css');
         ckconfig.contentsCss.push(basePath+'aspell/aspell.css');
 
         // Load FontAwesome CSS in case a user wants to manually add FA markup
