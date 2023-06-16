@@ -57,7 +57,6 @@ export class SakaiRubricsList extends RubricsElement {
         `)}
         </div>
       </div>
-      <br>
       <div class="act">
         <button class="active add-rubric" @click="${this.createNewRubric}">
             <span class="add fa fa-plus"></span>

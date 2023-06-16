@@ -79,7 +79,7 @@ export class SakaiRubricCriteria extends RubricsElement {
                     ?is-criterion-group="${true}">
                 </sakai-rubric-criterion-edit>
               </h4>
-              <p>${unsafeHTML(c.description)}</p>
+              <div class="rubric-description">${unsafeHTML(c.description)}</div>
             </div>
             <div class="criterion-actions">
               <a @focus="${this.onFocus}" @focusout="${this.focusOut}" tabindex="0" role="button" data-criterion-id="${c.id}" title="${tr("copy")} ${c.title}" class="linkStyle clone fa fa-copy" @click="${this.cloneCriterion}" href="#"></a>
@@ -99,9 +99,9 @@ export class SakaiRubricCriteria extends RubricsElement {
                     criterion="${JSON.stringify(c)}">
                 </sakai-rubric-criterion-edit>
               </h4>
-              <p>
+              <div class="rubric-description">
                 ${unsafeHTML(c.description)}
-              </p>
+              </div>
               ${this.weighted ? html`
                   <div class="form-inline weight-field">
                       <div class="form-group input-group-sm ${this.validWeight ? "" : "has-error"}">
@@ -139,6 +139,7 @@ export class SakaiRubricCriteria extends RubricsElement {
               ${repeat(c.ratings, (r) => r.id, (r, i) => html`
                 <div class="rating-item" data-rating-id="${r.id}" id="rating_item_${r.id}">
                   <h5 class="criterion-item-title">
+                    <span @focus="${this.onFocus}" @focusout="${this.focusOut}" tabindex="0" role="button" title="${tr("drag_order")}" class="reorder-icon sideways fa fa-bars"></span>
                     ${r.title}
                     <sakai-rubric-criterion-rating-edit criterion-id="${c.id}" @save-rating="${this.saveRating}" @delete-rating="${this.deleteRating}" minpoints="${c.pointrange ? c.pointrange.low : 0}" maxpoints="${c.pointrange ? c.pointrange.high : 0}" rating="${JSON.stringify(r)}" ?removable="${ this.isRatingRemovable(c) }"></sakai-rubric-criterion-rating-edit>
                   </h5>
@@ -160,8 +161,6 @@ export class SakaiRubricCriteria extends RubricsElement {
                   <div class="add-criterion-item">
                     ${this.renderAddRatingButton(c, i + 1)}
                   </div>
-
-                  <span @focus="${this.onFocus}" @focusout="${this.focusOut}" tabindex="0" role="button" title="${tr("drag_order")}" class="reorder-icon sideways fa fa-bars"></span>
                 </div>
               `)}
               </div>
@@ -181,7 +180,6 @@ export class SakaiRubricCriteria extends RubricsElement {
         </div>`
         : ""
       }
-      <br>
       <div>
         ${this.weighted ? html`
           <button class="save-weights" @click="${this.saveWeights}" ?disabled="${!this.validWeight}">

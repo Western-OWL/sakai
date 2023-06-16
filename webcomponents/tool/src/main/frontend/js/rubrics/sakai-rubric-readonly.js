@@ -32,7 +32,7 @@ export class SakaiRubricReadonly extends SakaiRubric {
       <div class="rubric-title" @click="${this.toggleRubric}">
         <div>
           <span class="rubric-name" id="rubric_toggle_shared_${this.rubric.id}" aria-expanded="${this.rubricExpanded}" role="tab" title="${tr("toggle_details")} ${this.rubric.title}" tabindex="0" >
-            <span class="fa fa-chevron-right"></span>
+            <span class="fa fa-fw fa-chevron-right"></span>
             ${this.rubric.title}
           </span>
         </div>

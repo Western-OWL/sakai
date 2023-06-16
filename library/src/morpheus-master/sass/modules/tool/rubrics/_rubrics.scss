@@ -11,13 +11,15 @@
     }
 
     .rubric-title {
+        position: relative;     // required for popover positioning
         background: $rubrics-title-bg;
-        padding: 20px;
+        padding: $standard-spacing;
         border: $rubrics-title-border-size solid $rubrics-title-border-color;
         border-width: $rubrics-title-border-size 0px;
         font-weight: bold;
         @include display-flex;
         @include justify-content(space-between);
+        cursor: pointer;
 
         div {
             font-weight: normal;
@@ -25,7 +27,6 @@
         }
 
         .rubric-name {
-            cursor: default;
             color: $rubrics-link-color;
             text-decoration: none;
         }
@@ -37,19 +38,27 @@
             a, .rubric-name {
                 color: $rubrics-title-active-text-color;
             }
+
+            .popover {
+                color: var(--sakai-text-color-2);   // reset color for popover
+            }
         }
 
         .actions {
+            display: flex;
+            justify-content: center;
             width: 100px;
+            height: calc(1em + #{$standard-space} + #{$standard-space}); // height of the icons and their padding to keep them at the top of a tall row
             float: right;
 
             .action-container {
-                display: inline-block;
+                display: flex;
+                align-items: center;
+                justify-content: center;
 
                 @media #{$desktop} {
-                    padding-left: 6px;
-                    padding-right: $standard-spacing;
-                    border-right: 2px solid $rubrics-title-border-color;
+                    padding: 0 $standard-spacing;
+                    border-right: 1px solid $rubrics-title-border-color;
 
                     > span {
                         font-weight: normal;
@@ -59,6 +68,14 @@
                         padding-right: 0;
                         border-right: 0;
                     }
+                }
+
+                .linkStyle {
+                    padding: $standard-space;
+                }
+                .linkStyle:hover, .linkStyle:focus {
+                    outline: 2px solid currentColor;
+                    border-radius: 50%;
                 }
             }
         }
@@ -97,23 +114,31 @@
     }
 
     .rubric-details {
-        padding: $standard-spacing;
+        padding: 0 $standard-spacing $standard-spacing $standard-spacing;
     }
 
     .rubric-title-sorting {
-        padding: 0px;
-        border-width: $rubrics-title-border-size 0px;
+        padding: 0;
         font-weight: bold;
         @include display-flex;
         @include justify-content(space-between);
 
-        div {
-            font-weight: normal;
+        > div {
             flex: 1;
+            padding: 0 $standard-spacing;
+
+            > a {
+                display: flex;
+                align-items: center;
+                gap: 0 $standard-space;
+            }
         }
     }
 
     .linkStyle {
+        text-decoration: none;
+    }
+    .linkStyle:hover, .linkStyle:focus {
         text-decoration: none;
     }
 
@@ -158,10 +183,6 @@
                 .criterion-detail {
                     border-left: 1px solid $rubrics-lightbox-border-color;
                     width: 100%;
-                    .add-criterion-item {
-                        right: 0px;
-                        top: 8px;
-                    }
                 }
                 .criterion-ratings {
                     width: 100%;
@@ -175,10 +196,6 @@
                             border-left: 1px solid $rubrics-lightbox-border-color;
                             &:last-of-type {
                                 border-bottom: none;
-                            }
-                            .add-criterion-item {
-                                right: 0px;
-                                top: 8px;
                             }
                         }
                     }
@@ -277,6 +294,7 @@
     &.sakai-rubric-criterion-student,
     &.sakai-rubric-criterion-readonly {
         width: 100%;
+        margin-bottom: $standard-space-2x;
         border-bottom: $rubrics-crit-border-size solid $rubrics-crit-border-color;
 
         .criterion-row {
@@ -286,7 +304,8 @@
             border: $rubrics-crit-border-size solid $rubrics-crit-border-color;
             border-width: $rubrics-crit-border-size 0 0 0;
             
-            .div-description{
+            .div-description {
+                margin-bottom: $standard-space-2x;
                 overflow: hidden;
                 text-overflow: ellipsis;
             }
@@ -329,7 +348,7 @@
 
             .criterion-detail {
                 position: relative;
-                padding: $standard-spacing;
+                padding: $standard-space-2x;
                 display: table-cell;
                 vertical-align: top;
                 background: $rubrics-crit-detail-bg;
@@ -343,6 +362,8 @@
                 p {
                     margin: 0;
                     padding: 0;
+                }
+                .rubric-description {
                     font-size: 11px;
                     color: $rubrics-crit-detail-color;
                 }
@@ -350,13 +371,12 @@
 
             .reorder-icon {
                 cursor: grab;
-                cursor: -webkit-grab;
-                cursor: -moz-grab;
+                color: $rubrics-button-icon-color;
+                font-weight: normal;
+                line-height: 1.2;
 
                 &:active {
                     cursor: grabbing;
-                    cursor: -webkit-grabbing;
-                    cursor: -moz-grabbing;
                 }
             }
 
@@ -364,17 +384,17 @@
                 display: block;
                 position: absolute;
                 padding-top: 5px;
-                right: -10px;
-                top: 0;
-                bottom: 0;
+                right: 0;
+                bottom: $standard-space;
                 width: 20px;
                 z-index: 5;
                 button {
-                    background-color: transparent !important;
+                    background: transparent !important;
                     border-color: transparent !important;
                     border-width: 0 !important;
                     padding: 0 !important;
                     margin: 0 !important;
+                    color: $rubrics-button-icon-color;
                     span {
                         pointer-events: none;
                     }
@@ -416,7 +436,7 @@
                 .rating-item {
                     position: relative;
                     display: table-cell;
-                    padding: 5px;
+                    padding: $standard-space-2x;
                     height: 100%;
                     border-right: $rubrics-crit-border-size solid $rubrics-crit-border-color;
 
@@ -429,10 +449,9 @@
 
                     .points {
                         color: $rubrics-item-points-color;
-                        font-style: italic;
                     }
 
-                    &.selected .points {
+                    &.selected .points, &.selected > p {
                         color: $rubrics-rating-active-text-color;
                     }
 
@@ -443,24 +462,43 @@
             }
 
             .criterion-actions {
-                padding: $standard-spacing;
-                display: table-cell;
-                background: $rubrics-crit-actions-bg;
-                width: 5%;
                 position: relative;
+                display: table-cell;
+                width: 5%;
+                min-width: 100px;
+                padding: $standard-spacing;
+                vertical-align: middle;
+                background: $rubrics-crit-actions-bg;
+
+                .clone {
+                    margin-right: $standard-spacing;
+                }
+                .linkStyle {
+                    padding: $standard-space;
+                }
+                .linkStyle:hover, .linkStyle:focus {
+                    outline: 2px solid currentColor;
+                    border-radius: 50%;
+                }
             }
         }
 
         .criterion-title, .criterion-item-title {
+            display: flex;
+            gap: $standard-space-2x;
+            margin: 0 0 $standard-space-2x 0;
+            padding: 0;
             font-size: 16px;
             color: $rubrics-crit-title-color;
             font-weight: bold;
-            margin: 0;
-            padding: 0;
 
             &.criterion-item-title {
                 font-weight: normal;
                 color: $rubrics-crit-item-title-color;
+            }
+
+            sakai-rubric-criterion-rating-edit {
+                margin-left: auto;
             }
         }
         .rating-item.selected .criterion-title, .rating-item.selected .criterion-item-title {
@@ -516,6 +554,7 @@
                 &:hover:not(.student), &:focus:not(.student) {
                     background: $rubrics-rating-hover-bg;
                     color: $rubrics-rating-active-text-color;
+                    cursor: pointer;
 
                     .criterion-item-title, p, .points {
                         color: $rubrics-rating-active-text-color;

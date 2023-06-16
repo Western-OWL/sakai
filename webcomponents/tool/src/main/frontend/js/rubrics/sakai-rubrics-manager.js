@@ -23,7 +23,7 @@ class SakaiRubricsManager extends RubricsElement {
     return {
       siteId: { attribute: "site-id", type: String },
       enablePdfExport: { attribute: "enable-pdf-export", type: Boolean },
-      i18nLoaded: { attribute: false, type: Boolean },
+      i18nLoaded: { attribute: false, type: Boolean }
     };
   }
 
@@ -34,7 +34,7 @@ class SakaiRubricsManager extends RubricsElement {
   render() {
 
     return html`
-      <h1>${tr("manage_rubrics")}</h1>
+      <div class="page-header"><h1>${tr("manage_rubrics")}</h1></div>
 
       <div class="sak-banner-info"><sr-lang key="locked_message">locked_message</sr></div>
 
@@ -50,7 +50,7 @@ class SakaiRubricsManager extends RubricsElement {
             role="tab" aria-multiselectable="true" class="manager-collapse-title"
             title="${tr("toggle_site_rubrics")}" tabindex="0" @click="${this.toggleSiteRubrics}">
           <div>
-            <span class="collpase-icon fa fa-chevron-down"></span>
+            <span class="collapse-icon fa fa-fw fa-chevron-down"></span>
             <sr-lang key="site_rubrics">site_rubrics</sr-lang>
           </div>
         </div>
@@ -62,7 +62,7 @@ class SakaiRubricsManager extends RubricsElement {
                   @click=${this.sortRubrics}
                   data-key="site-name">
                 <sr-lang class="site-name" key="site_name">site_name</sr-lang>
-                <span class="collpase-icon fa fa-chevron-up site-name sort-element-site"></span>
+                <span class="fa fa-fw site-name sort-element-site"></span>
               </a>
             </div>
             <div>
@@ -70,7 +70,7 @@ class SakaiRubricsManager extends RubricsElement {
                   @click=${this.sortRubrics}
                   data-key="site-title">
                 <sr-lang class="site-title" key="site_title">site_title</sr-lang>
-                <span class="collpase-icon fa fa-chevron-up site-title sort-element-site"></span>
+                <span class="fa fa-fw site-title sort-element-site"></span>
               </a>
             </div>
             <div>
@@ -78,7 +78,7 @@ class SakaiRubricsManager extends RubricsElement {
                   @click=${this.sortRubrics}
                   data-key="site-creator">
                 <sr-lang class="site-creator" key="creator_name">creator_name</sr-lang>
-                <span class="collpase-icon fa fa-chevron-up site-creator sort-element-site"></span>
+                <span class="fa fa-fw site-creator sort-element-site"></span>
               </a>
             </div>
             <div>
@@ -86,22 +86,22 @@ class SakaiRubricsManager extends RubricsElement {
                   @click=${this.sortRubrics}
                   data-key="site-modified">
                 <sr-lang class="site-modified" key="modified">modified</sr-lang>
-                <span class="collpase-icon fa fa-chevron-up site-modified sort-element-site"></span>
+                <span class="fa fa-fw site-modified sort-element-site"></span>
               </a>
             </div>
             <div class="actions"><sr-lang key="actions">actions</sr-lang></div>
           </div>
-          <br>
+
           <sakai-rubrics-list id="sakai-rubrics" site-id="${this.siteId}" @sharing-change="${this.handleSharingChange}" @copy-share-site="${this.copyShareSite}" ?enable-pdf-export=${this.enablePdfExport}></sakai-rubrics-list>
         </div>
-      
+
         <hr>
         <h3>${tr("public_rubrics_title")}</h3>
         <span id="public_rubrics_info">${unsafeHTML(tr("public_rubrics_info"))}</span>
 
         <div id="shared-rubrics-title" aria-expanded="${this.sharedRubricsExpanded}" role="tab" aria-multiselectable="true" class="manager-collapse-title" title="${tr("toggle_shared_rubrics")}" tabindex="0" @click="${this.toggleSharedRubrics}">
           <div>
-            <span class="collpase-icon fa fa-chevron-right"></span>
+            <span class="collapse-icon fa fa-fw fa-chevron-right"></span>
             <sr-lang key="shared_rubrics">shared_rubrics</sr-lang>
           </div>
         </div>
@@ -114,7 +114,7 @@ class SakaiRubricsManager extends RubricsElement {
                     @click=${this.sortRubrics}
                     data-key="shared-name">
                   <sr-lang class="shared-name" key="site_name">site_name</sr-lang>
-                  <span class="collpase-icon fa fa-chevron-up shared-name sort-element-shared"></span>
+                  <span class="fa fa-fw shared-name sort-element-shared"></span>
                 </a>
               </div>
               <div>
@@ -122,7 +122,7 @@ class SakaiRubricsManager extends RubricsElement {
                     @click=${this.sortRubrics}
                     data-key="shared-title">
                   <sr-lang class="shared-title" key="site_title">site_title</sr-lang>
-                  <span class="collpase-icon fa shared-title sort-element-shared"></span>
+                  <span class="fa fa-fw shared-title sort-element-shared"></span>
                 </a>
               </div>
               <div>
@@ -130,7 +130,7 @@ class SakaiRubricsManager extends RubricsElement {
                     @click=${this.sortRubrics}
                     data-key="shared-creator">
                   <sr-lang class="shared-creator" key="creator_name">creator_name</sr-lang>
-                  <span class="collpase-icon fa shared-creator sort-element-shared"></span>
+                  <span class="fa fa-fw shared-creator sort-element-shared"></span>
                 </a>
               </div>
               <div>
@@ -138,17 +138,14 @@ class SakaiRubricsManager extends RubricsElement {
                     @click=${this.sortRubrics}
                     data-key="shared-modified">
                   <sr-lang class="shared-modified" key="modified">modified</sr-lang>
-                  <span class="collpase-icon fa shared-modified sort-element-shared"></span>
+                  <span class="fa fa-fw shared-modified sort-element-shared"></span>
                 </a>
               </div>
               <div class="actions"><sr-lang key="actions">actions</sr-lang></div>
             </div>
-            <br>
             <sakai-rubrics-shared-list id="sakai-rubrics-shared-list" site-id="${this.siteId}" @copy-share-site="${this.copyShareSite}" ?enable-pdf-export=${this.enablePdfExport}></sakai-rubrics-shared-list>
           </div>
-          <br>
         </div>
-      </div>
     `;
   }
 
@@ -164,7 +161,7 @@ class SakaiRubricsManager extends RubricsElement {
 
     const siteRubrics = $("#site_rubrics");
     siteRubrics.toggle();
-    const icon = $("#site-rubrics-title .collpase-icon");
+    const icon = $("#site-rubrics-title .collapse-icon");
     if (siteRubrics.is(":visible")) {
       this.siteRubricsExpanded = "true";
       icon.removeClass("fa-chevron-right").addClass("fa-chevron-down");
@@ -178,7 +175,7 @@ class SakaiRubricsManager extends RubricsElement {
 
     const sharedRubrics = $("#shared_rubrics");
     sharedRubrics.toggle();
-    const icon = $("#shared-rubrics-title .collpase-icon");
+    const icon = $("#shared-rubrics-title .collapse-icon");
     if (sharedRubrics.is(":visible")) {
       this.sharedRubricsExpanded = "true";
       icon.removeClass("fa-chevron-right").addClass("fa-chevron-down");
@@ -208,8 +205,8 @@ class SakaiRubricsManager extends RubricsElement {
 
     const [rubricClass, rubricType] = sortInput.split("-");
 
-    const arrowUpIcon = 'fa-chevron-up';
-    const arrowDownIcon = 'fa-chevron-down';
+    const arrowUpIcon = 'fa-sort-amount-asc';
+    const arrowDownIcon = 'fa-sort-amount-desc';
     const selector = `.sort-element-${rubricClass}`;
     let ascending = event.currentTarget.querySelector(selector).classList.contains(arrowUpIcon);
     this.querySelectorAll(selector).forEach(item => {

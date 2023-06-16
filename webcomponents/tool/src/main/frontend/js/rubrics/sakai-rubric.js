@@ -67,14 +67,14 @@ export class SakaiRubric extends RubricsElement {
 
     return html`
       <div class="rubric-title" @click="${this.toggleRubric}">
-        <div>
+        <div class="rubric-name-container">
           <a href="#" class="rubric-name" id="rubric_toggle_${this.rubric.id}" aria-expanded="${this.rubricExpanded}" role="tab" title="${tr("toggle_details")} ${this.rubric.title}" tabindex="0" >
-            <span class="fa fa-chevron-right"></span>
-            ${this.rubric.title}
+            <span class="fa fa-fw fa-chevron-right"></span>
+            <span class="rubric-title-text">${this.rubric.title}</span>
           </a>
 
           ${this.rubric.locked ?
-            html`<span tabindex="0" role="display" title="${this.rubric.title} ${tr("is_locked")}" class="locked fa fa-lock"></span>`
+            html`<span tabindex="0" role="display" title="${this.rubric.title} ${tr("is_locked")}" class="locked fa fa-fw fa-lock"></span>`
             :
             html`<sakai-rubric-edit @show-tooltip="${this.showToolTip}" @update-rubric-title="${this.updateRubricTitle}" rubric="${JSON.stringify(this.rubric)}"></sakai-rubric-edit>`
           }
@@ -104,15 +104,15 @@ export class SakaiRubric extends RubricsElement {
             <span class="hidden-sm hidden-xs sr-only"><sr-lang key="copy" /></span>
             <a role="button" title="${tr("copy")} ${this.rubric.title}" tabindex="0" class="linkStyle clone fa fa-copy" @keyup="${this.openEditWithKeyboard}" @click="${this.cloneRubric}" href="#"></a>
           </div>
-          ${!this.rubric.locked ? html`
-            <div class="action-container">
+          <div class="action-container">
+            ${!this.rubric.locked ? html`
               <span class="hidden-sm hidden-xs sr-only"><sr-lang key="remove_label" /></span>
               <sakai-item-delete rubric="${JSON.stringify(this.rubric)}" site-id="${this.siteId}" class="sakai-rubric"></sakai-item-delete>
-            </div>
-            `
-            :
-            ""
-          }
+              `
+              :
+              ""
+            }
+          </div>
           ${this.enablePdfExport ? html`
             <div class="action-container">
               <sakai-rubric-pdf
@@ -160,7 +160,7 @@ export class SakaiRubric extends RubricsElement {
     const collapse = isReadOnly ? $(`#collapse_shared_${this.rubric.id}`) : $(`#collapse_${this.rubric.id}`);
     collapse.toggle();
 
-    const icon = isReadOnly ? $(`#rubric_toggle_shared_${this.rubric.id} span`) : $(`#rubric_toggle_${this.rubric.id} span`);
+    const icon = isReadOnly ? $(`#rubric_toggle_shared_${this.rubric.id} span.fa`) : $(`#rubric_toggle_${this.rubric.id} span.fa`);
 
     if (collapse.is(":visible")) {
       this.rubricExpanded = "true";
