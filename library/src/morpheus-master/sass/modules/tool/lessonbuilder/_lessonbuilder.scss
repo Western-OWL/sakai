@@ -409,6 +409,9 @@
 		border: 0;
 		background: transparent;
 	}
+	.layoutReorderer-module.list-group-item {
+		color: var(--sakai-active-text-color);
+	}
 }
 
 .#{$namespace}multipleTools {
@@ -447,3 +450,4 @@ div#calendarEventDialog {
 		}
 	}
 }
+
