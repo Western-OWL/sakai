@@ -3020,6 +3020,12 @@ public class AssignmentAction extends PagedResourceActionII {
                     }
                 }
                 context.put("groupsWithUserSubmission", groupsWithUserSubmission);
+
+				// detect if there are existing graded submissions and display a message about changing max points
+				if (a.getTypeOfGrade() == Assignment.GradeType.SCORE_GRADE_TYPE && a.getSubmissions().stream().anyMatch(s -> s.getGraded()))
+				{
+					context.put("changeMaxPointsMsg", true);
+				}
             }
         }
 

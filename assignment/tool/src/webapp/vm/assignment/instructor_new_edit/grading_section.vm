@@ -49,6 +49,7 @@ This section contains the options for grading this assignment, including rubrics
 			<div class="form-group form-required">
 				<label for="$name_GradePoints" class="control-label">$tlang.getString("gen.forpoi")</label>
 				<input name="$name_GradePoints" id="$name_GradePoints" value="$!value_GradePoints" type="text" size="5" maxlength="11" />
+				#if($changeMaxPointsMsg)<span class="sak-banner-info-inline">$tlang.getString("gen.forpoi.scale.msg")</span>#end
 			</div>
 
 			## Rubrics
