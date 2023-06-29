@@ -1,7 +1,7 @@
 package org.sakaiproject.tool.assessment.jsf.convert;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
@@ -60,7 +60,7 @@ public class SecureContentWrapper implements Converter {
 
             Elements links = doc.select("a[href]");
             Elements media = doc.select("[src]");
-            List<String> references = new ArrayList<String>();
+            Set<String> references = new HashSet<>();
             // href ...
             for (Element link : links) {
                 references.add(link.attr("abs:href"));
