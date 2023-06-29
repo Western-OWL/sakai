@@ -87,6 +87,27 @@ public class IgniteEntityProvider extends AbstractEntityProvider implements Acti
         return new ActionReturn(data);
     }
 
+	@EntityCustomAction(viewKey=EntityView.VIEW_LIST)
+    public ActionReturn clusterInfoLite(EntityView view) {
+        Map<String, Object> data = new HashMap<>();
+        IgniteCluster cluster = ignite.cluster();
+        data.put("IgniteClusterState", cluster.state().toString());
+        List<String> nodeIds = cluster.nodes().stream()
+                .map(n -> "id=" + n.id().toString() + ", consistentId=" + n.consistentId() + ", version=" + n.version())
+                .collect(Collectors.toList());
+
+        Integer configuredNodeSize = (Integer) ignite.getConfiguration().getUserAttributes().get("DiscoveryAddressesSize");
+        data.put("IgniteCurrentNodeSize", String.valueOf(nodeIds.size()));
+        data.put("IgniteConfiguredNodeSize", String.valueOf(configuredNodeSize));
+        if (nodeIds.size() == configuredNodeSize) {
+            data.put("IgniteNodeStatus", "CONNECTED");
+        } else {
+            data.put("IgniteNodeStatus", "SEGMENTED");
+        }
+
+        return new ActionReturn(data);
+    }
+
     @EntityCustomAction(viewKey=EntityView.VIEW_LIST)
     public ActionReturn cacheNames(EntityView view) {
         return new ActionReturn(ignite.cacheNames());
