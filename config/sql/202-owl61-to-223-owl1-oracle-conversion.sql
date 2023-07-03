@@ -866,7 +866,7 @@ DROP INDEX rbc_tool_item_owner;
 CREATE INDEX rbc_tool_item_owner ON rbc_tool_item_rbc_assoc (toolId, itemId, siteId);
 
 -- this migrates the data from the link tables
--- OWL: rewritten for Oracle and with knowledge that some columns will just end up dropped later
+-- OWL: rewritten for Oracle and with knowledge that some columns will just end up dropped later (rbc_tool_item_rbc_assoc.siteId)
 UPDATE rbc_criterion rc
 SET rc.rubric_id = (SELECT rrc.rbc_rubric_id FROM rbc_rubric_criterions rrc WHERE rc.id = rrc.criterions_id)
 WHERE rc.rubric_id is NULL
@@ -881,6 +881,11 @@ UPDATE rbc_rating rc
 SET rc.criterion_id = (SELECT rcr.rbc_criterion_id FROM rbc_criterion_ratings rcr WHERE rc.id = rcr.ratings_id)
 WHERE rc.criterion_id is NULL
 AND EXISTS (SELECT rcr.rbc_criterion_id FROM rbc_criterion_ratings rcr WHERE rc.id = rcr.ratings_id);
+
+UPDATE rbc_rating rc
+SET rc.order_index = (SELECT rcr.order_index FROM rbc_criterion_ratings rcr WHERE rc.id = rcr.ratings_id)
+WHERE rc.order_index is NULL
+AND EXISTS (SELECT rcr.order_index FROM rbc_criterion_ratings rcr WHERE rc.id = rcr.ratings_id);
 -- once the above conversion is run successfully then the following tables can be dropped
 -- DROP TABLE rbc_criterion_ratings;
 -- DROP TABLE rbc_rubric_criterions;
