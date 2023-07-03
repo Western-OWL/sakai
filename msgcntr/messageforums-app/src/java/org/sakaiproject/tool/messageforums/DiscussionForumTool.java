@@ -5127,6 +5127,7 @@ public class DiscussionForumTool {
 
 	  // does the actual save to 'delete' this message
 	  Message persistedMessage = forumManager.saveMessage(message);
+	  selectedMessage.setMessage(message);
 
 	  // reload the topic, forum and reset the topic's base forum
 	  selectedTopic = getDecoratedTopic(selectedTopic.getTopic());

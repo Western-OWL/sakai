@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
+import lombok.Setter;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -57,7 +58,7 @@ public class DiscussionMessageBean
   private static final ResourceLoader rb = new ResourceLoader(MESSAGECENTER_BUNDLE);
 
   private boolean selected;
-  private Message message;
+  @Setter private Message message;
   private boolean read;
   private int depth;
   private boolean hasNext;
