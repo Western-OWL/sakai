@@ -3854,7 +3854,8 @@ public class GradebookServiceHibernateImpl extends BaseHibernateManager implemen
 
 		} else {
 			// if passed in grade override is same as existing grade override, nothing to do
-			if ( (StringUtils.equals(courseGradeRecord.getEnteredGrade(), gradeScale)) && (Double.compare(courseGradeRecord.getEnteredPoints(), Double.parseDouble(grade)) == 0) ) {
+			// In OWL, enteredPoints is never used so we don't need to check it (original code will NPE)
+			if (StringUtils.equals(courseGradeRecord.getEnteredGrade(), gradeScale)) { // && (Double.compare(courseGradeRecord.getEnteredPoints(), Double.parseDouble(grade)) == 0) ) {
 				return;
 			}
 		}
