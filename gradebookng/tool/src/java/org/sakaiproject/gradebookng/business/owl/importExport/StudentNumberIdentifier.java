@@ -35,18 +35,18 @@ public class StudentNumberIdentifier implements UserIdentifier, Serializable
     @Override
     public GbUserBase getUser( ImportedRow row )
     {
-		String studentNumber = row.getStudentNumber();
+        String studentNumber = row.getStudentNumber();
         GbUser user = studentNumberMap.get( studentNumber );
         if( user != null )
         {
             report.addIdentifiedUser( user );
             log.debug( "User's student number {} identified as UUID: {}", studentNumber, user.getUserUuid() );
-			return user;
+            return user;
         }
 
         GbUnidentifiedUser uu = new GbUnidentifiedUser( studentNumber, "" );
         report.addUnknownUser( uu );
         log.debug( "User's student # {} is unknown to this gradebook", studentNumber );
-        return user;
+        return uu;
     }
 }
