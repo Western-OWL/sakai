@@ -3557,6 +3557,12 @@ public class DiscussionForumTool {
 		return selectedTopic != null && selectedTopic.getTopic() != null && selectedTopic.getTopic().getId() != null;
 	}
 
+    public boolean isExistingForum()
+    {
+        // Forum exists if it has an ID
+        return selectedForum != null && selectedForum.getForum() != null && selectedForum.getForum().getId() != null;
+    }
+
 	public boolean isSiteHasAnonymousTopics()
 	{
 		return forumManager.isSiteHasAnonymousTopics(getSiteId());
@@ -5609,6 +5615,22 @@ public class DiscussionForumTool {
   	
 	  return selectedTopic.getIsModeratedAndHasPerm() && !selectedMessage.isMsgApproved();
   }
+
+  public boolean isAllowedForumSettings()
+  {
+      // If in edit mode, we need to check if user can edit settings
+      if(isExistingForum())
+      {
+          return uiPermissionsManager.isChangeSettings(selectedForum.getForum());
+      }
+
+      // If in add mode, we need to check if user can add new forums
+      else
+      {
+          return getNewForum();
+      }
+  }
+
   
   /**
    * Deny option is displayed if:

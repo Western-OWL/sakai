@@ -79,7 +79,7 @@
 	</script>
 
   <!-- Y:\msgcntr\messageforums-app\src\webapp\jsp\dfReviseForumSettingsAttach.jsp -->
-    <h:form id="revise" rendered="#{ForumTool.newForum}">
+    <h:form id="revise" rendered="#{ForumTool.allowedForumSettings}">
 		  <script>
             $(document).ready(function(){
 				// Improve accessibility in error messages.adding the error as title
