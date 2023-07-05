@@ -8878,7 +8878,8 @@ public class AssignmentAction extends PagedResourceActionII {
 
         // if the grading type is not points (score) remove the rubric association regardless of the posted rubric params
         if (gradeType != Assignment.GradeType.SCORE_GRADE_TYPE && "1".equals(parametersHash.get("rbcs-associate"))) {
-            parametersHash.put("rbcs-associate", "0");
+            parametersHash.put(RubricsConstants.RBCS_ASSOCIATE, "0");
+			parametersHash.remove(RubricsConstants.RBCS_LIST);
         }
 
         return parametersHash;
