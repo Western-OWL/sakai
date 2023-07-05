@@ -236,9 +236,15 @@
     example describes availabel configuration options for SimpleLdapAttributeMapper
     (the default LdapAttributeMapper implementation). -->
 	<bean id="org.sakaiproject.unboundid.LdapAttributeMapper"
-			class="org.sakaiproject.unboundid.SimpleLdapAttributeMapper"
+			class="org.sakaiproject.unboundid.SimpleLdapCandidateAttributeMapper"
 			init-method="init">
-			
+
+		<property name="encryption" ref="org.sakaiproject.user.detail.ValueEncryptionUtilities" />
+		<property name="scs" ref="org.sakaiproject.component.api.ServerConfigurationService" />
+		<property name="candidateIdLength"><value>10</value></property>
+		<property name="additionalInfoLength"><value>100</value></property>
+		<property name="studentNumberLength"><value>9</value></property>
+
 		<!-- A typical set of attribute mappings. Keys are logical
 		names expected by the application. Values are physical LDAP
 		attribute names. If not specified or empty, defaults to
