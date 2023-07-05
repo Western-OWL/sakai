@@ -323,9 +323,9 @@ public class GradebookPage extends BasePage implements IGradesPage {
 		toolbarColumnTools.add(sortGradeItemsToolbarItem);
 
 		// bulk edit items button
-		final GbAjaxLink bulkEditItemsToolbarItem = new GbAjaxLink("bulkEditItemsToolbarItem") {
+		final SakaiAjaxButton bulkEditItemsToolbarItem = new SakaiAjaxButton("bulkEditItemsToolbarItem") {
 			@Override
-			public void onClick(final AjaxRequestTarget target) {
+			public void onSubmit(final AjaxRequestTarget target, Form<?> form) {
 				final GbModalWindow window = GradebookPage.this.getBulkEditItemsWindow();
 
 				final String siteId = GradebookPage.this.businessService.getCurrentSiteId();
