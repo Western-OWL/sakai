@@ -1412,7 +1412,7 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
                 ratingsParagraph.add(ratingsDesc);
 
                 PdfPCell newCell = new PdfPCell();
-                if (optEvaluation.isPresent()) {
+                if (showEvaluated) {
                     for (CriterionOutcome outcome : optEvaluation.get().getCriterionOutcomes()) {
                         if (cri.getId().equals(outcome.getCriterionId()) && rating.getId().equals(outcome.getSelectedRatingId())) {
                             newCell.setBackgroundColor(Color.LIGHT_GRAY);
