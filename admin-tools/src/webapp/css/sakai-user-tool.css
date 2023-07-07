@@ -2,22 +2,8 @@
     text-align: left;
 }
 
-#user-create_edit .act input[type="submit"], #useredit .act input[type="submit"],
-#userViewForm .act input[type="submit"]
-{
-    display: inline-block;
-    margin: 0 1em;
-}
-
-#userViewForm label
-{
-    font-weight: bold;
-    color: rgb(85, 85, 85);
-    display: inline-block;
-    float: none;
-    text-align: left;
-    margin-right: 1em;
-    min-width: 9em;
+#userViewForm table {
+	margin-bottom: 0;
 }
 
 @media only screen and (max-width : 800px){
@@ -33,8 +19,9 @@
 
 #user-create_edit fieldset, #useredit fieldset, #userViewForm fieldset
 {
-    border: 2px solid rgb(200, 200, 200);
-    padding: 1em;
+    border: 2px solid var(--sakai-border-color);
+	margin-bottom: 16px;
+    padding: 16px;
     position: relative;
 }
 
@@ -61,8 +48,7 @@ form .shorttext{
 
 #userViewForm fieldset legend, #user-create_edit fieldset legend, #useredit fieldset legend
 {
-    padding: 0 0.5em;
-    color: rgb(85, 85, 85);
+    padding: 0 4px;
 }
 
 .spinner {
