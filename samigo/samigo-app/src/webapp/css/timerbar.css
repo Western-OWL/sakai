@@ -71,10 +71,11 @@
 }
 
 #showHide {
-	background-color: transparent;
+	background: transparent;
 	border:none;
 	display: flex;
-	margin: 5px auto ;
+	margin: 5px auto;
+	color: var(--sakai-active-text-color);
 }
 
 #showHideText {

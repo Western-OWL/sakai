@@ -1,5 +1,4 @@
-div#questionProgressPanel a {
-  color: var(--sakai-text-color-3);
+div#questionProgressPanel a, #questionProgressPanel a[href]:hover {
   text-decoration: none;
 }
 #questionProgressPanel img {
@@ -7,9 +6,6 @@ div#questionProgressPanel a {
 }
 div#questionProgressPanel>div.tier1>table>tbody>tr {
   border-bottom: solid var(--sakai-border-color) 1px;
-}
-#questionProgressPanel a[href]:hover {
-  text-decoration: none;
 }
 
 table.table.stat-table {
@@ -1205,13 +1201,10 @@ div#questionProgressPanel div.tier1 {
 	top: 20px;
 	z-index: 3;
 }
-.currentQuestion a {
+.currentQuestion a[href], .currentQuestion a[href]:hover {
 	border: 1px solid var(--sakai-active-color-3);
 	background-color:var(--sakai-active-color-1);
-	color: var(--sakai-text-color-3);
-}
-.questionProgressTable {
-
+	color: var(--sakai-active-text-color);
 }
 .questionProgressTable td, .questionProgressTable_linear td {
 	border: 0;
