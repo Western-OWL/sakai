@@ -749,27 +749,30 @@ body {
 
 			&.expanded {
 				background-color: var(--tool-lessons-toplevel-menu-expanded-background-color);
+				color: var(--tool-menu-item-text-color);
 				&.is-current {
 					> .Mrphs-toolsNav__menuitem--link {
 						background-color: var(--tool-lessons-toplevel-menu-expanded-selected-background-color);
 						color: var(--tool-lessons-toplevel-menu-expanded-selected-color);
 						&:hover {
 							background-color: var(--tool-menu-item-selected-hover-background-color);
+							color: var(--tool-lessons-toplevel-menu-expanded-selected-color);
 						}
 					}
 				}
 				&.is-parent-of-current {
 					> .Mrphs-toolsNav__menuitem--link {
-						background-color: var(--tool-lessons-subpage-menu-selected-parent-background-color);
-						color: var(--tool-lessons-toplevel-menu-expanded-selected-color);
+						background-color: var(--tool-menu-item-background-color);
+
 						.#{$namespace}toolsNav__menuitem--icon {
-							color: var(--tool-lessons-toplevel-menu-expanded-selected-color) !important;
+							color: var(--tool-menu-item-text-color);;
 						}
 						.#{$namespace}toolsNav__menuitem--title {
-							color: var(--tool-lessons-toplevel-menu-expanded-selected-color) !important;
+							color: var(--tool-menu-item-text-color);;
 							font-weight: normal !important;
 						}
 						&:hover {
+							background-color: var(--tool-menu-item-hover-background-color);
 							color: var(--tool-lessons-toplevel-menu-expanded-selected-color) !important;
 							&:before {
 								border-left: $tool-menu-item-hover-border-left !important;
@@ -784,7 +787,7 @@ body {
 
 				> .Mrphs-toolsNav__menuitem--link {
 					background-color: var(--tool-lessons-subpage-menu-expanded-background-color);
-					color: var(--tool-lessons-toplevel-menu-expanded-selected-color);
+
 					&:hover {
 						background-color: var(--tool-lessons-toplevel-menu-expanded-hover-background-color);
 					}
