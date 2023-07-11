@@ -102,6 +102,7 @@ import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
 import java.util.HashSet;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -368,9 +369,9 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
                 return;
             }
             Map<Long, Criterion> current = rubric.getCriteria().stream().collect(Collectors.toMap(Criterion::getId, c -> c));
-            List<Criterion> sorted = sortedCriterionIds.stream().map(current::get).collect(Collectors.toList());
+            List<Criterion> sorted = sortedCriterionIds.stream().map(current::get).filter(Objects::nonNull).collect(Collectors.toList());
             if (current.size() != sorted.size()) {
-                log.warn("Attemp to clear all criterions through sorting, aborting. RubricID={}, criterionIDs={}", rubricId, sortedCriterionIds);
+                log.warn("Provided sorted ids do not match existing criteria, aborting. RubricID={}, criterionIDs={}", rubricId, sortedCriterionIds);
                 return;
             }
             rubric.getCriteria().clear();
@@ -387,9 +388,9 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
                 return;
             }
             Map<Long, Rating> current = criterion.getRatings().stream().collect(Collectors.toMap(Rating::getId, r -> r));
-            List<Rating> sorted = sortedRatingIds.stream().map(current::get).collect(Collectors.toList());
+            List<Rating> sorted = sortedRatingIds.stream().map(current::get).filter(Objects::nonNull).collect(Collectors.toList());
             if (current.size() != sorted.size()) {
-                log.warn("Attemp to clear all criterions through sorting, aborting. CriterionId={}, ratingIDs={}", criterionId, sortedRatingIds);
+                log.warn("Provided sorted ids do not match existing ratings, aborting. CriterionId={}, ratingIDs={}", criterionId, sortedRatingIds);
                 return;
             }
             criterion.getRatings().clear();
