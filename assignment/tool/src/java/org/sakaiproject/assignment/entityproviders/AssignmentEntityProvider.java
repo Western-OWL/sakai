@@ -26,6 +26,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 
 import static org.sakaiproject.assignment.api.AssignmentConstants.*;
 import static org.sakaiproject.assignment.api.AssignmentServiceConstants.*;
@@ -1525,7 +1526,8 @@ public class AssignmentEntityProvider extends AbstractEntityProvider implements 
 	{
 		SimpleAssignment sa = new SimpleAssignment(a);
 
-		boolean isStudent = !canGrade(a) && !canAdd(a) && !canUpdate(a);
+		boolean canGrade = canGrade(a);
+		boolean isStudent = !canGrade && !canAdd(a) && !canUpdate(a);
 
 		// 1. hidden due date
 		if (Boolean.TRUE.equals(a.getHideDueDate()) && isStudent)
@@ -1607,6 +1609,34 @@ public class AssignmentEntityProvider extends AbstractEntityProvider implements 
 					}
 					u.setId("");
 				});
+			}
+		}
+
+		// 8. feedback
+		// remove private notes on the submissions (instructor only)
+		// if submission is not returned, remove feedback, feedback attachments, feedback comments, and grades
+		if (CollectionUtils.isNotEmpty(sa.getSubmissions()) && !canGrade)
+		{
+			for (SimpleSubmission s : sa.getSubmissions())
+			{
+				s.setPrivateNotes("");
+				if (!s.getReturned())
+				{
+					s.setFeedbackText("");
+					s.setGrade("");
+					s.setFeedbackAttachments(Collections.emptyList());
+					s.setFeedbackComment("");
+					s.setGraded(false);
+					Map<String, String> props = s.getProperties();
+					props.put(AssignmentConstants.PROP_LAST_GRADED_DATE, "");
+					props.put(AssignmentConstants.REVIEW_SCORE, "");
+
+					for (SimpleSubmitter u : s.getSubmitters())
+					{
+						u.setGrade("");
+						u.setOverridden(false);
+					}
+				}
 			}
 		}
 
