@@ -906,6 +906,14 @@ div.wicket-mask-transparent, div.wicket-mask-dark {
 	margin-bottom: 5px;
 }
 
+/* dark mode tweaks*/
+div.wicket-modal .w_blue div.w_caption,
+div.wicket-modal .w_blue div.w_content
+{
+  background: var(--sakai-background-color-1);
+  color: var(--sakai-text-color-1);
+}
+
 /*** END MODALS ***/
 
 .panel-heading {
