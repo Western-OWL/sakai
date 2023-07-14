@@ -119,25 +119,25 @@
 .statsSummary td
 {
 	padding: 0.5em;
-	border: 1px solid #ddd;
+	border: 1px solid var(--sakai-border-color);
 }
 
 .statsSummary .statsLabel
 {
 	padding-left: 2em;
-	background-color: #f9f9f9;
-	color: #666;
+	background-color: var(--sakai-background-color-2);
+	color: var(--sakai-text-color-dimmed);
 	font-weight: bold;
 	text-align: right;
 }
 
 .statsSummary .statsValue
 {
-	border-right-color: #666;
+	border-right-color: var(--sakai-text-color-dimmed);
 }
 .statsSummary .statsValue:last-of-type
 {
-	border-right-color: #ddd;
+	border-right-color: var(--sakai-border-color);
 }
 
 .submissionHistoryContainer
@@ -154,22 +154,12 @@
 .submissionHistoryContainer th, .submissionHistoryContainer td
 {
 	padding: 0.5em;
-	border: 1px solid #ddd;
+	border: 1px solid var(--sakai-border-color);
 }
 
 .submissionHistoryContainer th
 {
-	background-color: #f0f0f0;
-}
-
-.submissionHistoryContainer tr:nth-of-type(2n+1) > td
-{
-	background-color: #fff;
-}
-
-.submissionHistoryContainer tr:nth-of-type(2n) > td
-{
-	background-color: #f9f9f9;
+	background-color: var(--sakai-background-color-2);
 }
 
 .gb-final-grades-table #gradebookGradesToolbar
@@ -237,6 +227,12 @@
 .submissionHistoryContainer tr.approved td
 {
 	background-color: var(--owl-fg-colour-history-current-approval);
+	color: var(--owl-fg-colour-history-current-approval-text);
+}
+
+.submissionHistoryContainer tr.approved td a
+{
+	color: var(--owl-fg-colour-history-current-approval-link);
 }
 
 span.gb-spinner-dropdown-container::after
@@ -362,8 +358,7 @@ span.sakai-spinner-internal-use::after
 }
 #gradebookGrades thead th {
   vertical-align: top;
-  background: #F0f0f0;
-  text-shadow: 1px 1px 2px #FFF;
+  background: var(--sakai-background-color-2);
   font-weight: normal;
 }
 #gradebookGrades thead th .gb-title {
@@ -375,12 +370,12 @@ span.sakai-spinner-internal-use::after
 }
 #gradebookGrades thead th .gb-title > a {
   text-decoration: none;
-  color: #414141;
+  color: var(--sakai-text-color-1);
 }
 #gradebookGrades thead th .gb-title > a:hover,
 #gradebookGrades thead th .gb-title > a:focus {
   text-decoration: underline;
-  color: #2a94c0;
+  color: var(--link-color);
 }
 #gradebookGrades thead th .gb-title > a:after {
   font-family: 'gradebook-icons';
