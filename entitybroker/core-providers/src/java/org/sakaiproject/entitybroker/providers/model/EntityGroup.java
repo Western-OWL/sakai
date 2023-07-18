@@ -495,7 +495,7 @@ public class EntityGroup implements Group {
     @Override
     public RealmLockMode getRealmLock() {
         if (group != null) {
-            return noAccess() || isMember ? null : group.getRealmLock();
+            return !isAdmin ? null : group.getRealmLock();
         }
         return RealmLockMode.NONE;
     }
@@ -503,7 +503,7 @@ public class EntityGroup implements Group {
     @Override
     public List<String[]> getRealmLocks() {
         if (group != null) {
-            return noAccess() || isMember ? Collections.emptyList() : group.getRealmLocks();
+            return !isAdmin ? Collections.emptyList() : group.getRealmLocks();
         }
         return Collections.emptyList();
     }
@@ -511,7 +511,7 @@ public class EntityGroup implements Group {
     @Override
     public RealmLockMode getLockForReference(String reference) {
         if (group != null) {
-            return noAccess() || isMember ? null : group.getLockForReference(reference);
+            return !isAdmin ? null : group.getLockForReference(reference);
         }
         return RealmLockMode.NONE;
     }

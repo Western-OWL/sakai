@@ -443,7 +443,7 @@ public class EntitySite implements Site {
     }
 
     public boolean isCustomPageOrdered() {
-        return noAccess() || isMember ? false : customPageOrdered;
+        return !isAdmin ? false : customPageOrdered;
     }
 
     public void setCustomPageOrdered(boolean customPageOrdered) {
@@ -539,7 +539,7 @@ public class EntitySite implements Site {
 
     public List<SitePage> getPages() {
         if (site != null) {
-            return noAccess() || isMember ? null : site.getPages();
+            return !isAdmin ? null : site.getPages();
         }
         throw new UnsupportedOperationException();
     }
@@ -567,7 +567,7 @@ public class EntitySite implements Site {
 
     public Collection getGroups() {
         if (site != null) {
-            return noAccess() || isMember ? null : site.getGroups();
+            return !isAdmin ? null : site.getGroups();
         }
         throw new UnsupportedOperationException();
     }
@@ -715,7 +715,7 @@ public class EntitySite implements Site {
 
     public boolean isActiveEdit() {
         if (site != null) {
-            return noAccess() || isMember ? false : site.isActiveEdit();
+            return !isAdmin ? false : site.isActiveEdit();
         }
         throw new UnsupportedOperationException();
     }
@@ -879,7 +879,7 @@ public class EntitySite implements Site {
     @Override
     public RealmLockMode getRealmLock() {
         if (site != null) {
-            return noAccess() || isMember ? null : site.getRealmLock();
+            return !isAdmin ? null : site.getRealmLock();
         }
         return RealmLockMode.NONE;
     }
@@ -887,7 +887,7 @@ public class EntitySite implements Site {
     @Override
     public List<String[]> getRealmLocks() {
         if (site != null) {
-            return noAccess() || isMember ? null : site.getRealmLocks();
+            return !isAdmin ? null : site.getRealmLocks();
         }
         return Collections.emptyList();
     }
@@ -941,14 +941,14 @@ public class EntitySite implements Site {
 
     public Date getSoftlyDeletedDate() {
         if (site != null) {
-            return !isAdmin || isMember ? null : site.getSoftlyDeletedDate();
+            return isAdmin ? site.getSoftlyDeletedDate() : null;
         }
         throw new UnsupportedOperationException();
     }
 
     public boolean isSoftlyDeleted() {
         if (site != null) {
-            return noAccess() ? false : site.isSoftlyDeleted();
+            return isAdmin || isMaintainer ? site.isSoftlyDeleted() : false;
         }
         throw new UnsupportedOperationException();
     }
