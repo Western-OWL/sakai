@@ -318,12 +318,15 @@ public class SiteEntityProvider extends AbstractEntityProvider implements CoreEn
         isAllowedAccessSite(site);
 
         boolean isMaintainer = siteService.allowUpdateSite(siteId);
+        String userID = developerHelperService.getCurrentUserId();
         Collection<Group> siteGroups = site.getGroups();
         if (!isMaintainer) {
-            List<String> userGroupIds = site.getGroupsWithMember(developerHelperService.getCurrentUserId()).stream().map(Group::getId).collect(Collectors.toList());
+            List<String> userGroupIds = site.getGroupsWithMember(userID).stream().map(Group::getId).collect(Collectors.toList());
             siteGroups = siteGroups.stream().filter(g -> userGroupIds.contains(g.getId())).collect(Collectors.toList());
         }
-        List<EntityGroup> groups = siteGroups.stream().map(g -> new EntityGroup(g, !isMaintainer)).collect(Collectors.toList());
+        boolean isAdmin = developerHelperService.isUserAdmin(developerHelperService.getCurrentUserReference());
+        boolean isMember = isUserMemberOfSite(userID, site);
+        List<EntityGroup> groups = siteGroups.stream().map(g -> new EntityGroup(g, isMaintainer, isMember, isAdmin)).collect(Collectors.toList());
         return new ActionReturn(groups);
     }
 
@@ -356,6 +359,9 @@ public class SiteEntityProvider extends AbstractEntityProvider implements CoreEn
         }
 
         Group group = null;
+        boolean isMaintainer = siteService.allowUpdateSite(siteId);
+        boolean isAdmin = developerHelperService.isUserAdmin(developerHelperService.getCurrentUserReference());
+        boolean isMember = isUserMemberOfSite(developerHelperService.getCurrentUserId(), site);
 
         if (EntityView.Method.GET.name().equals(view.getMethod())) {
             // GET /direct/site/siteid/group/groupid
@@ -364,7 +370,7 @@ public class SiteEntityProvider extends AbstractEntityProvider implements CoreEn
             }
             group = site.getGroup(groupId);
 
-            eg = new EntityGroup(group);
+            eg = new EntityGroup(group, isMaintainer, isMember, isAdmin);
             return eg;
 
         } else if (EntityView.Method.PUT.name().equals(view.getMethod())) {
@@ -453,7 +459,7 @@ public class SiteEntityProvider extends AbstractEntityProvider implements CoreEn
             return null;
         }
 
-        eg = new EntityGroup(group);
+        eg = new EntityGroup(group, isMaintainer, isMember, isAdmin);
         return eg;
     }
 
@@ -489,6 +495,17 @@ public class SiteEntityProvider extends AbstractEntityProvider implements CoreEn
         return filteredFunctions;
     }
 
+    private boolean isUserMemberOfSite(String userID, Site site) {
+        if (site != null) {
+            Member member = site.getMember(userID);
+            if (member != null && member.isActive()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     @EntityCustomAction(action = "pages", viewKey = EntityView.VIEW_SHOW)
     public ActionReturn getPagesAndTools(EntityView view, Search search) {
         // expects site/siteId/pages
@@ -501,12 +518,11 @@ public class SiteEntityProvider extends AbstractEntityProvider implements CoreEn
 
         String siteId = view.getEntityReference().getId();
         Site site = getSiteById(siteId);
+        boolean isMember = isUserMemberOfSite(userId, site);
         if (!admin) {
-            Member member = site.getMember(userId);
-            if (member == null || !member.isActive()) {
+            if (!isMember) {
                 throw new SecurityException("User (" + userId + ") cannot access the site pages list for site (" + site.getId() + ")");
             }
-            //role = member.getRole();
         }
         boolean includeProps = false;
         boolean includeConfig = false;
@@ -530,7 +546,7 @@ public class SiteEntityProvider extends AbstractEntityProvider implements CoreEn
 
         // get the pages for this site
         List<Map<String, Object>> data = new ArrayList<Map<String, Object>>();
-        EntitySite es = new EntitySite(site, false);
+        EntitySite es = new EntitySite(site, false, siteService.allowUpdateSite(siteId), isMember, admin);
 
         List<SitePage> pages = es.getSitePages();
         for (SitePage page : pages) {
@@ -1129,11 +1145,14 @@ public class SiteEntityProvider extends AbstractEntityProvider implements CoreEn
         isAllowedAccessSite(site);
         // convert
         boolean isMaintainer = siteService.allowUpdateSite(siteId);
+        String userID = developerHelperService.getCurrentUserId();
         List<String> userGroupIds = Collections.emptyList();
         if (!isMaintainer) {
-            userGroupIds = site.getGroupsWithMember(developerHelperService.getCurrentUserId()).stream().map(Group::getId).collect(Collectors.toList());
+            userGroupIds = site.getGroupsWithMember(userID).stream().map(Group::getId).collect(Collectors.toList());
         }
-        EntitySite es = new EntitySite(site, includeGroups, !isMaintainer, userGroupIds);
+        boolean isAdmin = developerHelperService.isUserAdmin(developerHelperService.getCurrentUserReference());
+        boolean isMember = isUserMemberOfSite(userID, site);
+        EntitySite es = new EntitySite(site, includeGroups, isMaintainer, isMember, isAdmin, userGroupIds);
         return es;
     }
 
@@ -1195,6 +1214,8 @@ public class SiteEntityProvider extends AbstractEntityProvider implements CoreEn
             selectType = select.value + "";
         }
         SelectionType sType = SelectionType.ACCESS;
+        String userReference = developerHelperService.getCurrentUserReference();
+        boolean isAdmin = developerHelperService.isUserAdmin(userReference);
         if ("access".equals(selectType)) {
             sType = SelectionType.ACCESS;
         } else if ("update".equals(selectType)) {
@@ -1205,11 +1226,10 @@ public class SiteEntityProvider extends AbstractEntityProvider implements CoreEn
             sType = SelectionType.PUBVIEW;
         } else {
             // based on the current user
-            String userReference = developerHelperService.getCurrentUserReference();
             if (userReference == null) {
                 sType = SelectionType.PUBVIEW;
             } else {
-                if (developerHelperService.isUserAdmin(userReference)) {
+                if (isAdmin) {
                     sType = SelectionType.ANY;
                 }
             }
@@ -1241,7 +1261,7 @@ public class SiteEntityProvider extends AbstractEntityProvider implements CoreEn
         // convert these into EntityUser objects
         List<EntitySite> entitySites = new ArrayList<EntitySite>();
         for (Site site : sites) {
-            EntitySite es = new EntitySite(site, false);
+            EntitySite es = new EntitySite(site, false, siteService.allowUpdateSite(site.getId()), isUserMemberOfSite(developerHelperService.getCurrentUserId(), site), isAdmin);
             entitySites.add(es);
         }
         return entitySites;

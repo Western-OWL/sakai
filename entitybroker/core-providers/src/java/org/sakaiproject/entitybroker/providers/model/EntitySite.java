@@ -102,7 +102,7 @@ public class EntitySite implements Site {
         if (props == null) {
             props = new HashMap<String, String>();
         }
-        return props;
+        return noAccess() ? Collections.emptyMap() : props;
     }
 
     public void setProps(Map<String, String> props) {
@@ -126,8 +126,10 @@ public class EntitySite implements Site {
     private transient Site site;
 
     // it is difficult to work with this class externally to partially sanitize it, so we resort
-    // to tracking a sanitize flag internally and reference it when necessary to modify output
-    private boolean sanitize = false;
+    // to tracking flags internally and reference them when necessary to modify output
+    private boolean isMaintainer = false;
+    private boolean isMember = false;
+    private boolean isAdmin = false;
 
     public EntitySite() {
     }
@@ -169,12 +171,11 @@ public class EntitySite implements Site {
         getUserRoles(); // populate the user roles
     }
 
-
-    public EntitySite(Site site, boolean includeGroups) {
-        this(site, includeGroups, false, Collections.emptyList());
+    public EntitySite(Site site, boolean includeGroups, boolean isMaintainer, boolean isMember, boolean isAdmin) {
+        this(site, includeGroups, isMaintainer, isMember, isAdmin, Collections.emptyList());
     }
 
-    public EntitySite(Site site, boolean includeGroups, boolean sanitize, List<String> groupIds) {
+    public EntitySite(Site site, boolean includeGroups, boolean isMaintainer, boolean isMember, boolean isAdmin, List<String> groupIds) {
         this.site = site;
         this.id = site.getId();
         this.title = site.getTitle();
@@ -193,9 +194,11 @@ public class EntitySite implements Site {
         this.type = site.getType();
         this.customPageOrdered = site.isCustomPageOrdered();
         this.lastModified = site.getModifiedDate() == null ? System.currentTimeMillis() : site.getModifiedDate().getTime();
-        this.sanitize = sanitize;
+        this.isMaintainer = isMaintainer;
+        this.isMember = isMember;
+        this.isAdmin = isAdmin;
 
-        if (!sanitize) {
+        if (isAdmin || isMaintainer) {
             this.maintainRole = site.getMaintainRole();
             getUserRoles(); // populate the user roles
             this.owner = site.getCreatedBy() == null ? null : site.getCreatedBy().getId();
@@ -207,9 +210,17 @@ public class EntitySite implements Site {
         for (Iterator<String> iterator = rp.getPropertyNames(); iterator.hasNext(); ) {
             String name = iterator.next();
             String value = rp.getProperty(name);
-            if (sanitize && !PROP_SITE_CONTACT_NAME.equals(name) && !PROP_SITE_CONTACT_EMAIL.equals(name))
-            {
-                continue; // only show contact name/email props, skip any others
+            if ((!isAdmin && !isMaintainer) && !PROP_SITE_CONTACT_NAME.equals(name) && !PROP_SITE_CONTACT_EMAIL.equals(name)) {
+                continue; // only show contact name/email props for non-admins and non-maintainers, skip any others
+            }
+            else if (noAccess() && !PROP_SITE_CONTACT_NAME.equals(name)) {
+                continue; // only show contact name prop for non-members, skip others
+            }
+            if (PROP_SITE_CONTACT_NAME.equals(name)) {
+                this.contactName = value;
+            }
+            if (PROP_SITE_CONTACT_EMAIL.equals(name)) {
+                this.contactEmail = value;
             }
             this.setProperty(name, value);
         }
@@ -217,12 +228,12 @@ public class EntitySite implements Site {
         // add in the groups
         if (includeGroups) {
             Collection<Group> groups = site.getGroups();
-            if (sanitize) { // filter groups to include only the passed in group ids
+            if ((isMember && !isMaintainer) || noAccess()) { // filter groups to include only the passed in group ids
                 groups = groups.stream().filter(g -> groupIds.contains(g.getId())).collect(Collectors.toList());
             }
             siteGroupsList = new Vector<EntityGroup>(groups.size());
             for (Group group : groups) {
-                EntityGroup eg = new EntityGroup(group, sanitize);
+                EntityGroup eg = new EntityGroup(group, isMaintainer, isMember, isAdmin);
                 siteGroupsList.add(eg);
             }
         }
@@ -248,7 +259,7 @@ public class EntitySite implements Site {
 
     @EntityId
     public String getId() {
-        return id;
+        return noAccess() ? "" : id;
     }
 
     public void setId(String id) {
@@ -260,7 +271,7 @@ public class EntitySite implements Site {
      */
     @EntityOwner
     public String getOwner() {
-        return owner;
+        return noAccess() ? "" : owner;
     }
 
     public void setOwner(String owner) {
@@ -280,7 +291,7 @@ public class EntitySite implements Site {
         } else {
             owner = new Owner(this.owner, this.owner);
         }
-        if (sanitize)
+        if ((isMember && !isMaintainer) || noAccess())
         {
             owner.setUserEntityURL("");
             owner.setUserId("");
@@ -293,7 +304,7 @@ public class EntitySite implements Site {
         if (site != null) {
             this.lastModified = site.getModifiedDate() == null ? lastModified : site.getModifiedDate().getTime();
         }
-        return lastModified;
+        return noAccess() || (isMember && !isMaintainer) ? 0 : lastModified;
     }
 
     public void setLastModified(long lastModified) {
@@ -345,7 +356,7 @@ public class EntitySite implements Site {
     }
 
     public String getIconUrl() {
-        return iconUrl;
+        return noAccess() ? "" : iconUrl;
     }
 
     public void setIconUrl(String iconUrl) {
@@ -353,7 +364,7 @@ public class EntitySite implements Site {
     }
 
     public String getInfoUrl() {
-        return infoUrl;
+        return noAccess() ? "" : infoUrl;
     }
 
     public void setInfoUrl(String infoUrl) {
@@ -362,7 +373,7 @@ public class EntitySite implements Site {
 
     public String getInfoUrlFull() {
         if (site != null) {
-            return site.getInfoUrlFull();
+            return noAccess() ? "" : site.getInfoUrlFull();
         }
         return infoUrlFull;
     }
@@ -380,7 +391,7 @@ public class EntitySite implements Site {
     }
 
     public String getJoinerRole() {
-        return joinerRole;
+        return noAccess() ? "" : joinerRole;
     }
 
     public void setJoinerRole(String joinerRole) {
@@ -388,7 +399,7 @@ public class EntitySite implements Site {
     }
 
     public String getSkin() {
-        return skin;
+        return noAccess() ? "" : skin;
     }
 
     public void setSkin(String skin) {
@@ -396,7 +407,7 @@ public class EntitySite implements Site {
     }
 
     public boolean isPublished() {
-        return published;
+        return noAccess() ? false : published;
     }
 
     public void setPublished(boolean published) {
@@ -416,7 +427,7 @@ public class EntitySite implements Site {
     }
 
     public String getMaintainRole() {
-        return maintainRole;
+        return noAccess() ? "" : maintainRole;
     }
 
     public void setMaintainRole(String maintainRole) {
@@ -424,7 +435,7 @@ public class EntitySite implements Site {
     }
 
     public String getProviderGroupId() {
-        return providerGroupId;
+        return noAccess() ? "" : providerGroupId;
     }
 
     public void setProviderGroupId(String providerGroupId) {
@@ -432,7 +443,7 @@ public class EntitySite implements Site {
     }
 
     public boolean isCustomPageOrdered() {
-        return customPageOrdered;
+        return noAccess() || isMember ? false : customPageOrdered;
     }
 
     public void setCustomPageOrdered(boolean customPageOrdered) {
@@ -448,7 +459,7 @@ public class EntitySite implements Site {
     }
 
     public String[] getUserRoles() {
-        if (sanitize) {
+        if (!isAdmin && !isMaintainer) {
             return new String[0];
         }
         if (userRoles == null) {
@@ -477,7 +488,7 @@ public class EntitySite implements Site {
 
     public List<SitePage> getSitePages() {
         ArrayList<SitePage> rpgs = new ArrayList<SitePage>(0);
-        if (site != null) {
+        if (site != null && !noAccess()) {
             List<SitePage> pages = site.getOrderedPages();
             rpgs = new ArrayList<SitePage>(pages.size());
             DeveloperHelperService dhs = (DeveloperHelperService) ComponentManager.get(DeveloperHelperService.class);
@@ -498,7 +509,7 @@ public class EntitySite implements Site {
                     }
                 }
                 if (allowPage) {
-                    rpgs.add(new EntitySitePage(sitePage));
+                    rpgs.add(new EntitySitePage(sitePage, isAdmin));
                 }
             }
         }
@@ -528,7 +539,7 @@ public class EntitySite implements Site {
 
     public List<SitePage> getPages() {
         if (site != null) {
-            return site.getPages();
+            return noAccess() || isMember ? null : site.getPages();
         }
         throw new UnsupportedOperationException();
     }
@@ -541,7 +552,7 @@ public class EntitySite implements Site {
     }
     public Date getCreatedDate() {
         if (site != null) {
-            return site.getCreatedDate();
+            return noAccess() ? null : site.getCreatedDate();
         }
         throw new UnsupportedOperationException();
     }
@@ -556,7 +567,7 @@ public class EntitySite implements Site {
 
     public Collection getGroups() {
         if (site != null) {
-            return site.getGroups();
+            return noAccess() || isMember ? null : site.getGroups();
         }
         throw new UnsupportedOperationException();
     }
@@ -584,7 +595,7 @@ public class EntitySite implements Site {
 
     public String getIconUrlFull() {
         if (site != null) {
-            return site.getIconUrlFull();
+            return noAccess() ? "" : site.getIconUrlFull();
         }
         return this.iconUrlFull;
     }
@@ -598,7 +609,7 @@ public class EntitySite implements Site {
     
     public Date getModifiedDate() {
         if (site != null) {
-            return site.getModifiedDate();
+            return noAccess() || (isMember && !isMaintainer) ? null : site.getModifiedDate();
         }
         throw new UnsupportedOperationException();
     }
@@ -704,20 +715,20 @@ public class EntitySite implements Site {
 
     public boolean isActiveEdit() {
         if (site != null) {
-            return site.isActiveEdit();
+            return noAccess() || isMember ? false : site.isActiveEdit();
         }
         throw new UnsupportedOperationException();
     }
 
     public ResourceProperties getProperties() {
         if (site != null) {
-            return site.getProperties();
+            return noAccess() ? null : site.getProperties();
         }
         throw new UnsupportedOperationException();
     }
 
     public String getReference() {
-        return "/site/" + id;
+        return noAccess() ? "" :"/site/" + id;
     }
 
     public String getReference(String arg0) {
@@ -853,7 +864,7 @@ public class EntitySite implements Site {
 
     public boolean isEmpty() {
         if (site != null) {
-            return site.isEmpty();
+            return !isAdmin && !isMaintainer ? false : site.isEmpty();
         }
         return false;
     }
@@ -868,7 +879,7 @@ public class EntitySite implements Site {
     @Override
     public RealmLockMode getRealmLock() {
         if (site != null) {
-            return site.getRealmLock();
+            return noAccess() || isMember ? null : site.getRealmLock();
         }
         return RealmLockMode.NONE;
     }
@@ -876,7 +887,7 @@ public class EntitySite implements Site {
     @Override
     public List<String[]> getRealmLocks() {
         if (site != null) {
-            return site.getRealmLocks();
+            return noAccess() || isMember ? null : site.getRealmLocks();
         }
         return Collections.emptyList();
     }
@@ -930,14 +941,14 @@ public class EntitySite implements Site {
 
     public Date getSoftlyDeletedDate() {
         if (site != null) {
-            return site.getSoftlyDeletedDate();
+            return !isAdmin || isMember ? null : site.getSoftlyDeletedDate();
         }
         throw new UnsupportedOperationException();
     }
 
     public boolean isSoftlyDeleted() {
         if (site != null) {
-            return site.isSoftlyDeleted();
+            return noAccess() ? false : site.isSoftlyDeleted();
         }
         throw new UnsupportedOperationException();
     }
@@ -956,4 +967,7 @@ public class EntitySite implements Site {
         throw new UnsupportedOperationException();
     }
 
+    private boolean noAccess() {
+        return !isAdmin && !isMaintainer && !isMember;
+    }
 }

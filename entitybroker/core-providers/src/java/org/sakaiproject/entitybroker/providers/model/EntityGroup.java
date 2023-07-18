@@ -71,8 +71,10 @@ public class EntityGroup implements Group {
     private String[] userRoles;
 
     // it is difficult to work with this class externally to partially sanitize it, so we resort
-    // to tracking a sanitize flag internally and reference it when necessary to modify output
-    private boolean sanitize = false;
+    // to tracking flags internally and reference them when necessary to modify output
+    private boolean isMaintainer = false;
+    private boolean isMember = false;
+    private boolean isAdmin = false;
 
     public Map<String, String> props;
     public Map<String, String> getProps() {
@@ -119,11 +121,7 @@ public class EntityGroup implements Group {
         getUserRoles(); // populate the user roles
     }
 
-    public EntityGroup(Group group) {
-        this(group, false);
-    }
-
-    public EntityGroup(Group group, boolean sanitize) {
+    public EntityGroup(Group group, boolean isMaintainer, boolean isMember, boolean isAdmin) {
         this.group = group;
         Site site = group.getContainingSite();
         this.siteId = site.getId();
@@ -133,12 +131,17 @@ public class EntityGroup implements Group {
         this.joinerRole = site.getJoinerRole();
 
         this.lastModified = group.getModifiedDate() == null ? System.currentTimeMillis() : group.getModifiedDate().getTime();
-        this.sanitize = sanitize;
-        if (!sanitize) {
+        this.isMaintainer = isMaintainer;
+        this.isMember = isMember;
+        this.isAdmin = isAdmin;
+        if (isAdmin || isMaintainer) {
             this.maintainRole = group.getMaintainRole();
             this.providerGroupId = group.getProviderGroupId();
             this.owner = group.getCreatedBy() == null ? null : group.getCreatedBy().getId();
             getUserRoles(); // populate the user roles
+        }
+
+        if (isAdmin) {
             // properties
             ResourceProperties rp = group.getProperties();
             for (Iterator<String> iterator = rp.getPropertyNames(); iterator.hasNext();) {
@@ -192,7 +195,7 @@ public class EntityGroup implements Group {
         } else {
             owner = new Owner(this.owner, this.owner);
         }
-        if (sanitize)
+        if (isMember && !isMaintainer)
         {
             owner.setUserEntityURL("");
             owner.setUserId("");
@@ -205,7 +208,7 @@ public class EntityGroup implements Group {
         if (group != null) {
             this.lastModified = group.getModifiedDate() == null ? lastModified : group.getModifiedDate().getTime();
         }
-        return lastModified;
+        return noAccess() || (isMember && !isMaintainer) ? 0 : lastModified;
     }
 
 	
@@ -257,7 +260,7 @@ public class EntityGroup implements Group {
     }
 
     public String[] getUserRoles() {
-        if (sanitize) {
+        if (isMember && !isMaintainer) {
             return new String[0];
         }
         if (userRoles == null) {
@@ -305,7 +308,7 @@ public class EntityGroup implements Group {
     
     public Date getModifiedDate() {
     	if (group != null) {
-            return group.getModifiedDate();
+            return noAccess() || (isMember && !isMaintainer) ? null : group.getModifiedDate();
         }
         throw new UnsupportedOperationException();
 	}
@@ -319,7 +322,7 @@ public class EntityGroup implements Group {
 
     public boolean isActiveEdit() {
         if (group != null) {
-            return group.isActiveEdit();
+            return noAccess() || (isMember && !isMaintainer) ? false : group.isActiveEdit();
         }
         throw new UnsupportedOperationException();
     }
@@ -442,7 +445,7 @@ public class EntityGroup implements Group {
 
     public Set getUsers() {
         if (group != null) {
-            return sanitize ? Collections.emptySet() : group.getUsers();
+            return noAccess() || (isMember && !isMaintainer) ? Collections.emptySet() : group.getUsers();
         }
         throw new UnsupportedOperationException();
     }
@@ -477,7 +480,7 @@ public class EntityGroup implements Group {
 
     public boolean isEmpty() {
         if (group != null) {
-            return group.isEmpty();
+            return noAccess() || (isMember && !isMaintainer) ? false : group.isEmpty();
         }
         return false;
     }
@@ -492,7 +495,7 @@ public class EntityGroup implements Group {
     @Override
     public RealmLockMode getRealmLock() {
         if (group != null) {
-            return group.getRealmLock();
+            return noAccess() || isMember ? null : group.getRealmLock();
         }
         return RealmLockMode.NONE;
     }
@@ -500,7 +503,7 @@ public class EntityGroup implements Group {
     @Override
     public List<String[]> getRealmLocks() {
         if (group != null) {
-            return sanitize ? Collections.emptyList() : group.getRealmLocks();
+            return noAccess() || isMember ? Collections.emptyList() : group.getRealmLocks();
         }
         return Collections.emptyList();
     }
@@ -508,7 +511,7 @@ public class EntityGroup implements Group {
     @Override
     public RealmLockMode getLockForReference(String reference) {
         if (group != null) {
-            return group.getLockForReference(reference);
+            return noAccess() || isMember ? null : group.getLockForReference(reference);
         }
         return RealmLockMode.NONE;
     }
@@ -573,5 +576,9 @@ public class EntityGroup implements Group {
             return group.getContainingSite();
         }
         throw new UnsupportedOperationException();
+    }
+
+    private boolean noAccess() {
+        return !isAdmin && !isMaintainer && !isMember;
     }
 }
