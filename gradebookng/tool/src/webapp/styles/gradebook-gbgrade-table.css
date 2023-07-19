@@ -192,11 +192,15 @@
   position: absolute;
   display: inline-block;
 }
+#gradeTableWrapper .gb-cg-item-flags.gb-grade-item-flags {
+  left: 4px; /* match padding of container */
+  bottom: 7px;
+}
 #gradeTableWrapper th .btn-group,
 #gradeTableWrapper td .btn-group {
   position: absolute;
-  bottom: 5px;
-  right: 5px;
+  bottom: 12px;
+  right: 0;
 }
 #gradeTableWrapper .btn-group > a {
   line-height: 10px;
@@ -275,6 +279,7 @@
   min-width: 16px;
   text-align: center;
   font-style: normal;
+  cursor: pointer;
 }
 .gb-flag-not-counted:before {
   content: '\e600';
