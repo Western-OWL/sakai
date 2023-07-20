@@ -475,14 +475,10 @@
 	.userList {
 	  margin-left: 36px !important;
 	  .selectedItem {
-	    background-color: var(--sakai-active-color-3);
-	    color: var(--sakai-text-color-3);
 	    font-weight: bold;
 	  }
 	  li label:hover {
 	    cursor: pointer;
-	    background: var(--sakai-active-color-1);
-	    color: var(--sakai-active-text-color);
 	  }
 	}
 

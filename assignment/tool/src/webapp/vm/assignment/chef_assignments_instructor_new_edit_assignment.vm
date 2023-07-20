@@ -1658,8 +1658,8 @@ function showExternalIframe(title, doreload) {
 								<a href="javascript:void(0)" id="expand_$roleCount" class="toggleRoleLink" style="display:inline" title="$expandString">
 									<img src="/library/image/sakai/expand.gif"  alt="$expandString"/><span class="members"><i class="icon-sakai--sakai-membership"></i></span>
 								</a>
-								<input id="$showInputString" name="showInputString_$roleCount" #if ($!value_allPurposeAccessList.contains($role)) checked="checked" #end type="checkbox" name="allPurpose_$role" class="selectAllMembers"/>
-								<label for="showInputString_$roleCount">
+								<input id="$showInputString" name="$showInputString" #if ($!value_allPurposeAccessList.contains($role)) checked="checked" #end type="checkbox" name="allPurpose_$role" class="selectAllMembers"/>
+								<label for="$showInputString">
 									$role
 								</label>
 								(<span class="highlight countDisplay"></span> <span class="highlight">$tlang.getString("allPurpose.user.selection.count")</span>)
