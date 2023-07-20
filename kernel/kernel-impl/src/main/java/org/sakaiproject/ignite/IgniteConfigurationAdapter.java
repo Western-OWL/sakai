@@ -159,14 +159,17 @@ public class IgniteConfigurationAdapter extends AbstractFactoryBean<IgniteConfig
                 tcpDiscovery.setLocalAddress(address);
                 localDiscoveryAddress = address;
             } else {
-                localDiscoveryAddress = "127.0.0.1";
+                localDiscoveryAddress = ""; // OWL
             }
 
-            if (range - 1 == 0) {
-                discoveryAddresses.add(localDiscoveryAddress + ":" + (port + range));
-            } else {
-                discoveryAddresses.add(localDiscoveryAddress + ":" + (port + range) + ".." + (port + range + range - 1));
-            }
+			if (!localDiscoveryAddress.isEmpty()) // OWL
+			{
+				if (range - 1 == 0) {
+					discoveryAddresses.add(localDiscoveryAddress + ":" + (port + range));
+				} else {
+					discoveryAddresses.add(localDiscoveryAddress + ":" + (port + range) + ".." + (port + range + range - 1));
+				}
+			}
 
             tcpCommunication.setLocalPort(port);
             tcpCommunication.setLocalPortRange(range - 1);
