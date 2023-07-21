@@ -47,7 +47,11 @@ public class IgniteConfigurationAdapter extends AbstractFactoryBean<IgniteConfig
     public static final String IGNITE_TCP_MESSAGE_QUEUE_LIMIT = "ignite.tcpMessageQueueLimit";
     public static final String IGNITE_TCP_SLOW_CLIENT_MESSAGE_QUEUE_LIMIT = "ignite.tcpSlowClientMessageQueueLimit";
     public static final String IGNITE_STOP_ON_FAILURE = "ignite.stopOnFailure";
+	// OWL
 	public static final String IGNITE_ADD_LOCALHOST_IP = "ignite.addLocalhostIP";
+	public static final String IGNITE_DEFAULT_TX_TIMEOUT = "ignite.defaultTxTimeout";
+	public static final String IGNITE_FAILURE_DETECTION_TIMEOUT = "ignite.failureDetectionTimeout";
+	public static final String IGNITE_WORKER_BLOCKED_TIMEOUT = "ignite.workerBlockedTimeout";
 
     private static final IgniteConfiguration igniteConfiguration = new IgniteConfiguration();
     private static Boolean configured = Boolean.FALSE;
@@ -86,7 +90,11 @@ public class IgniteConfigurationAdapter extends AbstractFactoryBean<IgniteConfig
             int tcpMessageQueueLimit = serverConfigurationService.getInt(IGNITE_TCP_MESSAGE_QUEUE_LIMIT, 1024);
             int tcpSlowClientMessageQueueLimit = serverConfigurationService.getInt(IGNITE_TCP_SLOW_CLIENT_MESSAGE_QUEUE_LIMIT, tcpMessageQueueLimit / 2);
             boolean stopOnFailure = serverConfigurationService.getBoolean(IGNITE_STOP_ON_FAILURE, true);
-			boolean addLocalhostIP = serverConfigurationService.getBoolean(IGNITE_ADD_LOCALHOST_IP, true);  // OWL
+			// OWL
+			boolean addLocalhostIP = serverConfigurationService.getBoolean(IGNITE_ADD_LOCALHOST_IP, true);
+			long defaultTxTimeout = serverConfigurationService.getLong(IGNITE_DEFAULT_TX_TIMEOUT, 30 * 1000);
+			long failureDetectionTimeout = serverConfigurationService.getLong(IGNITE_FAILURE_DETECTION_TIMEOUT, 20000);
+			long workerBlockedTimeout = serverConfigurationService.getLong(IGNITE_WORKER_BLOCKED_TIMEOUT, 20000);
 
             Map<String, Object> attributes = new HashMap<>();
             // disable banner
@@ -115,7 +123,8 @@ public class IgniteConfigurationAdapter extends AbstractFactoryBean<IgniteConfig
             TransactionConfiguration transactionConfiguration = new TransactionConfiguration();
             transactionConfiguration.setDefaultTxConcurrency(TransactionConcurrency.OPTIMISTIC);
             transactionConfiguration.setDefaultTxIsolation(TransactionIsolation.READ_COMMITTED);
-            transactionConfiguration.setDefaultTxTimeout(30 * 1000);
+            transactionConfiguration.setDefaultTxTimeout(defaultTxTimeout);
+			log.info("Ignite defaultTxTimeout = {}", transactionConfiguration.getDefaultTxTimeout());
             igniteConfiguration.setTransactionConfiguration(transactionConfiguration);
 
             igniteConfiguration.setDeploymentMode(DeploymentMode.CONTINUOUS);
@@ -130,14 +139,16 @@ public class IgniteConfigurationAdapter extends AbstractFactoryBean<IgniteConfig
             igniteConfiguration.setMetricsUpdateFrequency(serverConfigurationService.getLong(IGNITE_METRICS_UPDATE_FREQ, IgniteConfiguration.DFLT_METRICS_UPDATE_FREQ));
             igniteConfiguration.setMetricsLogFrequency(serverConfigurationService.getLong(IGNITE_METRICS_LOG_FREQ, 0L));
 
-            igniteConfiguration.setFailureDetectionTimeout(20000);
+            igniteConfiguration.setFailureDetectionTimeout(failureDetectionTimeout);
+			log.info("Ignite failureDetectionTimeout = {}", igniteConfiguration.getFailureDetectionTimeout());
             if (stopOnFailure) {
                 IgniteStopNodeAndExitHandler failureHandler = new IgniteStopNodeAndExitHandler();
                 failureHandler.setIgnoredFailureTypes(Collections.emptySet());
                 igniteConfiguration.setFailureHandler(failureHandler);
             }
 
-            igniteConfiguration.setSystemWorkerBlockedTimeout(20000);
+            igniteConfiguration.setSystemWorkerBlockedTimeout(workerBlockedTimeout);
+			log.info("Ignite workerBlockedTimeout = {}", igniteConfiguration.getSystemWorkerBlockedTimeout());
             igniteConfiguration.setSegmentationPolicy(SegmentationPolicy.NOOP);
 
             // local node network configuration
@@ -162,6 +173,7 @@ public class IgniteConfigurationAdapter extends AbstractFactoryBean<IgniteConfig
                 localDiscoveryAddress = address;
             } else {
                 localDiscoveryAddress = addLocalhostIP ? "127.0.0.1" : ""; // OWL
+				log.info("No ignite.address set. addLocalhostIP = {}", addLocalhostIP);
             }
 
 			if (!localDiscoveryAddress.isEmpty()) // OWL
