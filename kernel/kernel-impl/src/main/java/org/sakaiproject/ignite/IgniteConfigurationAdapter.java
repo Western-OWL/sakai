@@ -47,6 +47,7 @@ public class IgniteConfigurationAdapter extends AbstractFactoryBean<IgniteConfig
     public static final String IGNITE_TCP_MESSAGE_QUEUE_LIMIT = "ignite.tcpMessageQueueLimit";
     public static final String IGNITE_TCP_SLOW_CLIENT_MESSAGE_QUEUE_LIMIT = "ignite.tcpSlowClientMessageQueueLimit";
     public static final String IGNITE_STOP_ON_FAILURE = "ignite.stopOnFailure";
+	public static final String IGNITE_ADD_LOCALHOST_IP = "ignite.addLocalhostIP";
 
     private static final IgniteConfiguration igniteConfiguration = new IgniteConfiguration();
     private static Boolean configured = Boolean.FALSE;
@@ -85,6 +86,7 @@ public class IgniteConfigurationAdapter extends AbstractFactoryBean<IgniteConfig
             int tcpMessageQueueLimit = serverConfigurationService.getInt(IGNITE_TCP_MESSAGE_QUEUE_LIMIT, 1024);
             int tcpSlowClientMessageQueueLimit = serverConfigurationService.getInt(IGNITE_TCP_SLOW_CLIENT_MESSAGE_QUEUE_LIMIT, tcpMessageQueueLimit / 2);
             boolean stopOnFailure = serverConfigurationService.getBoolean(IGNITE_STOP_ON_FAILURE, true);
+			boolean addLocalhostIP = serverConfigurationService.getBoolean(IGNITE_ADD_LOCALHOST_IP, true);  // OWL
 
             Map<String, Object> attributes = new HashMap<>();
             // disable banner
@@ -159,7 +161,7 @@ public class IgniteConfigurationAdapter extends AbstractFactoryBean<IgniteConfig
                 tcpDiscovery.setLocalAddress(address);
                 localDiscoveryAddress = address;
             } else {
-                localDiscoveryAddress = ""; // OWL
+                localDiscoveryAddress = addLocalhostIP ? "127.0.0.1" : ""; // OWL
             }
 
 			if (!localDiscoveryAddress.isEmpty()) // OWL
