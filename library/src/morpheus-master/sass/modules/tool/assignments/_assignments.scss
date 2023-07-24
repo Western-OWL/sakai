@@ -339,10 +339,6 @@
 	  vertical-align: top;
 	}
 
-	.attachmentsIcon {
-	  max-width: none;
-	}
-
 	.assignmentUnsubmittable {
 	  background-color: var(--errorBanner-bgcolor);
 	  color: var(--errorBanner-color);
@@ -723,9 +719,14 @@
 		width: 80px;
 	}
 
-  #submissionList sakai-rubric-student-button {
-    float: right;
-  }
+	#submissionList {
+		sakai-rubric-student-button {
+			float: right;
+		}
+		#gradereleased, td[headers="gradereleased"], #attachment, td[headers="attachment"] {
+			text-align: center;
+		}
+	}
 
   #msgNoMembersInCommonError {
 	  max-height: 300px;
