@@ -486,6 +486,47 @@
 			</div>
 		#end
 
+		#if ($!isTimesheet)
+			<div id="timesheetsetupsection">
+				<h4>
+					$tlang.getString("gen.estimate")
+				</h4>
+
+				<div class="checkbox">
+					<label for="$name_NEW_ASSIGNMENT_CHECK_ADD_ESTIMATE">
+						<input id="$name_NEW_ASSIGNMENT_CHECK_ADD_ESTIMATE" name="$name_NEW_ASSIGNMENT_CHECK_ADD_ESTIMATE" type="checkbox" value="true" #if ($value_NEW_ASSIGNMENT_CHECK_ADD_ESTIMATE) checked #end onclick="ASN.toggleAutoAnnounceEstimate(this.checked)" />
+						$tlang.getString("gen.isestimate")
+					</label>
+				</div>
+
+				<div id="checkestimaterequired" class="checkbox hidden">
+					<label for="$name_NEW_ASSIGNMENT_CHECK_ADD_ESTIMATE_REQUIRED">
+						<input id="$name_NEW_ASSIGNMENT_CHECK_ADD_ESTIMATE_REQUIRED" name="$name_NEW_ASSIGNMENT_CHECK_ADD_ESTIMATE_REQUIRED" type="checkbox" value="true" #if ($value_NEW_ASSIGNMENT_CHECK_ADD_ESTIMATE_REQUIRED) checked #end />
+						$tlang.getString("gen.reqestimate")
+					</label>
+				</div>
+
+				<div id="inputtimestimate" class="form-group row form-required hidden">
+						<label for="$name_NEW_ASSIGNMENT_INPUT_ADD_TIME_ESTIMATE" class="col-sm-2 form-required">
+							$tlang.getString("gen.timestimate")
+						</label>
+						<div class="col-sm-2">
+							<input name="$name_NEW_ASSIGNMENT_INPUT_ADD_TIME_ESTIMATE" id="$name_NEW_ASSIGNMENT_INPUT_ADD_TIME_ESTIMATE" type="text" value="$formattedText.escapeHtml($!value_NEW_ASSIGNMENT_INPUT_ADD_TIME_ESTIMATE)" size="20" maxlength="20" class="form-control" placeholder="$!tlang.getString('ts.modal.field.tspent.format')" />
+						</div>
+				</div>
+			</div>
+			#if ($value_AssignTo == $value_AssignTo_Groups && $!groupsList && !$selectedGroupsNotFound)
+			<script>
+				ASN.disableTimesheetSetupSection();
+			</script>
+			#end
+		#end
+
+        <fieldset id="assignToSection" #if ($value_SubmissionType == 6) style = "display:none"#end>
+		<h4>$!tlang.getString('accessSectionHeader')</h4>
+		#parse("vm/assignment/instructor_new_edit/assignto_section.vm")
+		</fieldset>
+
 		<h4>
 			$tlang.getString("gen.stusub")
 		</h4>
@@ -653,47 +694,6 @@ function showExternalIframe(title, doreload) {
 //]]>
 </script>
 
-		#if ($!isTimesheet)
-			<div id="timesheetsetupsection">
-				<h4>
-					$tlang.getString("gen.estimate")
-				</h4>
-
-				<div class="checkbox">
-					<label for="$name_NEW_ASSIGNMENT_CHECK_ADD_ESTIMATE">
-						<input id="$name_NEW_ASSIGNMENT_CHECK_ADD_ESTIMATE" name="$name_NEW_ASSIGNMENT_CHECK_ADD_ESTIMATE" type="checkbox" value="true" #if ($value_NEW_ASSIGNMENT_CHECK_ADD_ESTIMATE) checked #end onclick="ASN.toggleAutoAnnounceEstimate(this.checked)" />
-						$tlang.getString("gen.isestimate")
-					</label>
-				</div>
-
-				<div id="checkestimaterequired" class="checkbox hidden">
-					<label for="$name_NEW_ASSIGNMENT_CHECK_ADD_ESTIMATE_REQUIRED">
-						<input id="$name_NEW_ASSIGNMENT_CHECK_ADD_ESTIMATE_REQUIRED" name="$name_NEW_ASSIGNMENT_CHECK_ADD_ESTIMATE_REQUIRED" type="checkbox" value="true" #if ($value_NEW_ASSIGNMENT_CHECK_ADD_ESTIMATE_REQUIRED) checked #end />
-						$tlang.getString("gen.reqestimate")
-					</label>
-				</div>
-
-				<div id="inputtimestimate" class="form-group row form-required hidden">
-						<label for="$name_NEW_ASSIGNMENT_INPUT_ADD_TIME_ESTIMATE" class="col-sm-2 form-required">
-							$tlang.getString("gen.timestimate")
-						</label>
-						<div class="col-sm-2">
-							<input name="$name_NEW_ASSIGNMENT_INPUT_ADD_TIME_ESTIMATE" id="$name_NEW_ASSIGNMENT_INPUT_ADD_TIME_ESTIMATE" type="text" value="$formattedText.escapeHtml($!value_NEW_ASSIGNMENT_INPUT_ADD_TIME_ESTIMATE)" size="20" maxlength="20" class="form-control" placeholder="$!tlang.getString('ts.modal.field.tspent.format')" />
-						</div>
-				</div>
-			</div>
-			#if ($value_AssignTo == $value_AssignTo_Groups && $!groupsList && !$selectedGroupsNotFound)
-			<script>
-				ASN.disableTimesheetSetupSection();
-			</script>
-			#end
-		#end
-
-        <fieldset id="assignToSection" #if ($value_SubmissionType == 6) style = "display:none"#end>
-		<h4>$!tlang.getString('accessSectionHeader')</h4>
-		#parse("vm/assignment/instructor_new_edit/assignto_section.vm")
-		</fieldset>
-
 		##show it only for those assignments not of type non-electronic submission
 		#if($!value_allowResubmitNumber && $value_SubmissionType != 4)
 			#set($resubmitStyle="display:block")
@@ -710,10 +710,10 @@ function showExternalIframe(title, doreload) {
 					<input type="checkbox" id="allowResToggle" name ="allowResToggle" #if($!value_allowResubmitNumber) checked="checked"#end onclick="if(checked){document.getElementById('allowResubmitNumber').style.display = 'block';document.getElementById('allowResubmitTime').style.display = 'block';document.getElementById('resubmitNotification').style.display = 'block';ASN.resizeFrame();}else{document.getElementById('allowResubmitNumber').style.display = 'none';document.getElementById('allowResubmitTime').style.display = 'none';document.getElementById('resubmitNotification').style.display = 'none';}" />
 				</div>
 			</div>
-		    <p class="sak-banner-info" id="ltiSubmissionResubmitNote" #if ($value_SubmissionType != 6) style = "display:none"#end>
-			    $tlang.getString("external.tool.resubmission")
-            </p>
 		</div>
+		<p class="sak-banner-info" id="ltiSubmissionResubmitNote" #if ($value_SubmissionType != 6) style = "display:none"#end>
+			$tlang.getString("external.tool.resubmission")
+		</p>
 
 		<div class="form-group row" id="allowResubmitNumber" style="$!resubmitStyle">
 			<label for="allowResubmitNumber" class="col-sm-offset-1 col-sm-2 control-label">
