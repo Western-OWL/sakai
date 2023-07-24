@@ -322,7 +322,10 @@ div.wicket-modal div.w_right > div {
 }
 
 div.wicket-modal .w_blue div.w_caption,
-div.wicket-modal .w_blue div.w_content
+div.wicket-modal .w_blue div.w_content,
+div.wicket-modal .modal-add-or-edit-gbitem div.w_caption,
+div.wicket-modal .modal-add-or-edit-gbitem div.w_content,
+div.wicket-modal .modal-add-or-edit-gbitem div.w_content_2
 {
   background: var(--sakai-background-color-1);
   color: var(--sakai-text-color-1);
