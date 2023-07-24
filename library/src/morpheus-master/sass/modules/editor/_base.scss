@@ -49,7 +49,12 @@
 
 	.cke_combo__format .cke_combo_button,
 	.cke_combo__styles .cke_combo_button {
+		border: 1px solid transparent; // to prevent jitter on hover from border popping in
 		padding: 0;
+	}
+
+	.cke_combo__format.cke_combo_on .cke_combo_button {
+		padding-left: 1px;	// prevents jitter when opening the menu because CKEditor has extra padding when this menu is off
 	}
 
 	.cke_toolbox_main {
