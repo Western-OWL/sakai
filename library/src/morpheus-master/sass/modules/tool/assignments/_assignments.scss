@@ -653,23 +653,33 @@
 	}
 
 	.sakai-asn-controlRow {
-		@include justify-content(space-between);
-		@include align-items(flex-end);
-		-webkit-flex-wrap: wrap;
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-end;
 		flex-wrap: wrap;
-		grader-toggle { margin-left: 20px; }
+		gap: 0 $standard-spacing;
+
+		.assignPanel {
+			margin-bottom: $standard-spacing;
+			padding: $standard-spacing;
+			background: var(--sakai-background-color-2);
+			border: 1px solid var(--sakai-border-color);
+		}
 
 		.listNav {
 			display: flex;
 			flex-wrap: wrap;
+			margin: 0 0 $standard-spacing 0; // overrides default listNav for vertical stacking
 
 			& > a {
 				margin-right: $standard-spacing;
 				padding-right: $standard-spacing;
-				border-right: 1px solid #ddd;
+				border-right: 1px solid var(--sakai-border-color);
 
 				&:last-of-type {
-					border-right: 0;
+					margin-right: 0;
+					padding-right: 0;
+					border-right: 0 none;
 				}
 			}
 		}

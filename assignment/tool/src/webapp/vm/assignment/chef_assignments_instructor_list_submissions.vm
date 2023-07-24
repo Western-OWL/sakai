@@ -21,14 +21,14 @@ function printView(url) {
 
 <div class="portletBody container-fluid">
     #navBarHREF( $allowAddAssignment $withGrade $allowGradeSubmission $allowAddAssignment $allowRecoverAssignment $allowAllGroups $assignmentscheck $allowUpdateSite $enableViewOption $view "" )
-	<div id="assignment-header">
+	##<div id="assignment-header">
 		<div class="page-header">
 		<h1>#assignmentIcons($!assignment) $formattedText.escapeHtml($assignment.Title)<small> - $tlang.getString('gen.subm2')</small></h1>
 		</div>
 		#*<div>
 			<grader-toggle #if(!$useGraderByDefault)unchecked-by-default#end tool="assignments"></grader-toggle>
 		</div>*#
-	</div>
+	##</div>
 
 	#if ($alertMessage)<div class="sak-banner-error"><strong>$tlang.getString("gen.alert")</strong> $alertMessage</div>#end
 	## reminder of submission download url
@@ -45,24 +45,24 @@ function printView(url) {
 		#set ($showMsg = false)
 		#set ($showMsg = $!allMsgNumber)
 		#if ($!showMsg || $showMsg != 0)
-		<div class="navPanel">
-			<div class="viewNav">
+		<div class="assignPanel">
 			#set ($gradeType = $typeOfGrade)
 			#if(!$disableGrade)
-				<form id="defaultGradeForm" name="defaultGradeForm" class="inlineForm" method="post" action="#toolForm($action)">
+				<form id="defaultGradeForm" name="defaultGradeForm" class="form-inline inlineForm" method="post" action="#toolForm($action)">
 					<input type="hidden" name="$!form_action" value="setScore" />
+					<label for="defaultGrade_1" style="display:block" class="textPanelFooter">$!form_label</label>
 					<div class="form-group">
-						<label for="defaultGrade_1" style="display:block" class="textPanelFooter">$!form_label</label>
 					##for non-point-based grading, choose the default grade from drop-down
 						<div>
 							<label class="textPanelFooter">
 								<input type="checkbox" checked="checked" name="notGrade" value="true"/> $tlang.getString("defaultGrade.notGrade")
 							</label>
 							<label class="textPanelFooter">
-								<input type="checkbox" checked="checked" name="notSubmit" value="true"/>$tlang.getString("defaultGrade.notSubmit")<br/>
+								<input type="checkbox" checked="checked" name="notSubmit" value="true"/> $tlang.getString("defaultGrade.notSubmit")
 							</label>
 						</div>
 					</div>
+					<div class="form-group">
 					#if ($!gradeType != 3)
 						<select id="defaultGrade_1" name="defaultGrade" size="1" >
 							<option value="">$tlang.getString("non.submission.grade.select")</option>
@@ -84,11 +84,11 @@ function printView(url) {
 						## instructor needs to type in default points in point-based-grading
 						<input type="text" id="defaultGrade_2" name="defaultGrade" value="$!defaultGrade" size="5" />
 					#end
-					<input type="button" accesskey="a" class="active" name="apply" value="$tlang.getString('gen.applygrade')" onclick="SPNR.disableControlsAndSpin( this, null ); ASN.submitForm( 'defaultGradeForm', null, null, null );" title="$tlang.getString("gen.applygrade")" />
-					<input type="hidden" name="sakai_csrf_token" value="$sakai_csrf_token" />
+						<input type="button" accesskey="a" class="active" name="apply" value="$tlang.getString('gen.applygrade')" onclick="SPNR.disableControlsAndSpin( this, null ); ASN.submitForm( 'defaultGradeForm', null, null, null );" title="$tlang.getString("gen.applygrade")" />
+						<input type="hidden" name="sakai_csrf_token" value="$sakai_csrf_token" />
+					</div>
 				</form>
 			#end
-			</div>
 		</div>
 		<form name="viewForm" id="viewForm" class="inlineForm" method="post" action="#toolForm("AssignmentAction")">
 			<input type="hidden" name="assignmentId" id = "assignmentId" value=$formattedText.escapeUrl($!assignmentReference) />
