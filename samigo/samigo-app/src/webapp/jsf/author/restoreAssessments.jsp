@@ -123,12 +123,11 @@
                             <h:selectBooleanCheckbox value="#{deletedAssessment.selected}" styleClass="select-checkbox" />
                         </h:column>
                     </h:dataTable>
-                    <div class="clearfix"></div>
-                    <p class="act samigo-dataTable-footer">
+                    <h:panelGroup styleClass="act samigo-dataTable-footer" layout="block" rendered ="#{! restoreAssessmentsBean.deletedAssessmentList.isEmpty()}">
                         <h:commandButton id="restore-selected" value="#{authorMessages.restore_assessments_restore}"
                             type="submit" action="#{restoreAssessmentsBean.restoreAssessments}" styleClass="disabled" />
                         <h:commandButton value="#{authorMessages.button_cancel}" type="submit" action="#{restoreAssessmentsBean.cancel}"/>
-                    </p>
+                    </h:panelGroup>
                 </h:form>
             </div>
           </div>
