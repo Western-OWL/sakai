@@ -205,7 +205,7 @@
 			#end
 		#end
 		#if ($size == 0)
-			<p class="text-info">
+			<p class="sak-banner-info">
                             #if ($value_SubmissionType == 5)
                                 $tlang.getString("gen.noatt.single")
                             #else
