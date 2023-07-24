@@ -23,6 +23,4 @@ import org.apache.wicket.extensions.markup.html.form.select.IOptionRenderer;
 public interface IStylableOptionRenderer extends IOptionRenderer {
 
 	public String getStyle(Object value);
-
-	public String getIconClass(Object value);
 }

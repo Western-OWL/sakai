@@ -833,3 +833,9 @@
     }
   }
 }
+
+#what-tools-select select,
+#what-events-select select
+{
+	overflow: auto;
+}

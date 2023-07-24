@@ -124,9 +124,6 @@ public class ReportsEditPage extends BasePage {
 
 	private ZonedDateTime startDate, endDate;
 
-	// namespace for sakai icons see _icons.scss
-	public static final String ICON_SAKAI = "icon-sakai--";
-
 	public ReportsEditPage() {
 		this(null, null, null);
 	}
@@ -913,18 +910,7 @@ public class ReportsEditPage extends BasePage {
 				return new Model(((ToolModel) opt.getDefaultModel()).getToolId());
 			}
 			public String getStyle(Object object) {
-				SelectOption opt = (SelectOption) object;
-				ToolModel toolModel = (ToolModel) opt.getDefaultModel();
-				String toolId = toolModel.getToolId();
-				String style = "display:block;";
-				return style;
-			}
-			public String getIconClass(Object object) {
-				SelectOption opt = (SelectOption) object;
-				ToolModel toolModel = (ToolModel) opt.getDefaultModel();
-				String toolId = toolModel.getToolId();
-				String hclass = ICON_SAKAI + toolId.replace('.', '-');
-				return hclass;
+				return "display:block;";
 			}
 		};
 		Collections.sort(tools, Comparators.getOptionRendererComparator(optionRenderer));
@@ -958,8 +944,7 @@ public class ReportsEditPage extends BasePage {
 				String style = "display:block;";
 				String toolId = toolInfo.getToolId();
 				String toolName = Locator.getFacade().getEventRegistryService().getToolName(toolId);
-				String hclass = ICON_SAKAI + toolId.replace('.', '-');
-				StylableSelectOptionsGroup group = new StylableSelectOptionsGroup("group", new Model(toolName), new Model(style), new Model(hclass));
+				StylableSelectOptionsGroup group = new StylableSelectOptionsGroup("group", new Model(toolName), new Model(style));
 				optgroupItem.add(group);
 				SelectOptions selectOptions = new SelectOptions("selectOptions", events, new IOptionRenderer() {
 					public String getDisplayValue(Object object) {

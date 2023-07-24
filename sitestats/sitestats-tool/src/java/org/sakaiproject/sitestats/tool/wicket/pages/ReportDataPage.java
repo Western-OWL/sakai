@@ -73,6 +73,7 @@ import org.sakaiproject.sitestats.tool.wicket.components.ImageWithLink;
 import org.sakaiproject.sitestats.tool.wicket.components.LastJobRun;
 import org.sakaiproject.sitestats.tool.wicket.components.Menus;
 import org.sakaiproject.sitestats.tool.wicket.components.SakaiDataTable;
+import org.sakaiproject.sitestats.tool.wicket.components.SakaiIconLabel;
 import org.sakaiproject.sitestats.tool.wicket.models.ReportDefModel;
 import org.sakaiproject.sitestats.tool.wicket.providers.ReportsDataProvider;
 import org.sakaiproject.time.api.UserTimeService;
@@ -381,11 +382,9 @@ public class ReportDataPage extends BasePage {
 					if(!"".equals(toolId)){
 						toolName = Locator.getFacade().getEventRegistryService().getToolName(toolId);
 					}
-					Label toolLabel = new Label(componentId, " " + toolName);
 					String hclass = ICON_SAKAI + toolId.replace('.', '-');
-					toolLabel.add(new AttributeModifier("class", new Model(hclass)));
-					toolLabel.add(new AttributeModifier("title", new Model(toolName)));
-					item.add(toolLabel);
+					item.add(new SakaiIconLabel(componentId, Model.of(hclass), Model.of(toolName)));
+
 				}
 			});
 		}
@@ -399,16 +398,13 @@ public class ReportDataPage extends BasePage {
 					if(!"".equals(eventId)){
 						eventName = Locator.getFacade().getEventRegistryService().getEventName(eventId);
 					}
-					Label eventLabel = new Label(componentId, " " + eventName);
 					ToolInfo toolInfo = eventIdToolMap.get(eventId);
+					String hclass = "";
 					if(toolInfo != null) {
 						String toolId = toolInfo.getToolId();
-						String toolName = Locator.getFacade().getEventRegistryService().getToolName(toolId);
-						String hclass = ICON_SAKAI + toolId.replace('.', '-');
-						eventLabel.add(new AttributeModifier("class", new Model(hclass)));
-						eventLabel.add(new AttributeModifier("title", new Model(toolName)));
+						hclass = ICON_SAKAI + toolId.replace('.', '-');
 					}
-					item.add(eventLabel);
+					item.add(new SakaiIconLabel(componentId, Model.of(hclass), Model.of(eventName)));
 				}
 			});
 		}
