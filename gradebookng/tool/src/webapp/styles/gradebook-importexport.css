@@ -97,3 +97,27 @@ div.previewGradesContainer table {
 div.modal-footer.act {
 	padding: 15px;
 }
+
+.gb-add-edit-datepicker
+{
+	display: flex;
+	align-items: center;
+}
+
+.gb-add-edit-datepicker button.ui-datepicker-trigger
+{
+	padding-top: 5px;
+	padding-bottom: 5px;
+}
+
+.gb-add-edit-rubric-assoc .sakai-rubric-association .rubrics-selections
+{
+	margin-top: 7px;
+	display: flex;
+	align-items: center;
+}
+
+.gb-add-edit-rubric-assoc .sakai-rubric-association .rubrics-selections select
+{
+	margin-bottom: 0;
+}
