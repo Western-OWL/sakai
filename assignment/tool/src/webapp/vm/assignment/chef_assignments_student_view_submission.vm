@@ -126,7 +126,7 @@ $(document).ready(function(){
 					<div class="sak-banner-warn">$tlang.getString("stuviewsubm.video")</div>
 				#end
 				#if($assignment.AllowPeerAssessment)
-					<div class="highlight">
+					<div class="sak-banner-warn">
 						#if($assignment.PeerAssessmentAnonEval)
 				 			$tlang.getString("stuviewsubm.peerreviewanon")
 						#else
