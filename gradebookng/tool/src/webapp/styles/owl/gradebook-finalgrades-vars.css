@@ -7,11 +7,10 @@
 {
 	--owl-fg-colour-success: #35795A;
 	--owl-fg-colour-error: #cc0000;
-	--owl-fg-colour-grade-saving: #F6ECB7;
 	--owl-fg-colour-grade-saving-icon: #dfc01c;
-	--owl-fg-colour-grade-save-success: #dff0d8 !important;
+	--owl-fg-colour-grade-save-success: var(--successBanner-bgcolor) !important;
 	--owl-fg-colour-grade-save-success-icon: green !important;
-	--owl-fg-colour-grade-save-error: #ffbbbb !important;
+	--owl-fg-colour-grade-save-error: var(--errorBanner-bgcolor) !important;
 	--owl-fg-colour-grade-save-over-limit: #fcf8e3 !important;
 	--owl-fg-colour-grade-save-over-limit-icon: rgb(200,144,0);
 	--owl-fg-colour-history-current-approval: var(--sakai-color-green--lighter-6);

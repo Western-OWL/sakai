@@ -67,13 +67,13 @@
 
 #gradebookGrades .gb-cell-editing .gb-editable-final-grade
 {
-	border: 1px solid #ccc;
+	border: 1px solid var(--sakai-border-color);
 	line-height: 1.5;
 }
 
 #gradebookGrades .gb-editable-final-grade:focus
 {
-  background-color: #FFF;
+  background-color: var(--sakai-background-color-1);
   width: 40px;
   text-align: center;
 }
@@ -643,16 +643,6 @@ span.sakai-spinner-internal-use::after
 #gradebookGrades .gb-live-feedback-error:before
 {
 	content: var(--owl-fg-icon-error);
-}
-
-#gradebookGrades table.table-striped > tbody > tr > td.gb-cell-saving
-{
-	background-color: var(--owl-fg-colour-grade-saving);
-}
-
-.gb-cell-saving > div
-{
-	background-color: var(--owl-fg-colour-grade-saving);
 }
 
 .gb-cell-saving > div::before
