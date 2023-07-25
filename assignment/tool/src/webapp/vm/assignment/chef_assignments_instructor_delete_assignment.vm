@@ -16,7 +16,7 @@
 			</div>
 		#end
 		<form name="form1" method="post" action="#toolForm("AssignmentAction")">
-			<table class="listHier lines nolines" cellspacing="0" summary="$tlang.getString("gen.lisofassto")">
+			<table class="table table-hover table-striped table-bordered" cellspacing="0" summary="$tlang.getString("gen.lisofassto")">
 				<tr>
 					<th id="title">$tlang.getString("gen.title")</th>
 					<th id="duedate">$tlang.getString("gen.duedat")</th>
