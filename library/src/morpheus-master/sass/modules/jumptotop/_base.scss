@@ -7,6 +7,9 @@
     mask-image: url(#{$skin-path}images/jumptotop.svg);
     mask-repeat: no-repeat;
     mask-size: 60px;
+    -webkit-mask-image: url(#{$skin-path}images/jumptotop.svg);
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-size: 60px;
     background-color: var(--sakai-text-color-1);
     border-radius: 30px;
 
