@@ -20,6 +20,6 @@ The ${localSakaiName} Administrators
 ${institution}
 </message>
 <locale>en</locale>
-<version>1</version>
+<version>2</version>
 </emailTemplate>
 </emailTemplates>
