@@ -378,4 +378,7 @@ public final class AssignmentConstants {
 	public static final boolean SAK_PROP_ALLOW_LINK_TO_EXISTING_GB_ITEM_DFLT = true;
 
     public static final String ASSIGNMENT_INPUT_ADD_SUBMISSION_TIME_SPENT = "value_ASSIGNMENT_INPUT_ADD_SUBMISSION_TIME_SPENT";
+
+    public static final String SAK_PROP_LTI_SUBMISSION_ENABLED = "assignment.submissionType.lti.enabled";
+    public static final boolean SAK_PROP_LTI_SUBMISSION_ENABLED_DFLT = true;
 }

@@ -3151,7 +3151,11 @@ public class AssignmentAction extends PagedResourceActionII {
         // information related to gradebook categories
         putGradebookCategoryInfoIntoContext(state, context);
 
-        context.put("value_totalSubmissionTypes", Assignment.SubmissionTypeOWL.values().length - 1);
+        int totalSubmissionTypes = Assignment.SubmissionTypeOWL.values().length - 1;
+        if (serverConfigurationService.getBoolean(AssignmentConstants.SAK_PROP_LTI_SUBMISSION_ENABLED, AssignmentConstants.SAK_PROP_LTI_SUBMISSION_ENABLED_DFLT)) {
+            totalSubmissionTypes += 1;
+        }
+        context.put("value_totalSubmissionTypes", totalSubmissionTypes);
 
         Integer scaleFactor;
         Boolean anonGrading;
@@ -7787,17 +7791,18 @@ public class AssignmentAction extends PagedResourceActionII {
             addAlert(state, rb.getString("thiasshas"));
         }
 
+        // OWL-5288 / OWL-5271 throw error if submission type is invalid for OWL; 6 == LTI, 7 == video
         Integer assignmentType = params.getInt(NEW_ASSIGNMENT_SUBMISSION_TYPE);
-        if ( assignmentType != null && assignmentType == 6 ) {
+        boolean ltiSubmissionEnabled = serverConfigurationService.getBoolean(AssignmentConstants.SAK_PROP_LTI_SUBMISSION_ENABLED, AssignmentConstants.SAK_PROP_LTI_SUBMISSION_ENABLED_DFLT);
+        if ( assignmentType == null || assignmentType == 7 || (!ltiSubmissionEnabled && assignmentType == 6) ) {
+            addAlert(state, rb.getString("invalidSubType"));
+        }
+
+        if ( assignmentType != null && ltiSubmissionEnabled && assignmentType == 6 ) {
             Integer contentId = params.getInt(NEW_ASSIGNMENT_CONTENT_ID);
             if ( contentId < 1 ) {
                 addAlert(state, rb.getString("pleaseselectlti"));
             }
-        }
-
-        // OWL-5288 - throw user facing error if they somehow selected video submission type
-        if ( assignmentType == null || assignmentType == 7 ) {
-            addAlert(state, rb.getString("invalidSubType"));
         }
 
         // allow resubmission numbers

@@ -281,15 +281,15 @@ public class Assignment {
         VIDEO_SUBMISSION                           // 7
     }
 
-    // OWL-5288 - we do not want the video submission type
+    // OWL-5288 - we do not want the video submission type (7)
+    // OWL-5271 - we want LTI submission type behind a sakai.property (6)
     public enum SubmissionTypeOWL {
         ASSIGNMENT_SUBMISSION_TYPE_NONE,           // 0
         TEXT_ONLY_ASSIGNMENT_SUBMISSION,           // 1
         ATTACHMENT_ONLY_ASSIGNMENT_SUBMISSION,     // 2
         TEXT_AND_ATTACHMENT_ASSIGNMENT_SUBMISSION, // 3
         NON_ELECTRONIC_ASSIGNMENT_SUBMISSION,      // 4
-        SINGLE_ATTACHMENT_SUBMISSION,              // 5
-        EXTERNAL_TOOL_SUBMISSION,                  // 6
+        SINGLE_ATTACHMENT_SUBMISSION               // 5
     }
 
     public enum GradeType {
