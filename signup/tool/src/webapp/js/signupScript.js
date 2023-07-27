@@ -459,10 +459,6 @@
 		var isCreateTSTagExist = document.getElementById('meeting:createTS');
 		if(userDefTschoiceTag && (mutiplBoxTag || singleBoxTag)){
 			if(userDefTschoiceTag.checked){
-				if(mutiplBoxTag)
-					mutiplBoxTag.className="greyed_mi";
-				if(singleBoxTag)
-					singleBoxTag.className="greyed_si";
 				
 				if(!isCreateTSTagExist)
 					showDTimeInputFields('disabled');

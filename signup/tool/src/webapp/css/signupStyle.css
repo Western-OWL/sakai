@@ -16,12 +16,7 @@ table.signupTable {
 }
 
 table.signupTable th {
-	background-color: #ddd;
 	padding: .3em 1em;
-}
-
-table.signupTable tr.evenRow {
-	background: #f8f8f8;
 }
 
 table.signupTable tr.recurRow {
@@ -211,10 +206,6 @@ table.organizerAction td.attName {
 	background: rgb(221, 221, 221);
 }
 
-.evenRow {
-	background: rgb(248, 248, 248);
-}
-
 table.organizer td {
 	padding: .15em 0em 0em 1em;
 	text-align: left;
@@ -256,34 +247,10 @@ table.organizer td {
 	max-width: 650px;
 }
 
-.greyed_mi{
-	vertical-align: top;
-	margin-left: 30px;
-	background: #e7eef5;
-	width: 350px;
-	color:#A3A3A3;
-}
-
-.greyed_mi input, .greyed_si label, .greyed_mi longtext_red{
-	color:#A3A3A3;
-}
-
 .si {
 	vertical-align: top;
 	margin-left: 30px;	
 	max-width: 650px;
-}
-
-.greyed_si{
-	vertical-align: top;
-	margin-left: 30px;
-	background: #e7eef5;
-	color: #A3A3A3;
-	width: 350px;
-}
-
-.greyed_si input, .greyed_si label {
-	color:#A3A3A3;
 }
 
 	
@@ -314,14 +281,6 @@ table.organizer td {
 
 .meetingRadioBtn{
 	white-space: nowrap;
-}
-
-.alertMessage {
-	width: 80%;
-	font-size: 1em;
-	color: #b11;
-	margin: 5px 0px 5px 0;
-	padding: 3px 3px 3px 25px;
 }
 
 .multiple {
@@ -423,14 +382,6 @@ table.instruction td.note{
 
 table.instruction td.desc{
 	padding-left:13px;
-}
-
-.alertMessageInline {
-	width: 80%;
-	font-size: 1em;
-	color: #b11;
-	margin: 5px 0px 5px 0;
-	padding: 3px 3px 3px 25px;
 }
 
 .organizerToplevelTable {

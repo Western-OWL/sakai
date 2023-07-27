@@ -82,7 +82,7 @@
 					<h:outputText value="#{msgs.print_event}" escape="false"/>
 				</h:outputLink><br/>
 
-				<h:outputText value="#{msgs.event_error_alerts} #{messageUIBean.errorMessage}" styleClass="alertMessage" escape="false" rendered="#{messageUIBean.error}" />
+				<h:outputText value="#{messageUIBean.errorMessage}" styleClass="sak-banner-error" escape="false" rendered="#{messageUIBean.error}" />
 				<div class="page-header">
 					<sakai:view_title value="#{msgs.event_participant_view_page_title}" />
 				</div>
@@ -270,7 +270,6 @@
 					binding="#{AttendeeSignupMBean.timeslotWrapperTable}" var="timeSlotWrapper"
 					rendered="#{AttendeeSignupMBean.meetingWrapper.meeting.meetingType !='announcement'}"
 					columnClasses="attendeeSignupTSCol,attendeeSignupAvailCol,attendeeInfoCol,attendeeSignupCol,attendeeSignupCol"
-					rowClasses="oddRow,evenRow"
 					styleClass="signupTable" style="width: 98%">
 					<h:column>
 						<f:facet name="header">

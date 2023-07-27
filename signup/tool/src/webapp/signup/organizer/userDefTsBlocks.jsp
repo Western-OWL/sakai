@@ -160,18 +160,18 @@
 			<script src="/library/js/spinner.js"></script>
 			<h:form id="meeting">
 				<%@ include file="/signup/menu/signupMenu.jsp" %>
-				<h:outputText value="#{msgs.event_error_alerts} #{messageUIBean.errorMessage}" styleClass="alertMessage" escape="false" rendered="#{messageUIBean.error}"/>
+				<h:outputText value="#{messageUIBean.errorMessage}" styleClass="sak-banner-error" escape="false" rendered="#{messageUIBean.error}"/>
 				<div class="page-header">
 					<sakai:view_title value="#{msgs.event_view_userDefined_Timeslot_page_title}"/>
 				</div>
 
-					<h:outputText value="#{msgs.warn_reschedule_event}" styleClass="alertMessage" style="width:85%" escape="false" rendered="#{UserDefineTimeslotBean.someoneSignedUp}"/>
+					<h:outputText value="#{msgs.warn_reschedule_event}" styleClass="sak-banner-error" style="width:85%" escape="false" rendered="#{UserDefineTimeslotBean.someoneSignedUp}"/>
 					
 						<div class="table-responsive">
 					    <t:dataTable id="userDefinedTS" value="#{UserDefineTimeslotBean.timeSlotWrpList}" 
 					    	var="tsWrapper"
 					    	binding="#{UserDefineTimeslotBean.tsTable}"
-					    	styleClass="userDefineTsTable table table-striped table-bordered table-hover" >
+					    	styleClass="table table-hover table-striped table-bordered" >
 								<t:column rendered="#{!tsWrapper.deleted}">
 									<f:facet name="header" >								
 											<h:outputText value="&nbsp;" escape="false"/>
@@ -193,7 +193,7 @@
 											<h:inputText styleClass="timeSlot" id="startTime" value="#{tsWrapper.timeSlot.startTimeString}"/>
 											<h:inputHidden id="hiddenStartTime" value="#{tsWrapper.timeSlot.startTime}"><f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss" timeZone="#{UserTimeZone.userTimeZone}" /></h:inputHidden>
 										</h:panelGroup>
-										<h:message for="startTime" errorClass="alertMessageInline"/>
+										<h:message for="startTime" errorClass="sak-banner-error-inline"/>
 									</h:panelGrid>
 						    	</t:column>
 						    	<t:column rendered="#{!tsWrapper.deleted}">
@@ -205,7 +205,7 @@
 											<h:inputText id="endTime" value="#{tsWrapper.timeSlot.endTimeString}"/>
 											<h:inputHidden id="hiddenEndTime" value="#{tsWrapper.timeSlot.endTime}"><f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss" timeZone="#{UserTimeZone.userTimeZone}" /></h:inputHidden>
 										</h:panelGroup>
-										<h:message for="endTime" errorClass="alertMessageInline"/>
+										<h:message for="endTime" errorClass="sak-banner-error-inline"/>
 									</h:panelGrid>
 						    	</t:column>
 						    	<t:column rendered="#{!tsWrapper.deleted}">

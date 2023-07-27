@@ -77,7 +77,7 @@
 		<sakai:view_content>
 			<h:form id="meeting">
 				<%@ include file="/signup/menu/signupMenu.jsp" %>
-				<h:outputText value="#{msgs.event_error_alerts} #{messageUIBean.errorMessage}" styleClass="alertMessage" escape="false" rendered="#{messageUIBean.error}"/>
+				<h:outputText value="#{messageUIBean.errorMessage}" styleClass="sak-banner-error" escape="false" rendered="#{messageUIBean.error}"/>
 				<h:outputText value="#{messageUIBean.infoMessage}" styleClass="information" escape="false" rendered="#{messageUIBean.info}"/>
 				<div class="page-header">
 			 		<sakai:view_title value="#{msgs.event_step5_page_title}"/>

@@ -26,12 +26,12 @@
 		<sakai:view_content>
 			<h:form id="meeting">
 				<%@ include file="/signup/menu/signupMenu.jsp" %>
-				<h:outputText value="#{msgs.event_error_alerts} #{messageUIBean.errorMessage}" styleClass="alertMessage" escape="false" rendered="#{messageUIBean.error}"/>
+				<h:outputText value="#{messageUIBean.errorMessage}" styleClass="sak-banner-error" escape="false" rendered="#{messageUIBean.error}"/>
 				<div class="page-header">
 					<sakai:view_title value="#{msgs.permission_page_title}"/>
 				</div>
 				<sakai:doc_section>
-				 <h:panelGrid columns="1" styleClass="instruction" style="background:#fff;">
+				 <h:panelGrid columns="1" styleClass="instruction">
                         <h:outputText value="#{msgs.permission_note_for_view_attend_group}" escape="false" />                                             
                         <h:outputText value="&nbsp;" escape="false" />
                     </h:panelGrid>					
@@ -44,7 +44,6 @@
 				 		value="#{SignupPermissionsUpdateBean.realmItems}"
 				 		binding="#{SignupPermissionsUpdateBean.permissionTable}"				 						 		
 				 		var="permission" style="width:80%;" 				 		
-				 		rowClasses="oddRow,evenRow"
 				 		styleClass="signupTable">
 						<h:column>
 							<f:facet name="header" >

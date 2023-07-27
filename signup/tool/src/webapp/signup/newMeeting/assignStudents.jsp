@@ -57,7 +57,7 @@
 		<sakai:view_content>
 			<h:form id="meeting">
 				<%@ include file="/signup/menu/signupMenu.jsp" %>
-				<h:outputText value="#{msgs.event_error_alerts} #{messageUIBean.errorMessage}" styleClass="alertMessage" escape="false" rendered="#{messageUIBean.error}"/>
+				<h:outputText value="#{messageUIBean.errorMessage}" styleClass="sak-banner-error" escape="false" rendered="#{messageUIBean.error}"/>
 				<div class="page-header">
 			 		<sakai:view_title value="#{msgs.event_assign_attendee_page_title}"/>
 				</div>
@@ -96,7 +96,7 @@
 				</h:panelGrid>
 			   <h:panelGroup layout="block" styleClass="table-responsive">
 			   <h:dataTable id="preSignup" value="#{NewSignupMeetingBean.timeSlotWrappers}" var="timeSlot"
-			   		rowClasses="oddTimeSlotRow,evenTimeSlotRow"	columnClasses="timeslotCol,orgMaxAttsCol,assignStudentsCol" styleClass="signupTable"  style="width: 55%"
+			   		columnClasses="timeslotCol,orgMaxAttsCol,assignStudentsCol" styleClass="table table-hover table-striped table-bordered signupTable"  style="width: 55%"
 			   		binding="#{NewSignupMeetingBean.timeslotWrapperTable}">
 					<h:column>		   
 						<f:facet name="header">
@@ -139,7 +139,7 @@
 						<f:facet name="header">
 							<h:outputText value="#{msgs.tab_attendee}"/>
 						</f:facet>
-						<h:panelGrid columns="1" columnClasses="noWrapCol" style="margin-left:-25px;">
+						<h:panelGrid columns="1" columnClasses="noWrapCol">
 							<h:dataTable id="attendees" value="#{timeSlot.attendeeWrappers}" var="attendeeWrapper" columnClasses="noWrapCol">
 								<h:column>
 									<h:commandLink id="deleteAttendee" title="#{msgs.event_tool_tips_delete}" action="#{NewSignupMeetingBean.removeAttendee}" >

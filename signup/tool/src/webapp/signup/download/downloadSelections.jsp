@@ -17,8 +17,6 @@
 				var lastActiveId;
 				var previousBgColor; 
 				var recurRowClass="recurRow";//defined in css
-				var evenRowClass = "evenRow";
-				var oddRowClass = "oddRow";
 				//IE browser will not show the disabled option item
 				var orignSelectorTag;
 				var origSelectorIndex;
@@ -36,28 +34,6 @@
 					menuLink.html(menuLink.find('a').text());
 
 				});
-				
-
-				function reprocessEvenOddRowClasses(){
-					var trRowTags = document.getElementsByTagName("tr");
-					rowNum=0;
-					if (!trRowTags)
-						return;
-						
-					for(i=0; i<trRowTags.length;i++){
-						if(trRowTags[i].style.display !="none"
-							&& (trRowTags[i].className == evenRowClass || trRowTags[i].className == oddRowClass) ){
-							if(rowNum % 2 == 0)
-								trRowTags[i].className = oddRowClass;
-							else
-								trRowTags[i].className = evenRowClass;
-							
-							rowNum++;
-						}
-
-					}
-
-				}
 				
 				function showAllRelatedRecurMeetings(id,iFrameId) {
 					var activeOne = document.getElementById(id);
@@ -172,7 +148,7 @@
 		<sakai:view_content>
 			<h:form id="items">
 				<%@ include file="/signup/menu/signupMenu.jsp" %>
-				<h:outputText value="#{msgs.event_error_alerts} #{messageUIBean.errorMessage}" styleClass="alertMessage" escape="false" rendered="#{messageUIBean.error}"/>
+				<h:outputText value="#{messageUIBean.errorMessage}" styleClass="sak-banner-error" escape="false" rendered="#{messageUIBean.error}"/>
 				<div class="page-header">
 					<sakai:view_title value="#{msgs.signup_download}"/>
 				</div>
@@ -225,9 +201,8 @@
 				 		var="wrapper" style="width:100%;" 
 				 		rowId="#{wrapper.recurId}"
 				 		rowStyle="#{wrapper.hideStyle}"
-				 		rowClasses="oddRow,evenRow"
 				 		columnClasses="titleCol, creatorCol, locationCol, dateCol, timeCol, statusCol, removeCol"
-				 		styleClass="table table-bordered table-striped table-hover">
+				 		styleClass="table table-hover table-striped table-bordered">
 	
 						<t:column>
 							<f:facet name="header">

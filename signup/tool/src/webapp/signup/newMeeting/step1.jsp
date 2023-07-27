@@ -90,12 +90,12 @@
         <sakai:view_content>
             <h:form id="meeting" >
                 <%@ include file="/signup/menu/signupMenu.jsp" %>
-                <h:outputText value="#{msgs.event_error_alerts} #{messageUIBean.errorMessage}" styleClass="alertMessage" escape="false" rendered="#{messageUIBean.error}"/>
+                <h:outputText value="#{messageUIBean.errorMessage}" styleClass="sak-banner-error" escape="false" rendered="#{messageUIBean.error}"/>
                 <div class="page-header">
                     <sakai:view_title value="#{msgs.create_new_event} #{msgs.basic}"/>
                 </div>
                 <sakai:doc_section>
-                    <h:panelGrid columns="1" styleClass="instruction" style="background:#fff;">
+                    <h:panelGrid columns="1" styleClass="instruction">
                         <h:outputText value="#{msgs.create_instruction} " escape="false" />                      
                         <h:panelGroup>
                             <h:outputText value="#{msgs.star_character}" style="color:#B11;" />
@@ -115,7 +115,7 @@
                                     styleClass="editText form-control"  >
                             <f:validateLength maximum="255" />
                         </h:inputText>
-                        <h:message for="name" errorClass="alertMessageInline"/>
+                        <h:message for="name" errorClass="sak-banner-error-inline"/>
                     </div>
                 </div>
 
@@ -153,7 +153,7 @@
                         </h:outputLabel>
                         <h:outputText value="&nbsp;" escape="false" rendered="#{!NewSignupMeetingBean.allLocationsEmpty}"/>
 
-                        <h:message for="customLocation" errorClass="alertMessageInline"/>
+                        <h:message for="customLocation" errorClass="sak-banner-error-inline"/>
                     </div>
                 </div>
                 <%-- category --%>
@@ -180,7 +180,7 @@
                         </h:outputLabel>
                         <h:outputText value="&nbsp;" escape="false" rendered="#{NewSignupMeetingBean.categoriesExist}"/>
 
-                        <h:message for="customCategory" errorClass="alertMessageInline"/>
+                        <h:message for="customCategory" errorClass="sak-banner-error-inline"/>
                     </div>
                 </div>
                 
@@ -223,7 +223,7 @@
                     <div class="col-md-10">
                        <h:inputText value="#{NewSignupMeetingBean.startTimeString}" size="28" id="startTime" 
                           onkeyup="getSignupDuration(); sakai.updateSignupBeginsExact(); return false;" onchange="sakai.updateSignupBeginsExact();"/>
-                       <h:message for="startTime" errorClass="alertMessageInline"/>
+                       <h:message for="startTime" errorClass="sak-banner-error-inline"/>
                     </div>
                 </div>
 
@@ -233,7 +233,7 @@
                     <div class="col-md-10">
                         <h:inputText value="#{NewSignupMeetingBean.endTimeString}" size="28" id="endTime" 
                           onkeyup="getSignupDuration(); sakai.updateSignupEndsExact(); return false;" onchange="sakai.updateSignupEndsExact();"/>
-                        <h:message for="endTime" errorClass="alertMessageInline"/>
+                        <h:message for="endTime" errorClass="sak-banner-error-inline"/>
                     </div>
                 </div>
                 
@@ -267,7 +267,7 @@
                                         <h:panelGroup id="endOfDate" style="margin-left:3px;">
                                              <!-- t:inputCalendar id="ex" value=""  renderAsPopup="true" monthYearRowClass="" renderPopupButtonAsImage="true" dayCellClass=""   styleClass="untilCalendar"/ -->                                 
                                             <h:inputText value="#{NewSignupMeetingBean.repeatUntilString}" size="28" id="until" />
-                                            <h:message for="until" errorClass="alertMessageInline" style="margin-left:10px" /> 
+                                            <h:message for="until" errorClass="sak-banner-error-inline" style="margin-left:10px" />
                                         </h:panelGroup>
                                     </h:panelGrid>
                                 </h:panelGrid> 
@@ -292,7 +292,7 @@
                             <f:selectItem itemValue="startNow" itemLabel="#{msgs.label_startNow}"/>
                         </h:selectOneMenu>
                         <h:outputText value="#{msgs.before_event_start}" escape="false" style="margin-left:18px"/>
-                        <h:message for="signupBegins" errorClass="alertMessageInline" />
+                        <h:message for="signupBegins" errorClass="sak-banner-error-inline" />
 
                         <!--  show exact date, based on above -->
                         <h:outputText id="signupBeginsExact" value="" escape="false" styleClass="dateExact" />
@@ -315,7 +315,7 @@
                             <f:selectItem itemValue="days" itemLabel="#{msgs.label_days}"/>
                         </h:selectOneMenu>                
                         <h:outputText value="#{msgs.before_event_end}" escape="false" style="margin-left:18px"/>
-                        <h:message for="signupDeadline" errorClass="alertMessageInline" />
+                        <h:message for="signupDeadline" errorClass="sak-banner-error-inline" />
                         <!--  Show exact date, based on above -->
                         <h:outputText id="signupEndsExact" value="" escape="false" styleClass="dateExact" />
                     </h:panelGroup>
@@ -362,7 +362,7 @@
                         </h:panelGroup>   
                         <h:panelGroup>
                             <h:outputText value="<div id='otherSites' style='display:none'>" escape="false"/>
-                            <h:outputText value="#{msgs.event_other_sites_empty}" styleClass="alertMessage" escape="false" rendered="#{empty NewSignupMeetingBean.otherSites}" />
+                            <h:outputText value="#{msgs.event_other_sites_empty}" styleClass="sak-banner-error" escape="false" rendered="#{empty NewSignupMeetingBean.otherSites}" />
                             <h:dataTable id="userSites" value="#{NewSignupMeetingBean.otherSites}" var="site" styleClass="meetingTypeTable" style="left:1px;">
                                 <h:column>
                                     <h:panelGroup>

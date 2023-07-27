@@ -38,8 +38,8 @@
 			<div class="toggle specialLink noPrint" style="display:none"><a href="#"><h:outputText value="#{msgs.attend_view_toggle}" /></a></div>
 			<%--//TODO: the value and conditions for the generic error messages will need to change--%>
 			<h:outputText
-				value="#{msgs.event_error_alerts} #{messageUIBean.errorMessage}"
-				styleClass="alertMessage" escape="false"
+				value="#{messageUIBean.errorMessage}"
+				styleClass="sak-banner-error" escape="false"
 				rendered="#{messageUIBean.error}" />
 			<h:form id="attendanceView">
 
@@ -91,7 +91,7 @@
 						<h:panelGroup rendered="#{!timeSlotWrapper.timeSlot.canceled}">
 							<h:outputText rendered="#{empty timeSlotWrapper.attendeeWrappers}" value="#{msgs.attend_view_list_slot_list_empty_msg}" styleClass="instruction" style="display:block;padding:1em 2em"/>
 							<h:dataTable id="availableSpots"
-								rowClasses="oddRow,evenRow" styleClass="listHier lines nolines centerlines availableSpots"
+								styleClass="table table-hover table-striped table-bordered availableSpots"
 								style="margin:0 2em;width:90%"
 								value="#{timeSlotWrapper.attendeeWrappers}"
 								var="attendeeWrapper"
@@ -117,8 +117,7 @@
 						
 						<h:panelGroup rendered="#{!timeSlotWrapper.timeSlot.canceled}">
 							<h:dataTable id="waitList"
-								rowClasses="oddRow,evenRow"
-								styleClass="listHier lines nolines centerlines waitListed"
+								styleClass="table table-hover table-striped table-bordered waitListed"
 								style="margin:0 2em;width:90%"
 								value="#{timeSlotWrapper.waitingList}"
 								var="waitingList"

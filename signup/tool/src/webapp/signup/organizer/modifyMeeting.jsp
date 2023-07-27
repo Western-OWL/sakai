@@ -118,7 +118,7 @@
 		<sakai:view_content>
 			<h:form id="meeting">
 				<%@ include file="/signup/menu/signupMenu.jsp" %>
-				<h:outputText value="#{msgs.event_error_alerts} #{messageUIBean.errorMessage}" styleClass="alertMessage" escape="false" rendered="#{messageUIBean.error}"/>
+				<h:outputText value="#{messageUIBean.errorMessage}" styleClass="sak-banner-error" escape="false" rendered="#{messageUIBean.error}"/>
 				<div class="page-header">
 					<sakai:view_title value="#{msgs.event_modify_meeting_page_title}"/>
 				</div>
@@ -154,7 +154,7 @@
 										styleClass="editText form-control">
 								<f:validateLength maximum="255" />
 							</h:inputText>
-							<h:message for="title" errorClass="alertMessageInline"/>
+							<h:message for="title" errorClass="sak-banner-error-inline"/>
 						</div>
 					</div>
 					
@@ -190,7 +190,7 @@
 								<h:outputText value="#{msgs.event_custom_undo}" escape="false" style="vertical-align: middle;"/>
 							</h:outputLabel>
 							<h:outputText value="&nbsp;" escape="false" />
-							<h:message for="customLocation" errorClass="alertMessageInline"/>
+							<h:message for="customLocation" errorClass="sak-banner-error-inline"/>
 						</div>
 					</div>
 					
@@ -217,7 +217,7 @@
 								<h:outputText value="#{msgs.event_custom_undo}" escape="false" style="vertical-align: middle;"/>
 							</h:outputLabel>
 							<h:outputText value="&nbsp;" escape="false"/>
-							<h:message for="customCategory" errorClass="alertMessageInline"/>
+							<h:message for="customCategory" errorClass="sak-banner-error-inline"/>
 						</div>
 					</div>
 					
@@ -251,7 +251,7 @@
 					</div>
 
 					<h:outputText id="rescheduleWarnLabel_1" value="" escape="false" style="display:none;" rendered="#{EditMeetingSignupMBean.someoneSignedUp}"/>
-					<h:outputText id="rescheduleWarnLabel_2" value="#{msgs.warn_reschedule_event}" styleClass="alertMessage" style="display:none;width:95%" escape="false" rendered="#{EditMeetingSignupMBean.someoneSignedUp}"/>
+					<h:outputText id="rescheduleWarnLabel_2" value="#{msgs.warn_reschedule_event}" styleClass="sak-banner-error" style="display:none;width:95%" escape="false" rendered="#{EditMeetingSignupMBean.someoneSignedUp}"/>
 
 					<%-- Start time --%>
 					<div class="form-group row ">
@@ -259,7 +259,7 @@
 						<h:panelGroup styleClass="col-lg-10" rendered="#{!EditMeetingSignupMBean.customTsType}" layout="block">
 							<h:inputText value="#{EditMeetingSignupMBean.startTimeString}" size="28" id="startTime" 
 								onfocus="showRescheduleWarning();" onkeyup="getSignupDuration(); sakai.updateSignupBeginsExact(); return false;" onchange="sakai.updateSignupBeginsExact();"/>
-							<h:message for="startTime" errorClass="alertMessageInline"/>
+							<h:message for="startTime" errorClass="sak-banner-error-inline"/>
 						</h:panelGroup>
 						<h:panelGroup rendered="#{EditMeetingSignupMBean.customTsType}" styleClass="col-lg-6" layout="block">
 								<h:outputText value="#{EditMeetingSignupMBean.signupMeeting.startTime}" styleClass="longtext">
@@ -274,7 +274,7 @@
 						<h:panelGroup styleClass="col-lg-10" rendered="#{!EditMeetingSignupMBean.customTsType}" layout="block">
 							<h:inputText value="#{EditMeetingSignupMBean.endTimeString}" size="28" id="endTime" 
 								onfocus="showRescheduleWarning();" onkeyup="getSignupDuration(); sakai.updateSignupEndsExact(); return false;" onchange="sakai.updateSignupEndsExact();"/>
-							<h:message for="endTime" errorClass="alertMessageInline"/>
+							<h:message for="endTime" errorClass="sak-banner-error-inline"/>
 						</h:panelGroup>
 						<h:panelGroup rendered="#{EditMeetingSignupMBean.customTsType}" layout="block" styleClass="col-lg-6">
 							<h:outputText value="#{EditMeetingSignupMBean.signupMeeting.endTime}" styleClass="longtext">
@@ -299,7 +299,7 @@
 								<f:selectItem itemValue="startNow" itemLabel="#{msgs.label_startNow}"/>
 							</h:selectOneMenu>
 							<h:outputText value="#{msgs.before_event_start}" escape="false" style="margin-left:18px"/>
-							<h:message for="signupBegins" errorClass="alertMessageInline"/>
+							<h:message for="signupBegins" errorClass="sak-banner-error-inline"/>
 
 							<!--  show exact date, based on above -->
 							<h:outputText id="signupBeginsExact" value="" escape="false" styleClass="dateExact" />
@@ -321,7 +321,7 @@
 								<f:selectItem itemValue="days" itemLabel="#{msgs.label_days}"/>
 							</h:selectOneMenu>
 							<h:outputText value="#{msgs.before_event_end}"  style="margin-left:18px"/>
-							<h:message for="signupDeadline" errorClass="alertMessageInline"/>
+							<h:message for="signupDeadline" errorClass="sak-banner-error-inline"/>
 								
 							<!--  show exact date, based on above -->
 							<h:outputText id="signupEndsExact" value="" escape="false" styleClass="dateExact" />
