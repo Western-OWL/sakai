@@ -44,7 +44,7 @@
 			<h:form id="attendanceView">
 
 				<%--//TODO: attend.event.title below needs to resolve to the event title--%>
-				<h3><h:outputText value="#{msgs.attend_view_title}" /> <h:outputText
+				<h3><h:outputText value="#{msgs.attend_view_title} " /> <h:outputText
 					value="#{AttendanceSignupBean.meetingWrapper.meeting.title}"
 					styleClass="highlight" /></h3>
 
@@ -95,7 +95,7 @@
 								style="margin:0 2em;width:90%"
 								value="#{timeSlotWrapper.attendeeWrappers}"
 								var="attendeeWrapper"
-								headerClass="subListHeader noPrint"
+								headerClass="noPrint"
 								summary="#{msgs.attend_view_list_slot_list_summary}"
 								rendered="#{!empty timeSlotWrapper.attendeeWrappers}"
 								>	
@@ -121,7 +121,6 @@
 								style="margin:0 2em;width:90%"
 								value="#{timeSlotWrapper.waitingList}"
 								var="waitingList"
-								headerClass="subListHeader"
 								summary="#{msgs.attend_view_list_slot_list_summary}"
 								rendered="#{!empty timeSlotWrapper.waitingList}"
 								>	
