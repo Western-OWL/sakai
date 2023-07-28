@@ -16,8 +16,6 @@
 		<script>
 	         //initialization of the page
 	         jQuery(document).ready(function() {
-		         //due to recuring meetings, make sure even/odd Rows display correctly
-		         reprocessEvenOddRowClasses();
 
 					var menuLink = $('#signupMainMenuLink');
 					menuLink.addClass('current');

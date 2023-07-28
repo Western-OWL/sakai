@@ -25,9 +25,6 @@
 					//IE browser will not show the disabled option item
 					orignSelectorTag=document.getElementById('items:viewByRange');
 					origSelectorIndex = orignSelectorTag? orignSelectorTag.selectedIndex : 2;//default
-					
-					//due to recuring meetings, make sure even/odd Rows display correctly
-					reprocessEvenOddRowClasses();
 
 					var menuLink = $('#signupExportMenuLink');
 					menuLink.addClass('current');
