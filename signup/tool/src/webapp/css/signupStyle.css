@@ -83,15 +83,6 @@ table.signupTable td.titleCol{
 	
 }
 
-.oddTimeSlotRow {
-	height: 50px;
-}
-
-.evenTimeSlotRow {
-	height: 50px;
-	background: rgb(248, 248, 248);
-}
-
 .timeslotCol {
 	white-space: nowrap;
 	text-align: left;
