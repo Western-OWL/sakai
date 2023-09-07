@@ -413,10 +413,12 @@ public class ReorderProducer implements ViewComponentProducer, NavigationCaseRep
 
 		if (mimeType == null || mimeType.equals("")) {
 			String s = pageItem.getSakaiId();
-			int j = s.lastIndexOf(".");
-			if (j >= 0)
-				s = s.substring(j+1);
-			mimeType = contentTypeImageService.getContentType(s);
+			if (s != null) {
+				int j = s.lastIndexOf(".");
+				if (j >= 0)
+					s = s.substring(j+1);
+				mimeType = contentTypeImageService.getContentType(s);
+			}
 		}
 
 		String src = null;
