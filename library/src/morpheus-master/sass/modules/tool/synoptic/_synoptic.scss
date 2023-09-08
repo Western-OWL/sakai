@@ -24,4 +24,15 @@ body > .portletBody > #calendarForm{
 	.navIntraTool {
 		margin: 0;
 	}
-} 
+}
+
+@media screen and (min-width: 750px) and (max-width: #{$break-medium-end}) {
+	.#{$namespace}sakai-synoptic-announcement .sakai-table-toolBar {
+		-webkit-flex-direction: row;
+		flex-direction: row;
+		-webkit-justify-content: space-between;
+		justify-content: space-between;
+		-webkit-align-items: flex-end;
+		align-items: flex-end;
+	}
+}

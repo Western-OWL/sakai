@@ -355,12 +355,6 @@ table.preSignTable td {
 	padding: 4px 3px 4px 20px;
 }
 
-.instruction {
-	margin-left: 10px;
-	line-height: 130%;
-	font-size: 90%;
-}
-
 table.instruction td.note{
 	vertical-align: top;
 }

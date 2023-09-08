@@ -148,36 +148,35 @@
 				<div class="page-header">
 					<sakai:view_title value="#{msgs.signup_tool}"/>
 				</div>
-				<h:panelGroup styleClass="" rendered="#{(SignupMeetingsBean.allowedToUpdate && SignupMeetingsBean.meetingsAvailable) or (!SignupMeetingsBean.allowedToUpdate && SignupMeetingsBean.meetingsAvailable)}">
+				<h:panelGroup styleClass="instruction" layout="block" rendered="#{(SignupMeetingsBean.allowedToUpdate && SignupMeetingsBean.meetingsAvailable) or (!SignupMeetingsBean.allowedToUpdate && SignupMeetingsBean.meetingsAvailable)}">
 					<h:outputText value="#{msgs.events_organizer_instruction}"  rendered="#{SignupMeetingsBean.allowedToUpdate && SignupMeetingsBean.meetingsAvailable}" escape="false"/>
-					<h:outputText value="&nbsp;" escape="false"/>
 					<h:outputText value="#{msgs.events_attendee_instruction}" rendered="#{!SignupMeetingsBean.allowedToUpdate && SignupMeetingsBean.meetingsAvailable}" escape="false"/>
 				</h:panelGroup>
 				
-				
-				<div class="form-group row">
-					<!-- view range dropdown -->
-					<h:outputLabel value="#{msgs.events_dropdownbox_title} "  for="viewByRange" styleClass="col-lg-1 col-md-1"/>
-					<div class="col-lg-3 col-md-3">
-						<h:selectOneMenu id="viewByRange" value="#{SignupMeetingsBean.viewDateRang}" valueChangeListener="#{SignupMeetingsBean.processSelectedRange}" onchange="if(validateIEDisabledItem(this)){submit()};">
-							<f:selectItems value="#{SignupMeetingsBean.viewDropDownList}"/>
-						</h:selectOneMenu>
-					</div>
-					<!-- filter by category dropdown -->
-					<h:outputLabel value="#{msgs.filter_by_category} " for="viewByCategory" styleClass="col-lg-2 col-md-2"/>
-					<div class="col-lg-2 col-md-2">
-						<h:selectOneMenu id="viewByCategory" value="#{SignupMeetingsBean.categoryFilter}" valueChangeListener="#{SignupMeetingsBean.processSelectedCategory}" onchange="if(validateIEDisabledItem(this)){submit()};">
-							<f:selectItems value="#{SignupMeetingsBean.allCategoriesForFilter}"/>
-						</h:selectOneMenu>
-					</div>
-					<!--  expand all recurring meetings -->
-					<h:panelGroup layout="block" styleClass="col-lg-4 col-md-4" rendered="#{SignupMeetingsBean.enableExpandOption && SignupMeetingsBean.meetingsAvailable}">
-						<h:panelGroup >
-								<h:selectBooleanCheckbox id="showallrecurmeeting" value="#{SignupMeetingsBean.showAllRecurMeetings}" valueChangeListener="#{SignupMeetingsBean.processExpandAllRcurEvents}" onclick="submit();"/>
-								<h:outputLabel for="showallrecurmeeting" value="#{msgs.expand_all_recur_events}" escape="false"/>
+				<div class="sakai-table-toolBar">
+					<div class="sakai-table-filterContainer">
+						<!-- view range dropdown -->
+						<div class="sakai-table-viewFilter">
+							<h:outputLabel value="#{msgs.events_dropdownbox_title}" for="viewByRange"/>
+							<h:selectOneMenu id="viewByRange" value="#{SignupMeetingsBean.viewDateRang}" valueChangeListener="#{SignupMeetingsBean.processSelectedRange}"
+											 onchange="if(validateIEDisabledItem(this)){submit();}">
+								<f:selectItems value="#{SignupMeetingsBean.viewDropDownList}"/>
+							</h:selectOneMenu>
+						</div>
+						<!-- filter by category dropdown -->
+						<div class="sakai-table-searchFilter">
+							<h:outputLabel value="#{msgs.filter_by_category}" for="viewByCategory"/>
+							<h:selectOneMenu id="viewByCategory" value="#{SignupMeetingsBean.categoryFilter}" valueChangeListener="#{SignupMeetingsBean.processSelectedCategory}"
+											 onchange="if(validateIEDisabledItem(this)){submit();}">
+								<f:selectItems value="#{SignupMeetingsBean.allCategoriesForFilter}"/>
+							</h:selectOneMenu>
+						</div>
+						<!--  expand all recurring meetings -->
+						<h:panelGroup layout="block" styleClass="sakai-table-searchFilter" rendered="#{SignupMeetingsBean.enableExpandOption && SignupMeetingsBean.meetingsAvailable}">
+							<h:selectBooleanCheckbox id="showallrecurmeeting" value="#{SignupMeetingsBean.showAllRecurMeetings}" valueChangeListener="#{SignupMeetingsBean.processExpandAllRcurEvents}" onclick="submit();"/>
+							<h:outputLabel for="showallrecurmeeting" value="#{msgs.expand_all_recur_events}" escape="false"/>
 						</h:panelGroup>
-						<h:outputText value="&nbsp;" escape="false" rendered="#{!SignupMeetingsBean.enableExpandOption}"/>
-					</h:panelGroup>
+					</div>
 				</div>
 
 				<h:panelGroup styleClass="noMeetingsWarn" rendered="#{!SignupMeetingsBean.meetingsAvailable}">

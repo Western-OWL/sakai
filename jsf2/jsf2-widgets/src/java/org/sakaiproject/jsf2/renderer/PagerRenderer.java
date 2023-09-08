@@ -123,6 +123,8 @@ public class PagerRenderer extends Renderer {
         // Output HTML
 
         out.startElement("div", null);
+        out.writeAttribute("class", "sakai-table-toolBar", null);
+        out.startElement("div", null);
         out.writeAttribute("class", "sakai-table-pagerContainer", null);
 
         writeStatus(out, textStatus);
@@ -146,6 +148,7 @@ public class PagerRenderer extends Renderer {
         out.writeAttribute("name", idPastItem, null);
         out.writeAttribute("value", String.valueOf(firstItem), null);
         out.endElement("input");
+        out.endElement("div");
         out.endElement("div");
     }
 

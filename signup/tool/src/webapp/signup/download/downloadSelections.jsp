@@ -150,38 +150,35 @@
 					<sakai:view_title value="#{msgs.signup_download}"/>
 				</div>
 
-				<h:outputText value="&nbsp;" escape="false"/>
-
-				<h:panelGrid columns="1">
-					<h:outputText value="#{msgs.events_organizer_download_instruction}"  rendered="#{DownloadEventBean.allowedToUpdate && DownloadEventBean.meetingsAvailable}" escape="false"/>
+				<h:panelGroup styleClass="instruction" layout="block">
+					<h:outputText value="#{msgs.events_organizer_download_instruction}" rendered="#{DownloadEventBean.allowedToUpdate && DownloadEventBean.meetingsAvailable}" escape="false"/>
 					<h:outputText value="#{msgs.events_attendee_download_instruction}" rendered="#{!DownloadEventBean.allowedToUpdate && DownloadEventBean.meetingsAvailable}" escape="false"/>
-					<h:outputText value="&nbsp;" escape="false"/>
-				</h:panelGrid>
+				</h:panelGroup>
 				
-				<div class="form-group row">
-					<!-- view range dropdown -->
-					<h:outputLabel value="#{msgs.events_dropdownbox_title} "  for="viewByRange" styleClass="col-lg-1 col-md-1"/>
-					<div class="col-lg-3 col-md-3">
-						<h:selectOneMenu id="viewByRange" value="#{DownloadEventBean.viewDateRang}" valueChangeListener="#{DownloadEventBean.processSelectedRange}" onchange="if(validateIEDisabledItem(this)){submit()};">
-							<f:selectItems value="#{DownloadEventBean.viewDropDownList}"/>
-						</h:selectOneMenu>
-					</div>
-
-					<!-- filter by category dropdown -->
-					<h:outputLabel value="#{msgs.filter_by_category} " for="viewByCategory" styleClass="col-lg-2 col-md-2"/>
-					<div  class="col-lg-2 col-md-2">
-						<h:selectOneMenu id="viewByCategory" value="#{DownloadEventBean.categoryFilter}" valueChangeListener="#{DownloadEventBean.processSelectedCategory}" onchange="if(validateIEDisabledItem(this)){submit()};">
-							<f:selectItems value="#{DownloadEventBean.allCategoriesForFilter}"/>
-						</h:selectOneMenu>
-					</div>
-					<!--  expand all recurring meetings -->
-					<h:panelGroup layout="block" styleClass="col-lg-4 col-md-4" rendered="#{DownloadEventBean.enableExpandOption && DownloadEventBean.meetingsAvailable}">
-						<h:panelGroup >
-							<h:selectBooleanCheckbox id="expandingchkbox" value="#{DownloadEventBean.showAllRecurMeetings}" valueChangeListener="#{DownloadEventBean.processExpandAllRcurEvents}" onclick="submit();"/>
-							<h:outputText value="#{msgs.expand_all_recur_events}" escape="false"/>
+				<div class="sakai-table-toolBar">
+					<div class="sakai-table-filterContainer">
+						<!-- view range dropdown -->
+						<div class="sakai-table-viewFilter">
+							<h:outputLabel value="#{msgs.events_dropdownbox_title} " for="viewByRange"/>
+							<h:selectOneMenu id="viewByRange" value="#{DownloadEventBean.viewDateRang}" valueChangeListener="#{DownloadEventBean.processSelectedRange}"
+											 onchange="if(validateIEDisabledItem(this)){submit();}">
+								<f:selectItems value="#{DownloadEventBean.viewDropDownList}"/>
+							</h:selectOneMenu>
+						</div>
+						<!-- filter by category dropdown -->
+						<div class="sakai-table-searchFilter">
+							<h:outputLabel value="#{msgs.filter_by_category}" for="viewByCategory"/>
+							<h:selectOneMenu id="viewByCategory" value="#{DownloadEventBean.categoryFilter}" valueChangeListener="#{DownloadEventBean.processSelectedCategory}"
+											 onchange="if(validateIEDisabledItem(this)){submit();}">
+								<f:selectItems value="#{DownloadEventBean.allCategoriesForFilter}"/>
+							</h:selectOneMenu>
+						</div>
+						<!--  expand all recurring meetings -->
+						<h:panelGroup layout="block" styleClass="sakai-table-searchFilter" rendered="#{DownloadEventBean.enableExpandOption && DownloadEventBean.meetingsAvailable}">
+							<h:selectBooleanCheckbox id="showallrecurmeeting" value="#{DownloadEventBean.showAllRecurMeetings}" valueChangeListener="#{DownloadEventBean.processExpandAllRcurEvents}" onclick="submit();"/>
+							<h:outputLabel for="showallrecurmeeting" value="#{msgs.expand_all_recur_events}" escape="false"/>
 						</h:panelGroup>
-						<h:outputText value="&nbsp;" escape="false" rendered="#{!DownloadEventBean.enableExpandOption}"/>					
-					</h:panelGroup>
+					</div>
 				</div>
 
 				<h:panelGrid columns="1" styleClass="noMeetingsWarn" rendered="#{!DownloadEventBean.meetingsAvailable}" >
