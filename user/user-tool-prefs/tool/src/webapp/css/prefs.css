@@ -257,7 +257,7 @@
 
 .site-entry {
     border: 1px solid #dfdfdf;
-    background-color: #fff;
+    background-color: var(--sakai-background-color-2);
     margin-top: 5px;
     margin-bottom: 5px;
     padding-left: 0.5em;
