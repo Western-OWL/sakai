@@ -641,9 +641,13 @@ sakai.editor.editors.ckeditor.launch = function(targetId, config, w, h) {
                 {id} .cke_button_on [
                     background-color:{ckeButtonOn};
                     border-color:{toolbarElementsBorder};
-                ] 
+                ]
                 {id} .cke_button_on span [
                     filter: {ckeButtonOnIcon};
+                ]
+                .cke_button_on span#cke_22_label [
+                    color:{activeTextColor};
+                    filter: none;
                 ]
                 {id} .cke_toolbar_separator,
                 {id} .cke_toolgroup a.cke_button:last-child:after,
