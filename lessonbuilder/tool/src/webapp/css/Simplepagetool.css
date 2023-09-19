@@ -769,6 +769,11 @@ span.reorder-icon {
     margin-left: 2em;
 }
 
+#reorderCol1 div.layoutReorderer-module.list-group-item-info
+{
+	background-color: var(--sakai-background-color-1);
+}
+
 h3.section-label {
     margin: 0;
 }
@@ -2170,4 +2175,24 @@ input[type="text"]:disabled {
 	opacity: 1;
 	color: var(--sakai-text-color-disabled);
 	cursor: not-allowed;
+}
+
+.sakaiUserTheme-dark object.playerwidth[type="text/plain"],
+.sakaiUserTheme-dark iframe.playerwidth[src$="html"],
+.sakaiUserTheme-dark iframe.playerwidth[src$="htm"]
+{
+	background-color: #ffffff;
+}
+
+.sakaiUserTheme-dark ul.jqueryFileTree a:hover
+{
+	background-color: var(--sakai-brand);
+}
+
+.sakaiUserTheme-dark ul.jqueryFileTree,
+.sakaiUserTheme-dark ul.jqueryFileTree li,
+.sakaiUserTheme-dark ul.jqueryFileTree a
+{
+	color: var(--sak-text-color-1);
+	background-color: var(--sak-background-color-1);
 }

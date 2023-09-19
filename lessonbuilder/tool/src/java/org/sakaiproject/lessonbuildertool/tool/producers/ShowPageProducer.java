@@ -132,6 +132,8 @@ import java.util.*;
 import org.sakaiproject.authz.api.SecurityAdvisor;
 import org.sakaiproject.lessonbuildertool.service.AssignmentEntity;
 import org.sakaiproject.site.api.Group;
+import org.sakaiproject.user.api.Preferences;
+import org.sakaiproject.user.api.PreferencesService;
 
 /**
  * This produces the primary view of the page. It also handles the editing of
@@ -151,6 +153,7 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 	private FormatAwareDateInputEvolver dateevolver;
 	@Setter private UserTimeService userTimeService;
 	@Setter private FormattedText formattedText;
+	@Setter private PreferencesService prefServ;
 	private HttpServletRequest httpServletRequest;
 	private HttpServletResponse httpServletResponse;
 	// have to do it here because we need it in urlCache. It has to happen before Spring initialization
@@ -1176,7 +1179,11 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 		// students an error
 		if (!anyItemVisible[0]) {
 			if (canEditPage) {
-				String helpUrl = null;
+				Preferences prefs = prefServ.getPreferences(simplePageBean.getCurrentUserId());
+				String userTheme = StringUtils.defaultIfEmpty(prefs.getProperties(PreferencesService.USER_SELECTED_UI_THEME_PREFS).getProperty("theme"), "");
+				boolean dark = userTheme.contains("dark");
+
+				String helpUrl;
 				// order:
 				// localized placedholder
 				// localized general
@@ -1184,14 +1191,16 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 				// we know the defaults exist because we include them, so
 				// we never need to consider default general
 				if (simplePageBean.isStudentPage(currentPage)) {
-				    helpUrl = getLocalizedURL("student.html", true);
+				    helpUrl = getLocalizedURL(dark ? "student-dark.html" : "student.html", true);
 				}
 				else {
-				    helpUrl = getLocalizedURL("placeholder.html", false);
-				    if (helpUrl == null)
-					helpUrl = getLocalizedURL("general.html", false);
-				    if (helpUrl == null)
-					helpUrl = getLocalizedURL("placeholder.html", true);
+				    helpUrl = getLocalizedURL(dark ? "placeholder-dark.html" : "placeholder.html", false);
+				    if (helpUrl == null) {
+						helpUrl = getLocalizedURL(dark ? "general-dark.html" : "general.html", false);
+					}
+				    if (helpUrl == null) {
+						helpUrl = getLocalizedURL(dark ? "placeholder-dark.html" : "placeholder.html", true);
+					}
 				}
 
 				UIOutput.make(tofill, "startupHelp")
@@ -4679,11 +4688,14 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 	// for both add multimedia and add resource, as well as updating resources
 	// in the edit dialogs
 	private void createAddMultimediaDialog(UIContainer tofill, SimplePage currentPage) {
+		Preferences prefs = prefServ.getPreferences(simplePageBean.getCurrentUserId());
+		String userTheme = StringUtils.defaultIfEmpty(prefs.getProperties(PreferencesService.USER_SELECTED_UI_THEME_PREFS).getProperty("theme"), "");
+		boolean dark = userTheme.contains("dark");
 		UIOutput.make(tofill, "add-multimedia-dialog").decorate(new UIFreeAttributeDecorator("title", messageLocator.getMessage("simplepage.resource")));
 		UILink.make(tofill, "mm-additional-instructions", messageLocator.getMessage("simplepage.additional-instructions-label"), 
-			    getLocalizedURL( "multimedia.html", true));
+			    getLocalizedURL( dark ? "multimedia-dark.html" : "multimedia.html", true));
 		UILink.make(tofill, "mm-additional-website-instructions", messageLocator.getMessage("simplepage.additional-website-instructions-label"), 
-			    getLocalizedURL( "website.html", true));
+			    getLocalizedURL( dark ? "website-dark.html" : "website.html", true));
 
 		UIForm form = UIForm.make(tofill, "add-multimedia-form");
 		makeCsrf(form, "csrf9");

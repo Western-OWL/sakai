@@ -1,0 +1,14 @@
+body
+{
+  color: var(--sakai-text-color-1);
+  background-color: var(--sakai-background-color-1);
+}
+.textblock
+{
+  background-color: #ffffdd;
+}
+.textblock2
+{
+  background-color: #eeeeee;
+}
+

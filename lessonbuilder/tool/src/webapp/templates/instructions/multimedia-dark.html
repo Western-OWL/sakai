@@ -1,12 +1,20 @@
-<html>
+<html class="sakaiUserTheme-dark">
   <head>
-    <meta http-equiv="Content-Style-Type" content="text/css" /> 
+    <meta http-equiv="Content-Style-Type" content="text/css" />
     <title>multimedia.html</title>
     <link href="/library/skin/tool_base.css" type="text/css" rel="stylesheet" media="all" />
 	<link href="/library/skin/morpheus-default/tool.css" type="text/css" rel="stylesheet" media="all" />
 	<link href="/lessonbuilder-tool/css/instructions.css" type="text/css" rel="stylesheet" media="all" />
+	<link href="/lessonbuilder-tool/css/instructions-dark.css" type="text/css" rel="stylesheet" media="all" />
     <script type="text/javascript" language="JavaScript" src="/library/js/headscripts.js"></script>
     <style>body { padding: 5px !important; }</style>
+	<style>
+		.sakaiUserTheme-dark body
+		{
+			background-color: #1f2225;
+			color: #d3d4d6;
+		}
+	</style>
   </head>
   <body>
 <style type="text/css">
@@ -21,7 +29,7 @@ border: solid black 1px;
 margin-right:345px;
 }
 </style>
-<p>[<a id="return"  href="general.html"> Back to main help screen</a>]</p>
+<p>[<a id="return"  href="general-dark.html"> Back to main help screen</a>]</p>
 <script>
    var a = document.getElementById('return');
    if (window.location.search != '')
@@ -44,7 +52,7 @@ margin-right:345px;
 <ul>
 <li> Upload a file. In this case Lessons will choose a player to show
 the file. The player depends upon the type of file and the browser.
-In order to get the best results on a variety of devices, 
+In order to get the best results on a variety of devices,
 we recommend using MP4 format. For best use on portable devices, the
 file should be prepared with software that specifically optimizes for
 those devices. For audio, we recommend MP3, although WAV is also widely
@@ -55,7 +63,7 @@ the same result as uploading the file through Lessons.</li>
 
 <li> Enter a URL for a video sharing site, e.g. Youtube. Lessons can
 recognize URLs for most common video sites, and add appropriate players.
-Most video sharing sites have options in the player to give you the 
+Most video sharing sites have options in the player to give you the
 URL for the video. Simply using the URL that shows in the bar at
 the top of your browser may not work.</li>
 
@@ -105,9 +113,9 @@ called <b> urls </b> of the unit's folder.
 <div class="textblock">
 <p>Unfortunately the ability to play movies, Flash, etc, tends to vary from browser to browser. You may want to create a unit that has one of each type of file you're going to use. That way students can make sure that they have the right plugins installed at the beginning of the course.</p>
 <p> However you can simplify things for your users by picking
-types of video that are most widely supported. Modern browsers 
+types of video that are most widely supported. Modern browsers
 generally have good support for MP4. Lessons also has good
-support for Flash video (FLV), but it will not work on many 
+support for Flash video (FLV), but it will not work on many
 portable devices, so MP4 is preferable where possible.
 
 </div>
