@@ -210,7 +210,7 @@
 			<version>4.1.0</version>
 			<scope>runtime</scope>
 		</dependency>
-		<!--Used in Private messages, Tests&Quizzes, selector of multiple items (users, groups), group manager tool -->
+		<!--Used in Private messages, Tests&Quizzes, selector of multiple items (users, groups) -->
         <dependency>
             <groupId>org.webjars</groupId>
             <artifactId>select2</artifactId>
@@ -291,7 +291,12 @@
 			<artifactId>multifile</artifactId>
 			<version>2.2.2</version>
 		</dependency>
-		<!-- Used in Webcomponents and the Lessons PDF Widget -->
+		<!--Used in the site group manager helper-->
+		<dependency>
+			<groupId>org.webjars.bower</groupId>
+			<artifactId>multiselect-two-sides</artifactId>
+			<version>2.5.5</version>
+		</dependency>
 		<dependency>
 			<groupId>org.webjars</groupId>
 			<artifactId>pdf-js</artifactId>
