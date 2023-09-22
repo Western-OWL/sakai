@@ -243,9 +243,9 @@
 }
 
 .manage-hidden-entry.site-entry.entry-hidden {
-    background-color: #aaa;
+    background-color: var(--sakai-background-color-4);
     border-color: #888;
-    color: #e7e7e7;
+    color: var(--sites-nav-menu-item-color);
 }
 
 .manage-hidden-entry .title {
@@ -257,7 +257,7 @@
 
 .site-entry {
     border: 1px solid #dfdfdf;
-    background-color: var(--sakai-background-color-2);
+    background-color: var(--sites-nav-menu-item-background);
     margin-top: 5px;
     margin-bottom: 5px;
     padding-left: 0.5em;
@@ -272,7 +272,7 @@
     font-style: normal;
     font-family: FontAwesome;
     content: '\f005';
-    color: #ababab;
+    color: var(--sites-nav-menu-item-color);
 }
 
 .site-entry.favorite-site .site-entry-star {
