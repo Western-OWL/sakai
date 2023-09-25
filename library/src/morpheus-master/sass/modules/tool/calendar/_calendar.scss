@@ -1,6 +1,10 @@
 @import "_calendar_variables";
 @import "_calendar_mixins";
 
+:root {
+	--fc-border-color: var(--sakai-border-color);
+}
+
 .#{$namespace}sakai-schedule {
 	
 	.page-header {
@@ -48,10 +52,6 @@
 	.step {
 		padding: $standard-spacing;
 	}
-
-	.sakai-table-toolBar {
-		border-bottom: 1px solid $page-header-border-color;
-	}
 	
 	.sakai-table-viewFilter {
 		input[type="submit"] {
@@ -81,7 +81,7 @@
 	.showListOfEvents > .sakai-table-viewFilter {
 		margin-top: $standard-spacing;
 		padding-top: $standard-spacing;
-		border-top: 1px solid $page-header-border-color;
+		border-top: 1px solid var(--sakai-border-color);
 	}
 	
 	.customDateRange {
