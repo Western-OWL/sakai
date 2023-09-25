@@ -1,0 +1,11 @@
+.sakaiUserTheme-dark body
+{
+	background-color: #1f2225;
+	color: #d3d4d6;
+}
+.sakaiUserTheme-dark body a[href]
+{
+	color: #d3d4d6;
+}
+
+
