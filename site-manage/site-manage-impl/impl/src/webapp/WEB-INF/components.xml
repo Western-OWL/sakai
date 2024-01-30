@@ -202,4 +202,11 @@
 		<property name="threadLocalManager"><ref bean="org.sakaiproject.thread_local.api.ThreadLocalManager"/></property>
 
 	</bean>
+
+
+	<bean id="org.sakaiproject.sitemanage.api.owl.OwlMigrationService"
+		class="org.sakaiproject.sitemanage.impl.owl.OwlMigrationServiceImpl"
+		init-method="init">
+
+	</bean>
 </beans>
