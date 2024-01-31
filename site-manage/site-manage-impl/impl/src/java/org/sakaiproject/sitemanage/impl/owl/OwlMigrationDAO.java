@@ -23,6 +23,7 @@ public class OwlMigrationDAO
     // Admin Workspace prop keys
     private static final String OWL_MIG_ENABLED = "OWL_MIG_ENABLED";
     private static final String OWL_MIG_SELECTION_OPTS = "OWL_MIG_SELECTION_OPTIONS_MAP";
+    private static final String OWL_MIG_STATUS_OPTS = "OWL_MIG_STATUS_DISPLAY_MAP";
 
     // Delimiters used in Admin Workspace props
     private static final String PIPE_DELIM = "\\|";
@@ -64,36 +65,73 @@ public class OwlMigrationDAO
     public static Map<String, String> getMigrationSelectionOptions()
     {
         Optional<Site> s = getAdminWorksite();
-        if( s.isPresent() )
+        if( s.isEmpty() )
         {
-            Site site = s.get();
-            ResourceProperties props = site.getProperties();
+            return Collections.emptyMap();
+        }
 
-            // Format: undecided:Undecided|doNotMig:Do Not Migrate|selfMig:Self-Migration|assistedMig:Assisted Migration
-            String prop = props.getProperty( OWL_MIG_SELECTION_OPTS );
+        Site site = s.get();
+        ResourceProperties props = site.getProperties();
 
-            // Split on '|' so we get an array of key:value pairs (undecided:Undecided, doNotMig:Do Not Migrate; etc.)
-            String[] entries = prop.split( PIPE_DELIM );
-            if( entries != null )
+        // Format: undecided:Undecided|doNotMig:Do Not Migrate|selfMig:Self-Migration|assistedMig:Assisted Migration
+        String prop = props.getProperty( OWL_MIG_SELECTION_OPTS );
+
+        return parsePipeAndColonDelimitedProp(prop);
+    }
+
+    /**
+     * Get the status options map stored in the "OWL_MIG_STATUS_DISPLAY_MAP" Admin site property
+     * @return A map, where the map's key is the status option key, and the map's value is the (sometimes) user facing status option
+     */
+    public static Map<String, String> getMigrationStatusOptions()
+    {
+        Optional<Site> s = getAdminWorksite();
+        if( s.isEmpty() )
+        {
+            return Collections.emptyMap();
+        }
+
+        Site site = s.get();
+        ResourceProperties props = site.getProperties();
+
+        // Format: migDone:Migrated|doNotMig:Do Not Migrate|manualMig:Manual Migration|pendingMig:Migration Pending|toBeDeleted:To Be Deleted|projPendingMig:Move Pending
+        String prop = props.getProperty( OWL_MIG_STATUS_OPTS );
+
+        return parsePipeAndColonDelimitedProp(prop);
+    }
+
+    /**
+     * Utility method that will take transform a String in the format of "key1:value1|key2:value2|key3:value3" into a Map of key-value pairs
+     * @param prop the pipe and colon delimited string (key1:value1|key2:value2|key3:value3)
+     * @return A Map of key-value pairs
+     */
+    private static Map<String, String> parsePipeAndColonDelimitedProp(String prop)
+    {
+        // Split on '|' so we get an array of key:value pairs (undecided:Undecided, doNotMig:Do Not Migrate; etc.)
+        String[] entries = prop.split( PIPE_DELIM );
+        if( entries == null )
+        {
+            return Collections.emptyMap();
+        }
+
+        Map<String, String> retMap = new HashMap<>( entries.length );
+        for( String entry : entries )
+        {
+            // Split on ':' so we have key and value separately (undecided, Undecided; etc.)
+            String[] keyValue = entry.split( COLON_DELIM );
+            if( keyValue != null && keyValue.length == 2 )
             {
-                Map<String, String> retMap = new HashMap<>( entries.length );
-                for( String entry : entries )
-                {
-                    // Split on ':' so we have key and value separately (undecided, Undecided; etc.)
-                    String[] keyValue = entry.split( COLON_DELIM );
-                    if( keyValue != null && keyValue.length == 2 )
-                    {
-                        retMap.put( keyValue[0], keyValue[1] );
-                    }
-                }
-
-                return retMap;
+                retMap.put( keyValue[0], keyValue[1] );
             }
         }
 
-        return Collections.emptyMap();
+        return retMap;
     }
 
+    /**
+     * Utility method to retrieve the !admin worksite
+     * @return an Optional wrapping the Site object, or an empty Optional if the site could not be retreived
+     */
     private static Optional<Site> getAdminWorksite()
     {
         try
