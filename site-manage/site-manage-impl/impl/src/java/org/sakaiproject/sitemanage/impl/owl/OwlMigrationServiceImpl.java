@@ -18,13 +18,12 @@ public class OwlMigrationServiceImpl implements OwlMigrationService {
 	}
 
 	public boolean isMigrationTabEnabled() {
-		throw new UnsupportedOperationException();
+		return OwlMigrationDAO.isMigrationEnabled();
 	}
 
 	public Map<String, List<SiteMigrationItem>> getSiteMigrationItems() {
 		throw new UnsupportedOperationException();
 	}
-
 
 	public List<MigrationOption> getMigrationOptions() {
 		throw new UnsupportedOperationException();
@@ -43,7 +42,7 @@ public class OwlMigrationServiceImpl implements OwlMigrationService {
 	}
 
 	/* TODO: private methods to implement:
-	 * migrationStatusMapping 
+	 * migrationStatusMapping
 	 * selectionsWithVisibleStatuses
 	 * visibleStatuses
 	 * eligibleTerms
