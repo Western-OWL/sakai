@@ -12,6 +12,11 @@ public interface OwlMigrationService {
 	public boolean isMigrationTabEnabled();
 
 	/**
+	 * List of common terms (E.g. "Fall/Winter 2024"), including project sites. This is useful to provide an ordering in the UI
+	 */
+	public List<String> getCommonTerms();
+
+	/**
 	 * Gets a map of common terms (I.e. groupings of eligible academic sessions), to SiteMigrationItems
 	 * Returns an empty map if the user is not authorized to specify migration selections for any sites.
 	 */
@@ -21,9 +26,10 @@ public interface OwlMigrationService {
 	public List<MigrationOption> getMigrationOptions();
 
 	/**
-	 * Persists the siteMigrationItem with the specified selection; updates the selection's associated user, date, and sets an initial status
+	 * If the site doesn't already have a selection, persists the siteMigrationItem with the specified selection.
+	 * Updates the selection's associated user, date, and sets an initial status if appropriate
 	 */
-	public void saveSelection(SiteMigrationItem siteMigrationItem, String selectionKey);
+	public void saveSelection(String siteId, String selectionKey);
 
 	/**
 	 * Gets the display value associated with a status key.
@@ -41,5 +47,4 @@ public interface OwlMigrationService {
 	 * Gets a UI message unsuitable to be managed by MBM
 	 */
 	public String getUIMessage(String messageKey);
-
 }

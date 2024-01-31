@@ -14,7 +14,8 @@ public class SiteMigrationItem {
 	public String siteId;
 
 	/** The selected migration option **/
-	public Optional<String> selectionKey;
+	public String selectionKey;
+	public boolean isSelectionEditable;
 	public Optional<String> selectionModifiedEid;
 	public Optional<Date> selectionModifiedDate;
 
@@ -23,4 +24,5 @@ public class SiteMigrationItem {
 	public Optional<String> statusModifiedEid;
 	public Optional<Date> statusModifiedDate;
 
+	public float resourcesSize;
 }
