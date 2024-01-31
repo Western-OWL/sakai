@@ -84,7 +84,7 @@ public class MembershipAction extends PagedResourceActionII
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.sakaiproject.cheftool.PagedResourceActionII#sizeResources(org.sakaiproject.service.framework.session.SessionState)
 	 */
 	protected int sizeResources(SessionState state)
@@ -146,7 +146,7 @@ public class MembershipAction extends PagedResourceActionII
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.sakaiproject.cheftool.PagedResourceActionII#readResourcesPage(org.sakaiproject.service.framework.session.SessionState, int, int)
 	 */
 	protected List readResourcesPage(SessionState state, int first, int last)
@@ -209,7 +209,7 @@ public class MembershipAction extends PagedResourceActionII
 	 * @param context
 	 * @param rundata
 	 * @param state
-	 * @return 
+	 * @return
 	 */
 	public String buildMainPanelContext(VelocityPortlet portlet, Context context, RunData rundata, SessionState state)
 	{
@@ -259,7 +259,7 @@ public class MembershipAction extends PagedResourceActionII
 			{
 				context.put("disableUnjoinSelection", Boolean.TRUE);
 			}
-			
+
 			if (SCS.getStrings("wsetup.disable.unjoin") != null)
 			{
 				context.put("disableUnjoinSiteTypes", new ArrayList(Arrays.asList(SCS.getStrings("wsetup.disable.unjoin"))));
@@ -293,7 +293,7 @@ public class MembershipAction extends PagedResourceActionII
 	 * @param context
 	 * @param runData
 	 * @param state
-	 * @return 
+	 * @return
 	 */
 	public String buildMyEnrolmentsContext( VelocityPortlet portlet, Context context, RunData runData, SessionState state )
 	{
@@ -343,7 +343,7 @@ public class MembershipAction extends PagedResourceActionII
 
 	/**
 	 * Build context for confirmation screen
-	 * 
+	 *
 	 * @param portlet
 	 * @param context
 	 * @param runData
@@ -368,7 +368,7 @@ public class MembershipAction extends PagedResourceActionII
 				}
 			}
 			context.put("unjoinSite", unjoinSite);
-			
+
 		}
 
 		String template = (String) getContext(runData).get("template");
@@ -377,7 +377,7 @@ public class MembershipAction extends PagedResourceActionII
 
 	/**
 	 * process unjoin
-	 * 
+	 *
 	 * @param data
 	 */
 	public void doGoto_unjoinyes(RunData data)
@@ -390,7 +390,7 @@ public class MembershipAction extends PagedResourceActionII
 
 	/**
 	 * cancel unjoin of site
-	 * 
+	 *
 	 * @param data
 	 */
 	public void doGoto_unjoincancel(RunData data)
@@ -405,7 +405,7 @@ public class MembershipAction extends PagedResourceActionII
 	 * @param context
 	 * @param runData
 	 * @param state
-	 * @return 
+	 * @return
 	 */
 	public String buildJoinableContext(VelocityPortlet portlet, Context context, RunData runData, SessionState state)
 	{
@@ -453,7 +453,7 @@ public class MembershipAction extends PagedResourceActionII
 	/**
 	 * Handle the eventSubmit_doGoto_enrolments command to show the list of enrolments for the current user.
 	 * SAK-32087
-	 * @param data 
+	 * @param data
 	 */
 	public void doGoto_enrolments( RunData data )
 	{
@@ -527,8 +527,8 @@ public class MembershipAction extends PagedResourceActionII
 		String[] id = (String[]) state.getAttribute(UNJOIN_SITE);
 		if (id != null)
 		{
-			String msg = RB.getString("mb.youhave") + " "; 
-			
+			String msg = RB.getString("mb.youhave") + " ";
+
 			// add to user auditing
 			List<String[]> userAuditList = new ArrayList<>();
 			// get the User object since we need a couple of lookups

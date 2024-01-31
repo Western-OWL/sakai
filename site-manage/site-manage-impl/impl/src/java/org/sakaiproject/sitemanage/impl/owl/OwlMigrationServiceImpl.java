@@ -26,6 +26,7 @@ public class OwlMigrationServiceImpl implements OwlMigrationService {
 	}
 
 	public List<MigrationOption> getMigrationOptions() {
+		Map<String, String> migOptions = OwlMigrationDAO.getMigrationSelectionOptions();
 		throw new UnsupportedOperationException();
 	}
 
