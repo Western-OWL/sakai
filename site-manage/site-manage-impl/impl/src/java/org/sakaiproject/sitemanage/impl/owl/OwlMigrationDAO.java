@@ -16,7 +16,6 @@ import org.sakaiproject.site.api.SiteService;
 @Slf4j
 public class OwlMigrationDAO
 {
-
     @Setter
     private static SiteService siteService;
 
@@ -24,6 +23,7 @@ public class OwlMigrationDAO
     private static final String OWL_MIG_ENABLED = "OWL_MIG_ENABLED";
     private static final String OWL_MIG_SELECTION_OPTS = "OWL_MIG_SELECTION_OPTIONS_MAP";
     private static final String OWL_MIG_STATUS_OPTS = "OWL_MIG_STATUS_DISPLAY_MAP";
+    private static final String OWL_MIG_INIT_STATUS_MAP = "OWL_MIG_SELECTION_INITIAL_STATUS_MAP";
 
     // Delimiters used in Admin Workspace props
     private static final String PIPE_DELIM = "\\|";
@@ -32,7 +32,7 @@ public class OwlMigrationDAO
 
     private static final String ADMIN_SITE_ID = "!admin";
 
-    private OwlMigrationDAO() { /* * Private default constructor to avoid instantiation */ }
+    private OwlMigrationDAO() { /* Private default constructor to avoid instantiation */ }
 
     // TODO: when resolving the cutoff dates, refer to how "sitestats.refResolver.lessonbuilder.read.cutoverDate" is resolved
 
@@ -52,7 +52,7 @@ public class OwlMigrationDAO
             {
                 return props.getBooleanProperty( OWL_MIG_ENABLED );
             }
-            catch( EntityPropertyNotDefinedException | EntityPropertyTypeException ex ) { /* * Property not found; ignore */ }
+            catch( EntityPropertyNotDefinedException | EntityPropertyTypeException ex ) { /* Property not found; ignore */ }
         }
 
         return false;
@@ -64,19 +64,8 @@ public class OwlMigrationDAO
      */
     public static Map<String, String> getMigrationSelectionOptions()
     {
-        Optional<Site> s = getAdminWorksite();
-        if( s.isEmpty() )
-        {
-            return Collections.emptyMap();
-        }
-
-        Site site = s.get();
-        ResourceProperties props = site.getProperties();
-
         // Format: undecided:Undecided|doNotMig:Do Not Migrate|selfMig:Self-Migration|assistedMig:Assisted Migration
-        String prop = props.getProperty( OWL_MIG_SELECTION_OPTS );
-
-        return parsePipeAndColonDelimitedProp(prop);
+        return parsePipeAndColonDelimitedProp( OWL_MIG_SELECTION_OPTS );
     }
 
     /**
@@ -85,6 +74,27 @@ public class OwlMigrationDAO
      */
     public static Map<String, String> getMigrationStatusOptions()
     {
+        // Format: migDone:Migrated|doNotMig:Do Not Migrate|manualMig:Manual Migration|pendingMig:Migration Pending|toBeDeleted:To Be Deleted|projPendingMig:Move Pending
+        return parsePipeAndColonDelimitedProp( OWL_MIG_STATUS_OPTS );
+    }
+
+    /**
+     * Get the initial status map stored in "OWL_MIG_SELECTION_INITIAL_STATUS_MAP" Admin site property
+     * @return A map, where the map's key is the migration selection option key, and the map's value is the initial status key
+     */
+    public static Map<String, String> getMigrationInitialStatusMap()
+    {
+        // Format: doNotMig:doNotMig|selfMig:manualMig|assistedMig:pendingMig
+        return parsePipeAndColonDelimitedProp( OWL_MIG_INIT_STATUS_MAP );
+    }
+
+    /**
+     * Utility method that will take transform a String in the format of "key1:value1|key2:value2|key3:value3" into a Map of key-value pairs
+     * @param prop the pipe and colon delimited string (key1:value1|key2:value2|key3:value3)
+     * @return A Map of key-value pairs
+     */
+    private static Map<String, String> parsePipeAndColonDelimitedProp( String sitePropKey )
+    {
         Optional<Site> s = getAdminWorksite();
         if( s.isEmpty() )
         {
@@ -94,19 +104,9 @@ public class OwlMigrationDAO
         Site site = s.get();
         ResourceProperties props = site.getProperties();
 
-        // Format: migDone:Migrated|doNotMig:Do Not Migrate|manualMig:Manual Migration|pendingMig:Migration Pending|toBeDeleted:To Be Deleted|projPendingMig:Move Pending
-        String prop = props.getProperty( OWL_MIG_STATUS_OPTS );
+        // Format: doNotMig:doNotMig|selfMig:manualMig|assistedMig:pendingMig
+        String prop = props.getProperty( sitePropKey );
 
-        return parsePipeAndColonDelimitedProp(prop);
-    }
-
-    /**
-     * Utility method that will take transform a String in the format of "key1:value1|key2:value2|key3:value3" into a Map of key-value pairs
-     * @param prop the pipe and colon delimited string (key1:value1|key2:value2|key3:value3)
-     * @return A Map of key-value pairs
-     */
-    private static Map<String, String> parsePipeAndColonDelimitedProp(String prop)
-    {
         // Split on '|' so we get an array of key:value pairs (undecided:Undecided, doNotMig:Do Not Migrate; etc.)
         String[] entries = prop.split( PIPE_DELIM );
         if( entries == null )
