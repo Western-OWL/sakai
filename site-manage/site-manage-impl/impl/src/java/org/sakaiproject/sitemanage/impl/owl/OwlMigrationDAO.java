@@ -26,14 +26,15 @@ public class OwlMigrationDAO
     private static SiteService siteService;
 
     // Admin Workspace prop keys
-    private static final String OWL_MIG_ENABLED             = "OWL_MIG_ENABLED";
-    private static final String OWL_MIG_SELECTION_OPTS      = "OWL_MIG_SELECTION_OPTIONS_MAP";
-    private static final String OWL_MIG_STATUS_OPTS         = "OWL_MIG_STATUS_DISPLAY_MAP";
-    private static final String OWL_MIG_INIT_STATUS_MAP     = "OWL_MIG_SELECTION_INITIAL_STATUS_MAP";
-    private static final String OWL_MIG_VISIBLE_STATUSES    = "OWL_MIG_SELECTIONS_WITH_VISIBLE_STATUSES";
+    private static final String OWL_MIG_ENABLED                             = "OWL_MIG_ENABLED";
+    private static final String OWL_MIG_SELECTION_OPTS                      = "OWL_MIG_SELECTION_OPTIONS_MAP";
+    private static final String OWL_MIG_STATUS_OPTS                         = "OWL_MIG_STATUS_DISPLAY_MAP";
+    private static final String OWL_MIG_INIT_STATUS_MAP                     = "OWL_MIG_SELECTION_INITIAL_STATUS_MAP";
+    private static final String OWL_MIG_SELECTIONS_WITH_VISIBLE_STATUSES    = "OWL_MIG_SELECTIONS_WITH_VISIBLE_STATUSES";
+    private static final String OWL_MIG_VISIBLE_STATUSES                    = "OWL_MIG_VISIBLE_STATUSES";
 
     // Delimiters used in Admin Workspace props
-    private static final String PIPE_DELIM          = "\\|";
+    private static final String PIPE_DELIM          = "\\|"; // Pipe is a special character in regex, so it needs to be escaped
     private static final String COLON_DELIM         = ":";
     private static final String SEMI_COLON_DELIM    = ";";
 
@@ -96,12 +97,23 @@ public class OwlMigrationDAO
     }
 
     /**
-     * Get the visible statuses stored in "OWL_MIG_SELECTIONS_WITH_VISIBLE_STATUSES" Admin site property
-     * @return List of Strings, where each String is a status key who's corresponding value is allowed to be exposed in the UI
+     * Get the selections with visible statuses stored in "OWL_MIG_SELECTIONS_WITH_VISIBLE_STATUSES" Admin site property.
+     * NOTE: if the selection key is not in this list, the status will not be displayed even if it is contained in getVisibleStatuses() (below)
+     * @return List of Strings, where each String is a selection key who's statuses are allowed to be exposed in the UI
      */
-    public static List<String> getVisibleMigrationStatuses()
+    public static List<String> getSelectionsWithVisibleStatuses()
     {
         // Format: assistedMig|statusKey2|statusKey3
+        return parsePipeDelimitedProp( OWL_MIG_SELECTIONS_WITH_VISIBLE_STATUSES );
+    }
+
+    /**
+     * Get the visible statuses stored in "OWL_MIG_VISIBLE_STATUSES" Admin site property
+     * @return List of Strings, where each String is a status key who's corresponding value is allowed to be exposed in the UI
+     */
+    public static List<String> getVisibleStatuses()
+    {
+        // Format: migDone|pendingMig
         return parsePipeDelimitedProp( OWL_MIG_VISIBLE_STATUSES );
     }
 
