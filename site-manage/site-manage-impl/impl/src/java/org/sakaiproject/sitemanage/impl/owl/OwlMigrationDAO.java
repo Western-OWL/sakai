@@ -1,12 +1,9 @@
 package org.sakaiproject.sitemanage.impl.owl;
 
-import java.sql.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -32,6 +29,7 @@ public class OwlMigrationDAO
     private static final String OWL_MIG_INIT_STATUS_MAP                     = "OWL_MIG_SELECTION_INITIAL_STATUS_MAP";
     private static final String OWL_MIG_SELECTIONS_WITH_VISIBLE_STATUSES    = "OWL_MIG_SELECTIONS_WITH_VISIBLE_STATUSES";
     private static final String OWL_MIG_VISIBLE_STATUSES                    = "OWL_MIG_VISIBLE_STATUSES";
+    private static final String OWL_MIG_CHANGEABLE_SELECTIONS               = "OWL_MIG_CHANGEABLE_SELECTIONS";
 
     // Delimiters used in Admin Workspace props
     private static final String PIPE_DELIM          = "\\|"; // Pipe is a special character in regex, so it needs to be escaped
@@ -115,6 +113,16 @@ public class OwlMigrationDAO
     {
         // Format: migDone|pendingMig
         return parsePipeDelimitedProp( OWL_MIG_VISIBLE_STATUSES );
+    }
+
+    /**
+     * Get the list of changeable selections stored in the "OWL_MIG_CHANGEABLE_SELECTIONS" Admin site property
+     * @return List of Strings, where each String is a selection key that is allowed to be changed in the UI by end users
+     */
+    public static List<String> getChangeableSelections()
+    {
+        // Format: undecided|selectionKey2|selectionKey3
+        return parsePipeDelimitedProp( OWL_MIG_CHANGEABLE_SELECTIONS );
     }
 
     /**
