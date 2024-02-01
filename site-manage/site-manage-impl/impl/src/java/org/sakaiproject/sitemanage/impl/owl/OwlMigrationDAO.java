@@ -126,6 +126,26 @@ public class OwlMigrationDAO
     }
 
     /**
+     * Utility method to retrieve an arbitrary property stored in Admin site properties.
+     * This will be used mostly to retrieve the banners, and confirmation messages.
+     * @param sitePropKey the key of the property to retrieve from Admin site properties
+     * @return An Optional containing the value of the property, or an empty Optional if the property couldn't be found
+     */
+    public static Optional<String> getUiMessage( String sitePropKey )
+    {
+        Optional<Site> s = getAdminWorksite();
+        if( s.isEmpty() )
+        {
+            return Optional.empty();
+        }
+
+        Site site = s.get();
+        ResourceProperties props = site.getProperties();
+        String prop = props.getProperty( sitePropKey );
+        return prop == null ? Optional.empty() : Optional.of( prop );
+    }
+
+    /**
      * Utility method that will transform a String in the format of "value1|value2|value3|value4" into a List of Strings
      * @param sitePropKey the key of the property stored in Admin site properties that contains the pipe delimited string (value1|value2|value3|value4)
      * @return A List of Strings
