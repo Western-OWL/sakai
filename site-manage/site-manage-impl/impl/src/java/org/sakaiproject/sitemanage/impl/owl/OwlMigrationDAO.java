@@ -1,7 +1,13 @@
 package org.sakaiproject.sitemanage.impl.owl;
 
+import java.sql.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import lombok.Setter;
@@ -20,15 +26,16 @@ public class OwlMigrationDAO
     private static SiteService siteService;
 
     // Admin Workspace prop keys
-    private static final String OWL_MIG_ENABLED = "OWL_MIG_ENABLED";
-    private static final String OWL_MIG_SELECTION_OPTS = "OWL_MIG_SELECTION_OPTIONS_MAP";
-    private static final String OWL_MIG_STATUS_OPTS = "OWL_MIG_STATUS_DISPLAY_MAP";
-    private static final String OWL_MIG_INIT_STATUS_MAP = "OWL_MIG_SELECTION_INITIAL_STATUS_MAP";
+    private static final String OWL_MIG_ENABLED             = "OWL_MIG_ENABLED";
+    private static final String OWL_MIG_SELECTION_OPTS      = "OWL_MIG_SELECTION_OPTIONS_MAP";
+    private static final String OWL_MIG_STATUS_OPTS         = "OWL_MIG_STATUS_DISPLAY_MAP";
+    private static final String OWL_MIG_INIT_STATUS_MAP     = "OWL_MIG_SELECTION_INITIAL_STATUS_MAP";
+    private static final String OWL_MIG_VISIBLE_STATUSES    = "OWL_MIG_SELECTIONS_WITH_VISIBLE_STATUSES";
 
     // Delimiters used in Admin Workspace props
-    private static final String PIPE_DELIM = "\\|";
-    private static final String COLON_DELIM = ":";
-    private static final String SEMI_COLON_DELIM = ";";
+    private static final String PIPE_DELIM          = "\\|";
+    private static final String COLON_DELIM         = ":";
+    private static final String SEMI_COLON_DELIM    = ";";
 
     private static final String ADMIN_SITE_ID = "!admin";
 
@@ -89,35 +96,65 @@ public class OwlMigrationDAO
     }
 
     /**
-     * Utility method that will take transform a String in the format of "key1:value1|key2:value2|key3:value3" into a Map of key-value pairs
-     * @param prop the pipe and colon delimited string (key1:value1|key2:value2|key3:value3)
-     * @return A Map of key-value pairs
+     * Get the visible statuses stored in "OWL_MIG_SELECTIONS_WITH_VISIBLE_STATUSES" Admin site property
+     * @return List of Strings, where each String is a status key who's corresponding value is allowed to be exposed in the UI
      */
-    private static Map<String, String> parsePipeAndColonDelimitedProp( String sitePropKey )
+    public static List<String> getVisibleMigrationStatuses()
+    {
+        // Format: assistedMig|statusKey2|statusKey3
+        return parsePipeDelimitedProp( OWL_MIG_VISIBLE_STATUSES );
+    }
+
+    /**
+     * Utility method that will transform a String in the format of "value1|value2|value3|value4" into a List of Strings
+     * @param sitePropKey the key of the property stored in Admin site properties that contains the pipe delimited string (value1|value2|value3|value4)
+     * @return A List of Strings
+     */
+    private static List<String> parsePipeDelimitedProp( String sitePropKey )
     {
         Optional<Site> s = getAdminWorksite();
         if( s.isEmpty() )
         {
-            return Collections.emptyMap();
+            return Collections.emptyList();
         }
 
         Site site = s.get();
         ResourceProperties props = site.getProperties();
 
-        // Format: doNotMig:doNotMig|selfMig:manualMig|assistedMig:pendingMig
+        // Format: value1|value2|value3
         String prop = props.getProperty( sitePropKey );
 
-        // Split on '|' so we get an array of key:value pairs (undecided:Undecided, doNotMig:Do Not Migrate; etc.)
+        // Split on '|' so we get an array of key:value pairs (key1:value1, key2:value2; etc.)
         String[] entries = prop.split( PIPE_DELIM );
         if( entries == null )
+        {
+            return Collections.emptyList();
+        }
+
+        List<String> retList = new ArrayList<>( entries.length );
+        retList.addAll( Arrays.asList( entries ) );
+
+        return retList;
+    }
+
+    /**
+     * Utility method that will transform a String in the format of "key1:value1|key2:value2|key3:value3" into a Map of key-value pairs
+     * @param sitePropKey the key of the property stored in Admin site properties that contains the pipe and colon delimited string (key1:value1|key2:value2|key3:value3)
+     * @return A Map of key-value pairs
+     */
+    private static Map<String, String> parsePipeAndColonDelimitedProp( String sitePropKey )
+    {
+        // Split on '|' so we get a List of key:value pairs (key1:value1, key2:value2; etc.)
+        List<String> entries = parsePipeDelimitedProp( sitePropKey );
+        if( entries.isEmpty() )
         {
             return Collections.emptyMap();
         }
 
-        Map<String, String> retMap = new HashMap<>( entries.length );
+        LinkedHashMap<String, String> retMap = new LinkedHashMap<>( entries.size() );
         for( String entry : entries )
         {
-            // Split on ':' so we have key and value separately (undecided, Undecided; etc.)
+            // Split on ':' so we have key and value separately
             String[] keyValue = entry.split( COLON_DELIM );
             if( keyValue != null && keyValue.length == 2 )
             {
