@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +32,7 @@ public class OwlMigrationDAO
     private static final String OWL_MIG_VISIBLE_STATUSES                    = "OWL_MIG_VISIBLE_STATUSES";
     private static final String OWL_MIG_CHANGEABLE_SELECTIONS               = "OWL_MIG_CHANGEABLE_SELECTIONS";
     private static final String OWL_MIG_ELIGIBLE_TERMS                      = "OWL_MIG_ELIGIBLE_TERMS";
+    private static final String OWL_MIG_TERM_GROUPINGS                      = "OWL_MIG_TERM_GROUPINGS";
 
     // Delimiters used in Admin Workspace props
     private static final String PIPE_DELIM          = "\\|"; // Pipe is a special character in regex, so it needs to be escaped
@@ -152,12 +154,67 @@ public class OwlMigrationDAO
      */
     public static List<String> getEligibleTermsForMigration()
     {
-        // Format: <termCode1>|<termCode2>|<termCode3>
+        // Format: UWOCONT1245|UWOGRAD1241|UWOUGRD1239|UWOPREL1239|UWOCONT1239
         return parsePipeDelimitedProp( OWL_MIG_ELIGIBLE_TERMS );
     }
 
     /**
-     * Utility method that will transform a String in the format of "value1|value2|value3|value4" into a List of Strings
+     * Get the map of term groupings stored in the "OWL_MIG_TERM_GROUPINGS" Admin site property
+     * @return A Map who's keys are the groupings, and the value is a List of Strings representing term code substrings. Any term code that contains the substring belongs to the given grouping
+     */
+    public static Map<String, List<String>> getTermGroupMap()
+    {
+        // Format: Summer 2022:1225;1226|Fall/Winter 2022:1228;1229;1231|Summer 2023:1235;1236|Fall/Winter 2023:1238;1239;1241|Summer 2024:1245;1246
+        LinkedHashMap<String, String> map = (LinkedHashMap) parsePipeAndColonDelimitedProp( OWL_MIG_TERM_GROUPINGS );
+        if (map.isEmpty())
+        {
+            return Collections.emptyMap();
+        }
+
+        // Now we have key=<grouping>, value=<termSubStringList>; we need to parse out the value into a List
+        LinkedHashMap<String, List<String>> retMap = new LinkedHashMap<>( map.size() );
+        for( Entry<String, String> entry : map.entrySet() )
+        {
+            String key = entry.getKey();
+            List<String> value = parseSemiColonDelimitedProp( entry.getValue() );
+            retMap.put( key, value );
+        }
+
+        return retMap;
+    }
+
+    /**
+     * Utility method to parse the given String with the given delimiter
+     * @param valueToParse the String value to parse with the given delimiter
+     * @param delimiter the delimiter to use when parsing the String
+     * @return A List of Strings
+     */
+    private static List<String> parseValueWithDelimiter( String valueToParse, String delimiter )
+    {
+        String[] entries = valueToParse.split( delimiter );
+        if( entries == null )
+        {
+            return Collections.emptyList();
+        }
+
+        List<String> retList = new ArrayList<>( entries.length );
+        retList.addAll( Arrays.asList( entries ) );
+        return retList;
+    }
+
+    /**
+     * Utility method that will parse the given String in the format of "value1;value2;value3" into a List of Strings
+     * @param valueToParse a String in the format of "value1;value2;value3" to be parsed into a List of Strings
+     * @return A List of Strings
+     */
+    private static List<String> parseSemiColonDelimitedProp( String valueToParse )
+    {
+        // Split on ';' so we get an array of key:value pairs (key1:value1, key2:value2; etc.)
+        return parseValueWithDelimiter( valueToParse, SEMI_COLON_DELIM );
+    }
+
+    /**
+     * Utility method that first gets a property stored in Admin site props, then transforms the property in the format of "value1|value2|value3|value4" into a List of Strings
      * @param sitePropKey the key of the property stored in Admin site properties that contains the pipe delimited string (value1|value2|value3|value4)
      * @return A List of Strings
      */
@@ -176,20 +233,11 @@ public class OwlMigrationDAO
         String prop = props.getProperty( sitePropKey );
 
         // Split on '|' so we get an array of key:value pairs (key1:value1, key2:value2; etc.)
-        String[] entries = prop.split( PIPE_DELIM );
-        if( entries == null )
-        {
-            return Collections.emptyList();
-        }
-
-        List<String> retList = new ArrayList<>( entries.length );
-        retList.addAll( Arrays.asList( entries ) );
-
-        return retList;
+        return parseValueWithDelimiter( prop, PIPE_DELIM );
     }
 
     /**
-     * Utility method that will transform a String in the format of "key1:value1|key2:value2|key3:value3" into a Map of key-value pairs
+     * Utility method that first gets a property stored in Admin site props, then transforms the property in the format of "key1:value1|key2:value2|key3:value3" into a Map of key-value pairs
      * @param sitePropKey the key of the property stored in Admin site properties that contains the pipe and colon delimited string (key1:value1|key2:value2|key3:value3)
      * @return A Map of key-value pairs
      */
