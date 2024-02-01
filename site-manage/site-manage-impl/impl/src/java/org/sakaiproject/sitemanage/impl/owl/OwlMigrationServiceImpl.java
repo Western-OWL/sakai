@@ -11,6 +11,7 @@ import org.sakaiproject.coursemanagement.api.CourseManagementService;
 import org.sakaiproject.site.api.SiteService;
 import org.sakaiproject.sitemanage.api.owl.OwlMigrationService;
 import org.sakaiproject.sitemanage.api.owl.SiteMigrationItem;
+import org.sakaiproject.tool.api.SessionManager;
 
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -23,16 +24,18 @@ public class OwlMigrationServiceImpl implements OwlMigrationService {
 	@Setter
 	protected ContentHostingService contentHostingService;
 	@Setter
-	protected SiteService siteService;
-	@Setter
 	protected CourseManagementService courseManagementService;
+	@Setter
+	protected SessionManager sessionManager;
+	@Setter
+	protected SiteService siteService;
 
 	private OwlMigrationDelegate migrationDelegate;
 
 	public void init() {
 		log.info("Initializing OwlMigrationServiceImpl");
 
-		migrationDelegate = new OwlMigrationDelegate(authzGroupService, contentHostingService, courseManagementService, siteService);
+		migrationDelegate = new OwlMigrationDelegate(authzGroupService, contentHostingService, courseManagementService, sessionManager, siteService);
 	}
 
 	@Override
