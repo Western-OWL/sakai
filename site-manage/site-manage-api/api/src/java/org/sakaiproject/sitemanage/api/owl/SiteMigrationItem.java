@@ -12,6 +12,7 @@ import lombok.Data;
 public class SiteMigrationItem {
 	
 	public String siteId;
+	public String siteTitle;
 
 	/** The selected migration option **/
 	public String selectionKey;
@@ -20,7 +21,8 @@ public class SiteMigrationItem {
 	public Optional<Date> selectionModifiedDate;
 
 	/** The migration status **/
-	public Optional<String> statusKey;
+	// TODO: not optional - just use "" when not present
+	public String statusKey;
 	public Optional<String> statusModifiedEid;
 	public Optional<Date> statusModifiedDate;
 

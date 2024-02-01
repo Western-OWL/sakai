@@ -9,7 +9,6 @@ import org.sakaiproject.authz.api.AuthzGroupService;
 import org.sakaiproject.content.api.ContentHostingService;
 import org.sakaiproject.coursemanagement.api.CourseManagementService;
 import org.sakaiproject.site.api.SiteService;
-import org.sakaiproject.sitemanage.api.owl.MigrationOption;
 import org.sakaiproject.sitemanage.api.owl.OwlMigrationService;
 import org.sakaiproject.sitemanage.api.owl.SiteMigrationItem;
 
@@ -44,7 +43,8 @@ public class OwlMigrationServiceImpl implements OwlMigrationService {
 	@Override
 	public List<String> getCommonTerms() {
 		// TODO: OWL_MIG_TERM_GROUPINGS maps common terms to actual terms, so the keys are sufficient for ordering
-		throw new UnsupportedOperationException();
+		// TODO: mocked for UI development
+		return java.util.Arrays.asList("Fall / Winter 2024", "Summer 2024", "Fall / Winter 2023", "Summer 2023");
 	}
 
 	@Override
@@ -57,25 +57,26 @@ public class OwlMigrationServiceImpl implements OwlMigrationService {
 
 
 	@Override
-	public List<MigrationOption> getMigrationOptions() {
-		Map<String, String> migOptions = OwlMigrationDAO.getMigrationSelectionOptions();
-		throw new UnsupportedOperationException();
+	public Map<String, String> getMigrationOptions() {
+		return OwlMigrationDAO.getMigrationSelectionOptions();
 	}
 
 	@Override
 	public void saveSelection(String siteId, String selectionKey) {
 		// TODO: validate before saving
-		throw new UnsupportedOperationException();
+		log.info("saveSelection invoked {}, {}", siteId, selectionKey);
 	}
 
 	@Override
-	public Optional<String> getStatusDisplay(String selectionKey, String statusKey) {
-		throw new UnsupportedOperationException();
+	public String getStatusDisplay(String selectionKey, String statusKey) {
+		// TODO: mocked for UI development
+		return Math.random() > 0.5 ? "(" + selectionKey + " - display)" : "";
 	}
 
 	@Override
 	public String getUIMessage(String messageKey) {
-		throw new UnsupportedOperationException();
+		// TODO: mocked for UI development
+		return "(" + messageKey + " - display)";
 	}
 
 	/* TODO: private methods to implement:

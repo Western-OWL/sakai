@@ -2,13 +2,15 @@ package org.sakaiproject.sitemanage.api.owl;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * Service to handle business logic related to identifying courses that are to be migrated to Brightspace
  */
 public interface OwlMigrationService {
 
+	/**
+	 * The global configuration permitting the migration tab to appear
+	 */
 	public boolean isMigrationTabEnabled();
 
 	/**
@@ -23,7 +25,11 @@ public interface OwlMigrationService {
 	public Map<String, List<SiteMigrationItem>> getSiteMigrationItems();
 
 
-	public List<MigrationOption> getMigrationOptions();
+	/**
+	 * Maps migration option keys to display values
+	 * Iteration order is preserved: implementation is LinkedHashMap
+	 */
+	public Map<String, String> getMigrationOptions();
 
 	/**
 	 * If the site doesn't already have a selection, persists the siteMigrationItem with the specified selection.
@@ -39,9 +45,9 @@ public interface OwlMigrationService {
 	 * Statuses are visible only if both:
 	 *    The selectionKey is in the list of selections with visible status.
 	 *    The statusKey is in the list of visible statuses.
-	 * @return empty if the status is not visible
+	 * @return empty String if the status is not visible
 	 */
-	public Optional<String> getStatusDisplay(String selectionKey, String statusKey);
+	public String getStatusDisplay(String selectionKey, String statusKey);
 
 	/**
 	 * Gets a UI message unsuitable to be managed by MBM
