@@ -57,8 +57,16 @@ VALUES ('!admin', 'OWL_MIG_TERM_GROUPINGS', 'Summer 2022:1225;1226|Fall/Winter 2
 
 # Cut off date for project sites
 INSERT INTO sakai_site_property
-VALUES ('!admin', 'OWL_MIG_PROJECT_SITE_CUTOFF_DATE', '2022-FEB-28');
+VALUES ('!admin', 'OWL_MIG_PROJECT_SITE_CUTOFF_DATE', '2022-02-28');
 
 # Cut off date for course sites
 INSERT INTO sakai_site_property
-VALUES ('!admin', 'OWL_MIG_COURSE_SITE_CUTOFF_DATE', '2022-FEB-28');
+VALUES ('!admin', 'OWL_MIG_COURSE_SITE_CUTOFF_DATE', '2022-02-28');
+
+# Site size warning threshold; interpretted as gigabytes, max 1 decimal place
+INSERT INTO sakai_site_property
+VALUES ('!admin', 'OWL_MIG_SITE_SIZE_WARN_THRESHOLD', '1.5');
+
+# Site size error threshold; interpretted as gigabytes, max 1 decimal place
+INSERT INTO sakai_site_property
+VALUES ('!admin', 'OWL_MIG_SITE_SIZE_ERROR_THRESHOLD', '2.0');

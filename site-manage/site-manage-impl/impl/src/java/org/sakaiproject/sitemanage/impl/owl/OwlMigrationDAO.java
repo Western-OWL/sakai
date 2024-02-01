@@ -1,5 +1,8 @@
 package org.sakaiproject.sitemanage.impl.owl;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -10,6 +13,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.sakaiproject.entity.api.EntityPropertyNotDefinedException;
 import org.sakaiproject.entity.api.EntityPropertyTypeException;
 import org.sakaiproject.entity.api.ResourceProperties;
@@ -33,17 +37,18 @@ public class OwlMigrationDAO
     private static final String OWL_MIG_CHANGEABLE_SELECTIONS               = "OWL_MIG_CHANGEABLE_SELECTIONS";
     private static final String OWL_MIG_ELIGIBLE_TERMS                      = "OWL_MIG_ELIGIBLE_TERMS";
     private static final String OWL_MIG_TERM_GROUPINGS                      = "OWL_MIG_TERM_GROUPINGS";
+    private static final String OWL_MIG_PROJECT_SITE_CUTOFF_DATE            = "OWL_MIG_PROJECT_SITE_CUTOFF_DATE";
+    private static final String OWL_MIG_COURSE_SITE_CUTOFF_DATE             = "OWL_MIG_COURSE_SITE_CUTOFF_DATE";
 
     // Delimiters used in Admin Workspace props
     private static final String PIPE_DELIM          = "\\|"; // Pipe is a special character in regex, so it needs to be escaped
     private static final String COLON_DELIM         = ":";
     private static final String SEMI_COLON_DELIM    = ";";
 
+    // Admin Workspace site ID
     private static final String ADMIN_SITE_ID = "!admin";
 
     private OwlMigrationDAO() { /* Private default constructor to avoid instantiation */ }
-
-    // TODO: when resolving the cutoff dates, refer to how "sitestats.refResolver.lessonbuilder.read.cutoverDate" is resolved
 
     /**
      * Checks "OWL_MIG_ENABLED" Admin site property
@@ -162,7 +167,7 @@ public class OwlMigrationDAO
      * Get the map of term groupings stored in the "OWL_MIG_TERM_GROUPINGS" Admin site property
      * @return A Map who's keys are the groupings, and the value is a List of Strings representing term code substrings. Any term code that contains the substring belongs to the given grouping
      */
-    public static Map<String, List<String>> getTermGroupMap()
+    public static Map<String, List<String>> getTermGroupingMap()
     {
         // Format: Summer 2022:1225;1226|Fall/Winter 2022:1228;1229;1231|Summer 2023:1235;1236|Fall/Winter 2023:1238;1239;1241|Summer 2024:1245;1246
         LinkedHashMap<String, String> map = (LinkedHashMap) parsePipeAndColonDelimitedProp( OWL_MIG_TERM_GROUPINGS );
@@ -181,6 +186,58 @@ public class OwlMigrationDAO
         }
 
         return retMap;
+    }
+
+    /**
+     * Get the project site cutoff date stored in the "OWL_MIG_PROJECT_SITE_CUTOFF_DATE" Admin site property
+     * @return LocalDate representing the date stored in Admin properties
+     */
+    public static Optional<LocalDate> getProjectSiteCutoffDate()
+    {
+        // Format: 2022-02-28
+        return getSitePropLocalDate( OWL_MIG_PROJECT_SITE_CUTOFF_DATE );
+    }
+
+    /**
+     * Get the course site cutoff date stored in the "OWL_MIG_COURSE_SITE_CUTOFF_DATE" Admin site property
+     * @return LocalDate representing the date stored in Admin properties
+     */
+    public static Optional<LocalDate> getCourseSiteCutoffDate()
+    {
+        // Format: 2022-02-28
+        return getSitePropLocalDate( OWL_MIG_COURSE_SITE_CUTOFF_DATE );
+    }
+
+    /**
+     * Utility function to get an arbitrary site property from Admin Worksite, and parse it into a LocalDate representation.
+     * This function assumes the String date format is 'YYYY-MM-DD', ex: 2022-02-28
+     * @param sitePropKey the key of the property stored in Admin site properties that contains the desired date
+     * @return An Optional containing the LocalDate representation of the String date if the property is found and can be parsed; Empty Optional if parsing fails or the property is empty or can't be found.
+     */
+    private static Optional<LocalDate> getSitePropLocalDate( String sitePropKey )
+    {
+        Optional<Site> s = getAdminWorksite();
+        if( s.isEmpty() )
+        {
+            return Optional.empty();
+        }
+
+        Site site = s.get();
+        ResourceProperties props = site.getProperties();
+        String cutOffDate = props.getProperty( sitePropKey );
+        if( StringUtils.isBlank( cutOffDate ) )
+        {
+            return Optional.empty();
+        }
+
+        try
+        {
+            return Optional.of( LocalDate.parse( cutOffDate ) );
+        }
+        catch( Exception ex )
+        {
+            return Optional.empty();
+        }
     }
 
     /**
