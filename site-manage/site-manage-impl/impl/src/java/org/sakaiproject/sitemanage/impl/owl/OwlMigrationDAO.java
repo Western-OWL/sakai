@@ -39,6 +39,8 @@ public class OwlMigrationDAO
     private static final String OWL_MIG_TERM_GROUPINGS                      = "OWL_MIG_TERM_GROUPINGS";
     private static final String OWL_MIG_PROJECT_SITE_CUTOFF_DATE            = "OWL_MIG_PROJECT_SITE_CUTOFF_DATE";
     private static final String OWL_MIG_COURSE_SITE_CUTOFF_DATE             = "OWL_MIG_COURSE_SITE_CUTOFF_DATE";
+    private static final String OWL_MIG_SITE_SIZE_WARN_THRESHOLD            = "OWL_MIG_SITE_SIZE_WARN_THRESHOLD";
+    private static final String OWL_MIG_SITE_SIZE_ERROR_THRESHOLD           = "OWL_MIG_SITE_SIZE_ERROR_THRESHOLD";
 
     // Delimiters used in Admin Workspace props
     private static final String PIPE_DELIM          = "\\|"; // Pipe is a special character in regex, so it needs to be escaped
@@ -209,6 +211,62 @@ public class OwlMigrationDAO
     }
 
     /**
+     * Get the site size warning threshold value stored in "OWL_MIG_SITE_SIZE_WARN_THRESHOLD" Admin site property.
+     * This value is assumed to be measured in gigabytes, with a maximum of 1 decimal place.
+     * @return An Optional wrapping the parsed float value, or an empty Optional if the property was not found or could not be parsed properly.
+     */
+    public static Optional<Float> getSiteSizeWarningThreshold()
+    {
+        return getSitePropFloat( OWL_MIG_SITE_SIZE_WARN_THRESHOLD );
+    }
+
+    /**
+     * Get the site size error threshold value stored in "OWL_MIG_SITE_SIZE_ERROR_THRESHOLD" Admin site property.
+     * This value is assumed to be measured in gigabytes, with a maximum of 1 decimal place.
+     * @return An Optional wrapping the parsed float value, or an empty Optional if the property was not found or could not be parsed properly.
+     */
+    public static Optional<Float> getSiteSizeErrorThreshold()
+    {
+        return getSitePropFloat( OWL_MIG_SITE_SIZE_ERROR_THRESHOLD );
+    }
+
+    private static String getSiteProp( String sitePropKey )
+    {
+        Optional<Site> s = getAdminWorksite();
+        if( s.isEmpty() )
+        {
+            return "";
+        }
+
+        Site site = s.get();
+        ResourceProperties props = site.getProperties();
+        return props.getProperty( sitePropKey );
+    }
+
+    /**
+     * Utility function to get an arbitrary site property from Admin Worksite, and parse it into a Float representation.
+     * @param sitePropKey they key of the proprety stored in Admin site properties that contains the desired floating point value
+     * @return An Optional wrapping the parsed float value, or an empty Optional if the property was not found or could not be parsed properly.
+     */
+    private static Optional<Float> getSitePropFloat( String sitePropKey )
+    {
+        String warnThresh = getSiteProp( sitePropKey );
+        if( StringUtils.isBlank( warnThresh ) )
+        {
+            return Optional.empty();
+        }
+
+        try
+        {
+            return Optional.of( Float.valueOf( warnThresh ) );
+        }
+        catch( NumberFormatException ex )
+        {
+            return Optional.empty();
+        }
+    }
+
+    /**
      * Utility function to get an arbitrary site property from Admin Worksite, and parse it into a LocalDate representation.
      * This function assumes the String date format is 'YYYY-MM-DD', ex: 2022-02-28
      * @param sitePropKey the key of the property stored in Admin site properties that contains the desired date
@@ -216,15 +274,7 @@ public class OwlMigrationDAO
      */
     private static Optional<LocalDate> getSitePropLocalDate( String sitePropKey )
     {
-        Optional<Site> s = getAdminWorksite();
-        if( s.isEmpty() )
-        {
-            return Optional.empty();
-        }
-
-        Site site = s.get();
-        ResourceProperties props = site.getProperties();
-        String cutOffDate = props.getProperty( sitePropKey );
+        String cutOffDate = getSiteProp( sitePropKey );
         if( StringUtils.isBlank( cutOffDate ) )
         {
             return Optional.empty();
