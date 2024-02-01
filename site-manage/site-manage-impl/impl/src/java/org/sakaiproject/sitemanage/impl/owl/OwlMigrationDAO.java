@@ -1,8 +1,6 @@
 package org.sakaiproject.sitemanage.impl.owl;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -11,9 +9,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+
 import org.apache.commons.lang.StringUtils;
+
 import org.sakaiproject.entity.api.EntityPropertyNotDefinedException;
 import org.sakaiproject.entity.api.EntityPropertyTypeException;
 import org.sakaiproject.entity.api.ResourceProperties;
@@ -143,15 +144,7 @@ public class OwlMigrationDAO
      */
     public static Optional<String> getUiMessage( String sitePropKey )
     {
-        Optional<Site> s = getAdminWorksite();
-        if( s.isEmpty() )
-        {
-            return Optional.empty();
-        }
-
-        Site site = s.get();
-        ResourceProperties props = site.getProperties();
-        String prop = props.getProperty( sitePropKey );
+        String prop = getSiteProp( sitePropKey );
         return prop == null ? Optional.empty() : Optional.of( prop );
     }
 
@@ -217,6 +210,7 @@ public class OwlMigrationDAO
      */
     public static Optional<Float> getSiteSizeWarningThreshold()
     {
+        // Format: 1.5
         return getSitePropFloat( OWL_MIG_SITE_SIZE_WARN_THRESHOLD );
     }
 
@@ -227,9 +221,15 @@ public class OwlMigrationDAO
      */
     public static Optional<Float> getSiteSizeErrorThreshold()
     {
+        // Format: 2.0
         return getSitePropFloat( OWL_MIG_SITE_SIZE_ERROR_THRESHOLD );
     }
 
+    /**
+     * Utility function to get an arbitrary site property from Admin Workspace as a String
+     * @param sitePropKey the key of the desired property stored in Admin site properties
+     * @return The String value of the property, empty string if the site could not be resolved, or null if the property does not exist
+     */
     private static String getSiteProp( String sitePropKey )
     {
         Optional<Site> s = getAdminWorksite();
@@ -245,7 +245,7 @@ public class OwlMigrationDAO
 
     /**
      * Utility function to get an arbitrary site property from Admin Worksite, and parse it into a Float representation.
-     * @param sitePropKey they key of the proprety stored in Admin site properties that contains the desired floating point value
+     * @param sitePropKey the key of the proprety stored in Admin site properties that contains the desired floating point value
      * @return An Optional wrapping the parsed float value, or an empty Optional if the property was not found or could not be parsed properly.
      */
     private static Optional<Float> getSitePropFloat( String sitePropKey )
