@@ -53,7 +53,7 @@ VALUES ('!admin', 'OWL_MIG_ELIGIBLE_TERMS', 'UWOCONT1245|UWOGRAD1241|UWOUGRD1239
 
 # Term mappings for the UI, format: <year>:<termCode#>;<termCode#>|<year>:<termCode#>;<termCode#>
 INSERT INTO sakai_site_property
-VALUES ('!admin', 'OWL_MIG_TERM_GROUPINGS', 'Summer 2022:1225;1226|Fall/Winter 2022:1228;1229;1231|Summer 2023:1235;1236|Fall/Winter 2023:1238;1239;1241|Summer 2024:1245;1246');
+VALUES ('!admin', 'OWL_MIG_TERM_GROUPINGS', 'Summer 2022:1225;1226|Fall/Winter 2022:1228;1229;1231|Summer 2023:1235;1236|Fall/Winter 2023:1238;1239;1241|Summer 2024:1245;1246|Project:All');
 
 # Cut off date for project sites
 INSERT INTO sakai_site_property
