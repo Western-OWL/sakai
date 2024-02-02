@@ -4,7 +4,9 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -44,6 +46,9 @@ public class OwlMigrationDelegate {
 	private SessionManager sessionManager;
 	private SiteService siteService;
 
+	final Comparator<SiteMigrationItem> SMI_COMPARATOR = Comparator.comparing(SiteMigrationItem::getSiteTitle)
+		.thenComparing(SiteMigrationItem::getSiteId);
+
 	public OwlMigrationDelegate(AuthzGroupService authzGroupService, ContentHostingService contentHostingService, 
 			CourseManagementService courseManagementService, SessionManager sessionManager,
 			SiteService siteService) {
@@ -54,58 +59,45 @@ public class OwlMigrationDelegate {
 		this.siteService = siteService;
 	}
 
-	private float getResourcesSizeInGb(Site site) {
-		String siteCollectionId = contentHostingService.getSiteCollection(site.getId());
-		try {
-			ContentCollection collection = contentHostingService.getCollection(siteCollectionId);
-			float kb = (float)collection.getBodySizeK();
-			return (float)(kb * Math.pow(1024, -2));
-		} catch (IdUnusedException e) {
-			// Ignore - this is common if the site doesn't have a resources tool
-		} catch (TypeException e) {
-			log.warn("Accessing the content collection for site {} threw a TypeException", site.getId(), e);
-		} catch (PermissionException e) {
-			log.warn("Accessing the content collection for site {} threw a PermissionExcetion", site.getId(), e);
-		}
-		return 0f;
-	}
-
 	public Map<String, List<SiteMigrationItem>> getSiteMigrationItems() {
-
-		// Start as a HashMap while iterating user's sites, can create a LinkedHashMap at the end of the method to reorder items
-		// E.g. iterate over common terms, and do orderedSiteMigrationItems.put(commonTerm, siteMigrationItems.get(commonTerm))
+		// Start as a HashMap while iterating user's sites, will create a LinkedHashMap at the end of the method to reorder items
 		Map<String, List<SiteMigrationItem>> siteMigrationItems = new HashMap<>();
 
-		List<String> eligibleTerms = OwlMigrationDAO.getEligibleTermsForMigration();
-
-		// Get all of the user's sites - exclude descriptions, include unpublished sites
-		List<Site> sites = siteService.getUserSites(false, true);
-
-		// Add project sites
-		if (eligibleTerms.stream().anyMatch("project"::equalsIgnoreCase)) {
-			sites.stream().filter(site -> "project".equals(site.getType())).forEach(site -> {
-				if (!cutoffDateApplies(OwlMigrationDAO.getProjectSiteCutoffDate(), site)) {
-					appendToMap(siteMigrationItems, "project", buildSiteMigrationItem(site));
-				}
-			});
-		}
-
-		// Get instructor sections
+		// Try to short circuit non-instructors ASAP:
+		// Get instructor sections. Users with no instructor roles can skip all course site processing
 		String userEid = getCurrentUserEid();
 		final Set<String> instructingSectionEids = courseManagementService.findSectionRoles(userEid).entrySet()
 			.stream().filter(entry -> "I".equals(entry.getValue())).map(Map.Entry::getKey).collect(Collectors.toSet());
+		boolean skipCourses = instructingSectionEids.isEmpty();
 
-		if (instructingSectionEids.isEmpty()) {
-			// Not an instructor in any sections; return early
+		List<String> eligibleTerms = OwlMigrationDAO.getEligibleTermsForMigration();
+		boolean projectSitesEligible = eligibleTerms.stream().anyMatch("project"::equalsIgnoreCase);
+		if (!projectSitesEligible && skipCourses) {
 			return siteMigrationItems;
 		}
 
 		Map<String, List<String>> groupTermMap = OwlMigrationDAO.getTermGroupingMap();
+
+		// Ensure we have a UI grouping for project sites if they're eligible.
+		String projectGroup = groupTermMap.keySet().stream().filter(group -> StringUtils.containsIgnoreCase(group, "project")).findFirst().orElse("Project Sites");
+		if (projectSitesEligible && !groupTermMap.containsKey(projectGroup)) {
+			// Project sites are eligible, but they are not placed in the term groupings (authoritative source for UI ordering). Add "Project Sites" to the end.
+			groupTermMap.put(projectGroup, Collections.emptyList());
+		}
+
 		Map<String, String> termCodeGroupMap = invertKeyListMap(groupTermMap);
 
-		// Append course sites to map of common terms -> List<SiteMigrationItem>
+		// Get all of the user's sites - exclude descriptions, include unpublished sites
+		List<Site> sites = siteService.getUserSites(false, true);
+
+		// Construct and append siteMigrationItems to map of common terms -> List<SiteMigrationItem>
 		for (Site site : sites) {
-			if (!"course".equals(site.getType())) {
+			if (projectSitesEligible && "project".equals(site.getType())) {
+				appendToMap(siteMigrationItems, projectGroup, buildSiteMigrationItem(site));
+				continue;
+			}
+
+			if (skipCourses || !"course".equals(site.getType())) {
 				continue;
 			}
 
@@ -145,32 +137,47 @@ public class OwlMigrationDelegate {
 				);
 		}
 
-
-		// Now sort everything
-		Map<String, List<SiteMigrationItem>> orderedSMIs = new LinkedHashMap<>();
-
-		// TODO: should we sort on the term code? Can be accomplished by adding a property to siteMigrationItem
-		final Comparator<SiteMigrationItem> smiTitleComparator = (smi1, smi2) -> smi1.getSiteTitle().compareTo(smi2.getSiteTitle());
-		final Comparator<SiteMigrationItem> smiComparator = smiTitleComparator.thenComparing((smi1, smi2) -> smi1.getSiteId().compareTo(smi2.getSiteId()));
-
-		groupTermMap.keySet().stream()
-			.filter(siteMigrationItems::containsKey).forEach(commonTerm -> {
-				List<SiteMigrationItem> siteMigrationItemList = siteMigrationItems.get(commonTerm);
-				siteMigrationItemList.sort(smiComparator);
-				orderedSMIs.put(commonTerm, siteMigrationItemList);
-		});
-
-		return orderedSMIs;
+		// Re-insert siteMigrationItems into a LinkedHashMap in the order expected by the UI
+		return groupSiteMigrationItems(siteMigrationItems, groupTermMap);
 	}
 
-	public SiteMigrationItem buildSiteMigrationItem(Site site) {
+	public String getStatusDisplay(String selectionKey, String statusKey) {
+		if (OwlMigrationDAO.getSelectionsWithVisibleStatuses().contains(selectionKey) && 
+			OwlMigrationDAO.getVisibleStatuses().contains(statusKey)) {
+			return StringUtils.trimToEmpty(OwlMigrationDAO.getMigrationStatusOptions().get(statusKey));
+		}
+		return "";
+	}
+
+	private Map<String, List<SiteMigrationItem>> groupSiteMigrationItems(Map<String, List<SiteMigrationItem>> siteMigrationItems, Map<String, List<String>> groupTermMap) {
+		Map<String, List<SiteMigrationItem>> groupedSMIs = new LinkedHashMap<>();
+
+		groupTermMap.keySet().stream()
+			.filter(siteMigrationItems::containsKey).forEach(group -> {
+				List<SiteMigrationItem> siteMigrationItemList = siteMigrationItems.get(group);
+				// TODO: if group is not the projectGroup, we can sort on terms - but what order?
+				// If we do, we should use sort(TERM_COMPARATOR.thenComparing(SMI_COMPARATOR))
+				siteMigrationItemList.sort(SMI_COMPARATOR);
+				groupedSMIs.put(group, siteMigrationItemList);
+		});
+
+		return groupedSMIs;
+	}
+
+	private SiteMigrationItem buildSiteMigrationItem(Site site) {
 		SiteMigrationItem item = new SiteMigrationItem();
+
+		populateSiteDetails(item, site);
+		populateResourcesDetails(item, site);
+		populateMigrationProperties(item, site);
+
+		return item;
+	}
+
+	private void populateSiteDetails(SiteMigrationItem item, Site site) {
 		item.setSiteId(site.getId());
 		item.setSiteTitle(site.getTitle());
-
-		populateResourcesDetails(item, site);
-		// TODO: lots more!
-		return item;
+		item.setSiteUrl(site.getUrl());
 	}
 
 	private void populateResourcesDetails(SiteMigrationItem item, Site site) {
@@ -190,8 +197,37 @@ public class OwlMigrationDelegate {
 		item.setResourcesSizeCategory(category);
 	}
 
-	private Instant toInstant(LocalDate localDate) {
-		return localDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
+	private void populateMigrationProperties(SiteMigrationItem item, Site site) {
+		Optional<SiteMigrationItemDTO> optDto = OwlMigrationDAO.getSiteMigrationItem(site.getId());
+
+		if (optDto.isPresent()) {
+			SiteMigrationItemDTO dto = optDto.get();
+
+			String selectionKey = StringUtils.defaultIfBlank(dto.getSelectionKey(), "undecided");
+			boolean isSelectionEditable = OwlMigrationDAO.getChangeableSelections().contains(selectionKey);
+			Optional<String> selectionModifiedEid = Optional.ofNullable(StringUtils.trimToNull(dto.getSelectionModifiedEid()));
+			Optional<Date> selectionModifiedDate = Optional.ofNullable(dto.getSelectionModifiedDate());
+			String statusKey = dto.getStatusKey();
+			Optional<String> statusModifiedEid = Optional.ofNullable(StringUtils.trimToNull(dto.getStatusModifiedEid()));
+			Optional<Date> statusModifiedDate = Optional.ofNullable(dto.getStatusModifiedDate());
+
+			item.setSelectionKey(selectionKey);
+			item.setSelectionEditable(isSelectionEditable);
+			item.setSelectionModifiedEid(selectionModifiedEid);
+			item.setSelectionModifiedDate(selectionModifiedDate);
+			item.setStatusKey(statusKey);
+			item.setStatusModifiedEid(statusModifiedEid);
+			item.setStatusModifiedDate(statusModifiedDate);
+		} else {
+			log.warn("Failed to get a SiteMigrationItemDTO; using defaults for site {}" + site.getId());
+			item.setSelectionKey("undecided");
+			item.setSelectionEditable(true);
+			item.setSelectionModifiedEid(Optional.empty());
+			item.setSelectionModifiedDate(Optional.empty());
+			item.setStatusKey("");
+			item.setStatusModifiedEid(Optional.empty());
+			item.setStatusModifiedDate(Optional.empty());
+		}
 	}
 
 	private boolean cutoffDateApplies(Optional<LocalDate> cutoff, Site site) {
@@ -199,10 +235,6 @@ public class OwlMigrationDelegate {
 			return false;
 		}
 		return site.getCreatedDate().toInstant().isBefore(toInstant(cutoff.get()));
-	}
-
-	private String getCurrentUserEid() {
-		return sessionManager.getCurrentSession().getUserEid();
 	}
 
 	private Set<String> getProvidersForCourseSite(Site site) {
@@ -227,6 +259,28 @@ public class OwlMigrationDelegate {
 			return Optional.empty();
 		}
 		return Optional.of(session.getEid());
+	}
+
+	private float getResourcesSizeInGb(Site site) {
+		String siteCollectionId = contentHostingService.getSiteCollection(site.getId());
+		try {
+			ContentCollection collection = contentHostingService.getCollection(siteCollectionId);
+			float kb = (float)collection.getBodySizeK();
+			return (float)(kb * Math.pow(1024, -2));
+		} catch (IdUnusedException e) {
+			// Ignore - this is common if the site doesn't have a resources tool
+		} catch (TypeException | PermissionException e) {
+			log.warn("Exception accessing the content collection for site {}; collectionId: {} ", site.getId(), siteCollectionId, e);
+		}
+		return 0f;
+	}
+
+	private String getCurrentUserEid() {
+		return sessionManager.getCurrentSession().getUserEid();
+	}
+
+	private Instant toInstant(LocalDate localDate) {
+		return localDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
 	}
 
 	private static <A, B> void appendToMap(Map<A, List<B>> map, A key, B value) {

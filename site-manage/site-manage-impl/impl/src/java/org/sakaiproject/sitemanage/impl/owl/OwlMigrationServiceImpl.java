@@ -66,30 +66,23 @@ public class OwlMigrationServiceImpl implements OwlMigrationService {
 
 	@Override
 	public void saveSelection(String siteId, String selectionKey) {
-		// TODO: validate before saving
+		// TODO: validate before saving (get site's authz providers, ensure the user has an "I" role)
+		// TODO: Persist with OwlMigrationDAO.saveSiteMigrationItem(SiteMigrationItemDTO)
 		log.info("saveSelection invoked {}, {}", siteId, selectionKey);
 	}
 
 	@Override
 	public String getStatusDisplay(String selectionKey, String statusKey) {
-		// TODO: mocked for UI development
-		return Math.random() > 0.5 ? "(" + selectionKey + " - display)" : "";
+		return migrationDelegate.getStatusDisplay(selectionKey, statusKey);
 	}
 
 	@Override
 	public String getUIMessage(String messageKey) {
-		// TODO: mocked for UI development
-		return "(" + messageKey + " - display)";
+		return OwlMigrationDAO.getUiMessage(messageKey).orElse("");
 	}
 
 	/* TODO: private methods to implement:
 	 * migrationStatusMapping
-	 * selectionsWithVisibleStatuses
-	 * visibleStatuses
-	 * eligibleTerms
-	 * academicSessionCommonTermMap
-	 * siteAgeCutoffDate
-	 *
 	 * migrationTabEnabled could be made private here too
 	 */
 
