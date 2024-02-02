@@ -1,9 +1,13 @@
 package org.sakaiproject.sitemanage.impl.owl;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,35 +69,79 @@ public class OwlMigrationDAO
     private static final String OWL_MIG_STATUS_MODIFIED_DATE    = "OWL_MIG_STATUS_MODIFIED_DATE";
     private static final String OWL_MIG_STATUS_MODIFIED_EID     = "OWL_MIG_STATUS_MODIFIED_EID";
 
+    // Format used for storage and retrieval of Dates as Strings; ex: 2024-02-02 14:18
+    private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm";
+
     private OwlMigrationDAO() { /* Private default constructor to avoid instantiation */ }
 
     /**
-     * Save or update the appropriate items from the SiteMigrationItem into site properties for the site ID packed.
-     * @param smi SiteMigrationItem object containing the relevant data to save, and the site ID to save it to
-     * @return true if the operation completed without issues, false if the site could not be retrieved and thus the save/update could not be performed
+     * Gets the properties for the given site ID and packs them into a SiteMigraitonItemDTO object
+     * @param siteID the ID of the site to retrieve the OWL migration properties for
+     * @return An Optional wrapping a SiteMigrationItemDTO object packed with the properties for the given site ID, or an empty Optional if an error occurred
+     * @throws IllegalArgumentException if the siteID parameter is null or empty
      */
-    public static boolean saveSiteMigrationItem( SiteMigrationItemDTO smi ) throws IllegalArgumentException
+    public static Optional<SiteMigrationItemDTO> getSiteMigrationItem( String siteID ) throws IllegalArgumentException
     {
-        if( smi == null )
+        if( StringUtils.isBlank( siteID ) )
+        {
+            throw new IllegalArgumentException( "siteID cannot be null or empty" );
+        }
+
+        try
+        {
+            Site site = siteService.getSite( siteID );
+            ResourceProperties props = site.getProperties();
+            String selectionKey = StringUtils.trimToEmpty( props.getProperty( OWL_MIG_USER_SELECTION ) );
+            String selectionModifiedEID = StringUtils.trimToEmpty( props.getProperty( OWL_MIG_USER_SELECTION_EID ) );
+            String statusKey = StringUtils.trimToEmpty( props.getProperty( OWL_MIG_STATUS ) );
+            String statusModifiedEID = StringUtils.trimToEmpty( props.getProperty( OWL_MIG_STATUS_MODIFIED_EID ) );
+            String selectionModifiedDate = props.getProperty( OWL_MIG_USER_SELETION_DATE );
+            String statusModifiedDate = props.getProperty( OWL_MIG_STATUS_MODIFIED_DATE );
+
+            // Formatter for user site properties represnting datetimes, ex: "2024-02-02 14:18"
+            DateFormat df = new SimpleDateFormat( DATE_FORMAT );
+            Date selModDate = StringUtils.isBlank( selectionModifiedDate ) ? null : df.parse( selectionModifiedDate );
+            Date statModDate = StringUtils.isBlank( statusModifiedDate ) ? null : df.parse( statusModifiedDate );
+            return Optional.of( new SiteMigrationItemDTO( siteID, selectionKey, selectionModifiedEID, statusKey, statusModifiedEID, selModDate, statModDate ) );
+        }
+        catch( IdUnusedException | ParseException ex )
+        {
+            log.error("Unable to retrieve site or property for {}", siteID, ex );
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Save or update the appropriate items from the SiteMigrationItem into site properties for the site ID packed.
+     * @param dto SiteMigrationItem object containing the relevant data to save, and the site ID to save it to
+     * @return true if the operation completed without issues, false if the site could not be retrieved and thus the save/update could not be performed
+     * @throws IllegalArgumentException if the SiteMigrationItemDTO is null, or any of it's members are null
+     */
+    public static boolean saveSiteMigrationItem( SiteMigrationItemDTO dto ) throws IllegalArgumentException
+    {
+        if( dto == null )
         {
             throw new IllegalArgumentException( "SiteMigrationItemDTO cannot be null" );
         }
-        if( smi.getSiteID() == null || smi.getSelectionKey() == null || smi.getSelectionModifiedDate() == null || smi.getSelectionModifiedEid() == null || smi.getStatusKey() == null ||
-            smi.getStatusModifiedDate() == null || smi.getStatusModifiedEid() == null )
+        if( dto.getSiteID() == null || dto.getSelectionKey() == null || dto.getSelectionModifiedDate() == null || dto.getSelectionModifiedEid() == null || dto.getStatusKey() == null ||
+            dto.getStatusModifiedDate() == null || dto.getStatusModifiedEid() == null )
         {
             throw new IllegalArgumentException( "SiteMigrationItemDTO members cannot be null" );
         }
 
         try
         {
-            Site site = siteService.getSite( smi.getSiteID() );
+            Site site = siteService.getSite( dto.getSiteID() );
             ResourcePropertiesEdit props = site.getPropertiesEdit();
-            props.addProperty( OWL_MIG_USER_SELECTION, smi.getSelectionKey() );
-            props.addProperty( OWL_MIG_USER_SELETION_DATE, smi.getSelectionModifiedDate().toString() );
-            props.addProperty( OWL_MIG_USER_SELECTION_EID, smi.getSelectionModifiedEid() );
-            props.addProperty( OWL_MIG_STATUS, smi.getStatusKey() );
-            props.addProperty( OWL_MIG_STATUS_MODIFIED_DATE, smi.getStatusModifiedDate().toString() );
-            props.addProperty( OWL_MIG_STATUS_MODIFIED_EID, smi.getStatusModifiedEid() );
+            props.addProperty( OWL_MIG_USER_SELECTION, dto.getSelectionKey() );
+            props.addProperty( OWL_MIG_USER_SELECTION_EID, dto.getSelectionModifiedEid() );
+            props.addProperty( OWL_MIG_STATUS, dto.getStatusKey() );
+            props.addProperty( OWL_MIG_STATUS_MODIFIED_EID, dto.getStatusModifiedEid() );
+
+            DateFormat df = new SimpleDateFormat( DATE_FORMAT );
+            props.addProperty( OWL_MIG_USER_SELETION_DATE, df.format( dto.getSelectionModifiedDate() ) );
+            props.addProperty( OWL_MIG_STATUS_MODIFIED_DATE, df.format( dto.getStatusModifiedDate() ) );
+
             siteService.save( site );
             return true;
         }
@@ -110,7 +158,7 @@ public class OwlMigrationDAO
      */
     public static Optional<String> getAdminDisplayName()
     {
-        String prop = getSiteProp( OWL_MIG_ADMIN_DISPLAY_NAME );
+        String prop = getSitePropString( OWL_MIG_ADMIN_DISPLAY_NAME );
         return Optional.ofNullable( prop );
     }
 
@@ -208,7 +256,7 @@ public class OwlMigrationDAO
      */
     public static Optional<String> getUiMessage( String sitePropKey )
     {
-        String prop = getSiteProp( sitePropKey );
+        String prop = getSitePropString( sitePropKey );
         return Optional.ofNullable( prop );
     }
 
@@ -294,7 +342,7 @@ public class OwlMigrationDAO
      * @param sitePropKey the key of the desired property stored in Admin site properties
      * @return The String value of the property, empty string if the site could not be resolved, or null if the property does not exist
      */
-    private static String getSiteProp( String sitePropKey )
+    private static String getSitePropString( String sitePropKey )
     {
         Optional<Site> s = getAdminWorksite();
         if( s.isEmpty() )
@@ -314,15 +362,15 @@ public class OwlMigrationDAO
      */
     private static Optional<Float> getSitePropFloat( String sitePropKey )
     {
-        String warnThresh = getSiteProp( sitePropKey );
-        if( StringUtils.isBlank( warnThresh ) )
+        String prop = getSitePropString( sitePropKey );
+        if( StringUtils.isBlank( prop ) )
         {
             return Optional.empty();
         }
 
         try
         {
-            return Optional.of( Float.valueOf( warnThresh ) );
+            return Optional.of( Float.valueOf( prop ) );
         }
         catch( NumberFormatException ex )
         {
@@ -338,15 +386,15 @@ public class OwlMigrationDAO
      */
     private static Optional<LocalDate> getSitePropLocalDate( String sitePropKey )
     {
-        String cutOffDate = getSiteProp( sitePropKey );
-        if( StringUtils.isBlank( cutOffDate ) )
+        String date = getSitePropString( sitePropKey );
+        if( StringUtils.isBlank( date ) )
         {
             return Optional.empty();
         }
 
         try
         {
-            return Optional.of( LocalDate.parse( cutOffDate ) );
+            return Optional.of( LocalDate.parse( date ) );
         }
         catch( Exception ex )
         {
