@@ -10,21 +10,29 @@ import lombok.Data;
  */
 @Data
 public class SiteMigrationItem {
-	
-	public String siteId;
-	public String siteTitle;
+
+	public enum ResourcesSizeCategory {
+		NONE,
+		WARN,
+		BRIGHTSPACE_LIMIT_EXCEEDED
+	}
+
+	private String siteId;
+	private String siteTitle;
+	private String siteUrl;
 
 	/** The selected migration option **/
-	public String selectionKey;
-	public boolean isSelectionEditable;
-	public Optional<String> selectionModifiedEid;
-	public Optional<Date> selectionModifiedDate;
+	private String selectionKey;
+	private boolean isSelectionEditable;
+	private Optional<String> selectionModifiedEid;
+	private Optional<Date> selectionModifiedDate;
 
 	/** The migration status **/
 	// TODO: not optional - just use "" when not present
-	public String statusKey;
-	public Optional<String> statusModifiedEid;
-	public Optional<Date> statusModifiedDate;
+	private String statusKey;
+	private Optional<String> statusModifiedEid;
+	private Optional<Date> statusModifiedDate;
 
-	public float resourcesSize;
+	private String resourcesSize;
+	private ResourcesSizeCategory resourcesSizeCategory;
 }

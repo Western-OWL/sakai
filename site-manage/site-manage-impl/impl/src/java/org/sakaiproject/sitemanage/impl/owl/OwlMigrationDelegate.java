@@ -1,10 +1,14 @@
 package org.sakaiproject.sitemanage.impl.owl;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -13,15 +17,20 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 
 import org.sakaiproject.authz.api.AuthzGroupService;
+import org.sakaiproject.content.api.ContentCollection;
 import org.sakaiproject.content.api.ContentHostingService;
 import org.sakaiproject.coursemanagement.api.AcademicSession;
 import org.sakaiproject.coursemanagement.api.CourseManagementService;
 import org.sakaiproject.coursemanagement.api.CourseOffering;
 import org.sakaiproject.coursemanagement.api.CourseSet;
 import org.sakaiproject.coursemanagement.api.Section;
+import org.sakaiproject.exception.IdUnusedException;
+import org.sakaiproject.exception.PermissionException;
+import org.sakaiproject.exception.TypeException;
 import org.sakaiproject.site.api.Site;
 import org.sakaiproject.site.api.SiteService;
 import org.sakaiproject.sitemanage.api.owl.SiteMigrationItem;
+import org.sakaiproject.sitemanage.api.owl.SiteMigrationItem.ResourcesSizeCategory;
 import org.sakaiproject.tool.api.SessionManager;
 
 import lombok.extern.slf4j.Slf4j;
@@ -45,12 +54,20 @@ public class OwlMigrationDelegate {
 		this.siteService = siteService;
 	}
 
-	public void getResourcesSizeInKb(Site site) {
-		/*
-		ContentCollection collection = contentHostingService.getCollection(siteCollectionId);
-		return collection.getBodySizeK();
-		 */
-		throw new UnsupportedOperationException();
+	private float getResourcesSizeInGb(Site site) {
+		String siteCollectionId = contentHostingService.getSiteCollection(site.getId());
+		try {
+			ContentCollection collection = contentHostingService.getCollection(siteCollectionId);
+			float kb = (float)collection.getBodySizeK();
+			return (float)(kb * Math.pow(1024, -2));
+		} catch (IdUnusedException e) {
+			// Ignore - this is common if the site doesn't have a resources tool
+		} catch (TypeException e) {
+			log.warn("Accessing the content collection for site {} threw a TypeException", site.getId(), e);
+		} catch (PermissionException e) {
+			log.warn("Accessing the content collection for site {} threw a PermissionExcetion", site.getId(), e);
+		}
+		return 0f;
 	}
 
 	public Map<String, List<SiteMigrationItem>> getSiteMigrationItems() {
@@ -67,8 +84,9 @@ public class OwlMigrationDelegate {
 		// Add project sites
 		if (eligibleTerms.stream().anyMatch("project"::equalsIgnoreCase)) {
 			sites.stream().filter(site -> "project".equals(site.getType())).forEach(site -> {
-				// TODO: also filter the project site cutoff date if set
-				appendToMap(siteMigrationItems, "project", buildSiteMigrationItem(site));
+				if (!cutoffDateApplies(OwlMigrationDAO.getProjectSiteCutoffDate(), site)) {
+					appendToMap(siteMigrationItems, "project", buildSiteMigrationItem(site));
+				}
 			});
 		}
 
@@ -91,6 +109,10 @@ public class OwlMigrationDelegate {
 				continue;
 			}
 
+			if (cutoffDateApplies(OwlMigrationDAO.getCourseSiteCutoffDate(), site)) {
+				continue;
+			}
+
 			Set<String> sectionEids = getProvidersForCourseSite(site);
 			Optional<String> firstInstructingSectionEidInSite = sectionEids.stream()
 				.filter(sectionEid -> instructingSectionEids.contains(sectionEid)).findFirst();
@@ -110,8 +132,6 @@ public class OwlMigrationDelegate {
 				continue;
 			}
 
-			// TODO: if course site creation threshold set, check site creation date; continue if site is too old
-
 			/*
 			 * Get the common term for the academic session:
 			 * Stream entries mapping termCodes (E.g. "1229") to common terms (E.g. "Fall / Winter 2022")
@@ -130,8 +150,8 @@ public class OwlMigrationDelegate {
 		Map<String, List<SiteMigrationItem>> orderedSMIs = new LinkedHashMap<>();
 
 		// TODO: should we sort on the term code? Can be accomplished by adding a property to siteMigrationItem
-		final Comparator<SiteMigrationItem> smiTitleComparator = (smi1, smi2) -> smi1.siteTitle.compareTo(smi2.siteTitle);
-		final Comparator<SiteMigrationItem> smiComparator = smiTitleComparator.thenComparing((smi1, smi2) -> smi1.siteId.compareTo(smi2.siteId));
+		final Comparator<SiteMigrationItem> smiTitleComparator = (smi1, smi2) -> smi1.getSiteTitle().compareTo(smi2.getSiteTitle());
+		final Comparator<SiteMigrationItem> smiComparator = smiTitleComparator.thenComparing((smi1, smi2) -> smi1.getSiteId().compareTo(smi2.getSiteId()));
 
 		groupTermMap.keySet().stream()
 			.filter(siteMigrationItems::containsKey).forEach(commonTerm -> {
@@ -145,10 +165,40 @@ public class OwlMigrationDelegate {
 
 	public SiteMigrationItem buildSiteMigrationItem(Site site) {
 		SiteMigrationItem item = new SiteMigrationItem();
-		item.siteId = site.getId();
-		item.siteTitle = site.getTitle();
+		item.setSiteId(site.getId());
+		item.setSiteTitle(site.getTitle());
+
+		populateResourcesDetails(item, site);
 		// TODO: lots more!
 		return item;
+	}
+
+	private void populateResourcesDetails(SiteMigrationItem item, Site site) {
+		float resourcesSize = getResourcesSizeInGb(site);
+		String resourcesSizeDisplay = String.format(Locale.US, "%.1f", resourcesSize);
+		item.setResourcesSize(resourcesSizeDisplay);
+
+		float errorThreshold = OwlMigrationDAO.getSiteSizeErrorThreshold().orElse(1.5f);
+		float warnThreshold = OwlMigrationDAO.getSiteSizeWarningThreshold().orElse(2f);
+
+		ResourcesSizeCategory category = ResourcesSizeCategory.NONE;
+		if (resourcesSize > errorThreshold) {
+			category = ResourcesSizeCategory.BRIGHTSPACE_LIMIT_EXCEEDED;
+		} else if (resourcesSize > warnThreshold) {
+			category = ResourcesSizeCategory.WARN;
+		}
+		item.setResourcesSizeCategory(category);
+	}
+
+	private Instant toInstant(LocalDate localDate) {
+		return localDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
+	}
+
+	private boolean cutoffDateApplies(Optional<LocalDate> cutoff, Site site) {
+		if (!cutoff.isPresent()) {
+			return false;
+		}
+		return site.getCreatedDate().toInstant().isBefore(toInstant(cutoff.get()));
 	}
 
 	private String getCurrentUserEid() {
