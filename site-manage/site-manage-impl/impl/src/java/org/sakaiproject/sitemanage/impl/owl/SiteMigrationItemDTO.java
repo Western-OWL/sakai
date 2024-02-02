@@ -7,6 +7,8 @@ import lombok.Data;
 
 /**
  * DTO used for persisting data to user site properties.
+ *
+ * NOTE: if a property can't be found in the given site, default values of empty String and null Date will be used accordingly.
  */
 @Data
 @AllArgsConstructor

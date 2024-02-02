@@ -77,7 +77,7 @@ public class OwlMigrationDAO
     /**
      * Gets the properties for the given site ID and packs them into a SiteMigraitonItemDTO object
      * @param siteID the ID of the site to retrieve the OWL migration properties for
-     * @return An Optional wrapping a SiteMigrationItemDTO object packed with the properties for the given site ID, or an empty Optional if an error occurred
+     * @return An Optional wrapping a SiteMigrationItemDTO object packed with the properties (or empty Strings and null dates if the properties are not found) for the given site ID, or an empty Optional if an error occurred
      * @throws IllegalArgumentException if the siteID parameter is null or empty
      */
     public static Optional<SiteMigrationItemDTO> getSiteMigrationItem( String siteID ) throws IllegalArgumentException
