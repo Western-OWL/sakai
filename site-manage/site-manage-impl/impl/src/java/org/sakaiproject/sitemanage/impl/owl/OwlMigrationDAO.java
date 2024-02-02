@@ -18,10 +18,15 @@ import org.apache.commons.lang.StringUtils;
 import org.sakaiproject.entity.api.EntityPropertyNotDefinedException;
 import org.sakaiproject.entity.api.EntityPropertyTypeException;
 import org.sakaiproject.entity.api.ResourceProperties;
+import org.sakaiproject.entity.api.ResourcePropertiesEdit;
 import org.sakaiproject.exception.IdUnusedException;
+import org.sakaiproject.exception.PermissionException;
 import org.sakaiproject.site.api.Site;
 import org.sakaiproject.site.api.SiteService;
 
+/**
+ * This class provides all data access and persistence for the OWL Migration site properties, both global and individual user sites.
+ */
 @Slf4j
 public class OwlMigrationDAO
 {
@@ -52,7 +57,52 @@ public class OwlMigrationDAO
     // Admin Workspace site ID
     private static final String ADMIN_SITE_ID = "!admin";
 
+    // User site prop keys
+    private static final String OWL_MIG_USER_SELECTION          = "OWL_MIG_USER_SELECTION";
+    private static final String OWL_MIG_USER_SELETION_DATE      = "OWL_MIG_USER_SELETION_DATE";
+    private static final String OWL_MIG_USER_SELECTION_EID      = "OWL_MIG_USER_SELECTION_EID";
+    private static final String OWL_MIG_STATUS                  = "OWL_MIG_STATUS";
+    private static final String OWL_MIG_STATUS_MODIFIED_DATE    = "OWL_MIG_STATUS_MODIFIED_DATE";
+    private static final String OWL_MIG_STATUS_MODIFIED_EID     = "OWL_MIG_STATUS_MODIFIED_EID";
+
     private OwlMigrationDAO() { /* Private default constructor to avoid instantiation */ }
+
+    /**
+     * Save or update the appropriate items from the SiteMigrationItem into site properties for the site ID packed.
+     * @param smi SiteMigrationItem object containing the relevant data to save, and the site ID to save it to
+     * @return true if the operation completed without issues, false if the site could not be retrieved and thus the save/update could not be performed
+     */
+    public static boolean saveSiteMigrationItem( SiteMigrationItemDTO smi ) throws IllegalArgumentException
+    {
+        if( smi == null )
+        {
+            throw new IllegalArgumentException( "SiteMigrationItemDTO cannot be null" );
+        }
+        if( smi.getSiteID() == null || smi.getSelectionKey() == null || smi.getSelectionModifiedDate() == null || smi.getSelectionModifiedEid() == null || smi.getStatusKey() == null ||
+            smi.getStatusModifiedDate() == null || smi.getStatusModifiedEid() == null )
+        {
+            throw new IllegalArgumentException( "SiteMigrationItemDTO members cannot be null" );
+        }
+
+        try
+        {
+            Site site = siteService.getSite( smi.getSiteID() );
+            ResourcePropertiesEdit props = site.getPropertiesEdit();
+            props.addProperty( OWL_MIG_USER_SELECTION, smi.getSelectionKey() );
+            props.addProperty( OWL_MIG_USER_SELETION_DATE, smi.getSelectionModifiedDate().toString() );
+            props.addProperty( OWL_MIG_USER_SELECTION_EID, smi.getSelectionModifiedEid() );
+            props.addProperty( OWL_MIG_STATUS, smi.getStatusKey() );
+            props.addProperty( OWL_MIG_STATUS_MODIFIED_DATE, smi.getStatusModifiedDate().toString() );
+            props.addProperty( OWL_MIG_STATUS_MODIFIED_EID, smi.getStatusModifiedEid() );
+            siteService.save( site );
+            return true;
+        }
+        catch( IdUnusedException | PermissionException ex )
+        {
+            log.error( "Unable to retrieve user site; cannot save SiteMigrationItemDTO", ex );
+            return false;
+        }
+    }
 
     /**
      * Get the value stored in "OWL_MIG_ADMIN_DISPLAY_NAME" Admin site property. This value is used in the UI rather than displaying actual admin EIDs.
