@@ -42,6 +42,7 @@ public class OwlMigrationDAO
     private static final String OWL_MIG_COURSE_SITE_CUTOFF_DATE             = "OWL_MIG_COURSE_SITE_CUTOFF_DATE";
     private static final String OWL_MIG_SITE_SIZE_WARN_THRESHOLD            = "OWL_MIG_SITE_SIZE_WARN_THRESHOLD";
     private static final String OWL_MIG_SITE_SIZE_ERROR_THRESHOLD           = "OWL_MIG_SITE_SIZE_ERROR_THRESHOLD";
+    private static final String OWL_MIG_ADMIN_DISPLAY_NAME                  = "OWL_MIG_ADMIN_DISPLAY_NAME";
 
     // Delimiters used in Admin Workspace props
     private static final String PIPE_DELIM          = "\\|"; // Pipe is a special character in regex, so it needs to be escaped
@@ -52,6 +53,16 @@ public class OwlMigrationDAO
     private static final String ADMIN_SITE_ID = "!admin";
 
     private OwlMigrationDAO() { /* Private default constructor to avoid instantiation */ }
+
+    /**
+     * Get the value stored in "OWL_MIG_ADMIN_DISPLAY_NAME" Admin site property. This value is used in the UI rather than displaying actual admin EIDs.
+     * @return The dummy display name for Admin EIDs in the UI
+     */
+    public static Optional<String> getAdminDisplayName()
+    {
+        String prop = getSiteProp( OWL_MIG_ADMIN_DISPLAY_NAME );
+        return Optional.ofNullable( prop );
+    }
 
     /**
      * Checks "OWL_MIG_ENABLED" Admin site property
@@ -145,7 +156,7 @@ public class OwlMigrationDAO
     public static Optional<String> getUiMessage( String sitePropKey )
     {
         String prop = getSiteProp( sitePropKey );
-        return prop == null ? Optional.empty() : Optional.of( prop );
+        return Optional.ofNullable( prop );
     }
 
     /**

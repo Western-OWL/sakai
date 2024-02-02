@@ -70,3 +70,7 @@ VALUES ('!admin', 'OWL_MIG_SITE_SIZE_WARN_THRESHOLD', '1.5');
 # Site size error threshold; interpretted as gigabytes, max 1 decimal place
 INSERT INTO sakai_site_property
 VALUES ('!admin', 'OWL_MIG_SITE_SIZE_ERROR_THRESHOLD', '2.0');
+
+# Admin display name (what will be shown in the UI for admin EIDs, instead of their actual EIDs)
+INSERT INTO sakai_site_property
+VALUES ('!admin', 'OWL_MIG_ADMIN_DISPLAY_NAME', 'Admin');
