@@ -30,8 +30,8 @@ import org.sakaiproject.site.api.SiteService;
 @Slf4j
 public class OwlMigrationDAO
 {
-    @Setter
-    private static SiteService siteService;
+    // Services
+    @Setter private static SiteService siteService;
 
     // Admin Workspace prop keys
     private static final String OWL_MIG_ENABLED                             = "OWL_MIG_ENABLED";
@@ -130,7 +130,10 @@ public class OwlMigrationDAO
             {
                 return props.getBooleanProperty( OWL_MIG_ENABLED );
             }
-            catch( EntityPropertyNotDefinedException | EntityPropertyTypeException ex ) { /* Property not found; ignore */ }
+            catch( EntityPropertyNotDefinedException | EntityPropertyTypeException ex )
+            {
+                log.error( "OWL_MIG_ENABLED admin property not found, or malformed", ex );
+            }
         }
 
         return false;
