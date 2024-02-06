@@ -35,11 +35,11 @@ VALUES ('!admin', 'OWL_MIG_CHANGEABLE_SELECTIONS', 'undecided');
 INSERT INTO sakai_site_property
 VALUES ('!admin', 'OWL_MIG_MSG_BANNER_TOP_1', 'Your OWL courses eligible for migration are listed below. Please make a choice for each. Once a choice is made, it cannot be changed. You do not need to make a decision for all listed courses at the same time. Any courses left as just "Undecided" can be changed later.');
 INSERT INTO sakai_site_property
-VALUES ('!admin', 'OWL_MIG_MSG_BANNER_TOP_2', 'More information about specific migration options or how to request a change if you made a mistake can be found at <a href="https://owlmigration.uwo.ca">OWL Migration Help</a>');
+VALUES ('!admin', 'OWL_MIG_MSG_BANNER_TOP_2', 'More information about specific migration options or how to request a change if you made a mistake can be found at <a target="_blank" href="https://owlmigration.uwo.ca">OWL Migration Help</a>');
 INSERT INTO sakai_site_property
 VALUES ('!admin', 'OWL_MIG_MSG_SAVE_CONFIRM_1', 'Please be aware that it is not possible to change a selection once it has been made.');
 INSERT INTO sakai_site_property
-VALUES ('!admin', 'OWL_MIG_MSG_SAVE_CONFIRM_2', 'You have selected one or more courses for self-migration that are estimated to be close to or above 2 GB in size. Courses this large may be difficult to migrate on your own due to size limitations in Brightspace. Please review your self-migration selections and consider choosing the assisted migraiton option. For more information on the impact of course size, see <a href="https://owlmigration.uwo.ca">OWL Migration Help</a>');
+VALUES ('!admin', 'OWL_MIG_MSG_SAVE_CONFIRM_2', 'You have selected one or more courses for self-migration that are estimated to be close to or above 2 GB in size. Courses this large may be difficult to migrate on your own due to size limitations in Brightspace. Please review your self-migration selections and consider choosing the assisted migration option. For more information on the impact of course size, see <a target="_blank" href="https://owlmigration.uwo.ca">OWL Migration Help</a>');
 
 # Extra blank slots for more messages/banners if need be
 INSERT INTO sakai_site_property
