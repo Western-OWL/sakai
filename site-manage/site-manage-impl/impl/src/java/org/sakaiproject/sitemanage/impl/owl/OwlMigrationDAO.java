@@ -52,6 +52,7 @@ public class OwlMigrationDAO
     private static final String OWL_MIG_SITE_SIZE_WARN_THRESHOLD            = "OWL_MIG_SITE_SIZE_WARN_THRESHOLD";
     private static final String OWL_MIG_SITE_SIZE_ERROR_THRESHOLD           = "OWL_MIG_SITE_SIZE_ERROR_THRESHOLD";
     private static final String OWL_MIG_ADMIN_DISPLAY_NAME                  = "OWL_MIG_ADMIN_DISPLAY_NAME";
+    private static final String OWL_MIG_SELECTIONS_WITH_SIZE_CHECKS         = "OWL_MIG_SELECTIONS_WITH_SIZE_CHECKS";
 
     // Delimiters used in Admin Workspace props
     private static final String PIPE_DELIM          = "\\|"; // Pipe is a special character in regex, so it needs to be escaped
@@ -268,6 +269,16 @@ public class OwlMigrationDAO
     {
         // Format: UWOCONT1245|UWOGRAD1241|UWOUGRD1239|UWOPREL1239|UWOCONT1239
         return parsePipeDelimitedProp( OWL_MIG_ELIGIBLE_TERMS );
+    }
+
+    /**
+     * Get the list of selection keys who when chosen will trigger a site resources size check in the UI for the given site.
+     * @return A List of Strings, where each String is a selection key that should trigger a site resources size check for the site when selected.
+     */
+    public static List<String> getSelectionsWithSizeChecks()
+    {
+        // Format: selfMig|assistedMig
+        return parsePipeDelimitedProp( OWL_MIG_SELECTIONS_WITH_SIZE_CHECKS );
     }
 
     /**

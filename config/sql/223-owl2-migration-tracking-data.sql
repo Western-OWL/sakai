@@ -74,3 +74,7 @@ VALUES ('!admin', 'OWL_MIG_SITE_SIZE_ERROR_THRESHOLD', '2.0');
 # Admin display name (what will be shown in the UI for admin EIDs, instead of their actual EIDs/display names)
 INSERT INTO sakai_site_property
 VALUES ('!admin', 'OWL_MIG_ADMIN_DISPLAY_NAME', 'Admin');
+
+# Selections that will trigger a site resources size check in the UI
+INSERT INTO sakai_site_property
+VALUES ('!admin', 'OWL_MIG_SELECTIONS_WITH_SIZE_CHECKS', 'selfMig');
