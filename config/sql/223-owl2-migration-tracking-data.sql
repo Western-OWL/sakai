@@ -75,6 +75,6 @@ VALUES ('!admin', 'OWL_MIG_SITE_SIZE_ERROR_THRESHOLD', '2.0');
 INSERT INTO sakai_site_property
 VALUES ('!admin', 'OWL_MIG_ADMIN_DISPLAY_NAME', 'Admin');
 
-# Selections that will trigger a site resources size check in the UI
+# Selections that will trigger a site resources size check in the UI, format: <selectionKey>|<selectionKey|<selectionKey>
 INSERT INTO sakai_site_property
 VALUES ('!admin', 'OWL_MIG_SELECTIONS_WITH_SIZE_CHECKS', 'selfMig');
