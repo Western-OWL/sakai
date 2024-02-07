@@ -44,13 +44,6 @@ public class OwlMigrationServiceImpl implements OwlMigrationService {
 	}
 
 	@Override
-	public List<String> getCommonTerms() {
-		// TODO: OWL_MIG_TERM_GROUPINGS maps common terms to actual terms, so the keys are sufficient for ordering
-		// TODO: mocked for UI development
-		return java.util.Arrays.asList("Fall / Winter 2024", "Summer 2024", "Fall / Winter 2023", "Summer 2023");
-	}
-
-	@Override
 	public Map<String, List<SiteMigrationItem>> getSiteMigrationItems() {
 		if (!isMigrationTabEnabled()) {
 			return Collections.emptyMap();
@@ -65,10 +58,19 @@ public class OwlMigrationServiceImpl implements OwlMigrationService {
 	}
 
 	@Override
-	public void saveSelection(String siteId, String selectionKey) {
-		// TODO: validate before saving (get site's authz providers, ensure the user has an "I" role)
-		// TODO: Persist with OwlMigrationDAO.saveSiteMigrationItem(SiteMigrationItemDTO)
-		log.info("saveSelection invoked {}, {}", siteId, selectionKey);
+	public List<String> saveSelections(Map<String, String>  siteSelections) {
+		return migrationDelegate.saveSelections(siteSelections);
+	}
+
+	@Override
+	public boolean isResourcesSizeWarningEnabled() {
+		// TODO: implement
+		return true;
+	}
+
+	@Override
+	public List<String> getSelectionKeysWithResourcesSizeWarnings() {
+		return OwlMigrationDAO.getSelectionsWithSizeChecks();
 	}
 
 	@Override
@@ -80,10 +82,5 @@ public class OwlMigrationServiceImpl implements OwlMigrationService {
 	public String getUIMessage(String messageKey) {
 		return OwlMigrationDAO.getUiMessage(messageKey).orElse("");
 	}
-
-	/* TODO: private methods to implement:
-	 * migrationStatusMapping
-	 * migrationTabEnabled could be made private here too
-	 */
 
 }

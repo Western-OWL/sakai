@@ -63,17 +63,116 @@ public class OwlMigrationDelegate {
 		// Start as a HashMap while iterating user's sites, will create a LinkedHashMap at the end of the method to reorder items
 		Map<String, List<SiteMigrationItem>> siteMigrationItems = new HashMap<>();
 
+		Optional<GroupIdentificationParameters> optGip = buildGroupIdentificationParameters();
+		if (!optGip.isPresent()) {
+			return siteMigrationItems;
+		}
+		GroupIdentificationParameters gip = optGip.get();
+
+		List<Site> sites = getUserSites();
+
+		// Construct and append siteMigrationItems to map of common terms -> List<SiteMigrationItem>
+		for (Site site : sites) {
+			Optional<String> group = getGroupIfSiteEligibleForMigration(site, gip);
+			if (group.isPresent()) {
+				appendToMap(siteMigrationItems, group.get(), buildSiteMigrationItem(site));
+			}
+		}
+
+		// Re-insert siteMigrationItems into a LinkedHashMap in the order expected by the UI
+		return groupSiteMigrationItems(siteMigrationItems, gip.groupTermMap);
+	}
+
+	public List<String> saveSelections(Map<String, String> siteSelections) {
+
+		// OWLTODO: implement logging; add params to invoked methods, etc. as needed to accomplish this.
+
+		Optional<GroupIdentificationParameters> optGip = buildGroupIdentificationParameters();
+		if (optGip.isEmpty()) {
+			return new ArrayList(siteSelections.keySet());
+		}
+		GroupIdentificationParameters gip = optGip.get();
+
+		List<String> changeableSelections = OwlMigrationDAO.getChangeableSelections();
+		Map<String, String> selectionStatusMap = OwlMigrationDAO.getMigrationInitialStatusMap();
+
+		List<Site> userSites = getUserSites();
+
+		List<String> failedSiteIds = new ArrayList<>();
+
+		for (Map.Entry<String, String> siteSelection : siteSelections.entrySet()) {
+			String siteId = siteSelection.getKey();
+			String selectionKey = siteSelection.getValue();
+
+			Optional<Site> site = userSites.stream().filter(userSite -> StringUtils.equals(userSite.getId(), siteId)).findFirst();
+
+			// Validate that the site is eligible for migration
+			if (!site.isPresent() || !getGroupIfSiteEligibleForMigration(site.get(), gip).isPresent()) {
+				failedSiteIds.add(siteId);
+				continue;
+			}
+
+			String statusKey = selectionStatusMap.get(selectionKey);
+
+			Optional<SiteMigrationItemDTO> optDto = OwlMigrationDAO.getSiteMigrationItem(siteId);
+			SiteMigrationItemDTO dto;
+
+			Date now = new Date();
+
+			if (optDto.isPresent()) {
+				dto = optDto.get();
+
+				// Update only if the selection is changeable
+				if (changeableSelections.contains(dto.getSelectionKey())) {
+					if (!dto.getSelectionKey().equals(selectionKey)) {
+						// User tried to change their unchangeable selection
+						failedSiteIds.add(siteId);
+					}
+					continue;
+				}
+
+				// Set the selection
+				dto.setSelectionKey(selectionKey);
+				dto.setSelectionModifiedDate(now);
+				dto.setSelectionModifiedEid(gip.userEid);
+
+				// Set the status if applicable
+				if (statusKey != null) {
+					dto.setStatusKey(statusKey);
+					dto.setStatusModifiedDate(now);
+					dto.setStatusModifiedEid(gip.userEid);
+				}
+			} else {
+				// SiteMigrationItemDTO couldn't be retrieved; try creating one
+				String statusModifiedEid = statusKey == null ? null : gip.userEid;
+				Date statusModifiedDate = statusKey == null ? null : now;
+				dto = new SiteMigrationItemDTO(siteId, selectionKey, gip.userEid, statusKey, statusModifiedEid, now, statusModifiedDate);
+			}
+
+			boolean selectionPersisted = OwlMigrationDAO.saveSiteMigrationItem(dto);
+			if (!selectionPersisted) {
+				failedSiteIds.add(siteId);
+			}
+		}
+
+		return failedSiteIds;
+	}
+
+	/**
+	 * Gets all the information necessary to identify whether site is eligible for migration, and which group it belongs to
+	 * Returns empty optional if we can immediately identify that the user cannot migrate any sites
+	 */
+	private Optional<GroupIdentificationParameters> buildGroupIdentificationParameters() {
 		// Try to short circuit non-instructors ASAP:
 		// Get instructor sections. Users with no instructor roles can skip all course site processing
 		String userEid = getCurrentUserEid();
-		final Set<String> instructingSectionEids = courseManagementService.findSectionRoles(userEid).entrySet()
-			.stream().filter(entry -> "I".equals(entry.getValue())).map(Map.Entry::getKey).collect(Collectors.toSet());
+		final Set<String> instructingSectionEids = getInstructingSectionEids(userEid);
 		boolean skipCourses = instructingSectionEids.isEmpty();
 
 		List<String> eligibleTerms = OwlMigrationDAO.getEligibleTermsForMigration();
 		boolean projectSitesEligible = eligibleTerms.stream().anyMatch("project"::equalsIgnoreCase);
 		if (!projectSitesEligible && skipCourses) {
-			return siteMigrationItems;
+			return Optional.empty();
 		}
 
 		Map<String, List<String>> groupTermMap = OwlMigrationDAO.getTermGroupingMap();
@@ -85,60 +184,72 @@ public class OwlMigrationDelegate {
 			groupTermMap.put(projectGroup, Collections.emptyList());
 		}
 
-		Map<String, String> termCodeGroupMap = invertKeyListMap(groupTermMap);
+		GroupIdentificationParameters gip = new GroupIdentificationParameters();
+		gip.userEid = userEid;
+		gip.instructingSectionEids = instructingSectionEids;
+		gip.skipCourses = skipCourses;
+		gip.eligibleTerms = eligibleTerms;
+		gip.projectSitesEligible = projectSitesEligible;
+		gip.groupTermMap = groupTermMap;
+		gip.projectGroup = projectGroup;
+		gip.termCodeGroupMap = invertKeyListMap(groupTermMap);
 
-		// Get all of the user's sites - exclude descriptions, include unpublished sites
-		List<Site> sites = siteService.getUserSites(false, true);
+		return Optional.of(gip);
+	}
 
-		// Construct and append siteMigrationItems to map of common terms -> List<SiteMigrationItem>
-		for (Site site : sites) {
-			if (projectSitesEligible && "project".equals(site.getType())) {
-				appendToMap(siteMigrationItems, projectGroup, buildSiteMigrationItem(site));
-				continue;
-			}
+	private Optional<String> getGroupIfSiteEligibleForMigration(Site site, GroupIdentificationParameters params) {
 
-			if (skipCourses || !"course".equals(site.getType())) {
-				continue;
-			}
+		String userEid = params.userEid;
+		Set<String> instructingSectionEids = params.instructingSectionEids;
+		boolean skipCourses = params.skipCourses;
+		List<String> eligibleTerms = params.eligibleTerms;
+		boolean projectSitesEligible = params.projectSitesEligible;
+		Map<String, List<String>> groupTermMap = params.groupTermMap;
+		String projectGroup = params.projectGroup;
+		Map<String, String> termCodeGroupMap = params.termCodeGroupMap;
 
-			if (cutoffDateApplies(OwlMigrationDAO.getCourseSiteCutoffDate(), site)) {
-				continue;
-			}
-
-			Set<String> sectionEids = getProvidersForCourseSite(site);
-			Optional<String> firstInstructingSectionEidInSite = sectionEids.stream()
-				.filter(sectionEid -> instructingSectionEids.contains(sectionEid)).findFirst();
-			if (!firstInstructingSectionEidInSite.isPresent()) {
-				// User is not an instructor in any of this site's sections
-				continue;
-			}
-
-			Optional<String> optAcademicSessionEid = getAcademicSessionEidForSectionEid(firstInstructingSectionEidInSite.get());
-			if (!optAcademicSessionEid.isPresent()) {
-				log.error("An instructor's section's corresponding academic session was not identified. Instructor {}, sectionEid {}", userEid, firstInstructingSectionEidInSite.get());
-				continue;
-			}
-
-			final String academicSessionEid = optAcademicSessionEid.get();
-			if (!eligibleTerms.contains(academicSessionEid)) {
-				continue;
-			}
-
-			/*
-			 * Get the common term for the academic session:
-			 * Stream entries mapping termCodes (E.g. "1229") to common terms (E.g. "Fall / Winter 2022")
-			 * Filter entries such that the site's academicSession (E.g. "UWOUGRD1229") contains the term code ("1229")
-			 * Map to the term code's corresponding common term (E.g. "Fall / Winter 2022")
-			 */
-			termCodeGroupMap.entrySet().stream()
-				.filter(termCodeGroupEntry -> academicSessionEid.contains(termCodeGroupEntry.getKey()))
-				.map(Map.Entry::getValue).findFirst().ifPresent(commonTerm -> 
-					appendToMap(siteMigrationItems, commonTerm, buildSiteMigrationItem(site))
-				);
+		if (projectSitesEligible && "project".equals(site.getType()) &&
+				!cutoffDateApplies(OwlMigrationDAO.getProjectSiteCutoffDate(), site)
+				&& site.getUserRole(getCurrentUserId()).getId().equals(site.getMaintainRole())) {
+			return Optional.of(projectGroup);
 		}
 
-		// Re-insert siteMigrationItems into a LinkedHashMap in the order expected by the UI
-		return groupSiteMigrationItems(siteMigrationItems, groupTermMap);
+		if (skipCourses || !"course".equals(site.getType())) {
+			Optional.empty();
+		}
+
+		if (cutoffDateApplies(OwlMigrationDAO.getCourseSiteCutoffDate(), site)) {
+			return Optional.empty();
+		}
+
+		Set<String> sectionEids = getProvidersForCourseSite(site);
+		Optional<String> firstInstructingSectionEidInSite = sectionEids.stream()
+			.filter(sectionEid -> instructingSectionEids.contains(sectionEid)).findFirst();
+		if (!firstInstructingSectionEidInSite.isPresent()) {
+			// User is not an instructor in any of this site's sections
+			return Optional.empty();
+		}
+
+		Optional<String> optAcademicSessionEid = getAcademicSessionEidForSectionEid(firstInstructingSectionEidInSite.get());
+		if (!optAcademicSessionEid.isPresent()) {
+			log.error("An instructor's section's corresponding academic session was not identified. Instructor {}, sectionEid {}", userEid, firstInstructingSectionEidInSite.get());
+			return Optional.empty();
+		}
+
+		final String academicSessionEid = optAcademicSessionEid.get();
+		if (!eligibleTerms.contains(academicSessionEid)) {
+			return Optional.empty();
+		}
+
+		/*
+		 * Get the common term for the academic session:
+		 * Stream entries mapping termCodes (E.g. "1229") to common terms (E.g. "Fall / Winter 2022")
+		 * Filter entries such that the site's academicSession (E.g. "UWOUGRD1229") contains the term code ("1229")
+		 * Map to the term code's corresponding common term (E.g. "Fall / Winter 2022")
+		 */
+		return termCodeGroupMap.entrySet().stream()
+			.filter(termCodeGroupEntry -> academicSessionEid.contains(termCodeGroupEntry.getKey()))
+			.map(Map.Entry::getValue).findFirst();
 	}
 
 	public String getStatusDisplay(String selectionKey, String statusKey) {
@@ -181,17 +292,18 @@ public class OwlMigrationDelegate {
 	}
 
 	private void populateResourcesDetails(SiteMigrationItem item, Site site) {
+		// OWLTODO: use config to turn this off if it performs poorly
 		float resourcesSize = getResourcesSizeInGb(site);
 		String resourcesSizeDisplay = String.format(Locale.US, "%.1f", resourcesSize);
 		item.setResourcesSize(resourcesSizeDisplay);
 
-		float errorThreshold = OwlMigrationDAO.getSiteSizeErrorThreshold().orElse(1.5f);
-		float warnThreshold = OwlMigrationDAO.getSiteSizeWarningThreshold().orElse(2f);
+		Optional<Float> errorThreshold = OwlMigrationDAO.getSiteSizeErrorThreshold();
+		Optional<Float> warnThreshold = OwlMigrationDAO.getSiteSizeWarningThreshold();
 
 		ResourcesSizeCategory category = ResourcesSizeCategory.NONE;
-		if (resourcesSize > errorThreshold) {
+		if (errorThreshold.isPresent() && resourcesSize > errorThreshold.get()) {
 			category = ResourcesSizeCategory.BRIGHTSPACE_LIMIT_EXCEEDED;
-		} else if (resourcesSize > warnThreshold) {
+		} else if (warnThreshold.isPresent() && resourcesSize > warnThreshold.get()) {
 			category = ResourcesSizeCategory.WARN;
 		}
 		item.setResourcesSizeCategory(category);
@@ -237,6 +349,16 @@ public class OwlMigrationDelegate {
 		return site.getCreatedDate().toInstant().isBefore(toInstant(cutoff.get()));
 	}
 
+	private Set<String> getInstructingSectionEids(String userEid) {
+		return courseManagementService.findSectionRoles(userEid).entrySet()
+			.stream().filter(entry -> "I".equals(entry.getValue())).map(Map.Entry::getKey).collect(Collectors.toSet());
+	}
+
+	private List<Site> getUserSites() {
+		// Get all of the user's sites - exclude descriptions, include unpublished sites
+		return siteService.getUserSites(false, true);
+	}
+
 	private Set<String> getProvidersForCourseSite(Site site) {
 		return authzGroupService.getProviderIds(site.getReference());
 	}
@@ -279,6 +401,10 @@ public class OwlMigrationDelegate {
 		return sessionManager.getCurrentSession().getUserEid();
 	}
 
+	private String getCurrentUserId() {
+		return sessionManager.getCurrentSessionUserId();
+	}
+
 	private Instant toInstant(LocalDate localDate) {
 		return localDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
 	}
@@ -305,5 +431,16 @@ public class OwlMigrationDelegate {
 			}
 		}
 		return inverted;
+	}
+
+	private class GroupIdentificationParameters {
+		String userEid;
+		Set<String> instructingSectionEids;
+		boolean skipCourses;
+		List<String> eligibleTerms;
+		boolean projectSitesEligible;
+		Map<String, List<String>> groupTermMap;
+		String projectGroup;
+		Map<String, String> termCodeGroupMap;
 	}
 }
