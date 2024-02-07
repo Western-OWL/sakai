@@ -161,7 +161,7 @@ public class OwlMigrationDAO
     public static Optional<String> getAdminDisplayName()
     {
         String prop = getSitePropString( OWL_MIG_ADMIN_DISPLAY_NAME );
-        return Optional.ofNullable( prop );
+        return Optional.ofNullable( StringUtils.trimToNull( prop ) );
     }
 
     /**
@@ -259,7 +259,7 @@ public class OwlMigrationDAO
     public static Optional<String> getUiMessage( String sitePropKey )
     {
         String prop = getSitePropString( sitePropKey );
-        return Optional.ofNullable( prop );
+        return Optional.ofNullable( StringUtils.trimToNull( prop ) );
     }
 
     /**
@@ -289,7 +289,7 @@ public class OwlMigrationDAO
     public static Map<String, List<String>> getTermGroupingMap()
     {
         // Format: Summer 2022:1225;1226|Fall/Winter 2022:1228;1229;1231|Summer 2023:1235;1236|Fall/Winter 2023:1238;1239;1241|Summer 2024:1245;1246
-        LinkedHashMap<String, String> map = (LinkedHashMap) parsePipeAndColonDelimitedProp( OWL_MIG_TERM_GROUPINGS );
+        Map<String, String> map = parsePipeAndColonDelimitedProp( OWL_MIG_TERM_GROUPINGS );
         if (map.isEmpty())
         {
             return Collections.emptyMap();
@@ -462,6 +462,10 @@ public class OwlMigrationDAO
 
         // Format: value1|value2|value3
         String prop = props.getProperty( sitePropKey );
+        if( StringUtils.isBlank( prop ) )
+        {
+            return Collections.emptyList();
+        }
 
         // Split on '|' so we get an array of key:value pairs (key1:value1, key2:value2; etc.)
         return parseValueWithDelimiter( prop, PIPE_DELIM );

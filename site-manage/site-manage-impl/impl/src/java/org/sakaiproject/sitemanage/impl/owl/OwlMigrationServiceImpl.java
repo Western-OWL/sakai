@@ -3,7 +3,6 @@ package org.sakaiproject.sitemanage.impl.owl;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.sakaiproject.authz.api.AuthzGroupService;
 import org.sakaiproject.content.api.ContentHostingService;
