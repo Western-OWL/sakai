@@ -116,7 +116,7 @@ public class OwlMigrationDAO
      * Save or update the appropriate items from the SiteMigrationItem into site properties for the site ID packed.
      * @param dto SiteMigrationItem object containing the relevant data to save, and the site ID to save it to
      * @return true if the operation completed without issues, false if the site could not be retrieved and thus the save/update could not be performed
-     * @throws IllegalArgumentException if the SiteMigrationItemDTO is null, or any of it's members are null
+     * @throws IllegalArgumentException if the SiteMigrationItemDTO is null, or any of it's required members are null (siteID, selectionKey, selectionModifiedDate, selectionModifiedEid)
      */
     public static boolean saveSiteMigrationItem( SiteMigrationItemDTO dto ) throws IllegalArgumentException
     {
@@ -124,10 +124,9 @@ public class OwlMigrationDAO
         {
             throw new IllegalArgumentException( "SiteMigrationItemDTO cannot be null" );
         }
-        if( dto.getSiteID() == null || dto.getSelectionKey() == null || dto.getSelectionModifiedDate() == null || dto.getSelectionModifiedEid() == null || dto.getStatusKey() == null ||
-            dto.getStatusModifiedDate() == null || dto.getStatusModifiedEid() == null )
+        if( dto.getSiteID() == null || dto.getSelectionKey() == null || dto.getSelectionModifiedDate() == null || dto.getSelectionModifiedEid() == null )
         {
-            throw new IllegalArgumentException( "SiteMigrationItemDTO members cannot be null" );
+            throw new IllegalArgumentException( "SiteMigrationItemDTO members cannot be null: siteID, selectionKey, selectionModifiedDate, selectionModifiedEid" );
         }
 
         try
@@ -136,11 +135,13 @@ public class OwlMigrationDAO
             ResourcePropertiesEdit props = site.getPropertiesEdit();
             props.addProperty( OWL_MIG_USER_SELECTION, dto.getSelectionKey() );
             props.addProperty( OWL_MIG_USER_SELECTION_EID, dto.getSelectionModifiedEid() );
-            props.addProperty( OWL_MIG_STATUS, dto.getStatusKey() );
-            props.addProperty( OWL_MIG_STATUS_MODIFIED_EID, dto.getStatusModifiedEid() );
+            props.addProperty( OWL_MIG_STATUS, StringUtils.trimToEmpty( dto.getStatusKey() ) );
+            props.addProperty( OWL_MIG_STATUS_MODIFIED_EID, StringUtils.trimToEmpty( dto.getStatusModifiedEid() ) );
 
             DateFormat df = new SimpleDateFormat( DATE_FORMAT );
-            props.addProperty( OWL_MIG_USER_SELETION_DATE, df.format( dto.getSelectionModifiedDate() ) );
+            String selectionModifiedDate = dto.getSelectionModifiedDate() != null ? df.format( dto.getSelectionModifiedDate() ): "";
+
+            props.addProperty( OWL_MIG_USER_SELETION_DATE, selectionModifiedDate );
             props.addProperty( OWL_MIG_STATUS_MODIFIED_DATE, df.format( dto.getStatusModifiedDate() ) );
 
             siteService.save( site );
