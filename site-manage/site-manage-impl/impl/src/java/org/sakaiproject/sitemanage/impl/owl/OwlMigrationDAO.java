@@ -139,10 +139,10 @@ public class OwlMigrationDAO
             props.addProperty( OWL_MIG_STATUS_MODIFIED_EID, StringUtils.trimToEmpty( dto.getStatusModifiedEid() ) );
 
             DateFormat df = new SimpleDateFormat( DATE_FORMAT );
-            String selectionModifiedDate = dto.getSelectionModifiedDate() != null ? df.format( dto.getSelectionModifiedDate() ): "";
+            String statusModifiedDate = dto.getStatusModifiedDate() != null ? df.format( dto.getStatusModifiedDate() ) : "";
 
-            props.addProperty( OWL_MIG_USER_SELETION_DATE, selectionModifiedDate );
-            props.addProperty( OWL_MIG_STATUS_MODIFIED_DATE, df.format( dto.getStatusModifiedDate() ) );
+            props.addProperty( OWL_MIG_USER_SELETION_DATE, df.format( dto.getSelectionModifiedDate() ) );
+            props.addProperty( OWL_MIG_STATUS_MODIFIED_DATE, statusModifiedDate );
 
             siteService.save( site );
             return true;
