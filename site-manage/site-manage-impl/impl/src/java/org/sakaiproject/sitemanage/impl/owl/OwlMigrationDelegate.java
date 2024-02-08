@@ -73,9 +73,11 @@ public class OwlMigrationDelegate {
 
 		// Construct and append siteMigrationItems to map of common terms -> List<SiteMigrationItem>
 		for (Site site : sites) {
-			Optional<String> group = getGroupIfSiteEligibleForMigration(site, gip);
-			if (group.isPresent()) {
-				appendToMap(siteMigrationItems, group.get(), buildSiteMigrationItem(site));
+			Optional<GroupAndTerm> groupAndTerm = getGroupAndTermIfSiteEligibleForMigration(site, gip, false);
+			if (groupAndTerm.isPresent()) {
+				String group = groupAndTerm.get().group;
+				String academicSessionEid = groupAndTerm.get().academicSessionEid;
+				appendToMap(siteMigrationItems, group, buildSiteMigrationItem(site, academicSessionEid));
 			}
 		}
 
@@ -84,11 +86,9 @@ public class OwlMigrationDelegate {
 	}
 
 	public List<String> saveSelections(Map<String, String> siteSelections) {
-
-		// OWLTODO: implement logging; add params to invoked methods, etc. as needed to accomplish this.
-
 		Optional<GroupIdentificationParameters> optGip = buildGroupIdentificationParameters();
 		if (optGip.isEmpty()) {
+			log.warn("saveSelections invoked by user {} who has no eligible sites to migrate", getCurrentUserEid());
 			return new ArrayList(siteSelections.keySet());
 		}
 		GroupIdentificationParameters gip = optGip.get();
@@ -107,7 +107,7 @@ public class OwlMigrationDelegate {
 			Optional<Site> site = userSites.stream().filter(userSite -> StringUtils.equals(userSite.getId(), siteId)).findFirst();
 
 			// Validate that the site is eligible for migration
-			if (!site.isPresent() || !getGroupIfSiteEligibleForMigration(site.get(), gip).isPresent()) {
+			if (!site.isPresent() || !getGroupAndTermIfSiteEligibleForMigration(site.get(), gip, true).isPresent()) {
 				failedSiteIds.add(siteId);
 				continue;
 			}
@@ -126,6 +126,7 @@ public class OwlMigrationDelegate {
 				if (changeableSelections.contains(dto.getSelectionKey())) {
 					if (!dto.getSelectionKey().equals(selectionKey)) {
 						// User tried to change their unchangeable selection
+						log.warn("User {} tried to change the selection for site {}, but its existing selection '{}' is unchangeable", getCurrentUserEid(), siteId, dto.getSelectionKey());
 						failedSiteIds.add(siteId);
 					}
 					continue;
@@ -163,7 +164,7 @@ public class OwlMigrationDelegate {
 	 * Returns empty optional if we can immediately identify that the user cannot migrate any sites
 	 */
 	private Optional<GroupIdentificationParameters> buildGroupIdentificationParameters() {
-		// Try to short circuit non-instructors ASAP:
+		// Try to return early for non-instructors ASAP:
 		// Get instructor sections. Users with no instructor roles can skip all course site processing
 		String userEid = getCurrentUserEid();
 		final Set<String> instructingSectionEids = getInstructingSectionEids(userEid);
@@ -197,7 +198,7 @@ public class OwlMigrationDelegate {
 		return Optional.of(gip);
 	}
 
-	private Optional<String> getGroupIfSiteEligibleForMigration(Site site, GroupIdentificationParameters params) {
+	private Optional<GroupAndTerm> getGroupAndTermIfSiteEligibleForMigration(Site site, GroupIdentificationParameters params, boolean logWhenIneligible) {
 
 		String userEid = params.userEid;
 		Set<String> instructingSectionEids = params.instructingSectionEids;
@@ -211,14 +212,20 @@ public class OwlMigrationDelegate {
 		if (projectSitesEligible && "project".equals(site.getType()) &&
 				!cutoffDateApplies(OwlMigrationDAO.getProjectSiteCutoffDate(), site)
 				&& site.getUserRole(getCurrentUserId()).getId().equals(site.getMaintainRole())) {
-			return Optional.of(projectGroup);
+			return Optional.of(new GroupAndTerm(projectGroup));
 		}
 
 		if (skipCourses || !"course".equals(site.getType())) {
-			Optional.empty();
+			if (logWhenIneligible) {
+				log.warn("Site {} is not eligible for migration: it doesn't meet project site criteria, or it's a course site and the user has no instructor enrollments. User: {}", site.getId(), userEid);
+			}
+			return Optional.empty();
 		}
 
 		if (cutoffDateApplies(OwlMigrationDAO.getCourseSiteCutoffDate(), site)) {
+			if (logWhenIneligible) {
+				log.warn("Site {} is not eligible for migration: creation date precedes the course site cutoff date. User: {}", site.getId(), userEid);
+			}
 			return Optional.empty();
 		}
 
@@ -227,6 +234,9 @@ public class OwlMigrationDelegate {
 			.filter(sectionEid -> instructingSectionEids.contains(sectionEid)).findFirst();
 		if (!firstInstructingSectionEidInSite.isPresent()) {
 			// User is not an instructor in any of this site's sections
+			if (logWhenIneligible) {
+				log.warn("Site {} is not eligible for migration: it is a course site in which the user has no instructor enrollments. User: {}", site.getId(), userEid);
+			}
 			return Optional.empty();
 		}
 
@@ -238,6 +248,9 @@ public class OwlMigrationDelegate {
 
 		final String academicSessionEid = optAcademicSessionEid.get();
 		if (!eligibleTerms.contains(academicSessionEid)) {
+			if (logWhenIneligible) {
+				log.warn("Site {} is not eligible for migration: its corresponding academic session {} is not in the list of eligible terms. User: {}", site.getId(), academicSessionEid, userEid);
+			}
 			return Optional.empty();
 		}
 
@@ -247,9 +260,15 @@ public class OwlMigrationDelegate {
 		 * Filter entries such that the site's academicSession (E.g. "UWOUGRD1229") contains the term code ("1229")
 		 * Map to the term code's corresponding common term (E.g. "Fall / Winter 2022")
 		 */
-		return termCodeGroupMap.entrySet().stream()
+		Optional<String> group = termCodeGroupMap.entrySet().stream()
 			.filter(termCodeGroupEntry -> academicSessionEid.contains(termCodeGroupEntry.getKey()))
 			.map(Map.Entry::getValue).findFirst();
+
+		if (!group.isPresent()) {
+			log.error("Site {} is eligible, but its academic session {} does not have a corresponding group. Please review OWL_MIG_TERM_GROUPINGS", site.getId(), academicSessionEid);
+		}
+
+		return Optional.of(new GroupAndTerm(group.get(), academicSessionEid));
 	}
 
 	public String getStatusDisplay(String selectionKey, String statusKey) {
@@ -263,12 +282,18 @@ public class OwlMigrationDelegate {
 	private Map<String, List<SiteMigrationItem>> groupSiteMigrationItems(Map<String, List<SiteMigrationItem>> siteMigrationItems, Map<String, List<String>> groupTermMap) {
 		Map<String, List<SiteMigrationItem>> groupedSMIs = new LinkedHashMap<>();
 
+		final List<String> eligibleTerms = OwlMigrationDAO.getEligibleTermsForMigration();
+
 		groupTermMap.keySet().stream()
 			.filter(siteMigrationItems::containsKey).forEach(group -> {
 				List<SiteMigrationItem> siteMigrationItemList = siteMigrationItems.get(group);
-				// TODO: if group is not the projectGroup, we can sort on terms - but what order?
-				// If we do, we should use sort(TERM_COMPARATOR.thenComparing(SMI_COMPARATOR))
-				siteMigrationItemList.sort(SMI_COMPARATOR);
+
+				// Order the sites within the group by term, with terms ordered as included in eligibleTermsForMigration.
+				// Safe for project sites: indexOf returns -1 (all are equal)
+				Comparator<SiteMigrationItem> orderedMatchingEligibleTerms = (SiteMigrationItem s1, SiteMigrationItem s2) ->
+					Integer.compare(eligibleTerms.indexOf(s1.getAcademicSessionEid()), eligibleTerms.indexOf(s2.getAcademicSessionEid()));
+
+				siteMigrationItemList.sort(orderedMatchingEligibleTerms.thenComparing(SMI_COMPARATOR));
 				groupedSMIs.put(group, siteMigrationItemList);
 		});
 
@@ -276,11 +301,17 @@ public class OwlMigrationDelegate {
 	}
 
 	private SiteMigrationItem buildSiteMigrationItem(Site site) {
+		return buildSiteMigrationItem(site, "");
+	}
+
+	private SiteMigrationItem buildSiteMigrationItem(Site site, String academicSessionEid) {
 		SiteMigrationItem item = new SiteMigrationItem();
 
 		populateSiteDetails(item, site);
 		populateResourcesDetails(item, site);
 		populateMigrationProperties(item, site);
+
+		item.setAcademicSessionEid(academicSessionEid);
 
 		return item;
 	}
@@ -292,7 +323,13 @@ public class OwlMigrationDelegate {
 	}
 
 	private void populateResourcesDetails(SiteMigrationItem item, Site site) {
-		// OWLTODO: use config to turn this off if it performs poorly
+		if (OwlMigrationDAO.getSelectionsWithSizeChecks().isEmpty()) {
+			// Resource sizes don't matter; return early for performance
+			item.setResourcesSize("");
+			item.setResourcesSizeCategory(ResourcesSizeCategory.NONE);
+			return;
+		}
+
 		float resourcesSize = getResourcesSizeInGb(site);
 		String resourcesSizeDisplay = String.format(Locale.US, "%.1f", resourcesSize);
 		item.setResourcesSize(resourcesSizeDisplay);
@@ -442,5 +479,20 @@ public class OwlMigrationDelegate {
 		Map<String, List<String>> groupTermMap;
 		String projectGroup;
 		Map<String, String> termCodeGroupMap;
+	}
+
+	private class GroupAndTerm {
+		String group;
+		String academicSessionEid;
+
+		public GroupAndTerm(String group, String academicSessionEid) {
+			this.group = group;
+			this.academicSessionEid = academicSessionEid;
+		}
+
+		public GroupAndTerm(String group) {
+			this.group = group;
+			this.academicSessionEid = "";
+		}
 	}
 }

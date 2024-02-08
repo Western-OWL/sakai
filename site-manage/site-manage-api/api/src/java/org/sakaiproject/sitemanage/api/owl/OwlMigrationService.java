@@ -43,6 +43,10 @@ public interface OwlMigrationService {
 	 */
 	public List<String> saveSelections(Map<String, String> siteSelections);
 
+	/**
+	 * @deprecated TODO: I believe this will be unused and can be removed
+	 */
+	@Deprecated
 	public boolean isResourcesSizeWarningEnabled();
 
 	public List<String> getSelectionKeysWithResourcesSizeWarnings();

@@ -35,4 +35,7 @@ public class SiteMigrationItem {
 
 	private String resourcesSize;
 	private ResourcesSizeCategory resourcesSizeCategory;
+
+	// Not user facing, but useful for ordering sites within groups
+	private String academicSessionEid;
 }
