@@ -62,12 +62,6 @@ public class OwlMigrationServiceImpl implements OwlMigrationService {
 	}
 
 	@Override
-	public boolean isResourcesSizeWarningEnabled() {
-		// TODO: is this necessary?
-		return getSelectionKeysWithResourcesSizeWarnings().isEmpty();
-	}
-
-	@Override
 	public List<String> getSelectionKeysWithResourcesSizeWarnings() {
 		return OwlMigrationDAO.getSelectionsWithSizeChecks();
 	}
