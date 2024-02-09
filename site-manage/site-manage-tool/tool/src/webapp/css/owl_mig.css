@@ -1,0 +1,58 @@
+.owl-mig-tracking-main-content form fieldset
+{
+	border: var(--sakai-border-color) solid 1px;
+	padding: 0.5em;
+}
+
+.owl-mig-tracking-status-label
+{
+	background-color: #b5ffc8;
+	display: inline-block;
+	height: 20px;
+	margin: 0;
+	padding: 4px;
+	border-radius: 4px;
+	line-height: 1;
+	color: var(--sakai-color-gray--darker-4);
+	font-size: 12px;
+	font-weight: bold;
+	white-space: nowrap;
+}
+
+.owl-mig-tracking-size-label-warn,
+.owl-mig-tracking-size-label-error
+{
+	display: inline-block;
+	margin: 0;
+	padding: 6px;
+	line-height: 1;
+	font-size: 12px;
+	font-weight: bold;
+	white-space: nowrap;
+}
+
+.owl-mig-tracking-size-label-warn
+{
+	background-color: var(--warnBanner-bgcolor);
+	color: var(--warnBanner-color);
+}
+
+.owl-mig-tracking-size-label-error
+{
+	background-color: var(--errorBanner-bgcolor);
+	color: var(--errorBanner-color);
+}
+
+#owl-mig-realButtonsContainer
+{
+	display: none;
+	background: var(--sakai-background-color-2);
+	margin-bottom:16px;
+	padding: 16px;
+}
+
+#owl-mig-realButtonsContainer .act
+{
+	margin: 0;
+}
+

@@ -23,7 +23,11 @@ package org.sakaiproject.site.tool;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.sakaiproject.cheftool.Context;
@@ -53,6 +57,8 @@ import org.sakaiproject.userauditservice.api.UserAuditService;
 import org.sakaiproject.util.ResourceLoader;
 
 import lombok.extern.slf4j.Slf4j;
+import org.sakaiproject.site.tool.owl.migration.OwlMigrationHelper;
+import org.sakaiproject.sitemanage.api.owl.SiteMigrationItem;
 
 /**
  * <p>
@@ -79,8 +85,10 @@ public class MembershipAction extends PagedResourceActionII
 	private static final EnrolmentsHandler ENROLMENTS_HANDLER = new EnrolmentsHandler();
 	private static final String SAK_PROP_ENROLMENTS_BLURB = "membership.enrolments.blurb";
 	private static final String ENROLMENTS_BLURB = SCS.getString( SAK_PROP_ENROLMENTS_BLURB, "" );
+	private static final String CURRENT_SITES_MODE = "current_sites";
 	private static final String MY_ENROLMENTS_MODE = "my_enrolments";
 	private static final String JOINABLE_MODE = "joinable";
+	private static final String MIGRATION_MODE = "migration";
 
 	/*
 	 * (non-Javadoc)
@@ -231,6 +239,22 @@ public class MembershipAction extends PagedResourceActionII
 
 		MembershipActiveTab activeTab = MembershipActiveTab.CURRENT_SITES;
 		String mode = (String) state.getAttribute( STATE_VIEW_MODE );
+
+		// OWL
+		Map<String, List<SiteMigrationItem>> termMap = Collections.emptyMap();
+		if (OwlMigrationHelper.migrationEnabled())
+		{
+			termMap = OwlMigrationHelper.getSiteMigrationItems();
+		}
+		boolean migrationAllowed = !termMap.isEmpty();
+
+		// OWL
+		// mode is null by default so we have to explicitly set it in order to be the first tab on initial load of the tool
+		if (mode == null && migrationAllowed)
+		{
+			mode = MIGRATION_MODE;
+		}
+
 		if( MY_ENROLMENTS_MODE.equals( mode ) )
 		{
 			activeTab = MembershipActiveTab.OFFICIAL_ENROLMENTS;
@@ -240,6 +264,11 @@ public class MembershipAction extends PagedResourceActionII
 		{
 			activeTab = MembershipActiveTab.JOINABLE_SITES;
 			template = buildJoinableContext(portlet, context, rundata, state);
+		}
+		else if (MIGRATION_MODE.equals(mode)) // OWL
+		{
+			activeTab = MembershipActiveTab.MIGRATION;
+			template = buildMigrationContext(portlet, context, rundata, state, termMap);
 		}
 		else
 		{
@@ -280,11 +309,19 @@ public class MembershipAction extends PagedResourceActionII
 		context.put("membershipTextEdit", new SiteTextEditUtil());
 
 		// Add the menu to the vm
-		MenuBuilder.buildMenuForMembership(portlet, rundata, state, context, RB, activeTab);
+		MenuBuilder.buildMenuForMembership(portlet, rundata, state, context, RB, activeTab, migrationAllowed);
 
 		return template;
 
 	} // buildMainPanelContext
+
+	// OWL
+	private String buildMigrationContext(VelocityPortlet portlet, Context context, RunData runData, SessionState state,
+			Map<String, List<SiteMigrationItem>> termMap)
+	{
+		String template = (String) getContext(runData).get("template");
+		return OwlMigrationHelper.buildMigrationContext(portlet, context, runData, state, template, RB, termMap);
+	}
 
 	/**
 	 * Build the context for the 'My Official Course Enrolments' page.
@@ -385,6 +422,7 @@ public class MembershipAction extends PagedResourceActionII
 		SessionState state = ((JetspeedRunData) data).getPortletSessionState(((JetspeedRunData) data).getJs_peid());
 		state.removeAttribute(STATE_CONFIRM_VIEW_MODE);
 		state.removeAttribute(STATE_TOP_PAGE_MESSAGE);
+		OwlMigrationHelper.cleanMigrationState(state);
 		doUnjoin(data);
 	}
 
@@ -397,6 +435,7 @@ public class MembershipAction extends PagedResourceActionII
 	{
 		SessionState state = ((JetspeedRunData) data).getPortletSessionState(((JetspeedRunData) data).getJs_peid());
 		state.removeAttribute(STATE_CONFIRM_VIEW_MODE);
+		OwlMigrationHelper.cleanMigrationState(state);
 	}
 
 	/**
@@ -431,10 +470,11 @@ public class MembershipAction extends PagedResourceActionII
 	public void doGoto_unjoinable(RunData data)
 	{
 		SessionState state = ((JetspeedRunData) data).getPortletSessionState(((JetspeedRunData) data).getJs_peid());
-		state.removeAttribute(STATE_VIEW_MODE);
+		state.setAttribute(STATE_VIEW_MODE, CURRENT_SITES_MODE);
 		state.removeAttribute(STATE_PAGESIZE);
 		state.removeAttribute(STATE_TOP_PAGE_MESSAGE);
 		state.removeAttribute(SEARCH_TERM);
+		OwlMigrationHelper.cleanMigrationState(state);
 	}
 
 	/**
@@ -448,6 +488,17 @@ public class MembershipAction extends PagedResourceActionII
 		state.removeAttribute(STATE_PAGESIZE);
 		state.removeAttribute(STATE_TOP_PAGE_MESSAGE);
 		state.removeAttribute(SEARCH_TERM);
+		OwlMigrationHelper.cleanMigrationState(state);
+	}
+
+	public void doGoto_migration(RunData data)
+	{
+		SessionState state = ((JetspeedRunData) data).getPortletSessionState(((JetspeedRunData) data).getJs_peid());
+		state.setAttribute(STATE_VIEW_MODE, MIGRATION_MODE);
+		state.removeAttribute(STATE_PAGESIZE);
+		state.removeAttribute(STATE_TOP_PAGE_MESSAGE);
+		state.removeAttribute(SEARCH_TERM);
+		OwlMigrationHelper.cleanMigrationState(state);
 	}
 
 	/**
@@ -462,6 +513,27 @@ public class MembershipAction extends PagedResourceActionII
 		state.removeAttribute( STATE_PAGESIZE );
 		state.removeAttribute( STATE_TOP_PAGE_MESSAGE );
 		state.removeAttribute( SEARCH_TERM );
+		OwlMigrationHelper.cleanMigrationState(state);
+	}
+
+	// OWL
+	public void doMigrate(RunData data)
+	{
+		SessionState state = ((JetspeedRunData) data).getPortletSessionState(((JetspeedRunData) data).getJs_peid());
+		List<String> errorSites = OwlMigrationHelper.updateMigrations(data, state);
+		if (!errorSites.isEmpty())
+		{
+			String sites = errorSites.stream().collect(Collectors.joining(", "));
+			addAlert(state, String.format("%s %s", RB.getString("owl.mig.siteErrors"), sites));
+		}
+	}
+
+	// OWL
+	public void doMigrate_cancel(RunData data)
+	{
+		// do nothing, just refresh the page
+		SessionState state = ((JetspeedRunData) data).getPortletSessionState(((JetspeedRunData) data).getJs_peid());
+		OwlMigrationHelper.cleanMigrationState(state);
 	}
 
 	/**

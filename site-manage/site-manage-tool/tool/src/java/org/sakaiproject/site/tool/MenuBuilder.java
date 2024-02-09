@@ -93,6 +93,7 @@ public class MenuBuilder
      */
     public enum MembershipActiveTab
     {
+        MIGRATION,
         CURRENT_SITES,
         OFFICIAL_ENROLMENTS,
         JOINABLE_SITES
@@ -109,9 +110,15 @@ public class MenuBuilder
      * @param rl
      * @param activeTab
      */
-    public static void buildMenuForMembership( VelocityPortlet portlet, RunData data, SessionState state, Context context, ResourceLoader rl, MembershipActiveTab activeTab )
+    public static void buildMenuForMembership( VelocityPortlet portlet, RunData data, SessionState state, Context context, ResourceLoader rl, MembershipActiveTab activeTab, boolean migrationAllowed )
     {
         Menu menu = new MenuImpl( portlet, data, (String) state.getAttribute( SiteAction.STATE_ACTION ) );
+
+        // OWL Migration
+        if (migrationAllowed)
+        {
+            menu.add(buildMenuEntry(rl.getString("owl.mig.tab"), "doGoto_migration", activeTab.equals(MembershipActiveTab.MIGRATION)));
+        }
 
         // Current sites
         menu.add( buildMenuEntry( rl.getString( "mb.cursit" ), "doGoto_unjoinable", activeTab.equals( MembershipActiveTab.CURRENT_SITES ) ) );

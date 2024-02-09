@@ -1,0 +1,148 @@
+<div class="portletBody specialLink container-fluid">
+  #if($menu)#toolbar($menu)#end
+  <div class="membershipContent owl-mig-tracking-main-content">
+
+    #if($successDate)<div class="sak-banner-success">#mb("owl.mig.success") $MigTool.formatDate($successDate, $tlang.Locale)</div>#end
+
+    #if($alertMessage)<div class="sak-banner-error">$formattedText.escapeHtml($alertMessage)</div>#end
+
+    #if(!$banner1.Empty)<div class="sak-banner-info">$banner1</div>#end
+    #if(!$banner2.Empty)<div class="sak-banner-info">$banner2</div>#end
+    #if(!$banner3.Empty)<div class="sak-banner-info">$banner3</div>#end
+
+    <form action="#toolForm("$action")" method="post">
+      #foreach($term in $termMap.keySet())
+      <fieldset>
+        <legend>$term</legend>
+        <table class="table table-responsive table-bordered table-striped">
+          <caption class="sr-only">#mb("owl.mig.header.caption") $term</caption>
+          <thead>
+            <tr>
+              <th>#mb("owl.mig.header.siteTitle")</th>
+              <th>#mb("owl.mig.header.siteSize")</th>
+              <th>#mb("owl.mig.header.option")</th>
+              <th>#mb("owl.mig.header.optionOn")</th>
+              <th>#mb("owl.mig.header.optionBy")</th>
+            </tr>
+          </thead>
+          </tbody>
+            #set($noVal = $tlang.getString("owl.mig.noValue"))
+            #foreach($site in $termMap.get($term))
+            <tr>
+              <td>#linkify($site)</td>
+              <td>#size($site)</td>
+              <td>#selection($site $options)</td>
+              <td>$MigTool.formatDate($site.SelectionModifiedDate, $tlang.Locale, $noVal)</td>
+              <td>$MigTool.formatUser($site.SelectionModifiedEid, $noVal)</td>
+            </tr>
+            #end
+          </tbody>
+        </table>
+      </fieldset>
+      #end
+
+      #if($hasEditableSites)
+      <div class="act">
+        <input id="contBtn" type="button" accesskey="c" class="active" name="continue" value='#mb("owl.mig.btn.continue")' onclick="OWL_MIG.continue();" />
+        <input id="cancelBtn" type="submit" accesskey="x" name="cancel" value='#mb("owl.mig.btn.cancel")'>
+      </div>
+      #end
+      <div aria-live="polite">
+      <div id="owl-mig-realButtonsContainer">
+        #if(!$confirm1.Empty)<p>$confirm1</p>#end
+        #if(!$confirm2.Empty)<p id="sizeBlurb">$confirm2</p>#end
+        #if(!$confirm3.Empty)<p>$confirm3</p>#end
+        <p>#mb("owl.mig.areyousure")</p>
+        <div class="act">
+          <input type="submit" accesskey="s" class="active" name="save" value='#mb("owl.mig.btn.save")' onclick='document.getElementById("sakai_action").value="doMigrate";'/>
+          <input type="button" accesskey="d" name="dontsave" value='#mb("owl.mig.btn.dontsave")' onclick="OWL_MIG.cancelSave();"/>
+        </div>
+      </div>
+      </div>
+
+      <input type="hidden" name="sakai_action" id="sakai_action" value="doMigrate_cancel" />
+      <input type="hidden" name="sakai_csrf_token" value="$sakai_csrf_token" />
+    </form>
+  </div>
+</div>
+
+<script>
+var OWL_MIG = OWL_MIG || {};
+OWL_MIG.showSizeBlurb = function()
+{
+  const selections = Array.from(document.getElementsByName("userSelection"));
+  const sizeCheckOptionKeys = [$sizeCheckOptions];
+
+  for (const selection of selections)
+  {
+    const optionKey = selection.value.split("::")[1];
+    if (sizeCheckOptionKeys.includes(optionKey) && selection.dataset.sizeCat !== "NONE")
+    {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+OWL_MIG.showHideSizeBlurb = function()
+{
+  const blurb = document.getElementById("sizeBlurb");
+  blurb.style.display = OWL_MIG.showSizeBlurb() ? "block" : "none";
+}
+
+OWL_MIG.continue = function()
+{
+  OWL_MIG.showHideSizeBlurb();
+  const realButtonsContainer = document.getElementById("owl-mig-realButtonsContainer");
+  realButtonsContainer.style.display="block";
+  document.getElementById("contBtn").disabled=true;
+  document.getElementById("cancelBtn").disabled=true;
+  realButtonsContainer.scrollIntoView({behavior: "smooth"});
+}
+
+OWL_MIG.cancelSave = function()
+{
+  document.getElementById("owl-mig-realButtonsContainer").style.display="none";
+  document.getElementById("contBtn").disabled=false;
+  document.getElementById("cancelBtn").disabled=false;
+}
+</script>
+
+## MACROS ONLY BELOW
+
+#macro(selection $site $options)
+#if($site.SelectionEditable)
+<label for="${site.SiteId}-dropdown" class="sr-only">#mb("owl.mig.select.label") #title($site)</label>
+<select name="userSelection" id="${site.SiteId}-dropdown" data-size-cat="$site.getResourcesSizeCategory().name()">
+  #foreach($optionKey in $options.keySet())
+  <option value="$site.SiteId::$optionKey" #if($optionKey == $site.SelectionKey)selected#end>$options.get($optionKey)</option>
+  #end
+</select>
+#else
+#set($status = $MigTool.getStatusDisplay($site))
+$options.get($site.SelectionKey) #if(!$status.Empty)<span class="owl-mig-tracking-status-label">$status</span>#end
+#end
+#end
+
+#macro(size $site)
+#set($sizeCss = $MigTool.getSizeCssClass($site))
+#if($sizeCss.Empty)
+$MigTool.formatSize($site)
+#else
+<span class="$sizeCss">$MigTool.formatSize($site)</span>
+#end
+#end
+
+#macro(mb $key)
+$tlang.getString($key)
+#end
+
+#macro(title $site)
+$formattedText.escapeHtml($site.SiteTitle)
+#end
+
+#macro(linkify $site)
+<a href="$site.getSiteUrl()" target="_blank">#title($site)</a>
+#end
+
