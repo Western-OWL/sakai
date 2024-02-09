@@ -128,7 +128,8 @@ public class OwlMigrationDelegate {
 				dto = optDto.get();
 
 				// Update only if the selection is changeable
-				if (!changeableSelections.contains(dto.getSelectionKey())) {
+				boolean changeable = StringUtils.isEmpty(dto.getSelectionKey()) || changeableSelections.contains(dto.getSelectionKey());
+				if (!changeable) {
 					if (!dto.getSelectionKey().equals(selectionKey)) {
 						// User tried to change their unchangeable selection
 						log.warn("User {} tried to change the selection for site {}, but its existing selection '{}' is unchangeable", getCurrentUserEid(), siteId, dto.getSelectionKey());
