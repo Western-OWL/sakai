@@ -26,11 +26,13 @@ import org.sakaiproject.coursemanagement.api.CourseManagementService;
 import org.sakaiproject.coursemanagement.api.CourseOffering;
 import org.sakaiproject.coursemanagement.api.CourseSet;
 import org.sakaiproject.coursemanagement.api.Section;
+import org.sakaiproject.event.api.EventTrackingService;
 import org.sakaiproject.exception.IdUnusedException;
 import org.sakaiproject.exception.PermissionException;
 import org.sakaiproject.exception.TypeException;
 import org.sakaiproject.site.api.Site;
 import org.sakaiproject.site.api.SiteService;
+import org.sakaiproject.sitemanage.api.owl.OwlMigrationService;
 import org.sakaiproject.sitemanage.api.owl.SiteMigrationItem;
 import org.sakaiproject.sitemanage.api.owl.SiteMigrationItem.ResourcesSizeCategory;
 import org.sakaiproject.tool.api.SessionManager;
@@ -43,18 +45,20 @@ public class OwlMigrationDelegate {
 	private AuthzGroupService authzGroupService;
 	private ContentHostingService contentHostingService;
 	private CourseManagementService courseManagementService;
+	private EventTrackingService eventTrackingService;
 	private SessionManager sessionManager;
 	private SiteService siteService;
 
 	final Comparator<SiteMigrationItem> SMI_COMPARATOR = Comparator.comparing(SiteMigrationItem::getSiteTitle)
 		.thenComparing(SiteMigrationItem::getSiteId);
 
-	public OwlMigrationDelegate(AuthzGroupService authzGroupService, ContentHostingService contentHostingService, 
-			CourseManagementService courseManagementService, SessionManager sessionManager,
-			SiteService siteService) {
+	public OwlMigrationDelegate(AuthzGroupService authzGroupService, ContentHostingService contentHostingService,
+			CourseManagementService courseManagementService, EventTrackingService eventTrackingService,
+			SessionManager sessionManager, SiteService siteService) {
 		this.authzGroupService = authzGroupService;
 		this.contentHostingService = contentHostingService;
 		this.courseManagementService = courseManagementService;
+		this.eventTrackingService = eventTrackingService;
 		this.sessionManager = sessionManager;
 		this.siteService = siteService;
 	}
@@ -98,17 +102,18 @@ public class OwlMigrationDelegate {
 
 		List<Site> userSites = getUserSites();
 
-		List<String> failedSiteIds = new ArrayList<>();
+		List<String> failedSiteTitles = new ArrayList<>();
 
 		for (Map.Entry<String, String> siteSelection : siteSelections.entrySet()) {
 			String siteId = siteSelection.getKey();
 			String selectionKey = siteSelection.getValue();
 
 			Optional<Site> site = userSites.stream().filter(userSite -> StringUtils.equals(userSite.getId(), siteId)).findFirst();
+			String siteTitle = site.map(Site::getTitle).orElse(siteId);
 
 			// Validate that the site is eligible for migration
 			if (!site.isPresent() || !getGroupAndTermIfSiteEligibleForMigration(site.get(), gip, true).isPresent()) {
-				failedSiteIds.add(siteId);
+				failedSiteTitles.add(siteTitle);
 				continue;
 			}
 
@@ -127,7 +132,7 @@ public class OwlMigrationDelegate {
 					if (!dto.getSelectionKey().equals(selectionKey)) {
 						// User tried to change their unchangeable selection
 						log.warn("User {} tried to change the selection for site {}, but its existing selection '{}' is unchangeable", getCurrentUserEid(), siteId, dto.getSelectionKey());
-						failedSiteIds.add(siteId);
+						failedSiteTitles.add(siteTitle);
 					}
 					continue;
 				}
@@ -151,12 +156,14 @@ public class OwlMigrationDelegate {
 			}
 
 			boolean selectionPersisted = OwlMigrationDAO.saveSiteMigrationItem(dto);
-			if (!selectionPersisted) {
-				failedSiteIds.add(siteId);
+			if (selectionPersisted) {
+				eventTrackingService.post(eventTrackingService.newEvent(OwlMigrationService.EVENT_OWL_MIGRATION_SELECTION_SAVED, siteId + "->" + selectionKey, true));
+			} else {
+				failedSiteTitles.add(siteTitle);
 			}
 		}
 
-		return failedSiteIds;
+		return failedSiteTitles;
 	}
 
 	/**
@@ -203,11 +210,8 @@ public class OwlMigrationDelegate {
 		String userEid = params.userEid;
 		Set<String> instructingSectionEids = params.instructingSectionEids;
 		boolean skipCourses = params.skipCourses;
-		List<String> eligibleTerms = params.eligibleTerms;
 		boolean projectSitesEligible = params.projectSitesEligible;
-		Map<String, List<String>> groupTermMap = params.groupTermMap;
 		String projectGroup = params.projectGroup;
-		Map<String, String> termCodeGroupMap = params.termCodeGroupMap;
 
 		if (projectSitesEligible && "project".equals(site.getType()) &&
 				!cutoffDateApplies(OwlMigrationDAO.getProjectSiteCutoffDate(), site)
@@ -229,10 +233,24 @@ public class OwlMigrationDelegate {
 			return Optional.empty();
 		}
 
-		Set<String> sectionEids = getProvidersForCourseSite(site);
-		Optional<String> firstInstructingSectionEidInSite = sectionEids.stream()
-			.filter(sectionEid -> instructingSectionEids.contains(sectionEid)).findFirst();
-		if (!firstInstructingSectionEidInSite.isPresent()) {
+		String siteTitle = site.getTitle();
+		List<Section> sections = new ArrayList<Section>();
+		for (String sectionEid : getProvidersForCourseSite(site)) {
+			if (!instructingSectionEids.contains(sectionEid)) {
+				continue;
+			}
+
+			Section section = courseManagementService.getSection(sectionEid);
+			boolean isSiteTitle = siteTitle.equals(section.getTitle());
+
+			if (isSiteTitle) {
+				// Favor the section matching the site title
+				sections.add(0, section);
+			} else {
+				sections.add(section);
+			}
+		}
+		if (sections.isEmpty()) {
 			// User is not an instructor in any of this site's sections
 			if (logWhenIneligible) {
 				log.warn("Site {} is not eligible for migration: it is a course site in which the user has no instructor enrollments. User: {}", site.getId(), userEid);
@@ -240,17 +258,31 @@ public class OwlMigrationDelegate {
 			return Optional.empty();
 		}
 
-		Optional<String> optAcademicSessionEid = getAcademicSessionEidForSectionEid(firstInstructingSectionEidInSite.get());
+		Optional<GroupAndTerm> groupAndTerm = sections.stream().map(section -> getGroupAndTermForSectionIfEligible(section, site, params))
+			.flatMap(Optional::stream).findFirst();
+
+		if (groupAndTerm.isEmpty() && logWhenIneligible) {
+			log.warn("Site {} is not eligible for migration: its corresponding academic sessions are not in the list of eligible terms. User: {}", site.getId(), userEid);
+		}
+
+		return groupAndTerm;
+
+	}
+
+	public Optional<GroupAndTerm> getGroupAndTermForSectionIfEligible(Section section, Site site, GroupIdentificationParameters params) {
+
+		String userEid = params.userEid;
+		List<String> eligibleTerms = params.eligibleTerms;
+		Map<String, String> termCodeGroupMap = params.termCodeGroupMap;
+
+		Optional<String> optAcademicSessionEid = getAcademicSessionEidForSectionEid(section.getEid());
 		if (!optAcademicSessionEid.isPresent()) {
-			log.error("An instructor's section's corresponding academic session was not identified. Instructor {}, sectionEid {}", userEid, firstInstructingSectionEidInSite.get());
+			log.error("An instructor's section's corresponding academic session was not identified. Instructor {}, sectionEid {}", userEid, section.getEid());
 			return Optional.empty();
 		}
 
 		final String academicSessionEid = optAcademicSessionEid.get();
 		if (!eligibleTerms.contains(academicSessionEid)) {
-			if (logWhenIneligible) {
-				log.warn("Site {} is not eligible for migration: its corresponding academic session {} is not in the list of eligible terms. User: {}", site.getId(), academicSessionEid, userEid);
-			}
 			return Optional.empty();
 		}
 

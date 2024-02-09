@@ -9,6 +9,8 @@ import java.util.Optional;
  */
 public interface OwlMigrationService {
 
+	public static final String EVENT_OWL_MIGRATION_SELECTION_SAVED = "owl.migration.selection.save";
+
 	/**
 	 * The global configuration permitting the migration tab to appear
 	 */
@@ -56,6 +58,8 @@ public interface OwlMigrationService {
 	 * @return empty String if the status is not visible
 	 */
 	public String getStatusDisplay(String selectionKey, String statusKey);
+
+	public Optional<String> getAdminDisplayName();
 
 	/**
 	 * Gets a UI message unsuitable to be managed by MBM

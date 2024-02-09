@@ -3,10 +3,12 @@ package org.sakaiproject.sitemanage.impl.owl;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.sakaiproject.authz.api.AuthzGroupService;
 import org.sakaiproject.content.api.ContentHostingService;
 import org.sakaiproject.coursemanagement.api.CourseManagementService;
+import org.sakaiproject.event.api.EventTrackingService;
 import org.sakaiproject.site.api.SiteService;
 import org.sakaiproject.sitemanage.api.owl.OwlMigrationService;
 import org.sakaiproject.sitemanage.api.owl.SiteMigrationItem;
@@ -25,6 +27,8 @@ public class OwlMigrationServiceImpl implements OwlMigrationService {
 	@Setter
 	protected CourseManagementService courseManagementService;
 	@Setter
+	protected EventTrackingService eventTrackingService;
+	@Setter
 	protected SessionManager sessionManager;
 	@Setter
 	protected SiteService siteService;
@@ -34,7 +38,7 @@ public class OwlMigrationServiceImpl implements OwlMigrationService {
 	public void init() {
 		log.info("Initializing OwlMigrationServiceImpl");
 
-		migrationDelegate = new OwlMigrationDelegate(authzGroupService, contentHostingService, courseManagementService, sessionManager, siteService);
+		migrationDelegate = new OwlMigrationDelegate(authzGroupService, contentHostingService, courseManagementService, eventTrackingService, sessionManager, siteService);
 	}
 
 	@Override
@@ -69,6 +73,11 @@ public class OwlMigrationServiceImpl implements OwlMigrationService {
 	@Override
 	public String getStatusDisplay(String selectionKey, String statusKey) {
 		return migrationDelegate.getStatusDisplay(selectionKey, statusKey);
+	}
+
+	@Override
+	public Optional<String> getAdminDisplayName() {
+		return OwlMigrationDAO.getAdminDisplayName();
 	}
 
 	@Override
