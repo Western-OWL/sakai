@@ -175,7 +175,7 @@ public class OwlMigrationDelegate {
 		// Try to return early for non-instructors ASAP:
 		// Get instructor sections. Users with no instructor roles can skip all course site processing
 		String userEid = getCurrentUserEid();
-		final Set<String> instructingSectionEids = getInstructingSectionEids(userEid);
+		final Set<String> instructingSectionEids = getSectionEidsWithEligibleRoles(userEid);
 		boolean skipCourses = instructingSectionEids.isEmpty();
 
 		List<String> eligibleTerms = OwlMigrationDAO.getEligibleTermsForMigration();
@@ -419,9 +419,10 @@ public class OwlMigrationDelegate {
 		return site.getCreatedDate().toInstant().isBefore(toInstant(cutoff.get()));
 	}
 
-	private Set<String> getInstructingSectionEids(String userEid) {
+	private Set<String> getSectionEidsWithEligibleRoles(String userEid) {
+		final List<String> eligibleRoles = OwlMigrationDAO.getEligibleCourseSiteRoles();
 		return courseManagementService.findSectionRoles(userEid).entrySet()
-			.stream().filter(entry -> "I".equals(entry.getValue())).map(Map.Entry::getKey).collect(Collectors.toSet());
+			.stream().filter(entry -> eligibleRoles.contains(entry.getValue())).map(Map.Entry::getKey).collect(Collectors.toSet());
 	}
 
 	private List<Site> getUserSites() {
