@@ -315,18 +315,27 @@ public class OwlMigrationDelegate {
 	private Map<String, List<SiteMigrationItem>> groupSiteMigrationItems(Map<String, List<SiteMigrationItem>> siteMigrationItems, Map<String, List<String>> groupTermMap) {
 		Map<String, List<SiteMigrationItem>> groupedSMIs = new LinkedHashMap<>();
 
-		final List<String> eligibleTerms = OwlMigrationDAO.getEligibleTermsForMigration();
+		// To sort sites within groups primarily by terms, uncomment A, B, and comment C
+
+		// A:
+		// final List<String> eligibleTerms = OwlMigrationDAO.getEligibleTermsForMigration();
 
 		groupTermMap.keySet().stream()
 			.filter(siteMigrationItems::containsKey).forEach(group -> {
 				List<SiteMigrationItem> siteMigrationItemList = siteMigrationItems.get(group);
 
+
+				// B:
+				/*
 				// Order the sites within the group by term, with terms ordered as included in eligibleTermsForMigration.
 				// Safe for project sites: indexOf returns -1 (all are equal)
 				Comparator<SiteMigrationItem> orderedMatchingEligibleTerms = (SiteMigrationItem s1, SiteMigrationItem s2) ->
 					Integer.compare(eligibleTerms.indexOf(s1.getAcademicSessionEid()), eligibleTerms.indexOf(s2.getAcademicSessionEid()));
 
 				siteMigrationItemList.sort(orderedMatchingEligibleTerms.thenComparing(SMI_COMPARATOR));
+				*/
+				// C:
+				siteMigrationItemList.sort(SMI_COMPARATOR);
 				groupedSMIs.put(group, siteMigrationItemList);
 		});
 
