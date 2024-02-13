@@ -78,3 +78,7 @@ VALUES ('!admin', 'OWL_MIG_ADMIN_DISPLAY_NAME', 'Admin');
 # Selections that will trigger a site resources size check in the UI, format: <selectionKey>|<selectionKey|<selectionKey>
 INSERT INTO sakai_site_property
 VALUES ('!admin', 'OWL_MIG_SELECTIONS_WITH_SIZE_CHECKS', 'selfMig');
+
+# Course site roles who are allowed to view their sites with one of these roles, and make migration selections for them, format: roleKey|roleKey|roleKey
+INSERT INTO sakai_site_property
+VALUES ('!admin', 'OWL_MIG_ELIGIBLE_COURSE_ROLES', 'I');

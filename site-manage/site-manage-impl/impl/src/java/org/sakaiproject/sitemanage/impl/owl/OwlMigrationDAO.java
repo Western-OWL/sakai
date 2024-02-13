@@ -53,6 +53,7 @@ public class OwlMigrationDAO
     private static final String OWL_MIG_SITE_SIZE_ERROR_THRESHOLD           = "OWL_MIG_SITE_SIZE_ERROR_THRESHOLD";
     private static final String OWL_MIG_ADMIN_DISPLAY_NAME                  = "OWL_MIG_ADMIN_DISPLAY_NAME";
     private static final String OWL_MIG_SELECTIONS_WITH_SIZE_CHECKS         = "OWL_MIG_SELECTIONS_WITH_SIZE_CHECKS";
+    private static final String OWL_MIG_ELIGIBLE_COURSE_ROLES               = "OWL_MIG_ELIGIBLE_COURSE_ROLES";
 
     // Delimiters used in Admin Workspace props
     private static final String PIPE_DELIM          = "\\|"; // Pipe is a special character in regex, so it needs to be escaped
@@ -280,6 +281,16 @@ public class OwlMigrationDAO
     {
         // Format: selfMig|assistedMig
         return parsePipeDelimitedProp( OWL_MIG_SELECTIONS_WITH_SIZE_CHECKS );
+    }
+
+    /**
+     * Get the list of course site role keys who are allowed to views sites where they have any of these roles, and make migration selections for them in the UI
+     * @return A List of Strings, where each String is a course site role key
+     */
+    public static List<String> getEligibleCourseSiteRoles()
+    {
+        // Format: I|CC|GA
+        return parsePipeDelimitedProp( OWL_MIG_ELIGIBLE_COURSE_ROLES );
     }
 
     /**
