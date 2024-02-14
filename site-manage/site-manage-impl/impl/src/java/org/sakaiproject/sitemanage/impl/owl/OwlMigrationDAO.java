@@ -203,13 +203,13 @@ public class OwlMigrationDAO
     }
 
     /**
-     * Get the default selection key/value pair who's value will be displayed in the UI when there are no "active" status keys
-     * @return A Map with one entry, where the key is the default seleciton key, and the value is the selection key's value
+     * Get the default selection value that will be displayed in the UI when there are no "active" status keys
+     * @return An Optional containing the default selection value, or an empty Optional if the property can't be found or parsed properly
      */
-    public static Map<String, String> getDefaultMigrationSelectionOption()
+    public static Optional<String> getDefaultMigrationSelectionOption()
     {
-        // Format: undecided:Undecided
-        return parsePipeAndColonDelimitedProp( OWL_MIG_SELECTION_DEFAULT );
+        String defaultSelectionOption = StringUtils.trimToNull(getSitePropString( OWL_MIG_SELECTION_DEFAULT ) );
+        return Optional.ofNullable( defaultSelectionOption );
     }
 
     /**

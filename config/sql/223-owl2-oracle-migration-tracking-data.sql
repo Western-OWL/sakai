@@ -14,9 +14,9 @@ VALUES ('!admin', 'OWL_MIG_ACTIVE_SELECTION_KEYS', 'undecided|doNotMig|selfMig|a
 INSERT INTO sakai_site_property
 VALUES ('!admin', 'OWL_MIG_SELECTION_OPTIONS_MAP', 'undecided:Undecided|doNotMig:Do Not Migrate|selfMig:Self-Migration|assistedMig:Assisted Migration');
 
--- Migration default selection to display if the OWL_MIG_ACTIVE_SELECTION_KEYS list is empty; key:displayValue
+-- Migration default selection value to display if the OWL_MIG_ACTIVE_SELECTION_KEYS list is empty
 INSERT INTO sakai_site_property
-VALUES ('!admin', 'OWL_MIG_SELECTION_DEFAULT', 'undecided:Undecided');
+VALUES ('!admin', 'OWL_MIG_SELECTION_DEFAULT', 'Undecided');
 
 -- Migration statuses; key:displayValue (pipe delimited)
 INSERT INTO sakai_site_property
