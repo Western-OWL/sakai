@@ -299,6 +299,7 @@ public class OwlMigrationDelegate {
 
 		if (!group.isPresent()) {
 			log.error("Site {} is eligible, but its academic session {} does not have a corresponding group. Please review OWL_MIG_TERM_GROUPINGS", site.getId(), academicSessionEid);
+			return Optional.empty();
 		}
 
 		return Optional.of(new GroupAndTerm(group.get(), academicSessionEid));

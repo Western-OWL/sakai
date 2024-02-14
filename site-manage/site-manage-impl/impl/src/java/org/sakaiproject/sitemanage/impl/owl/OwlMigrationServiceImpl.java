@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.sakaiproject.authz.api.AuthzGroupService;
 import org.sakaiproject.content.api.ContentHostingService;
@@ -59,6 +60,19 @@ public class OwlMigrationServiceImpl implements OwlMigrationService {
 	public Map<String, String> getMigrationOptions() {
 		return OwlMigrationDAO.getMigrationSelectionOptions();
 	}
+
+	@Override
+	public Map<String, String> getActiveOptions() {
+		final Map<String, String> migrationOptions = getMigrationOptions();
+		return OwlMigrationDAO.getActiveMigrationSelectionKeys().stream()
+			.collect(Collectors.toMap(key -> key, key -> migrationOptions.get(key)));
+	}
+
+	@Override
+	public Optional<String> getNoActiveOptionsDisplay() {
+		return OwlMigrationDAO.getDefaultMigrationSelectionOption();
+	}
+
 
 	@Override
 	public List<String> saveSelections(Map<String, String>  siteSelections) {

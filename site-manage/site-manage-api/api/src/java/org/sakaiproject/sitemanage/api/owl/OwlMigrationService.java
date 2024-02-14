@@ -25,10 +25,23 @@ public interface OwlMigrationService {
 
 
 	/**
-	 * Maps migration option keys to display values
-	 * Iteration order is preserved: implementation is LinkedHashMap
+	 * Maps migration option keys to display values.
+	 * Iteration order is preserved: implementation is LinkedHashMap.
+	 * May contain options that are no longer active.
+	 * @see getActiveOptions()
 	 */
 	public Map<String, String> getMigrationOptions();
+
+	/**
+	 * Map active migration option keys to display values
+	 * If empty, UI should be read only
+	 */
+	public Map<String, String> getActiveOptions();
+
+	/**
+	 * If there are no active migration options, this value will be displayed for sites that are undecided in the read only UI
+	 */
+	public Optional<String> getNoActiveOptionsDisplay();
 
 	/**
 	 * For sites that are eligible for migration and have changeable selections, persist their specified selection.
