@@ -183,7 +183,7 @@ public class OwlMigrationDAO
             }
             catch( EntityPropertyNotDefinedException | EntityPropertyTypeException ex )
             {
-                log.error( "OWL_MIG_ENABLED admin property not found, or malformed", ex );
+                log.error( "OWL_MIG_ENABLED admin property not found, or malformed!" );
             }
         }
 
