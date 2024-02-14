@@ -54,6 +54,8 @@ public class OwlMigrationDAO
     private static final String OWL_MIG_ADMIN_DISPLAY_NAME                  = "OWL_MIG_ADMIN_DISPLAY_NAME";
     private static final String OWL_MIG_SELECTIONS_WITH_SIZE_CHECKS         = "OWL_MIG_SELECTIONS_WITH_SIZE_CHECKS";
     private static final String OWL_MIG_ELIGIBLE_COURSE_ROLES               = "OWL_MIG_ELIGIBLE_COURSE_ROLES";
+    private static final String OWL_MIG_ACTIVE_SELECTION_KEYS               = "OWL_MIG_ACTIVE_SELECTION_KEYS";
+    private static final String OWL_MIG_SELECTION_DEFAULT                   = "OWL_MIG_SELECTION_DEFAULT";
 
     // Delimiters used in Admin Workspace props
     private static final String PIPE_DELIM          = "\\|"; // Pipe is a special character in regex, so it needs to be escaped
@@ -188,6 +190,26 @@ public class OwlMigrationDAO
         }
 
         return false;
+    }
+
+    /**
+     * Get the List of migration selection keys which are "active" (available to be selected in the UI)
+     * @return A List of Strings, where each String is a selection key which is available in the UI for selection by end users
+     */
+    public static List<String> getActiveMigrationSelectionKeys()
+    {
+        // Format: undecided|doNotMig|selfMig|assistedMig
+        return parsePipeDelimitedProp( OWL_MIG_ACTIVE_SELECTION_KEYS );
+    }
+
+    /**
+     * Get the default selection key/value pair who's value will be displayed in the UI when there are no "active" status keys
+     * @return A Map with one entry, where the key is the default seleciton key, and the value is the selection key's value
+     */
+    public static Map<String, String> getDefaultMigrationSelectionOption()
+    {
+        // Format: undecided:Undecided
+        return parsePipeAndColonDelimitedProp( OWL_MIG_SELECTION_DEFAULT );
     }
 
     /**

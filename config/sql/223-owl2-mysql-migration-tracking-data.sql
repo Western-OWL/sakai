@@ -6,9 +6,17 @@
 INSERT INTO sakai_site_property
 VALUES ('!admin', 'OWL_MIG_ENABLED', 'true');
 
-# Migration selection options available in the UI; key:displayValue (pipe delimited)
+# Migration selection option (keys) that are "active" (available for selection in the UI), (pipe delimited)
+INSERT INTO sakai_site_property
+VALUES ('!admin', 'OWL_MIG_ACTIVE_SELECTION_KEYS', 'undecided|doNotMig|selfMig|assistedMig');
+
+# Migration selection options map; key:displayValue (pipe delimited)
 INSERT INTO sakai_site_property
 VALUES ('!admin', 'OWL_MIG_SELECTION_OPTIONS_MAP', 'undecided:Undecided|doNotMig:Do Not Migrate|selfMig:Self-Migration|assistedMig:Assisted Migration');
+
+# Migration default selection to display if the OWL_MIG_ACTIVE_SELECTION_KEYS list is empty; key:displayValue
+INSERT INTO sakai_site_property
+VALUES ('!admin', 'OWL_MIG_SELECTION_DEFAULT', 'undecided:Undecided');
 
 # Migration statuses; key:displayValue (pipe delimited)
 INSERT INTO sakai_site_property
