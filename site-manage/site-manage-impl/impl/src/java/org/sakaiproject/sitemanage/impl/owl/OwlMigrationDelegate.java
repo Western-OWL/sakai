@@ -190,6 +190,13 @@ public class OwlMigrationDelegate {
 		String projectGroup = groupTermMap.keySet().stream().filter(group -> StringUtils.containsIgnoreCase(group, "project")).findFirst().orElse("Project Sites");
 		if (projectSitesEligible && !groupTermMap.containsKey(projectGroup)) {
 			// Project sites are eligible, but they are not placed in the term groupings (authoritative source for UI ordering). Add "Project Sites" to the end.
+			if (groupTermMap.isEmpty()) {
+				/*
+				 * The DAO implementation gave us Collections.emptyMap().
+				 * This is immutable. We want to add to it, so we have to instantiate a new Map
+				 */
+				groupTermMap = new LinkedHashMap<>();
+			}
 			groupTermMap.put(projectGroup, Collections.emptyList());
 		}
 
@@ -365,6 +372,11 @@ public class OwlMigrationDelegate {
 		item.setSiteUrl(site.getUrl());
 	}
 
+	/**
+	 * The displayed resource size is rounded to the nearest decimal place.
+	 * Likewise, the ResourceSizeCategory reflects the rounded value
+	 * because, say, a 1.95 GB site only needs 51.2 MB outside of Resources to exceed 2.0 GB
+	 */
 	private void populateResourcesDetails(SiteMigrationItem item, Site site) {
 		if (OwlMigrationDAO.getSelectionsWithSizeChecks().isEmpty()) {
 			// Resource sizes don't matter; return early for performance
@@ -381,9 +393,9 @@ public class OwlMigrationDelegate {
 		Optional<Float> warnThreshold = OwlMigrationDAO.getSiteSizeWarningThreshold();
 
 		ResourcesSizeCategory category = ResourcesSizeCategory.NONE;
-		if (errorThreshold.isPresent() && resourcesSize > errorThreshold.get()) {
+		if (errorThreshold.isPresent() && (resourcesSize + 0.05) >= errorThreshold.get()) {
 			category = ResourcesSizeCategory.BRIGHTSPACE_LIMIT_EXCEEDED;
-		} else if (warnThreshold.isPresent() && resourcesSize > warnThreshold.get()) {
+		} else if (warnThreshold.isPresent() && resourcesSize + 0.05 >= warnThreshold.get()) {
 			category = ResourcesSizeCategory.WARN;
 		}
 		item.setResourcesSizeCategory(category);
