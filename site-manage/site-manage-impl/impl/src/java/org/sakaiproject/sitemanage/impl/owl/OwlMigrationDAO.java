@@ -104,11 +104,11 @@ public class OwlMigrationDAO
 
             // Formatter for user site properties represnting datetimes, ex: "2024-02-02 14:18"
             DateFormat df = new SimpleDateFormat( DATE_FORMAT );
-            Date selModDate = StringUtils.isBlank( selectionModifiedDate ) ? null : df.parse( selectionModifiedDate );
-            Date statModDate = StringUtils.isBlank( statusModifiedDate ) ? null : df.parse( statusModifiedDate );
+            Date selModDate = parseDate( selectionModifiedDate, df );
+            Date statModDate = parseDate( statusModifiedDate, df );
             return Optional.of( new SiteMigrationItemDTO( siteID, selectionKey, selectionModifiedEID, statusKey, statusModifiedEID, selModDate, statModDate ) );
         }
-        catch( IdUnusedException | ParseException ex )
+        catch( IdUnusedException ex )
         {
             log.error("Unable to retrieve site or property for {}", siteID, ex );
             return Optional.empty();
@@ -380,6 +380,30 @@ public class OwlMigrationDAO
     {
         // Format: 2.0
         return getSitePropFloat( OWL_MIG_SITE_SIZE_ERROR_THRESHOLD );
+    }
+
+    /**
+     * Parse the given date String into a Date object
+     * @param date String representation of a Date
+     * @param df DateFormat object to use when parsing
+     * @return Date object equivalent of the input String, or null if the String is empty, blank, or null itself
+     */
+    private static Date parseDate( String date, DateFormat df )
+    {
+        if( StringUtils.isBlank( date ) )
+        {
+            return null;
+        }
+
+        try
+        {
+            return df.parse( date );
+        }
+        catch( ParseException e )
+        {
+            log.error("Unable to parse date String to Date: {}", date );
+            return null;
+        }
     }
 
     /**
