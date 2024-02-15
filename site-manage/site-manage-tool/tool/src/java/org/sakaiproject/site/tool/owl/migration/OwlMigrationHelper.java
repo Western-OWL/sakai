@@ -48,7 +48,11 @@ public class OwlMigrationHelper
 		boolean editableOptions = termMap.values().stream().flatMap(Collection::stream).anyMatch(smi -> smi.isSelectionEditable());
 		context.put("hasEditableSites", editableOptions); // true if any of the sites are in an editable state (ie. "undecided")
 
-		context.put("options", OWL_MIG_SERV.getMigrationOptions()); // the possible selections in the migration options dropdown
+		context.put("optionsDisplayMap", OWL_MIG_SERV.getMigrationOptions()); // map of all selections key -> display value
+		Map<String, String> activeOptions = OWL_MIG_SERV.getActiveOptions(); // map of currently active selections keys -> display value
+		context.put("options", activeOptions); // the possible selections in the migration options dropdown
+		context.put("readOnlyMode", activeOptions.isEmpty()); // shorthand for no active options (tab is effectively in a read-only mode)
+		context.put("readOnlyNoSelectionDisplay", OWL_MIG_SERV.getNoActiveOptionsDisplay()); // value to display in options column when in read-only mode and no user selection has been made
 
 		context.put("tlang", rb);
 
@@ -78,7 +82,7 @@ public class OwlMigrationHelper
 		// build string for JS array literal used to help determine when to display site size warnings
 		String js = OWL_MIG_SERV.getSelectionKeysWithResourcesSizeWarnings().stream().collect(Collectors.joining("','"));
 		context.put("sizeCheckOptions", js.isBlank() ? "" : "'" + js + "'");
-
+		context.put("showSizeCol", !js.isBlank()); // if there are no selections that trigger size check, hide the size column
 
 		return template + "_migration"; // the actual name of the vm file for this tab
 	}

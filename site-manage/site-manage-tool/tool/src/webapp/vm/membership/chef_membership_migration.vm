@@ -19,7 +19,7 @@
           <thead>
             <tr>
               <th>#mb("owl.mig.header.siteTitle")</th>
-              <th>#mb("owl.mig.header.siteSize")</th>
+              #if($showSizeCol)<th>#mb("owl.mig.header.siteSize")</th>#end
               <th>#mb("owl.mig.header.option")</th>
               <th>#mb("owl.mig.header.optionOn")</th>
               <th>#mb("owl.mig.header.optionBy")</th>
@@ -30,7 +30,7 @@
             #foreach($site in $termMap.get($term))
             <tr>
               <td>#linkify($site)</td>
-              <td>#size($site)</td>
+              #if($showSizeCol)<td>#size($site)</td>#end
               <td>#selection($site $options)</td>
               <td>$MigTool.formatDate($site.SelectionModifiedDate, $tlang.Locale, $noVal)</td>
               <td>$MigTool.formatUser($site.SelectionModifiedEid, $noVal)</td>
@@ -41,12 +41,11 @@
       </fieldset>
       #end
 
-      #if($hasEditableSites)
+      #if($hasEditableSites && !$readOnlyMode)
       <div class="act">
-        <input id="contBtn" type="button" accesskey="c" class="active" name="continue" value='#mb("owl.mig.btn.continue")' onclick="OWL_MIG.continue();" />
+        <input id="contBtn" type="button" accesskey="n" class="active" name="continue" value='#mb("owl.mig.btn.continue")' onclick="OWL_MIG.continue();" />
         <input id="cancelBtn" type="submit" accesskey="x" name="cancel" value='#mb("owl.mig.btn.cancel")'>
       </div>
-      #end
       <div aria-live="polite">
       <div id="owl-mig-realButtonsContainer">
         #if(!$confirm1.Empty)<p>$confirm1</p>#end
@@ -54,11 +53,12 @@
         #if(!$confirm3.Empty)<p>$confirm3</p>#end
         <p>#mb("owl.mig.areyousure")</p>
         <div class="act">
-          <input type="submit" accesskey="s" class="active" name="save" value='#mb("owl.mig.btn.save")' onclick='document.getElementById("sakai_action").value="doMigrate";'/>
-          <input type="button" accesskey="d" name="dontsave" value='#mb("owl.mig.btn.dontsave")' onclick="OWL_MIG.cancelSave();"/>
+          <input id="saveBtn" type="submit" accesskey="s" class="active" name="save" value='#mb("owl.mig.btn.save")' onclick='document.getElementById("sakai_action").value="doMigrate";'/>
+          <input id="dontBtn" type="button" accesskey="d" name="dontsave" value='#mb("owl.mig.btn.dontsave")' onclick="OWL_MIG.cancelSave();"/>
         </div>
       </div>
       </div>
+      #end
 
       <input type="hidden" name="sakai_action" id="sakai_action" value="doMigrate_cancel" />
       <input type="hidden" name="sakai_csrf_token" value="$sakai_csrf_token" />
@@ -99,29 +99,34 @@ OWL_MIG.continue = function()
   document.getElementById("contBtn").disabled=true;
   document.getElementById("cancelBtn").disabled=true;
   realButtonsContainer.scrollIntoView({behavior: "smooth"});
+  document.getElementById("dontBtn").focus();
 }
 
 OWL_MIG.cancelSave = function()
 {
   document.getElementById("owl-mig-realButtonsContainer").style.display="none";
-  document.getElementById("contBtn").disabled=false;
+  const contBtn = document.getElementById("contBtn");
+  contBtn.disabled=false;
   document.getElementById("cancelBtn").disabled=false;
+  contBtn.focus();
 }
 </script>
 
 ## MACROS ONLY BELOW
 
 #macro(selection $site $options)
-#if($site.SelectionEditable)
+#if($site.SelectionEditable && !$readOnlyMode)
 <label for="${site.SiteId}-dropdown" class="sr-only">#mb("owl.mig.select.label") #title($site)</label>
 <select name="userSelection" id="${site.SiteId}-dropdown" data-size-cat="$site.getResourcesSizeCategory().name()">
   #foreach($optionKey in $options.keySet())
   <option value="$site.SiteId::$optionKey" #if($optionKey == $site.SelectionKey)selected#end>$options.get($optionKey)</option>
   #end
 </select>
+#elseif($readOnlyMode && !$site.SelectionModifiedDate.isPresent())
+$readOnlyNoSelectionDisplay.orElse($noVal)
 #else
 #set($status = $MigTool.getStatusDisplay($site))
-$options.get($site.SelectionKey) #if(!$status.Empty)<span class="owl-mig-tracking-status-label">$status</span>#end
+$optionsDisplayMap.get($site.SelectionKey) #if(!$status.Empty)<span class="owl-mig-tracking-status-label">$status</span>#end
 #end
 #end
 
