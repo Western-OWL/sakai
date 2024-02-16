@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 
 import org.sakaiproject.authz.api.AuthzGroupService;
+import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.content.api.ContentCollection;
 import org.sakaiproject.content.api.ContentHostingService;
 import org.sakaiproject.coursemanagement.api.AcademicSession;
@@ -26,6 +27,7 @@ import org.sakaiproject.coursemanagement.api.CourseManagementService;
 import org.sakaiproject.coursemanagement.api.CourseOffering;
 import org.sakaiproject.coursemanagement.api.CourseSet;
 import org.sakaiproject.coursemanagement.api.Section;
+import org.sakaiproject.email.api.EmailService;
 import org.sakaiproject.event.api.EventTrackingService;
 import org.sakaiproject.exception.IdUnusedException;
 import org.sakaiproject.exception.PermissionException;
@@ -45,7 +47,9 @@ public class OwlMigrationDelegate {
 	private AuthzGroupService authzGroupService;
 	private ContentHostingService contentHostingService;
 	private CourseManagementService courseManagementService;
+	private EmailService emailService;
 	private EventTrackingService eventTrackingService;
+	private ServerConfigurationService serverConfigurationService;
 	private SessionManager sessionManager;
 	private SiteService siteService;
 
@@ -53,12 +57,14 @@ public class OwlMigrationDelegate {
 		.thenComparing(SiteMigrationItem::getSiteId);
 
 	public OwlMigrationDelegate(AuthzGroupService authzGroupService, ContentHostingService contentHostingService,
-			CourseManagementService courseManagementService, EventTrackingService eventTrackingService,
-			SessionManager sessionManager, SiteService siteService) {
+			CourseManagementService courseManagementService, EmailService emailService, EventTrackingService eventTrackingService,
+			ServerConfigurationService serverConfigurationService, SessionManager sessionManager, SiteService siteService) {
 		this.authzGroupService = authzGroupService;
 		this.contentHostingService = contentHostingService;
 		this.courseManagementService = courseManagementService;
+		this.emailService = emailService;
 		this.eventTrackingService = eventTrackingService;
+		this.serverConfigurationService = serverConfigurationService;
 		this.sessionManager = sessionManager;
 		this.siteService = siteService;
 	}
@@ -89,6 +95,19 @@ public class OwlMigrationDelegate {
 		return groupSiteMigrationItems(siteMigrationItems, gip.groupTermMap);
 	}
 
+	public Map<String, String> getActiveOptions() {
+		final Map<String, String> migrationOptions = OwlMigrationDAO.getMigrationSelectionOptions();
+		List<String> activeMigrationOptions = OwlMigrationDAO.getActiveMigrationSelectionKeys();
+
+		if (activeMigrationOptions.stream().anyMatch(option -> !migrationOptions.containsKey(option))) {
+			logAndSendMisconfigurationEmail("OWL_MIG_ACTIVE_SELECTION_KEYS contains items that are not keys in OWL_MIG_SELECTION_OPTIONS_MAP. Until this is resolved, the migration tab will be in read-only mode.");
+			return Collections.emptyMap();
+		}
+
+		return activeMigrationOptions.stream()
+			.collect(Collectors.toMap(key -> key, key -> migrationOptions.get(key), (v1, v2) -> v2, LinkedHashMap::new));
+	}
+
 	public List<String> saveSelections(Map<String, String> siteSelections) {
 		Optional<GroupIdentificationParameters> optGip = buildGroupIdentificationParameters();
 		if (optGip.isEmpty()) {
@@ -109,7 +128,19 @@ public class OwlMigrationDelegate {
 			String selectionKey = siteSelection.getValue();
 
 			Optional<Site> site = userSites.stream().filter(userSite -> StringUtils.equals(userSite.getId(), siteId)).findFirst();
-			String siteTitle = site.map(Site::getTitle).orElse(siteId);
+			if (!site.isPresent()) {
+				log.warn("User {} tried to change the selection for site {} in which they are not a member", getCurrentUserEid(), siteId);
+				failedSiteTitles.add(siteId);
+				continue;
+			}
+
+			String siteTitle = site.get().getTitle();
+
+			if (!OwlMigrationDAO.getActiveMigrationSelectionKeys().contains(selectionKey)) {
+				log.warn("User {} tried to change the selection for site {} to a value that is not an active selection: {}" , getCurrentUserEid(), siteId, selectionKey);
+				failedSiteTitles.add(siteTitle);
+				continue;
+			}
 
 			// Validate that the site is eligible for migration
 			if (!site.isPresent() || !getGroupAndTermIfSiteEligibleForMigration(site.get(), gip, true).isPresent()) {
@@ -305,7 +336,7 @@ public class OwlMigrationDelegate {
 			.map(Map.Entry::getValue).findFirst();
 
 		if (!group.isPresent()) {
-			log.error("Site {} is eligible, but its academic session {} does not have a corresponding group. Please review OWL_MIG_TERM_GROUPINGS", site.getId(), academicSessionEid);
+			logAndSendMisconfigurationEmail("Site {} is eligible, but its academic session {} does not have a corresponding group. Please review OWL_MIG_TERM_GROUPINGS", site.getId(), academicSessionEid);
 			return Optional.empty();
 		}
 
@@ -318,6 +349,29 @@ public class OwlMigrationDelegate {
 			return StringUtils.trimToEmpty(OwlMigrationDAO.getMigrationStatusOptions().get(statusKey));
 		}
 		return "";
+	}
+
+	/**
+	 * Takes an slf4j style parameterized message describing a misconfiguraiton issue.
+	 * The message is both logged and emailed to the configured recipients.
+	 */
+	public void logAndSendMisconfigurationEmail(String message, String... params) {
+		Object[] args = (Object[]) params;
+		log.error(message, args);
+
+		String sender = serverConfigurationService.getString("smtpFrom@org.sakaiproject.email.api.EmailService", "postmaster@" + serverConfigurationService.getServerName());
+
+		Optional<String> optRecipient = OwlMigrationDAO.getSupportEmailAddress();
+		if (!optRecipient.isPresent()) {
+			log.error("Migration tab is misconfigured, and there is no email recipient; using owlmigrationquestions@uwo.ca");
+		}
+
+		String recipient = optRecipient.orElse("owlmigrationquestions@uwo.ca");
+		String environment = serverConfigurationService.getString("ui.service", "OWL");
+		String subject = environment + ": Migration tab properties are misconfigured!";
+		String emailBody = String.format(message.replace("{}", "%s"), args);
+
+		emailService.send(sender, recipient, subject, emailBody, null, null, null);
 	}
 
 	private Map<String, List<SiteMigrationItem>> groupSiteMigrationItems(Map<String, List<SiteMigrationItem>> siteMigrationItems, Map<String, List<String>> groupTermMap) {

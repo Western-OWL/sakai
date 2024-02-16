@@ -1,14 +1,17 @@
 package org.sakaiproject.sitemanage.impl.owl;
 
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.sakaiproject.authz.api.AuthzGroupService;
+import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.content.api.ContentHostingService;
 import org.sakaiproject.coursemanagement.api.CourseManagementService;
+import org.sakaiproject.email.api.EmailService;
 import org.sakaiproject.event.api.EventTrackingService;
 import org.sakaiproject.site.api.SiteService;
 import org.sakaiproject.sitemanage.api.owl.OwlMigrationService;
@@ -28,7 +31,11 @@ public class OwlMigrationServiceImpl implements OwlMigrationService {
 	@Setter
 	protected CourseManagementService courseManagementService;
 	@Setter
+	protected EmailService emailService;
+	@Setter
 	protected EventTrackingService eventTrackingService;
+	@Setter
+	protected ServerConfigurationService serverConfigurationService;
 	@Setter
 	protected SessionManager sessionManager;
 	@Setter
@@ -39,7 +46,8 @@ public class OwlMigrationServiceImpl implements OwlMigrationService {
 	public void init() {
 		log.info("Initializing OwlMigrationServiceImpl");
 
-		migrationDelegate = new OwlMigrationDelegate(authzGroupService, contentHostingService, courseManagementService, eventTrackingService, sessionManager, siteService);
+		migrationDelegate = new OwlMigrationDelegate(authzGroupService, contentHostingService, courseManagementService,
+			emailService, eventTrackingService, serverConfigurationService, sessionManager, siteService);
 	}
 
 	@Override
@@ -63,16 +71,13 @@ public class OwlMigrationServiceImpl implements OwlMigrationService {
 
 	@Override
 	public Map<String, String> getActiveOptions() {
-		final Map<String, String> migrationOptions = getMigrationOptions();
-		return OwlMigrationDAO.getActiveMigrationSelectionKeys().stream()
-			.collect(Collectors.toMap(key -> key, key -> migrationOptions.get(key)));
+		return migrationDelegate.getActiveOptions();
 	}
 
 	@Override
 	public Optional<String> getNoActiveOptionsDisplay() {
 		return OwlMigrationDAO.getDefaultMigrationSelectionOption();
 	}
-
 
 	@Override
 	public List<String> saveSelections(Map<String, String>  siteSelections) {
