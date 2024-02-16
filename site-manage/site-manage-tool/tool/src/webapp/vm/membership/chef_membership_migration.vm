@@ -126,7 +126,7 @@ OWL_MIG.cancelSave = function()
 $readOnlyNoSelectionDisplay.orElse($noVal)
 #else
 #set($status = $MigTool.getStatusDisplay($site))
-$optionsDisplayMap.get($site.SelectionKey) #if(!$status.Empty)<span class="owl-mig-tracking-status-label">$status</span>#end
+$MigTool.getSelectionDisplay($site, $optionsDisplayMap) #if(!$status.Empty)<span class="owl-mig-tracking-status-label">$status</span>#end
 #end
 #end
 

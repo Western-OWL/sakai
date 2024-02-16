@@ -3,6 +3,7 @@ package org.sakaiproject.site.tool.owl.migration;
 import java.time.Instant;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.component.cover.ComponentManager;
@@ -113,5 +114,18 @@ public class MigTool
 	public static String formatSize(SiteMigrationItem item)
 	{
 		return item.getResourcesSize() + " GB";
+	}
+
+	/**
+	 * Gets the display text for the given site's selection
+	 * @param item the site
+	 * @param displayMap the map of selection keys to display text
+	 * @return the display value for the key, or the key itself if not found in the map
+	 */
+	public static String getSelectionDisplay(SiteMigrationItem item, Map<String, String> displayMap)
+	{
+		String key = item.getSelectionKey();
+		String display = displayMap.get(item.getSelectionKey());
+		return display == null ? key : display;
 	}
 }
