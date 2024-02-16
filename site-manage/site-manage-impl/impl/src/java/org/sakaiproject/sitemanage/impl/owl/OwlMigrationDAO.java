@@ -56,6 +56,7 @@ public class OwlMigrationDAO
     private static final String OWL_MIG_ELIGIBLE_COURSE_ROLES               = "OWL_MIG_ELIGIBLE_COURSE_ROLES";
     private static final String OWL_MIG_ACTIVE_SELECTION_KEYS               = "OWL_MIG_ACTIVE_SELECTION_KEYS";
     private static final String OWL_MIG_SELECTION_DEFAULT                   = "OWL_MIG_SELECTION_DEFAULT";
+    private static final String OWL_MIG_SUPPORT_EMAIL                       = "OWL_MIG_SUPPORT_EMAIL";
 
     // Delimiters used in Admin Workspace props
     private static final String PIPE_DELIM          = "\\|"; // Pipe is a special character in regex, so it needs to be escaped
@@ -193,6 +194,16 @@ public class OwlMigrationDAO
     }
 
     /**
+     * Get the support email address stored in the OWL_MIG_SUPPORT_EMAIL Admin site property
+     * @return An Optional wrapping the email address String, or empty Optional if the property wasn't found
+     */
+    public static Optional<String> getSupportEmailAddress()
+    {
+        String supportEmail = StringUtils.trimToNull( getSitePropString( OWL_MIG_SUPPORT_EMAIL ) );
+        return Optional.ofNullable( supportEmail );
+    }
+
+    /**
      * Get the List of migration selection keys which are "active" (available to be selected in the UI)
      * @return A List of Strings, where each String is a selection key which is available in the UI for selection by end users
      */
@@ -208,7 +219,7 @@ public class OwlMigrationDAO
      */
     public static Optional<String> getDefaultMigrationSelectionOption()
     {
-        String defaultSelectionOption = StringUtils.trimToNull(getSitePropString( OWL_MIG_SELECTION_DEFAULT ) );
+        String defaultSelectionOption = StringUtils.trimToNull( getSitePropString( OWL_MIG_SELECTION_DEFAULT ) );
         return Optional.ofNullable( defaultSelectionOption );
     }
 
