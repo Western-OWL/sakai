@@ -68,7 +68,7 @@ public class OwlMigrationDAO
 
     // User site prop keys
     private static final String OWL_MIG_USER_SELECTION          = "OWL_MIG_USER_SELECTION";
-    private static final String OWL_MIG_USER_SELETION_DATE      = "OWL_MIG_USER_SELETION_DATE";
+    private static final String OWL_MIG_USER_SELECTION_DATE     = "OWL_MIG_USER_SELECTION_DATE";
     private static final String OWL_MIG_USER_SELECTION_EID      = "OWL_MIG_USER_SELECTION_EID";
     private static final String OWL_MIG_STATUS                  = "OWL_MIG_STATUS";
     private static final String OWL_MIG_STATUS_MODIFIED_DATE    = "OWL_MIG_STATUS_MODIFIED_DATE";
@@ -100,7 +100,7 @@ public class OwlMigrationDAO
             String selectionModifiedEID = StringUtils.trimToEmpty( props.getProperty( OWL_MIG_USER_SELECTION_EID ) );
             String statusKey = StringUtils.trimToEmpty( props.getProperty( OWL_MIG_STATUS ) );
             String statusModifiedEID = StringUtils.trimToEmpty( props.getProperty( OWL_MIG_STATUS_MODIFIED_EID ) );
-            String selectionModifiedDate = props.getProperty( OWL_MIG_USER_SELETION_DATE );
+            String selectionModifiedDate = props.getProperty( OWL_MIG_USER_SELECTION_DATE );
             String statusModifiedDate = props.getProperty( OWL_MIG_STATUS_MODIFIED_DATE );
 
             // Formatter for user site properties represnting datetimes, ex: "2024-02-02 14:18"
@@ -145,7 +145,7 @@ public class OwlMigrationDAO
             DateFormat df = new SimpleDateFormat( DATE_FORMAT );
             String statusModifiedDate = dto.getStatusModifiedDate() != null ? df.format( dto.getStatusModifiedDate() ) : "";
 
-            props.addProperty( OWL_MIG_USER_SELETION_DATE, df.format( dto.getSelectionModifiedDate() ) );
+            props.addProperty( OWL_MIG_USER_SELECTION_DATE, df.format( dto.getSelectionModifiedDate() ) );
             props.addProperty( OWL_MIG_STATUS_MODIFIED_DATE, statusModifiedDate );
 
             siteService.save( site );
