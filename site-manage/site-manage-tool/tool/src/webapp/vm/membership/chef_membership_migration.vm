@@ -88,7 +88,10 @@ OWL_MIG.showSizeBlurb = function()
 OWL_MIG.showHideSizeBlurb = function()
 {
   const blurb = document.getElementById("sizeBlurb");
-  blurb.style.display = OWL_MIG.showSizeBlurb() ? "block" : "none";
+  if (blurb !== null)
+  {
+    blurb.style.display = OWL_MIG.showSizeBlurb() ? "block" : "none";
+  }
 }
 
 OWL_MIG.continue = function()
