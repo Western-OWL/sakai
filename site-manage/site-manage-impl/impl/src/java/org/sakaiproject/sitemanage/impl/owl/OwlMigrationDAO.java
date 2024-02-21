@@ -94,7 +94,6 @@ public class OwlMigrationDAO
 
         try
         {
-            log.error( "Before site object retrieval" );
             Site site = siteService.getSite( siteID );
             ResourceProperties props = site.getProperties();
             String selectionKey = StringUtils.trimToEmpty( props.getProperty( OWL_MIG_USER_SELECTION ) );
@@ -108,7 +107,6 @@ public class OwlMigrationDAO
             DateFormat df = new SimpleDateFormat( DATE_FORMAT );
             Date selModDate = parseDate( selectionModifiedDate, df );
             Date statModDate = parseDate( statusModifiedDate, df );
-            log.error( "After site object and property retrieval, before Optional<> return" );
             return Optional.of( new SiteMigrationItemDTO( siteID, selectionKey, selectionModifiedEID, statusKey, statusModifiedEID, selModDate, statModDate ) );
         }
         catch( IdUnusedException ex )
@@ -137,7 +135,6 @@ public class OwlMigrationDAO
 
         try
         {
-            log.error( "Before site object retrieval" );
             Site site = siteService.getSite( dto.getSiteID() );
             ResourcePropertiesEdit props = site.getPropertiesEdit();
             props.addProperty( OWL_MIG_USER_SELECTION, dto.getSelectionKey() );
@@ -152,7 +149,6 @@ public class OwlMigrationDAO
             props.addProperty( OWL_MIG_STATUS_MODIFIED_DATE, statusModifiedDate );
 
             siteService.save( site );
-            log.error( "After SiteService.save()" );
             return true;
         }
         catch( IdUnusedException | PermissionException ex )
