@@ -53,7 +53,7 @@
         #if(!$confirm3.Empty)<p>$confirm3</p>#end
         <p>#mb("owl.mig.areyousure")</p>
         <div class="act">
-          <input id="saveBtn" type="submit" accesskey="s" class="active" name="save" value='#mb("owl.mig.btn.save")' onclick='document.getElementById("sakai_action").value="doMigrate";'/>
+          <input id="saveBtn" type="submit" accesskey="s" class="active" name="save" value='#mb("owl.mig.btn.save")' onclick='document.getElementById("sakai_action").value="doMigrate";SPNR.disableControlsAndSpin(this, null);'/>
           <input id="dontBtn" type="button" accesskey="d" name="dontsave" value='#mb("owl.mig.btn.dontsave")' onclick="OWL_MIG.cancelSave();"/>
         </div>
       </div>
