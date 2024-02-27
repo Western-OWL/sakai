@@ -62,6 +62,7 @@ public class ReportHandlerHook {
               response.sendRedirect("/lessonbuilder-tool/ccexport?" +
                       "version=" + parameters.getVersion() + "&" +
                       "bank=" + parameters.getBank() + "&" +
+                      "draft=" + parameters.getDraft() + "&" +
                       "siteid=" + siteId);
           } catch (IOException ioe) {
               log.warn("Could not send redirect, {}", ioe.toString());

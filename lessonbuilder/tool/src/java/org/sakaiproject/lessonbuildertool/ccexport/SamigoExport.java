@@ -79,7 +79,7 @@ public class SamigoExport {
         messageSource.setBasename("messages");
     }
 
-    public List<String> getEntitiesInSite(String siteId) {
+    public List<String> getEntitiesInSite(String siteId, boolean includeDrafts) {
         // find topics in site, but organized by forum
         return Optional.ofNullable(pubService.getBasicInfoOfAllPublishedAssessments2("title", true, siteId).stream())
                 .orElseGet(Stream::empty)

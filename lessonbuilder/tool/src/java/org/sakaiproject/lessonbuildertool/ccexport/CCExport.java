@@ -108,7 +108,7 @@ public class CCExport {
      * contents of the site is brought over.
      */
 
-    public void doExport(HttpServletResponse response, String siteId, String version, String bank) {
+    public void doExport(HttpServletResponse response, String siteId, String version, String bank, String draft) {
         CCConfig ccConfig = new CCConfig(siteId, preferencesService.getLocale(sessionManager.getCurrentSessionUserId()));
 
         if ("1.1".equals(version)) {
@@ -120,6 +120,9 @@ public class CCExport {
         if ("1".equals(bank)) {
             ccConfig.setDoBank(true);
         }
+
+        // OWL
+        ccConfig.setDoDraft("1".equals(draft));
 
         ccConfig.setResults(new ArrayList<>());
 
@@ -306,7 +309,7 @@ public class CCExport {
 
     public boolean addAllSamigo(CCConfig ccConfig) {
 
-        List<String> tests = samigoExport.getEntitiesInSite(ccConfig.getSiteId());
+        List<String> tests = samigoExport.getEntitiesInSite(ccConfig.getSiteId(), ccConfig.isDoDraft());
         if (tests == null) return true;
 
         // These are going to be loaded into the final file system. I considered

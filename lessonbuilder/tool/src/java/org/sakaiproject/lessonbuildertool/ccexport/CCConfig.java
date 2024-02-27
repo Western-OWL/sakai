@@ -35,6 +35,8 @@ public class CCConfig {
     private boolean doBank = false;
     private CCResourceItem samigoBank = null;
     private int nextId = 1;
+    // OWL
+    private boolean doDraft = false;
 
     private Map<String, CCResourceItem> fileMap = new HashMap<>();                  // file resources
     private Map<String, CCResourceItem> samigoMap = new HashMap<>();                // Samigo tests

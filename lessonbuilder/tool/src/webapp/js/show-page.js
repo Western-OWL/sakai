@@ -617,9 +617,12 @@ $(document).ready(function() {
             const exportCCVersion = document.querySelector('input[name="export-cc"]:checked').value;
             const exportCCLink = document.getElementById('export-cc-link');
             const exportCCUrl = new URL(exportCCLink.href);
+            // OWL - get the draft checkbox value
+            const exportCCDraft = document.getElementById('export-cc-draft').checked;
             // Update the request parameters with the selected options.
             exportCCUrl.searchParams.set('version', exportCCVersion);
             exportCCUrl.searchParams.set('bank', exportCCBank ? 1 : 0);
+            exportCCUrl.searchParams.set('draft', exportCCDraft ? 1 : 0);
             // Replace the link
             exportCCLink.href = exportCCUrl.href;
             exportCCLink.click();
