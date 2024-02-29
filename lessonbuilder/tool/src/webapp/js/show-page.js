@@ -612,23 +612,56 @@ $(document).ready(function() {
 
         $('#export-cc-submit').click(function(){
             // Get the checkbox value for bank option.
-            const exportCCBank = document.getElementById('export-cc-bank').checked;
+            const exportCCBank = document.getElementById('export-cc-bank').checked && !document.getElementById('export-cc-bank').disabled;
             // Get the selected CC version.
             const exportCCVersion = document.querySelector('input[name="export-cc"]:checked').value;
             const exportCCLink = document.getElementById('export-cc-link');
             const exportCCUrl = new URL(exportCCLink.href);
-            // OWL - get the draft checkbox value
-            const exportCCDraft = document.getElementById('export-cc-draft').checked;
+            // OWL - get the draft checkbox value and the tool checkbox values
+            const exportCCDraft = document.getElementById('export-cc-draft').checked && !document.getElementById('export-cc-draft').disabled;
+            const toolBoxes = Array.from(document.getElementsByName("includecontent"));
+            const tools = toolBoxes.filter((cb) => cb.checked).map((cb) => cb.dataset.tool).join();
             // Update the request parameters with the selected options.
             exportCCUrl.searchParams.set('version', exportCCVersion);
             exportCCUrl.searchParams.set('bank', exportCCBank ? 1 : 0);
             exportCCUrl.searchParams.set('draft', exportCCDraft ? 1 : 0);
+            exportCCUrl.searchParams.set('tools', tools);
             // Replace the link
             exportCCLink.href = exportCCUrl.href;
             exportCCLink.click();
             closeExportCcDialog();
             return false;
         });
+
+		// OWL
+		$('[name="includecontent"]').click(function()
+		{
+			const tools = Array.from(document.getElementsByName("includecontent")).filter((cb) => cb.checked);
+			document.getElementById("export-cc-submit").disabled = tools.length === 0;
+		});
+		$('#export-cc-content-sam').click(function()
+		{
+			const samBox = document.getElementById("export-cc-content-sam");
+			const asnBox = document.getElementById("export-cc-content-asn");
+			const bankBox = document.getElementById("export-cc-bank");
+			const draftBox = document.getElementById("export-cc-draft");
+			bankBox.disabled = !samBox.checked;
+			if (draftBox !== null)
+			{
+				draftBox.disabled = !samBox.checked && !asnBox.checked;
+			}
+
+		});
+		$('#export-cc-content-asn').click(function()
+		{
+			const samBox = document.getElementById("export-cc-content-sam");
+			const asnBox = document.getElementById("export-cc-content-asn");
+			const draftBox = document.getElementById("export-cc-draft");
+			if (draftBox !== null)
+			{
+				draftBox.disabled = !samBox.checked && !asnBox.checked;
+			}
+		});
 
 		$('#import-cc-submit').click(function() {
 			// prevent double clicks

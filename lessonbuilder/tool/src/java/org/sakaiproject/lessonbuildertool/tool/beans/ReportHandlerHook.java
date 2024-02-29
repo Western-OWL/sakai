@@ -63,6 +63,7 @@ public class ReportHandlerHook {
                       "version=" + parameters.getVersion() + "&" +
                       "bank=" + parameters.getBank() + "&" +
                       "draft=" + parameters.getDraft() + "&" +
+                      "tools=" + parameters.getTools() + "&" +
                       "siteid=" + siteId);
           } catch (IOException ioe) {
               log.warn("Could not send redirect, {}", ioe.toString());

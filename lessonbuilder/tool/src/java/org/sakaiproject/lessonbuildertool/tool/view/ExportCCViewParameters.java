@@ -28,10 +28,16 @@ import uk.org.ponder.rsf.viewstate.SimpleViewParameters;
 
 public class ExportCCViewParameters extends SimpleViewParameters {
 
+	public static final String VERSION_DEFAULT = "1.3";
+	public static final String BANK_DEFAULT = "0";
+	public static final String DRAFT_DEFAULT = "0";
+	public static final String TOOLS_DEFAULT = "asn,frm,lsn,lti,res,sam";
+
 	private boolean exportcc = false;
-        private String version = "1.2";
-        private String bank = "1";
-	private String draft = "0";
+	private String version = VERSION_DEFAULT;
+	private String bank = BANK_DEFAULT;
+	private String draft = DRAFT_DEFAULT;
+	private String tools = TOOLS_DEFAULT;
 
 	public ExportCCViewParameters() {
 		super();
@@ -73,4 +79,11 @@ public class ExportCCViewParameters extends SimpleViewParameters {
 		return draft;
 	}
 
+	public void setTools(String s) {
+		tools = s;
+	}
+
+	public String getTools() {
+		return tools;
+	}
 }

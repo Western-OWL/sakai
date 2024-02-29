@@ -54,18 +54,19 @@ public class CCExportServlet extends HttpServlet {
         String bank = request.getParameter("bank");
         // OWL
         String draft = request.getParameter("draft");
+        String tools = request.getParameter("tools");
 
         try {
-            if (StringUtils.isNoneBlank(siteId, version, bank, draft)) {
+            if (StringUtils.isNoneBlank(siteId, version, bank, draft, tools)) {
                 Site site = siteService.getSite(siteId);
                 if (securityService.unlock(SimplePage.PERMISSION_LESSONBUILDER_UPDATE, site.getReference())) {
-                    ccExport.doExport(response, siteId, version, bank, draft);
+                    ccExport.doExport(response, siteId, version, bank, draft, tools);
                     response.setStatus(HttpServletResponse.SC_OK);
                 } else {
                     response.sendError(HttpServletResponse.SC_FORBIDDEN);
                 }
             } else {
-                log.warn("Missing params: siteId={}, version={}, bank={}, draft={}", siteId, version, bank, draft);
+                log.warn("Missing params: siteId={}, version={}, bank={}, draft={}, tools={}", siteId, version, bank, draft, tools);
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             }
         } catch (IdUnusedException iue) {

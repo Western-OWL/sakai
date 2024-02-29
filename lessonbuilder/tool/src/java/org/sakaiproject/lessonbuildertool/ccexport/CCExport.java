@@ -55,6 +55,7 @@ import org.sakaiproject.user.api.PreferencesService;
 
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.sakaiproject.lessonbuildertool.tool.view.ExportCCViewParameters;
 
 @Slf4j
 public class CCExport {
@@ -108,7 +109,7 @@ public class CCExport {
      * contents of the site is brought over.
      */
 
-    public void doExport(HttpServletResponse response, String siteId, String version, String bank, String draft) {
+    public void doExport(HttpServletResponse response, String siteId, String version, String bank, String draft, String tools) {
         CCConfig ccConfig = new CCConfig(siteId, preferencesService.getLocale(sessionManager.getCurrentSessionUserId()));
 
         if ("1.1".equals(version)) {
@@ -123,31 +124,56 @@ public class CCExport {
 
         // OWL
         ccConfig.setDoDraft("1".equals(draft));
+        List<String> doTools = List.of(tools.split(","));
+        if (doTools.isEmpty() || StringUtils.isBlank(doTools.get(0))) {
+            doTools = List.of(ExportCCViewParameters.TOOLS_DEFAULT.split(","));
+        }
 
         ccConfig.setResults(new ArrayList<>());
 
         try {
-            if (!addAllFiles(ccConfig)) return;
-            if (!addAllSamigo(ccConfig)) return;
-            if (!addAllAssignments(ccConfig)) return;
-            if (!addAllForums(ccConfig)) return;
-            if (!addAllBlti(ccConfig)) return;
+            if (doTools.contains("res") && !addAllFiles(ccConfig)) return;
+            if (doTools.contains("sam") && !addAllSamigo(ccConfig)) return;
+            if (doTools.contains("asn") && !addAllAssignments(ccConfig)) return;
+            if (doTools.contains("frm") && !addAllForums(ccConfig)) return;
+            if (doTools.contains("lti") && !addAllBlti(ccConfig)) return;
         } catch (Exception e) {
             log.error("Lessons export error outputting file, {}", e.toString());
             setErrKey("simplepage.exportcc-fileerr", e.getMessage(), ccConfig.getLocale());
         }
 
+        String siteTitle = "UNKNOWN_SITE";
+        try {
+            Site s = siteService.getSite(siteId);
+            siteTitle = StringUtils.deleteWhitespace(s.getTitle());
+        }
+        catch (IdUnusedException e) {
+            // ignore
+        }
+
         try (ZipPrintStream out = new ZipPrintStream(response.getOutputStream())) {
             out.setLevel(serverConfigurationService.getInt("zip.compression.level", 1));
-            response.setHeader("Content-disposition", "inline; filename=sakai-export.imscc");
+            response.setHeader("Content-disposition", String.format("inline; filename=sakai-export-%s_%s.imscc", siteTitle, siteId));
             response.setContentType("application/zip");
 
-            outputAllFiles(ccConfig, out);
-            outputAllSamigo(ccConfig, out);
-            outputAllAssignments(ccConfig, out);
-            outputAllForums(ccConfig, out);
-            outputAllBlti(ccConfig, out);
-            outputAllTexts(ccConfig, out);
+            if (doTools.contains("res")) {
+                outputAllFiles(ccConfig, out);
+            }
+            if (doTools.contains("sam")) {
+                outputAllSamigo(ccConfig, out);
+            }
+            if (doTools.contains("asn")) {
+                outputAllAssignments(ccConfig, out);
+            }
+            if (doTools.contains("frm")) {
+                outputAllForums(ccConfig, out);
+            }
+            if (doTools.contains("lti")) {
+                outputAllBlti(ccConfig, out);
+            }
+            if (doTools.contains("lsn")) {
+                outputAllTexts(ccConfig, out);
+            }
             outputManifest(ccConfig, out);
 
             ZipEntry zipEntry = new ZipEntry("cc-objects/export-errors.txt");

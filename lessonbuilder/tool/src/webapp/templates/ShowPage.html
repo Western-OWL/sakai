@@ -1732,13 +1732,29 @@
                             <label rsf:id="msg=simplepage.exportcc-use11" for="export-cc-v11" id="export-cc-v11-label">Use v1.1</label>
                         </div>
                         <div class="radio">
-                            <input type="radio" name="export-cc" id="export-cc-v12" checked="checked" value="1.2"/>
+                            <input type="radio" name="export-cc" id="export-cc-v12" value="1.2"/>
                             <label rsf:id="msg=simplepage.exportcc-use12" for="export-cc-v12" id="export-cc-v12-label">Use v1.2</label>
                         </div>
                         <div class="radio">
-                            <input type="radio" name="export-cc" id="export-cc-v13" value="1.3"/>
+                            <input type="radio" name="export-cc" id="export-cc-v13" checked="checked" value="1.3"/>
                             <label rsf:id="msg=simplepage.exportcc-use13" for="export-cc-v13" id="export-cc-v13-label">Use v1.3</label> <br />
                         </div>
+                    </div>
+                    <div class="form-group">
+                        <p rsf:id="msg=simplepage.exportcc-includecontent">Include content:</p>
+                        <input type="checkbox" name="includecontent" id="export-cc-content-asn" data-tool="asn" checked="checked" class="checkbox"/>
+                        <label rsf:id="msg=simplepage.exportcc-includecontent-asn" for="export-cc-content-asn" id="export-cc-content-asn-label">Include Assignments</label> <br />
+                        <input type="checkbox" name="includecontent" id="export-cc-content-frm" data-tool="frm" checked="checked"/>
+                        <label rsf:id="msg=simplepage.exportcc-includecontent-frm" for="export-cc-content-frm" id="export-cc-content-frm-label">Include Forums</label> <br />
+                        <input type="checkbox" name="includecontent" id="export-cc-content-lsn" data-tool="lsn" checked="checked"/>
+                        <label rsf:id="msg=simplepage.exportcc-includecontent-lsn" for="export-cc-content-lsn" id="export-cc-content-lsn-label">Include Lessons</label> <br />
+                        <input type="checkbox" name="includecontent" id="export-cc-content-lti" data-tool="lti" checked="checked"/>
+                        <label rsf:id="msg=simplepage.exportcc-includecontent-lti" for="export-cc-content-lti" id="export-cc-content-lti-label">Include LTI</label> <br />
+                        <input type="checkbox" name="includecontent" id="export-cc-content-res" data-tool="res" checked="checked"/>
+                        <label rsf:id="msg=simplepage.exportcc-includecontent-res" for="export-cc-content-res" id="export-cc-content-res-label">Include Resources</label> <br />
+                        <input type="checkbox" name="includecontent" id="export-cc-content-sam" data-tool="sam" checked="checked"/>
+                        <label rsf:id="msg=simplepage.exportcc-includecontent-sam" for="export-cc-content-sam" id="export-cc-content-sam-label">Include Quizzes</label> <br />
+                        <p rsf:id="msg=simplepage.exportcc-includecontent-warning" class="sak-banner-warn" >Excluding Resources can result in incomplete exports of other tool content.</p>
                     </div>
                     <div class="form-group">
                         <input type="checkbox" id="export-cc-bank"/>

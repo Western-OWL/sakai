@@ -2196,3 +2196,9 @@ input[type="text"]:disabled {
 	color: var(--sak-text-color-1);
 	background-color: var(--sak-background-color-1);
 }
+
+/* OWL */
+#export-cc-dialog label
+{
+	cursor: pointer;
+}

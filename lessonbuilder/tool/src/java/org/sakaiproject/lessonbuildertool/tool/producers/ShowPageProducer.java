@@ -4881,9 +4881,6 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 		// the actual submission is with a GET. The submit button clicks this link.
 		ExportCCViewParameters view = new ExportCCViewParameters("exportCc");
 		view.setExportcc(true);
-		view.setVersion("1.2");
-		view.setBank("1");
-		view.setDraft("0");
 		UIInternalLink.make(form, "export-cc-link", "export cc link", view);
 
 	}
