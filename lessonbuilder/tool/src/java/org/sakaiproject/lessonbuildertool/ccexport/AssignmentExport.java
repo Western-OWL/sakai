@@ -27,6 +27,7 @@ import org.sakaiproject.assignment.api.model.Assignment;
 import org.sakaiproject.content.api.ContentHostingService;
 import org.sakaiproject.content.api.ContentResource;
 import org.sakaiproject.lessonbuildertool.service.LessonEntity;
+import org.sakaiproject.lessonbuildertool.util.ResourceLoaderMessageSource;
 import org.sakaiproject.util.api.FormattedText;
 
 import lombok.Setter;
@@ -40,11 +41,18 @@ public class AssignmentExport {
     @Setter private ContentHostingService contentHostingService;
     @Setter private FormattedText formattedText;
 
-    private List<CCAssignmentItem> getItemsInSite(String siteId) {
+    private ResourceLoaderMessageSource messageSource;
+
+    public AssignmentExport() {
+        messageSource = new ResourceLoaderMessageSource();
+        messageSource.setBasename("messages");
+    }
+
+    private List<CCAssignmentItem> getItemsInSite(String siteId, boolean includeDrafts) {
         List<CCAssignmentItem> list = new ArrayList<>();
 
         for (Assignment assignment : assignmentService.getAssignmentsForContext(siteId)) {
-            if (!assignment.getDraft()) {
+            if (includeDrafts || !assignment.getDraft()) {
                 Set<String> attachments = assignment.getAttachments();
                 String instructions = assignment.getInstructions();
 
@@ -65,8 +73,9 @@ public class AssignmentExport {
         List<String> list = new ArrayList<>();
         String siteId = ccConfig.getSiteId();
         String siteRef = "/group/" + siteId + "/";
+        boolean includeDrafts = ccConfig.isDoDraft();
 
-        List<CCAssignmentItem> items = getItemsInSite(siteId);
+        List<CCAssignmentItem> items = getItemsInSite(siteId, includeDrafts);
 
         for (CCAssignmentItem item : items) {
 
@@ -109,7 +118,7 @@ public class AssignmentExport {
         return list;
     }
 
-    private CCAssignmentItem getContents(String assignmentRef) {
+    private CCAssignmentItem getContents(String assignmentRef, CCConfig ccConfig) {
 
         if (!assignmentRef.startsWith(LessonEntity.ASSIGNMENT + "/")) {
             return null;
@@ -130,7 +139,14 @@ public class AssignmentExport {
             return null;
         }
 
-        ret.setTitle(assignment.getTitle());
+        String assignmentTitle;
+        if (assignment.getDraft()) {
+            assignmentTitle = new StringBuilder(messageSource.getMessage("simplepage.exportcc.draft.assignment.prefix", null, ccConfig.getLocale()))
+                .append(" ").append(assignment.getTitle()).toString();
+        } else {
+            assignmentTitle = assignment.getTitle();
+        }
+        ret.setTitle(assignmentTitle);
         ret.setInstructions(assignment.getInstructions());
 
         Assignment.GradeType typeOfGrade = assignment.getTypeOfGrade();
@@ -177,7 +193,7 @@ public class AssignmentExport {
 
     public boolean outputEntity(CCConfig ccConfig, String assignmentRef, ZipPrintStream out, CCResourceItem ccResourceItem) {
 
-        CCAssignmentItem contents = getContents(assignmentRef);
+        CCAssignmentItem contents = getContents(assignmentRef, ccConfig);
         if (contents == null) return false;
 
         String instructions = ccUtils.relFixup(ccConfig, contents.getInstructions(), ccResourceItem);
@@ -256,7 +272,7 @@ public class AssignmentExport {
 
     public boolean outputEntity2(CCConfig ccConfig, String assignmentRef, ZipPrintStream out, CCResourceItem ccResourceItem) {
 
-        CCAssignmentItem contents = getContents(assignmentRef);
+        CCAssignmentItem contents = getContents(assignmentRef, ccConfig);
         if (contents == null) return false;
 
         String title = contents.getTitle();

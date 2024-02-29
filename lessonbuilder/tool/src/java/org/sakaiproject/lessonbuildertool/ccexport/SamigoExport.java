@@ -49,9 +49,11 @@ import org.sakaiproject.tool.assessment.data.ifc.assessment.PublishedAssessmentI
 import org.sakaiproject.tool.assessment.data.ifc.assessment.SectionDataIfc;
 import org.sakaiproject.tool.assessment.data.ifc.questionpool.QuestionPoolDataIfc;
 import org.sakaiproject.tool.assessment.data.ifc.shared.TypeIfc;
+import org.sakaiproject.tool.assessment.facade.AssessmentFacade;
 import org.sakaiproject.tool.assessment.facade.PublishedAssessmentFacade;
 import org.sakaiproject.tool.assessment.facade.QuestionPoolFacade;
 import org.sakaiproject.tool.assessment.facade.QuestionPoolFacadeQueriesAPI;
+import org.sakaiproject.tool.assessment.services.assessment.AssessmentService;
 import org.sakaiproject.tool.assessment.services.assessment.PublishedAssessmentService;
 import org.sakaiproject.user.api.UserDirectoryService;
 import org.sakaiproject.util.api.FormattedText;
@@ -69,10 +71,13 @@ public class SamigoExport {
     @Setter private CCUtils ccUtils;
     @Setter private FormattedText formattedText;
     @Setter private PublishedAssessmentService pubService = new PublishedAssessmentService();
+    @Setter private AssessmentService assessmentService = new AssessmentService();
     @Setter private QuestionPoolFacadeQueriesAPI questionPoolFacadeQueries;
     @Setter private UserDirectoryService userDirectoryService;
 
     private ResourceLoaderMessageSource messageSource;
+
+    private static final String BASE_ASSESSMENT_PREFIX = "sam_base";
 
     public SamigoExport() {
         messageSource = new ResourceLoaderMessageSource();
@@ -80,12 +85,22 @@ public class SamigoExport {
     }
 
     public List<String> getEntitiesInSite(String siteId, boolean includeDrafts) {
-        // find topics in site, but organized by forum
-        return Optional.ofNullable(pubService.getBasicInfoOfAllPublishedAssessments2("title", true, siteId).stream())
+        List<String> entities = Optional.ofNullable(pubService.getBasicInfoOfAllPublishedAssessments2("title", true, siteId).stream())
                 .orElseGet(Stream::empty)
                 .filter(a -> AssessmentIfc.ACTIVE_STATUS.equals(a.getStatus()))
                 .map(a -> LessonEntity.SAM_PUB + "/" + a.getPublishedAssessmentId().toString())
                 .collect(Collectors.toList());
+
+        if (includeDrafts) {
+            List<AssessmentFacade> quizzes = assessmentService.getBasicInfoOfAllActiveAssessmentsBySite(siteId, "title");
+            // AssessmentFacades can be partial builds.
+            // We can't call getAssessmentId() for the return value of the method above as it results in a ClassCastException internally.
+            // Instead, we must call getData().getAssessmentBaseId().
+            List<String> drafts = quizzes.stream().map(a -> BASE_ASSESSMENT_PREFIX + "/" + a.getData().getAssessmentBaseId().toString()).collect(Collectors.toList());
+            entities.addAll(drafts);
+        }
+
+        return entities;
     }
 
     public List<Long> getAllPools() {
@@ -98,10 +113,44 @@ public class SamigoExport {
     }
 
     public boolean outputEntity(CCConfig ccConfig, String samigoId, ZipPrintStream out, CCResourceItem CCResourceItem, CCVersion ccVersion) {
-        String publishedAssessmentString = samigoId.substring(samigoId.indexOf("/") + 1);
-        PublishedAssessmentFacade assessment = pubService.getPublishedAssessment(publishedAssessmentString, true);
-        List<ItemDataIfc> publishedItemList = preparePublishedItemList(assessment);
-        String assessmentTitle = formattedText.convertFormattedTextToPlaintext(assessment.getTitle());
+        String[] part = samigoId.split("/", 2);
+        if (part.length != 2) {
+            log.error("outputEntity - unexpected samigoId: {}", samigoId);
+            return false;
+        }
+
+        String entityType = part[0];
+        String assStr = part[1];
+
+        List<ItemDataIfc> itemList;
+        String originalAssessmentTitle;
+        boolean isDraft = false;
+
+        switch (entityType) {
+            case BASE_ASSESSMENT_PREFIX:
+                AssessmentFacade baseAssessment = assessmentService.getAssessment(assStr);
+                originalAssessmentTitle = formattedText.convertFormattedTextToPlaintext(baseAssessment.getTitle());
+                itemList = prepareItemList(getAssessmentSections(baseAssessment));
+                isDraft = true;
+                break;
+            case LessonEntity.SAM_PUB:
+                // Note: original code passed 'true' in 2nd parameter called 'withGroups'; groups never make it into the export --bbailla2
+                PublishedAssessmentFacade pubAssessment = pubService.getPublishedAssessment(assStr, false);
+                originalAssessmentTitle = formattedText.convertFormattedTextToPlaintext(pubAssessment.getTitle());
+                itemList = prepareItemList(getPublishedAssessmentSections(pubAssessment));
+                break;
+            default:
+                log.error("outputEntity invoked, but the entity type is not an assessment: {}", entityType);
+                return false;
+        }
+
+        String assessmentTitle;
+        if (isDraft) {
+            assessmentTitle = new StringBuilder(messageSource.getMessage("simplepage.exportcc.draft.assessment.prefix", null, ccConfig.getLocale()))
+                .append(" ").append(originalAssessmentTitle).toString();
+        } else {
+            assessmentTitle = originalAssessmentTitle;
+        }
 
         out.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
 
@@ -123,7 +172,7 @@ public class SamigoExport {
         out.println("  <assessment ident=\"QDB_1\" title=\"" + StringEscapeUtils.escapeXml11(assessmentTitle) + "\">");
         out.println("    <section ident=\"S_1\">");
 
-        outputQuestions(ccConfig, publishedItemList, null, assessmentTitle, out, CCResourceItem, ccVersion);
+        outputQuestions(ccConfig, itemList, null, assessmentTitle, out, CCResourceItem, ccVersion);
 
         out.println("    </section>");
         out.println("  </assessment>");
@@ -170,9 +219,9 @@ public class SamigoExport {
             if (pools != null && pools.size() > 0) {
                 int poolno = 1;
                 for (QuestionPoolDataIfc pool : pools) {
-                    List<ItemDataIfc> itemList = questionPoolFacadeQueries.getAllItems(pool.getQuestionPoolId());
-                    if (itemList != null && itemList.size() > 0)
-                        outputQuestions(ccConfig, itemList, ("pool" + (poolno++)), pool.getTitle(), out, ccResourceItem, ccVersion);
+                    List<ItemDataIfc> qpItemList = questionPoolFacadeQueries.getAllItems(pool.getQuestionPoolId());
+                    if (qpItemList != null && qpItemList.size() > 0)
+                        outputQuestions(ccConfig, qpItemList, ("pool" + (poolno++)), pool.getTitle(), out, ccResourceItem, ccVersion);
                 }
             }
         }
@@ -590,12 +639,21 @@ public class SamigoExport {
         }
     }
 
-    public List<ItemDataIfc> preparePublishedItemList(PublishedAssessmentIfc publishedAssessment) {
-
-        List<ItemDataIfc> items = new ArrayList<>();
-        List<SectionDataIfc> sortedSections = (List<SectionDataIfc>) publishedAssessment.getSectionSet().stream()
+    private List<SectionDataIfc> getPublishedAssessmentSections(PublishedAssessmentIfc publishedAssessment) {
+        return (List<SectionDataIfc>) publishedAssessment.getSectionSet().stream()
                 .sorted(Comparator.comparing(SectionDataIfc::getSequence))
                 .collect(Collectors.toList());
+    }
+
+    private List<SectionDataIfc> getAssessmentSections(AssessmentIfc assessment) {
+        return (List<SectionDataIfc>) assessment.getSectionSet().stream()
+                .sorted(Comparator.comparing(SectionDataIfc::getSequence))
+                .collect(Collectors.toList());
+    }
+
+    private List<ItemDataIfc> prepareItemList(List<SectionDataIfc> sortedSections) {
+
+        List<ItemDataIfc> items = new ArrayList<>();
 
         for (SectionDataIfc section : sortedSections) {
             section.getItemSet().stream()

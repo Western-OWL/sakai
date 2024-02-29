@@ -236,6 +236,11 @@ public class AssessmentService {
 																					// paging
 	}
 
+	public List<AssessmentFacade> getBasicInfoOfAllActiveAssessmentsBySite(String siteId, String orderBy)
+	{
+		return PersistenceService.getInstance().getAssessmentFacadeQueries().getBasicInfoOfAllActiveAssessmentsByAgent(orderBy, siteId);
+	}
+
 	public List<AssessmentFacade> getAllAssessments(int pageSize, int pageNumber,
 			String orderBy) {
 		try {
