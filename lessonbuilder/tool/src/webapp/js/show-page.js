@@ -645,11 +645,8 @@ $(document).ready(function() {
 			const asnBox = document.getElementById("export-cc-content-asn");
 			const bankBox = document.getElementById("export-cc-bank");
 			const draftBox = document.getElementById("export-cc-draft");
-			bankBox.disabled = !samBox.checked;
-			if (draftBox !== null)
-			{
-				draftBox.disabled = !samBox.checked && !asnBox.checked;
-			}
+			lsn_toggleDisableAndHide(!samBox.checked, bankBox, document.getElementById("export-cc-bank-group"));
+			lsn_toggleDisableAndHide(!samBox.checked && !asnBox.checked, draftBox, document.getElementById("export-cc-draft-group"));
 
 		});
 		$('#export-cc-content-asn').click(function()
@@ -657,10 +654,7 @@ $(document).ready(function() {
 			const samBox = document.getElementById("export-cc-content-sam");
 			const asnBox = document.getElementById("export-cc-content-asn");
 			const draftBox = document.getElementById("export-cc-draft");
-			if (draftBox !== null)
-			{
-				draftBox.disabled = !samBox.checked && !asnBox.checked;
-			}
+			lsn_toggleDisableAndHide(!samBox.checked && !asnBox.checked, draftBox, document.getElementById("export-cc-draft-group"));
 		});
 
 		$('#import-cc-submit').click(function() {
@@ -4132,5 +4126,17 @@ function fixAddBeforeLTI(el) {
 
 function titleInvalidForGB(title) {
 	return title.startsWith("*") || title.startsWith("#") || title.includes("[") || title.includes("]");
+}
+
+// OWL
+function lsn_toggleDisableAndHide(disable, cb, cbGroup)
+{
+	if (cb === null || cbGroup === null)
+	{
+		return;
+	}
+	cb.disabled = disable;
+	const display = disable ? "none" : "block";
+	cbGroup.style.display = display;
 }
 
