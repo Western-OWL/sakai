@@ -4,7 +4,7 @@
 
 -- Global on/off switch (boolean); determines if the tab in Membership is visible for appropriate users
 INSERT INTO sakai_site_property
-VALUES ('!admin', 'OWL_MIG_ENABLED', 'true');
+VALUES ('!admin', 'OWL_MIG_ENABLED', 'false');
 
 -- Migration selection option (keys) that are "active" (available for selection in the UI), (pipe delimited)
 INSERT INTO sakai_site_property
