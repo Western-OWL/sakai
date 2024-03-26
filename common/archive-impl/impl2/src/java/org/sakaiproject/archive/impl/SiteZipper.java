@@ -141,6 +141,8 @@ public class SiteZipper {
             zip  = new FileInputStream(compressedArchivePath);
             String hash = DigestUtils.sha1Hex(zip);
             FileUtils.writeStringToFile(new File(hashPath), hash);
+        } catch (Throwable e) {
+            log.warn("Thrown while creating zip file for m_storagePath: {}", m_storagePath, e);
         } finally {
             zOut.finish();
             zOut.close();
@@ -175,6 +177,8 @@ public class SiteZipper {
                 fInputStream = new FileInputStream(f);
                 IOUtils.copy(fInputStream, zOut);
                 zOut.closeArchiveEntry();
+            } catch (Throwable e) {
+                log.warn("Thrown while creating zip file for path: {}", path, e);
             } finally {
                 IOUtils.closeQuietly(fInputStream);
             }
