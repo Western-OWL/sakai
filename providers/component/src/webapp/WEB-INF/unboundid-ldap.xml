@@ -150,15 +150,15 @@
 			health checks against the available connections in this pool.
 			Requires healthCheckMappings's invokeForBackgroundChecks to be set to true
 			Defaults to 180000 (three minutes) -->
-		<!-- property name="healthCheckIntervalMillis">
+		<property name="healthCheckIntervalMillis">
 			<value>300000</value>
-		</property -->
+		</property>
 
 		<!-- Provides mapping to create an LDAP connection pool health check implementation
 			that may be used to check the health of the associated server by verifying that
 			a specified entry can be retrieved in an acceptable period of time
 			Defaults to null (invokes the Unboundid defaut implementation, which does not do any checks) -->
-		<!-- property name="healthCheckMappings">
+		<property name="healthCheckMappings">
 			<map>
 				<entry key="maxResponseTime"><value>10000</value></entry>
 				<entry key="invokeOnCreate"><value>false</value></entry>
@@ -168,7 +168,7 @@
 				<entry key="invokeForBackgroundChecks"><value>true</value></entry>
 				<entry key="invokeOnException"><value>false</value></entry>
 			</map>
-		</property -->
+		</property>
 
 		<!-- Optional. Size of batch when loading multiple users at once.
 		     Defaults to DEFAULT_BATCH_SIZE = 200 -->
