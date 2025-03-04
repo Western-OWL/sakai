@@ -26,7 +26,6 @@ import java.util.Properties;
 
 import javax.sql.DataSource;
 
-import org.apache.commons.configuration2.PropertiesConfiguration;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sakaiproject.component.cover.ComponentManager;
@@ -45,10 +44,6 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class DBLTIService extends BaseLTIService implements LTIService {
-	/**
-	 * 
-	 */
-	private PropertiesConfiguration statements;
 
 	/** Dependency: SqlService */
 	protected SqlService m_sql = null;
