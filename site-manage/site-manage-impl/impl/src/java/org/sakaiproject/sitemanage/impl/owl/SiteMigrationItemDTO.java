@@ -15,10 +15,13 @@ import lombok.Data;
 public class SiteMigrationItemDTO
 {
     private String siteID;
-    private String selectionKey;
-    private String selectionModifiedEid;
+    private String typeKey;
+    private String typeModifiedEid;
+    private String actionKey;
+    private String actionModifiedEid;
     private String statusKey;
     private String statusModifiedEid;
-    private Date selectionModifiedDate;
+    private Date typeModifiedDate;
+    private Date actionModifiedDate;
     private Date statusModifiedDate;
 }

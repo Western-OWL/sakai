@@ -3,7 +3,6 @@ package org.sakaiproject.sitemanage.impl.owl;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -11,7 +10,6 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 
 import lombok.Setter;
@@ -38,25 +36,25 @@ public class OwlMigrationDAO
     @Setter private static SiteService siteService;
 
     // Admin Workspace prop keys
-    private static final String OWL_MIG_ENABLED                             = "OWL_MIG_ENABLED";
-    private static final String OWL_MIG_SELECTION_OPTS                      = "OWL_MIG_SELECTION_OPTIONS_MAP";
-    private static final String OWL_MIG_STATUS_OPTS                         = "OWL_MIG_STATUS_DISPLAY_MAP";
-    private static final String OWL_MIG_INIT_STATUS_MAP                     = "OWL_MIG_SELECTION_INITIAL_STATUS_MAP";
-    private static final String OWL_MIG_SELECTIONS_WITH_VISIBLE_STATUSES    = "OWL_MIG_SELECTIONS_WITH_VISIBLE_STATUSES";
-    private static final String OWL_MIG_VISIBLE_STATUSES                    = "OWL_MIG_VISIBLE_STATUSES";
-    private static final String OWL_MIG_CHANGEABLE_SELECTIONS               = "OWL_MIG_CHANGEABLE_SELECTIONS";
-    private static final String OWL_MIG_ELIGIBLE_TERMS                      = "OWL_MIG_ELIGIBLE_TERMS";
-    private static final String OWL_MIG_TERM_GROUPINGS                      = "OWL_MIG_TERM_GROUPINGS";
-    private static final String OWL_MIG_PROJECT_SITE_CUTOFF_DATE            = "OWL_MIG_PROJECT_SITE_CUTOFF_DATE";
-    private static final String OWL_MIG_COURSE_SITE_CUTOFF_DATE             = "OWL_MIG_COURSE_SITE_CUTOFF_DATE";
-    private static final String OWL_MIG_SITE_SIZE_WARN_THRESHOLD            = "OWL_MIG_SITE_SIZE_WARN_THRESHOLD";
-    private static final String OWL_MIG_SITE_SIZE_ERROR_THRESHOLD           = "OWL_MIG_SITE_SIZE_ERROR_THRESHOLD";
-    private static final String OWL_MIG_ADMIN_DISPLAY_NAME                  = "OWL_MIG_ADMIN_DISPLAY_NAME";
-    private static final String OWL_MIG_SELECTIONS_WITH_SIZE_CHECKS         = "OWL_MIG_SELECTIONS_WITH_SIZE_CHECKS";
-    private static final String OWL_MIG_ELIGIBLE_COURSE_ROLES               = "OWL_MIG_ELIGIBLE_COURSE_ROLES";
-    private static final String OWL_MIG_ACTIVE_SELECTION_KEYS               = "OWL_MIG_ACTIVE_SELECTION_KEYS";
-    private static final String OWL_MIG_SELECTION_DEFAULT                   = "OWL_MIG_SELECTION_DEFAULT";
-    private static final String OWL_MIG_SUPPORT_EMAIL                       = "OWL_MIG_SUPPORT_EMAIL";
+    private static final String OWL_MIG_ENABLED                     = "OWL_MIG_ENABLED";
+    private static final String OWL_MIG_ACTIVE_TYPE_KEYS            = "OWL_MIG_ACTIVE_TYPE_KEYS";
+    private static final String OWL_MIG_TYPE_MAP                    = "OWL_MIG_TYPE_MAP";
+    private static final String OWL_MIG_ACTIVE_ADMIN_TYPE_KEYS      = "OWL_MIG_ACTIVE_ADMIN_TYPE_KEYS";
+    private static final String OWL_MIG_ADMIN_TYPE_MAP              = "OWL_MIG_ADMIN_TYPE_MAP";
+    private static final String OWL_MIG_TYPE_DEFAULT                = "OWL_MIG_TYPE_DEFAULT";
+    private static final String OWL_MIG_TYPES_TO_ACTIONS_MAP        = "OWL_MIG_TYPES_TO_ACTIONS_MAP";
+    private static final String OWL_MIG_ACTION_MAP                  = "OWL_MIG_ACTIONS_MAP";
+    private static final String OWL_MIG_STATUS_MAP                  = "OWL_MIG_STATUS_MAP";
+    private static final String OWL_MIG_ACTION_INIT_STATUS_MAP      = "OWL_MIG_ACTION_INITIAL_STATUS_MAP";
+    private static final String OWL_MIG_ACTIONS_WITH_VISIBLE_STATUS = "OWL_MIG_ACTIONS_WITH_VISIBLE_STATUSES";
+    private static final String OWL_MIG_VISIBLE_STATUSES            = "OWL_MIG_VISIBLE_STATUSES";
+    private static final String OWL_MIG_CHANGEABLE_TYPES            = "OWL_MIG_CHANGEABLE_TYPES";
+    private static final String OWL_MIG_CHANGEABLE_ACTIONS          = "OWL_MIG_CHANGEABLE_ACTIONS";
+    private static final String OWL_MIG_SITE_SIZE_WARN_THRESHOLD    = "OWL_MIG_SITE_SIZE_WARN_THRESHOLD";
+    private static final String OWL_MIG_SITE_SIZE_ERROR_THRESHOLD   = "OWL_MIG_SITE_SIZE_ERROR_THRESHOLD";
+    private static final String OWL_MIG_ACTIONS_WITH_SIZE_CHECK     = "OWL_MIG_ACTIONS_WITH_SIZE_CHECKS";
+    private static final String OWL_MIG_ADMIN_DISPLAY_NAME          = "OWL_MIG_ADMIN_DISPLAY_NAME";
+    private static final String OWL_MIG_SUPPORT_EMAIL               = "OWL_MIG_SUPPORT_EMAIL";
 
     // Delimiters used in Admin Workspace props
     private static final String PIPE_DELIM          = "\\|"; // Pipe is a special character in regex, so it needs to be escaped
@@ -67,12 +65,15 @@ public class OwlMigrationDAO
     private static final String ADMIN_SITE_ID = "!admin";
 
     // User site prop keys
-    private static final String OWL_MIG_USER_SELECTION          = "OWL_MIG_USER_SELECTION";
-    private static final String OWL_MIG_USER_SELECTION_DATE     = "OWL_MIG_USER_SELECTION_DATE";
-    private static final String OWL_MIG_USER_SELECTION_EID      = "OWL_MIG_USER_SELECTION_EID";
-    private static final String OWL_MIG_STATUS                  = "OWL_MIG_STATUS";
-    private static final String OWL_MIG_STATUS_MODIFIED_DATE    = "OWL_MIG_STATUS_MODIFIED_DATE";
-    private static final String OWL_MIG_STATUS_MODIFIED_EID     = "OWL_MIG_STATUS_MODIFIED_EID";
+    private static final String OWL_PROJ_MIG_TYPE_SELECTION = "OWL_PROJ_MIG_TYPE_SELECTION";
+    private static final String OWL_PROJ_MIG_ACTION_SELECTION = "OWL_PROJ_MIG_ACTION_SELECTION";
+    private static final String OWL_PROJ_MIG_TYPE_SELECTION_DATE = "OWL_PROJ_MIG_TYPE_SELECTION_DATE";
+    private static final String OWL_PROJ_MIG_ACTION_SELECTION_DATE = "OWL_PROJ_MIG_ACTION_SELECTION_DATE";
+    private static final String OWL_PROJ_MIG_TYPE_SELECTION_EID = "OWL_PROJ_MIG_TYPE_SELECTION_EID";
+    private static final String OWL_PROJ_MIG_ACTION_SELECTION_EID = "OWL_PROJ_MIG_ACTION_SELECTION_EID";
+    private static final String OWL_PROJ_MIG_STATUS = "OWL_PROJ_MIG_STATUS";
+    private static final String OWL_PROJ_MIG_STATUS_DATE = "OWL_PROJ_MIG_STATUS_DATE";
+    private static final String OWL_PROJ_MIG_STATUS_EID = "OWL_PROJ_MIG_STATUS_EID";
 
     // Format used for storage and retrieval of Dates as Strings; ex: 2024-02-02 14:18
     private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm";
@@ -82,7 +83,8 @@ public class OwlMigrationDAO
     /**
      * Gets the properties for the given site ID and packs them into a SiteMigraitonItemDTO object
      * @param siteID the ID of the site to retrieve the OWL migration properties for
-     * @return An Optional wrapping a SiteMigrationItemDTO object packed with the properties (or empty Strings and null dates if the properties are not found) for the given site ID, or an empty Optional if an error occurred
+     * @return An Optional wrapping a SiteMigrationItemDTO object packed with the properties (or empty Strings and null dates if the properties are not found) for the given site ID,
+     *              or an empty Optional if an error occurred
      * @throws IllegalArgumentException if the siteID parameter is null or empty
      */
     public static Optional<SiteMigrationItemDTO> getSiteMigrationItem( String siteID ) throws IllegalArgumentException
@@ -96,18 +98,25 @@ public class OwlMigrationDAO
         {
             Site site = siteService.getSite( siteID );
             ResourceProperties props = site.getProperties();
-            String selectionKey = StringUtils.trimToEmpty( props.getProperty( OWL_MIG_USER_SELECTION ) );
-            String selectionModifiedEID = StringUtils.trimToEmpty( props.getProperty( OWL_MIG_USER_SELECTION_EID ) );
-            String statusKey = StringUtils.trimToEmpty( props.getProperty( OWL_MIG_STATUS ) );
-            String statusModifiedEID = StringUtils.trimToEmpty( props.getProperty( OWL_MIG_STATUS_MODIFIED_EID ) );
-            String selectionModifiedDate = props.getProperty( OWL_MIG_USER_SELECTION_DATE );
-            String statusModifiedDate = props.getProperty( OWL_MIG_STATUS_MODIFIED_DATE );
+            String typeKey = StringUtils.trimToEmpty( props.getProperty( OWL_PROJ_MIG_TYPE_SELECTION ) );
+            String typeModifiedEID = StringUtils.trimToEmpty( props.getProperty( OWL_PROJ_MIG_TYPE_SELECTION_EID ) );
+            String typeModifiedDate = props.getProperty( OWL_PROJ_MIG_TYPE_SELECTION_DATE );
+
+            String actionKey = StringUtils.trimToEmpty( props.getProperty( OWL_PROJ_MIG_ACTION_SELECTION ) );
+            String actionModifiedEID = StringUtils.trimToEmpty( props.getProperty( OWL_PROJ_MIG_ACTION_SELECTION_EID ) );
+            String actionModifiedDate = props.getProperty( OWL_PROJ_MIG_ACTION_SELECTION_DATE );
+
+            String statusKey = StringUtils.trimToEmpty( props.getProperty( OWL_PROJ_MIG_STATUS ) );
+            String statusModifiedEID = StringUtils.trimToEmpty( props.getProperty( OWL_PROJ_MIG_STATUS_EID ) );
+            String statusModifiedDate = props.getProperty( OWL_PROJ_MIG_STATUS_DATE );
 
             // Formatter for user site properties represnting datetimes, ex: "2024-02-02 14:18"
             DateFormat df = new SimpleDateFormat( DATE_FORMAT );
-            Date selModDate = parseDate( selectionModifiedDate, df );
-            Date statModDate = parseDate( statusModifiedDate, df );
-            return Optional.of( new SiteMigrationItemDTO( siteID, selectionKey, selectionModifiedEID, statusKey, statusModifiedEID, selModDate, statModDate ) );
+            Date typeModDate = parseDate( typeModifiedDate, df);
+            Date actionModDate = parseDate( actionModifiedDate, df);
+            Date statusModDate = parseDate( statusModifiedDate, df);
+
+            return Optional.of( new SiteMigrationItemDTO( siteID, typeKey, typeModifiedEID, actionKey, actionModifiedEID, statusKey, statusModifiedEID, typeModDate, actionModDate, statusModDate ) );
         }
         catch( IdUnusedException ex )
         {
@@ -120,7 +129,8 @@ public class OwlMigrationDAO
      * Save or update the appropriate items from the SiteMigrationItem into site properties for the site ID packed.
      * @param dto SiteMigrationItem object containing the relevant data to save, and the site ID to save it to
      * @return true if the operation completed without issues, false if the site could not be retrieved and thus the save/update could not be performed
-     * @throws IllegalArgumentException if the SiteMigrationItemDTO is null, or any of it's required members are null (siteID, selectionKey, selectionModifiedDate, selectionModifiedEid)
+     * @throws IllegalArgumentException if the SiteMigrationItemDTO is null, or any of it's required members are null (siteID, typeKey, typeModifiedDate, typeModifiedEid,
+     *              actionKey, actionModifiedDate, actionModifiedEid)
      */
     public static boolean saveSiteMigrationItem( SiteMigrationItemDTO dto ) throws IllegalArgumentException
     {
@@ -128,25 +138,29 @@ public class OwlMigrationDAO
         {
             throw new IllegalArgumentException( "SiteMigrationItemDTO cannot be null" );
         }
-        if( dto.getSiteID() == null || dto.getSelectionKey() == null || dto.getSelectionModifiedDate() == null || dto.getSelectionModifiedEid() == null )
+        if( dto.getSiteID() == null || dto.getTypeKey() == null || dto.getTypeModifiedDate() == null || dto.getTypeModifiedEid() == null
+                || dto.getActionKey() == null || dto.getActionModifiedDate() == null || dto.getActionModifiedEid() == null)
         {
-            throw new IllegalArgumentException( "SiteMigrationItemDTO members cannot be null: siteID, selectionKey, selectionModifiedDate, selectionModifiedEid" );
+            throw new IllegalArgumentException( "SiteMigrationItemDTO members cannot be null: siteID, typeKey, typeModifiedDate, typeModifiedEid, actionKey, actionModifiedDate, actionModifiedEid" );
         }
 
         try
         {
             Site site = siteService.getSite( dto.getSiteID() );
             ResourcePropertiesEdit props = site.getPropertiesEdit();
-            props.addProperty( OWL_MIG_USER_SELECTION, dto.getSelectionKey() );
-            props.addProperty( OWL_MIG_USER_SELECTION_EID, dto.getSelectionModifiedEid() );
-            props.addProperty( OWL_MIG_STATUS, StringUtils.trimToEmpty( dto.getStatusKey() ) );
-            props.addProperty( OWL_MIG_STATUS_MODIFIED_EID, StringUtils.trimToEmpty( dto.getStatusModifiedEid() ) );
+            props.addProperty( OWL_PROJ_MIG_TYPE_SELECTION, dto.getTypeKey() );
+            props.addProperty( OWL_PROJ_MIG_TYPE_SELECTION_EID, dto.getTypeModifiedEid() );
+            props.addProperty( OWL_PROJ_MIG_ACTION_SELECTION, dto.getActionKey() );
+            props.addProperty( OWL_PROJ_MIG_ACTION_SELECTION_EID, dto.getActionModifiedEid() );
+            props.addProperty( OWL_PROJ_MIG_STATUS, StringUtils.trimToEmpty( dto.getStatusKey() ) );
+            props.addProperty( OWL_PROJ_MIG_STATUS_EID, StringUtils.trimToEmpty( dto.getStatusModifiedEid() ) );
 
             DateFormat df = new SimpleDateFormat( DATE_FORMAT );
             String statusModifiedDate = dto.getStatusModifiedDate() != null ? df.format( dto.getStatusModifiedDate() ) : "";
 
-            props.addProperty( OWL_MIG_USER_SELECTION_DATE, df.format( dto.getSelectionModifiedDate() ) );
-            props.addProperty( OWL_MIG_STATUS_MODIFIED_DATE, statusModifiedDate );
+            props.addProperty( OWL_PROJ_MIG_TYPE_SELECTION_DATE, df.format( dto.getTypeModifiedDate() ) );
+            props.addProperty( OWL_PROJ_MIG_ACTION_SELECTION_DATE, df.format( dto.getActionModifiedDate() ) );
+            props.addProperty( OWL_PROJ_MIG_STATUS_DATE, statusModifiedDate );
 
             siteService.save( site );
             return true;
@@ -204,64 +218,119 @@ public class OwlMigrationDAO
     }
 
     /**
-     * Get the List of migration selection keys which are "active" (available to be selected in the UI)
-     * @return A List of Strings, where each String is a selection key which is available in the UI for selection by end users
+     * Get the List of type keys which are "active" (available to be selected in the UI)
+     * @return A List of Strings, where each String is a type key which is available in the UI for selection by end users
      */
-    public static List<String> getActiveMigrationSelectionKeys()
+    public static List<String> getActiveTypeKeys()
     {
-        // Format: undecided|doNotMig|selfMig|assistedMig
-        return parsePipeDelimitedProp( OWL_MIG_ACTIVE_SELECTION_KEYS );
+        // Format: undecided|acad|research|hrTrain|stuTrain|empTrain|extTrain|extOther|nonInstruct|other
+        return parsePipeDelimitedProp( OWL_MIG_ACTIVE_TYPE_KEYS );
     }
 
     /**
-     * Get the default selection value that will be displayed in the UI when there are no "active" status keys
-     * @return An Optional containing the default selection value, or an empty Optional if the property can't be found or parsed properly
+     * Get the default type value that will be displayed in the UI when there are no "active" type keys
+     * @return An Optional containing the default type value, or an empty Optional if the property can't be found or parsed properly
      */
-    public static Optional<String> getDefaultMigrationSelectionOption()
+    public static Optional<String> getDefaultTypeOption()
     {
-        String defaultSelectionOption = StringUtils.trimToNull( getSitePropString( OWL_MIG_SELECTION_DEFAULT ) );
+        String defaultSelectionOption = StringUtils.trimToNull( getSitePropString( OWL_MIG_TYPE_DEFAULT ) );
         return Optional.ofNullable( defaultSelectionOption );
     }
 
     /**
-     * Get the UI selection options stored in the "OWL_MIG_SELECTION_OPTIONS_MAP" Admin site property
-     * @return A map, where the map's key is the selection option key, and the map's value is the user facing selection option
+     * Get the UI type options stored in the "OWL_MIG_TYPE_MAP" Admin site property
+     * @return A map, where the map's key is the type option key, and the map's value is the user facing type option
      */
-    public static Map<String, String> getMigrationSelectionOptions()
+    public static Map<String, String> getTypeOptions()
     {
-        // Format: undecided:Undecided|doNotMig:Do Not Migrate|selfMig:Self-Migration|assistedMig:Assisted Migration
-        return parsePipeAndColonDelimitedProp( OWL_MIG_SELECTION_OPTS );
+        // Format: undecided:Undecided|acad:Supplementary Academic Materials|research:Research
+        return parsePipeAndColonDelimitedProp( OWL_MIG_TYPE_MAP );
     }
 
     /**
-     * Get the status options map stored in the "OWL_MIG_STATUS_DISPLAY_MAP" Admin site property
+     * Get the List of admin-only type keys which are "active" (available to be selected in the UI)
+     * @return A List of Strings, where each String is a type key which is available in the UI for selection by admins only
+     */
+    public static List<String> getActiveAdminTypeKeys()
+    {
+        // Format: undecided|acad|research|hrTrain|stuTrain|empTrain|extTrain|extOther|nonInstruct|other
+        return parsePipeDelimitedProp( OWL_MIG_ACTIVE_ADMIN_TYPE_KEYS );
+    }
+
+    /**
+     * Get the UI type options stored in the "OWL_MIG_ADMIN_TYPE_MAP" Admin site property
+     * @return A map, where the map's key is the type option key, and the map's value is the admin facing type option
+     */
+    public static Map<String, String> getAdminTypeOptions()
+    {
+        // Format: undecided:Undecided|acad:Supplementary Academic Materials|research:Research
+        return parsePipeAndColonDelimitedProp( OWL_MIG_ADMIN_TYPE_MAP );
+    }
+
+    /**
+     * Get the map of type->actions stored in the "OWL_MIG_TYPES_TO_ACTIONS_MAP" Admin site property
+     * @return A Map who's keys are type keys, and the value is a List of action keys available for the given type
+     */
+    public static Map<String, List<String>> getTypesToActionsMap()
+    {
+        // Format: acad:undecided;mig;alt;ret;selfDel;del|research:undecided;alt;ret;selfDel;del|hrTrain:undecided;mig;alt;ret;selfDel;del
+        Map<String, String> map = parsePipeAndColonDelimitedProp( OWL_MIG_TYPES_TO_ACTIONS_MAP );
+        if (map.isEmpty())
+        {
+            return Collections.emptyMap();
+        }
+
+        // Now we have key=<typeKey>, value=<actionKeyList>; we need to parse out the value into a List
+        LinkedHashMap<String, List<String>> retMap = new LinkedHashMap<>( map.size() );
+        for( Map.Entry<String, String> entry : map.entrySet() )
+        {
+            String key = entry.getKey();
+            List<String> value = parseSemiColonDelimitedProp( entry.getValue() );
+            retMap.put( key, value );
+        }
+
+        return retMap;
+    }
+
+    /**
+     * Get the UI action options stored in the "OWL_MIG_ACTIONS_MAP" Admin site property
+     * @return A map, where the map's key is the action option key, and the map's value is the user facing action option
+     */
+    public static Map<String, String> getActionOptions()
+    {
+        // Format: undecided:Undecided|mig:Request Migration to OWL Brightspace|alt:Transition to Alternate Solution
+        return parsePipeAndColonDelimitedProp( OWL_MIG_ACTION_MAP );
+    }
+
+    /**
+     * Get the status options map stored in the "OWL_MIG_STATUS_MAP" Admin site property
      * @return A map, where the map's key is the status option key, and the map's value is the (sometimes) user facing status option
      */
-    public static Map<String, String> getMigrationStatusOptions()
+    public static Map<String, String> getStatusOptions()
     {
-        // Format: migDone:Migrated|doNotMig:Do Not Migrate|manualMig:Manual Migration|pendingMig:Migration Pending|toBeDeleted:To Be Deleted|projPendingMig:Move Pending
-        return parsePipeAndColonDelimitedProp( OWL_MIG_STATUS_OPTS );
+        // Format: migDone:Migrated|pendingMig:Migration Pending|transDone:Transitioned to Alternate Solution|transPending:Transition to Alternate Solution Pending
+        return parsePipeAndColonDelimitedProp( OWL_MIG_STATUS_MAP );
     }
 
     /**
-     * Get the initial status map stored in "OWL_MIG_SELECTION_INITIAL_STATUS_MAP" Admin site property
-     * @return A map, where the map's key is the migration selection option key, and the map's value is the initial status key
+     * Get the initial status map stored in "OWL_MIG_ACTION_INITIAL_STATUS_MAP" Admin site property
+     * @return A map, where the map's key is the action option key, and the map's value is the initial status key
      */
-    public static Map<String, String> getMigrationInitialStatusMap()
+    public static Map<String, String> getInitialActionStatusMap()
     {
-        // Format: doNotMig:doNotMig|selfMig:manualMig|assistedMig:pendingMig
-        return parsePipeAndColonDelimitedProp( OWL_MIG_INIT_STATUS_MAP );
+        // Format: mig:pendingMig|alt:transPending|ret:ret|selfDel:selfDel|del:del
+        return parsePipeAndColonDelimitedProp( OWL_MIG_ACTION_INIT_STATUS_MAP );
     }
 
     /**
-     * Get the selections with visible statuses stored in "OWL_MIG_SELECTIONS_WITH_VISIBLE_STATUSES" Admin site property.
-     * NOTE: if the selection key is not in this list, the status will not be displayed even if it is contained in getVisibleStatuses() (below)
-     * @return List of Strings, where each String is a selection key who's statuses are allowed to be exposed in the UI
+     * Get the actions with visible statuses stored in "OWL_MIG_ACTIONS_WITH_VISIBLE_STATUSES" Admin site property.
+     * NOTE: if the action key is not in this list, the status will not be displayed even if it is contained in getVisibleStatuses() (below)
+     * @return List of Strings, where each String is an action key who's statuses are allowed to be exposed in the UI
      */
-    public static List<String> getSelectionsWithVisibleStatuses()
+    public static List<String> getActionsWithVisibleStatuses()
     {
-        // Format: assistedMig|statusKey2|statusKey3
-        return parsePipeDelimitedProp( OWL_MIG_SELECTIONS_WITH_VISIBLE_STATUSES );
+        // Format: mig|alt|ret|selfDel|del
+        return parsePipeDelimitedProp( OWL_MIG_ACTIONS_WITH_VISIBLE_STATUS );
     }
 
     /**
@@ -270,18 +339,28 @@ public class OwlMigrationDAO
      */
     public static List<String> getVisibleStatuses()
     {
-        // Format: migDone|pendingMig
+        // Format: migDone|pendingMig|transDone|transPending|ret|selfDel|del
         return parsePipeDelimitedProp( OWL_MIG_VISIBLE_STATUSES );
     }
 
     /**
-     * Get the list of changeable selections stored in the "OWL_MIG_CHANGEABLE_SELECTIONS" Admin site property
-     * @return List of Strings, where each String is a selection key that is allowed to be changed in the UI by end users
+     * Get the list of changeable types stored in the "OWL_MIG_CHANGEABLE_TYPES" Admin site property
+     * @return List of Strings, where each String is a type key that is allowed to be changed in the UI by end users
      */
-    public static List<String> getChangeableSelections()
+    public static List<String> getChangeableTypes()
     {
-        // Format: undecided|selectionKey2|selectionKey3
-        return parsePipeDelimitedProp( OWL_MIG_CHANGEABLE_SELECTIONS );
+        // Format: undecided|other
+        return parsePipeDelimitedProp( OWL_MIG_CHANGEABLE_TYPES );
+    }
+
+    /**
+     * Get the list of changeable actions stored in the "OWL_MIG_CHANGEABLE_ACTIONS" Admin site property
+     * @return List of Strings, where each String is an action key that is allowed to be changed in the UI by end users
+     */
+    public static List<String> getChangeableActions()
+    {
+        // Format: undecided|actionKey2
+        return parsePipeDelimitedProp( OWL_MIG_CHANGEABLE_ACTIONS );
     }
 
     /**
@@ -297,78 +376,13 @@ public class OwlMigrationDAO
     }
 
     /**
-     * Get the list of eligible term codes stored in the "OWL_MIG_ELIGIBLE_TERMS" Admin site property
-     * @return A List of Strings, where each String is a term code; all sites belonging to the term codes are eligible for migration options
+     * Get the list of action keys who when chosen will trigger a site resources size check in the UI for the given site.
+     * @return A List of Strings, where each String is an action key that should trigger a site resources size check for the site when selected.
      */
-    public static List<String> getEligibleTermsForMigration()
+    public static List<String> getActionsWithSizeChecks()
     {
-        // Format: UWOCONT1245|UWOGRAD1241|UWOUGRD1239|UWOPREL1239|UWOCONT1239
-        return parsePipeDelimitedProp( OWL_MIG_ELIGIBLE_TERMS );
-    }
-
-    /**
-     * Get the list of selection keys who when chosen will trigger a site resources size check in the UI for the given site.
-     * @return A List of Strings, where each String is a selection key that should trigger a site resources size check for the site when selected.
-     */
-    public static List<String> getSelectionsWithSizeChecks()
-    {
-        // Format: selfMig|assistedMig
-        return parsePipeDelimitedProp( OWL_MIG_SELECTIONS_WITH_SIZE_CHECKS );
-    }
-
-    /**
-     * Get the list of course site role keys who are allowed to views sites where they have any of these roles, and make migration selections for them in the UI
-     * @return A List of Strings, where each String is a course site role key
-     */
-    public static List<String> getEligibleCourseSiteRoles()
-    {
-        // Format: I|CC|GA
-        return parsePipeDelimitedProp( OWL_MIG_ELIGIBLE_COURSE_ROLES );
-    }
-
-    /**
-     * Get the map of term groupings stored in the "OWL_MIG_TERM_GROUPINGS" Admin site property
-     * @return A Map who's keys are the groupings, and the value is a List of Strings representing term code substrings. Any term code that contains the substring belongs to the given grouping
-     */
-    public static Map<String, List<String>> getTermGroupingMap()
-    {
-        // Format: Summer 2022:1225;1226|Fall/Winter 2022:1228;1229;1231|Summer 2023:1235;1236|Fall/Winter 2023:1238;1239;1241|Summer 2024:1245;1246
-        Map<String, String> map = parsePipeAndColonDelimitedProp( OWL_MIG_TERM_GROUPINGS );
-        if (map.isEmpty())
-        {
-            return Collections.emptyMap();
-        }
-
-        // Now we have key=<grouping>, value=<termSubStringList>; we need to parse out the value into a List
-        LinkedHashMap<String, List<String>> retMap = new LinkedHashMap<>( map.size() );
-        for( Entry<String, String> entry : map.entrySet() )
-        {
-            String key = entry.getKey();
-            List<String> value = parseSemiColonDelimitedProp( entry.getValue() );
-            retMap.put( key, value );
-        }
-
-        return retMap;
-    }
-
-    /**
-     * Get the project site cutoff date stored in the "OWL_MIG_PROJECT_SITE_CUTOFF_DATE" Admin site property
-     * @return LocalDate representing the date stored in Admin properties
-     */
-    public static Optional<LocalDate> getProjectSiteCutoffDate()
-    {
-        // Format: 2022-02-28
-        return getSitePropLocalDate( OWL_MIG_PROJECT_SITE_CUTOFF_DATE );
-    }
-
-    /**
-     * Get the course site cutoff date stored in the "OWL_MIG_COURSE_SITE_CUTOFF_DATE" Admin site property
-     * @return LocalDate representing the date stored in Admin properties
-     */
-    public static Optional<LocalDate> getCourseSiteCutoffDate()
-    {
-        // Format: 2022-02-28
-        return getSitePropLocalDate( OWL_MIG_COURSE_SITE_CUTOFF_DATE );
+        // Format: mig|actionKey2|actionKey3
+        return parsePipeDelimitedProp( OWL_MIG_ACTIONS_WITH_SIZE_CHECK );
     }
 
     /**
@@ -453,30 +467,6 @@ public class OwlMigrationDAO
             return Optional.of( Float.valueOf( prop ) );
         }
         catch( NumberFormatException ex )
-        {
-            return Optional.empty();
-        }
-    }
-
-    /**
-     * Utility function to get an arbitrary site property from Admin Worksite, and parse it into a LocalDate representation.
-     * This function assumes the String date format is 'YYYY-MM-DD', ex: 2022-02-28
-     * @param sitePropKey the key of the property stored in Admin site properties that contains the desired date
-     * @return An Optional containing the LocalDate representation of the String date if the property is found and can be parsed; Empty Optional if parsing fails or the property is empty or can't be found.
-     */
-    private static Optional<LocalDate> getSitePropLocalDate( String sitePropKey )
-    {
-        String date = getSitePropString( sitePropKey );
-        if( StringUtils.isBlank( date ) )
-        {
-            return Optional.empty();
-        }
-
-        try
-        {
-            return Optional.of( LocalDate.parse( date ) );
-        }
-        catch( Exception ex )
         {
             return Optional.empty();
         }
