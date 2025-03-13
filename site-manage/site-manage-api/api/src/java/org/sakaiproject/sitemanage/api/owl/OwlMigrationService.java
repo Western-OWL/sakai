@@ -20,9 +20,13 @@ public interface OwlMigrationService {
 	 * Gets a list of SiteMigrationItems.
 	 * Returns an empty list if the user is not authorized to specify migration selections for any eligible sites.
 	 */
-	// OWLTODO: this method used to return a map that handled ordering/grouping for the UI; it remains to be seen if something similar is needed for project sites
-	public List<SiteMigrationItem> getSiteMigrationItems();
+	public Map<String, List<SiteMigrationItem>> getSiteMigrationItems();
 
+	/**
+	 * Gets a map of type to list of appropriate migration actions for that type.
+	 * @return the map
+	 */
+	public Map<String, List<MigAction>> getTypeActionMap();
 
 	/**
 	 * Maps migration type keys to display values.

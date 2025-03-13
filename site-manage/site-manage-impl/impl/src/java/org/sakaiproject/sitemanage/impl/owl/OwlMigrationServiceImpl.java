@@ -1,6 +1,7 @@
 package org.sakaiproject.sitemanage.impl.owl;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -18,6 +19,7 @@ import org.sakaiproject.tool.api.SessionManager;
 
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.sakaiproject.sitemanage.api.owl.MigAction;
 
 @Slf4j
 public class OwlMigrationServiceImpl implements OwlMigrationService {
@@ -54,11 +56,14 @@ public class OwlMigrationServiceImpl implements OwlMigrationService {
 	}
 
 	@Override
-	public List<SiteMigrationItem> getSiteMigrationItems() {
+	public Map<String, List<SiteMigrationItem>> getSiteMigrationItems() {
 		if (!isMigrationTabEnabled()) {
-			return Collections.emptyList();
+			return Collections.emptyMap();
 		}
-		return migrationDelegate.getSiteMigrationItems();
+		// OWLTODO: fix this temp hack to restore the map
+		var map = new HashMap<String, List<SiteMigrationItem>>();
+		map.put("Project Sites", migrationDelegate.getSiteMigrationItems());
+		return map;
 	}
 
 	@Override
@@ -89,6 +94,10 @@ public class OwlMigrationServiceImpl implements OwlMigrationService {
 	@Override
 	public List<String> saveSelections(Map<String, String> siteSelections) {
 		return migrationDelegate.saveSelections(siteSelections);
+	}
+
+	public Map<String, List<MigAction>> getTypeActionMap() {
+		return migrationDelegate.getTypeActionMap();
 	}
 
 	@Override

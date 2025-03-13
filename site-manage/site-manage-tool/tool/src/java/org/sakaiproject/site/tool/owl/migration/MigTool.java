@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import lombok.Data;
 import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.sitemanage.api.owl.OwlMigrationService;
@@ -25,6 +26,8 @@ public class MigTool
 	private static final UserDirectoryService UDS = ComponentManager.get(UserDirectoryService.class);
 	private static final SecurityService SS = ComponentManager.get(SecurityService.class);
 
+	private static final Date EPOCH = Date.from(Instant.EPOCH);
+
 	private MigTool()
 	{
 		// utility class
@@ -37,7 +40,7 @@ public class MigTool
 	 */
 	public static String getStatusDisplay(SiteMigrationItem item)
 	{
-		return OWL_MIG_SERV.getStatusDisplay(item.getSelectionKey(), item.getStatusKey());
+		return OWL_MIG_SERV.getStatusDisplay(item.getActionKey(), item.getStatusKey());
 	}
 
 	/**
@@ -61,6 +64,21 @@ public class MigTool
 	public static String formatDate(Instant instant, Locale locale)
 	{
 		return formatDate(Optional.of(Date.from(instant)), locale, "");
+	}
+
+	public static String formatLatestDateAndUser(SiteMigrationItem item, Locale locale, String noValue)
+	{
+		if (item.getTypeModifiedDate().isEmpty())
+		{
+			return noValue;  // cannot have an action date without a type date
+		}
+
+		if (item.getTypeModifiedDate().get().after(item.getActionModifiedDate().orElse(EPOCH)))
+		{
+			return formatDate(item.getTypeModifiedDate(), locale, noValue);
+		}
+
+		return formatDate(item.getActionModifiedDate(), locale, noValue);
 	}
 
 	/**
@@ -124,8 +142,15 @@ public class MigTool
 	 */
 	public static String getSelectionDisplay(SiteMigrationItem item, Map<String, String> displayMap)
 	{
-		String key = item.getSelectionKey();
-		String display = displayMap.get(item.getSelectionKey());
+		String key = item.getTypeKey();
+		String display = displayMap.get(item.getTypeKey());
 		return display == null ? key : display;
+	}
+
+	@Data
+	public static class FormattedDateAndUser
+	{
+		private String date;
+		private String user;
 	}
 }

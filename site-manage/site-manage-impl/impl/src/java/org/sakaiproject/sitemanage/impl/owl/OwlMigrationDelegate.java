@@ -29,6 +29,7 @@ import org.sakaiproject.sitemanage.api.owl.SiteMigrationItem.ResourcesSizeCatego
 import org.sakaiproject.tool.api.SessionManager;
 
 import lombok.extern.slf4j.Slf4j;
+import org.sakaiproject.sitemanage.api.owl.MigAction;
 
 @Slf4j
 public class OwlMigrationDelegate {
@@ -96,6 +97,10 @@ public class OwlMigrationDelegate {
 
 		return activeActionOptions.stream()
 			.collect(Collectors.toMap(key -> key, actionOptions::get, (v1, v2) -> v2, LinkedHashMap::new));
+	}
+
+	public Map<String, List<MigAction>> getTypeActionMap() {
+		throw new UnsupportedOperationException("OWLTODO implement me!");
 	}
 
 	// OWLTODO: this map contains only site id and one "selection"; this will need to be refactored to pass two selections (type and action)

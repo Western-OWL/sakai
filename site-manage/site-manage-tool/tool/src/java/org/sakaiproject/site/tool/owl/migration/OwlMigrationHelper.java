@@ -2,15 +2,18 @@ package org.sakaiproject.site.tool.owl.migration;
 
 import java.time.Instant;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import lombok.Data;
 import org.sakaiproject.cheftool.Context;
 import org.sakaiproject.cheftool.RunData;
 import org.sakaiproject.cheftool.VelocityPortlet;
 import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.event.api.SessionState;
 import org.sakaiproject.sitemanage.api.owl.DisplayConstants;
+import org.sakaiproject.sitemanage.api.owl.MigAction;
 import org.sakaiproject.sitemanage.api.owl.OwlMigrationService;
 import org.sakaiproject.sitemanage.api.owl.SiteMigrationItem;
 import org.sakaiproject.util.ResourceLoader;
@@ -45,14 +48,17 @@ public class OwlMigrationHelper
 			ResourceLoader rb, Map<String, List<SiteMigrationItem>> termMap)
 	{
 		context.put("termMap", termMap);
-		boolean editableOptions = termMap.values().stream().flatMap(Collection::stream).anyMatch(smi -> smi.isSelectionEditable());
+		boolean editableOptions = termMap.values().stream().flatMap(Collection::stream).anyMatch(smi -> smi.isTypeEditable());
 		context.put("hasEditableSites", editableOptions); // true if any of the sites are in an editable state (ie. "undecided")
 
-		context.put("optionsDisplayMap", OWL_MIG_SERV.getMigrationOptions()); // map of all selections key -> display value
-		Map<String, String> activeOptions = OWL_MIG_SERV.getActiveOptions(); // map of currently active selections keys -> display value
+		context.put("optionsDisplayMap", OWL_MIG_SERV.getMigrationTypes()); // map of all selections key -> display value
+		Map<String, String> activeOptions = OWL_MIG_SERV.getActiveTypes(); // map of currently active selections keys -> display value
 		context.put("options", activeOptions); // the possible selections in the migration options dropdown
 		context.put("readOnlyMode", activeOptions.isEmpty()); // shorthand for no active options (tab is effectively in a read-only mode)
-		context.put("readOnlyNoSelectionDisplay", OWL_MIG_SERV.getNoActiveOptionsDisplay()); // value to display in options column when in read-only mode and no user selection has been made
+		context.put("readOnlyNoSelectionDisplay", OWL_MIG_SERV.getNoActiveTypesDisplay()); // value to display in options column when in read-only mode and no user selection has been made
+
+		// OWLTODO: what about active/inactive actions?
+		context.put("typeActionMap", getMigrationActions());
 
 		context.put("tlang", rb);
 
@@ -80,7 +86,7 @@ public class OwlMigrationHelper
 		}
 
 		// build string for JS array literal used to help determine when to display site size warnings
-		String js = OWL_MIG_SERV.getSelectionKeysWithResourcesSizeWarnings().stream().collect(Collectors.joining("','"));
+		String js = OWL_MIG_SERV.getActionKeysWithResourcesSizeWarnings().stream().collect(Collectors.joining("','"));
 		context.put("sizeCheckOptions", js.isBlank() ? "" : "'" + js + "'");
 		context.put("showSizeCol", !js.isBlank()); // if there are no selections that trigger size check, hide the size column
 
@@ -99,6 +105,18 @@ public class OwlMigrationHelper
 	public static Map<String, List<SiteMigrationItem>> getSiteMigrationItems()
 	{
 		return OWL_MIG_SERV.getSiteMigrationItems();
+	}
+
+	public static Map<String, List<MigAction>> getMigrationActions()
+	{
+		// OWLTODO: obviously this is all fake data right now...
+		var m = new HashMap<String, List<MigAction>>();
+		m.put("undecided", List.of(new MigAction("fake1", "Just some fake"), new MigAction("fake2", "Options here so we"), new MigAction("fake3", "Can test things out")));
+		m.put("doNotMig", List.of(new MigAction("fake4", "Just some fakery"), new MigAction("fake5", "To make you see"), new MigAction("fake6", "Things have changed")));
+		m.put("selfMig", List.of());
+		m.put("assistedMig", List.of());
+
+		return m;
 	}
 
 	/**
