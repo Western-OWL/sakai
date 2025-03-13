@@ -1,11 +1,9 @@
 package org.sakaiproject.sitemanage.impl.owl;
 
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.sakaiproject.authz.api.AuthzGroupService;
 import org.sakaiproject.component.api.ServerConfigurationService;
@@ -56,37 +54,46 @@ public class OwlMigrationServiceImpl implements OwlMigrationService {
 	}
 
 	@Override
-	public Map<String, List<SiteMigrationItem>> getSiteMigrationItems() {
+	public List<SiteMigrationItem> getSiteMigrationItems() {
 		if (!isMigrationTabEnabled()) {
-			return Collections.emptyMap();
+			return Collections.emptyList();
 		}
 		return migrationDelegate.getSiteMigrationItems();
 	}
 
-
 	@Override
-	public Map<String, String> getMigrationOptions() {
-		return OwlMigrationDAO.getMigrationSelectionOptions();
+	public Map<String, String> getMigrationTypes() {
+		return OwlMigrationDAO.getTypeOptions();
 	}
 
 	@Override
-	public Map<String, String> getActiveOptions() {
-		return migrationDelegate.getActiveOptions();
+	public Map<String, String> getActiveTypes() {
+		return migrationDelegate.getActiveTypes();
 	}
 
 	@Override
-	public Optional<String> getNoActiveOptionsDisplay() {
-		return OwlMigrationDAO.getDefaultMigrationSelectionOption();
+	public Map<String, String> getMigrationActions() {
+		return OwlMigrationDAO.getActionOptions();
 	}
 
 	@Override
-	public List<String> saveSelections(Map<String, String>  siteSelections) {
+	public Map<String, String> getActiveActions() {
+		return migrationDelegate.getActiveActions();
+	}
+
+	@Override
+	public Optional<String> getNoActiveTypesDisplay() {
+		return OwlMigrationDAO.getDefaultTypeOption();
+	}
+
+	@Override
+	public List<String> saveSelections(Map<String, String> siteSelections) {
 		return migrationDelegate.saveSelections(siteSelections);
 	}
 
 	@Override
-	public List<String> getSelectionKeysWithResourcesSizeWarnings() {
-		return OwlMigrationDAO.getSelectionsWithSizeChecks();
+	public List<String> getActionKeysWithResourcesSizeWarnings() {
+		return OwlMigrationDAO.getActionsWithSizeChecks();
 	}
 
 	@Override

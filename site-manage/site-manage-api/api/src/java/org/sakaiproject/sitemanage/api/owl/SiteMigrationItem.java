@@ -6,7 +6,7 @@ import java.util.Optional;
 import lombok.Data;
 
 /**
- * Represents the migration selection and status of a site
+ * Represents the migration selections (type and action) and status of a site
  */
 @Data
 public class SiteMigrationItem {
@@ -21,21 +21,23 @@ public class SiteMigrationItem {
 	private String siteTitle;
 	private String siteUrl;
 
-	/** The selected migration option **/
-	private String selectionKey;
-	private boolean isSelectionEditable;
-	private Optional<String> selectionModifiedEid;
-	private Optional<Date> selectionModifiedDate;
+	/** The selected type option **/
+	private String typeKey;
+	private boolean isTypeEditable;
+	private Optional<String> typeModifiedEid;
+	private Optional<Date> typeModifiedDate;
+
+	/** The selected action option **/
+	private String actionKey;
+	private boolean isActionEditable;
+	private Optional<String> actionModifiedEid;
+	private Optional<Date> actionModifiedDate;
 
 	/** The migration status **/
-	// TODO: not optional - just use "" when not present
 	private String statusKey;
 	private Optional<String> statusModifiedEid;
 	private Optional<Date> statusModifiedDate;
 
 	private String resourcesSize;
 	private ResourcesSizeCategory resourcesSizeCategory;
-
-	// Not user facing, but useful for ordering sites within groups
-	private String academicSessionEid;
 }

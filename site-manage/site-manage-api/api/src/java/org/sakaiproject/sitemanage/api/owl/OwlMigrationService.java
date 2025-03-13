@@ -17,31 +17,45 @@ public interface OwlMigrationService {
 	public boolean isMigrationTabEnabled();
 
 	/**
-	 * Gets a map of groups to SiteMigrationItems.
-	 * Groups can be common term names like "Fall/Winter 2024" for eligible academic sessions, or "Project Sites" if eligible.
-	 * Returns an empty map if the user is not authorized to specify migration selections for any eligible sites.
+	 * Gets a list of SiteMigrationItems.
+	 * Returns an empty list if the user is not authorized to specify migration selections for any eligible sites.
 	 */
-	public Map<String, List<SiteMigrationItem>> getSiteMigrationItems();
+	// OWLTODO: this method used to return a map that handled ordering/grouping for the UI; it remains to be seen if something similar is needed for project sites
+	public List<SiteMigrationItem> getSiteMigrationItems();
 
 
 	/**
-	 * Maps migration option keys to display values.
+	 * Maps migration type keys to display values.
 	 * Iteration order is preserved: implementation is LinkedHashMap.
-	 * May contain options that are no longer active.
-	 * @see getActiveOptions()
+	 * May contain types that are no longer active.
+	 * @see getActiveTypes()
 	 */
-	public Map<String, String> getMigrationOptions();
+	public Map<String, String> getMigrationTypes();
 
 	/**
-	 * Map active migration option keys to display values
+	 * Map active migration type keys to display values
 	 * If empty, UI should be read only
 	 */
-	public Map<String, String> getActiveOptions();
+	public Map<String, String> getActiveTypes();
 
 	/**
-	 * If there are no active migration options, this value will be displayed for sites that are undecided in the read only UI
+	 * Maps migration action keys to display values.
+	 * Iteration order is preserved: implementation is LinkedHashMap.
+	 * May contain actions that are no longer active.
+	 * @see getActiveActionss()
 	 */
-	public Optional<String> getNoActiveOptionsDisplay();
+	public Map<String, String> getMigrationActions();
+
+	/**
+	 * Map active migration action keys to display values
+	 * If empty, UI should be read only
+	 */
+	public Map<String, String> getActiveActions();
+
+	/**
+	 * If there are no active migration types, this value will be displayed for sites that are undecided in the read only UI
+	 */
+	public Optional<String> getNoActiveTypesDisplay();
 
 	/**
 	 * For sites that are eligible for migration and have changeable selections, persist their specified selection.
@@ -58,7 +72,7 @@ public interface OwlMigrationService {
 	 */
 	public List<String> saveSelections(Map<String, String> siteSelections);
 
-	public List<String> getSelectionKeysWithResourcesSizeWarnings();
+	public List<String> getActionKeysWithResourcesSizeWarnings();
 
 	/**
 	 * Gets the display value associated with a status key.
@@ -66,7 +80,7 @@ public interface OwlMigrationService {
 	 * @param statusKey
 	 *
 	 * Statuses are visible only if both:
-	 *    The selectionKey is in the list of selections with visible status.
+	 *    The actionKey is in the list of actions with visible status.
 	 *    The statusKey is in the list of visible statuses.
 	 * @return empty String if the status is not visible
 	 */
