@@ -43,6 +43,7 @@ public class OwlMigrationDAO
     private static final String OWL_MIG_ADMIN_TYPE_MAP              = "OWL_MIG_ADMIN_TYPE_MAP";
     private static final String OWL_MIG_TYPE_DEFAULT                = "OWL_MIG_TYPE_DEFAULT";
     private static final String OWL_MIG_TYPES_TO_ACTIONS_MAP        = "OWL_MIG_TYPES_TO_ACTIONS_MAP";
+    private static final String OWL_MIG_ACTIVE_ACTION_KEYS          = "OWL_MIG_ACTIVE_ACTION_KEYS";
     private static final String OWL_MIG_ACTION_MAP                  = "OWL_MIG_ACTIONS_MAP";
     private static final String OWL_MIG_STATUS_MAP                  = "OWL_MIG_STATUS_MAP";
     private static final String OWL_MIG_ACTION_INIT_STATUS_MAP      = "OWL_MIG_ACTION_INITIAL_STATUS_MAP";
@@ -65,15 +66,15 @@ public class OwlMigrationDAO
     private static final String ADMIN_SITE_ID = "!admin";
 
     // User site prop keys
-    private static final String OWL_PROJ_MIG_TYPE_SELECTION = "OWL_PROJ_MIG_TYPE_SELECTION";
-    private static final String OWL_PROJ_MIG_ACTION_SELECTION = "OWL_PROJ_MIG_ACTION_SELECTION";
-    private static final String OWL_PROJ_MIG_TYPE_SELECTION_DATE = "OWL_PROJ_MIG_TYPE_SELECTION_DATE";
-    private static final String OWL_PROJ_MIG_ACTION_SELECTION_DATE = "OWL_PROJ_MIG_ACTION_SELECTION_DATE";
-    private static final String OWL_PROJ_MIG_TYPE_SELECTION_EID = "OWL_PROJ_MIG_TYPE_SELECTION_EID";
-    private static final String OWL_PROJ_MIG_ACTION_SELECTION_EID = "OWL_PROJ_MIG_ACTION_SELECTION_EID";
-    private static final String OWL_PROJ_MIG_STATUS = "OWL_PROJ_MIG_STATUS";
-    private static final String OWL_PROJ_MIG_STATUS_DATE = "OWL_PROJ_MIG_STATUS_DATE";
-    private static final String OWL_PROJ_MIG_STATUS_EID = "OWL_PROJ_MIG_STATUS_EID";
+    private static final String OWL_PROJ_MIG_TYPE_SELECTION         = "OWL_PROJ_MIG_TYPE_SELECTION";
+    private static final String OWL_PROJ_MIG_ACTION_SELECTION       = "OWL_PROJ_MIG_ACTION_SELECTION";
+    private static final String OWL_PROJ_MIG_TYPE_SELECTION_DATE    = "OWL_PROJ_MIG_TYPE_SELECTION_DATE";
+    private static final String OWL_PROJ_MIG_ACTION_SELECTION_DATE  = "OWL_PROJ_MIG_ACTION_SELECTION_DATE";
+    private static final String OWL_PROJ_MIG_TYPE_SELECTION_EID     = "OWL_PROJ_MIG_TYPE_SELECTION_EID";
+    private static final String OWL_PROJ_MIG_ACTION_SELECTION_EID   = "OWL_PROJ_MIG_ACTION_SELECTION_EID";
+    private static final String OWL_PROJ_MIG_STATUS                 = "OWL_PROJ_MIG_STATUS";
+    private static final String OWL_PROJ_MIG_STATUS_DATE            = "OWL_PROJ_MIG_STATUS_DATE";
+    private static final String OWL_PROJ_MIG_STATUS_EID             = "OWL_PROJ_MIG_STATUS_EID";
 
     // Format used for storage and retrieval of Dates as Strings; ex: 2024-02-02 14:18
     private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm";
@@ -167,7 +168,7 @@ public class OwlMigrationDAO
         }
         catch( IdUnusedException | PermissionException ex )
         {
-            log.error( "Unable to retrieve user site; cannot save SiteMigrationItemDTO", ex );
+            log.error( "Unable to retrieve user site by ID [{}]; cannot save SiteMigrationItemDTO", dto.getSiteID(), ex );
             return false;
         }
     }
@@ -290,6 +291,16 @@ public class OwlMigrationDAO
         }
 
         return retMap;
+    }
+
+    /**
+     * Get the List of action keys which are "active" (available to be selected in the UI)
+     * @return A List of Strings, where each String is an action key which is available in the UI for selection by end users
+     */
+    public static List<String> getActiveActionKeys()
+    {
+        // Format: undecided|mig|alt|ret|selfDel|del
+        return parsePipeDelimitedProp( OWL_MIG_ACTIVE_ACTION_KEYS );
     }
 
     /**

@@ -30,6 +30,10 @@ VALUES ('!admin', 'OWL_MIG_TYPE_DEFAULT', 'Undecided');
 INSERT INTO sakai_site_property
 VALUES ('!admin', 'OWL_MIG_TYPES_TO_ACTIONS_MAP', 'acad:undecided;mig;alt;ret;selfDel;del|research:undecided;alt;ret;selfDel;del|hrTrain:undecided;mig;alt;ret;selfDel;del|stuTrain:undecided;mig;alt;ret;selfDel;del|empTrain:undecided;mig;alt;ret;selfDel;del|extTrain:undecided;alt;ret;selfDel;del|extOther:undecided;alt;ret;selfDel;del|nonInstruct:undecided;alt;ret;selfDel;del|other:undecided;alt;ret;selfDel;del');
 
+-- Migration action option (keys) that are "active" (available for selection in the UI), (pipe delimited)
+INSERT INTO sakai_site_property
+VALUES ('!admin', 'OWL_MIG_ACTIVE_ACTION_KEYS', 'undecided|mig|alt|ret|selfDel|del');
+
 -- Migration action options map; key:displayValue (pipe delimited)
 INSERT INTO sakai_site_property
 VALUES ('!admin', 'OWL_MIG_ACTIONS_MAP', 'undecided:Undecided|mig:Request Migration to OWL Brightspace|alt:Transition to Alternate Solution|ret:Retain|selfDel:I will Delete|del:Delete Anytime');
