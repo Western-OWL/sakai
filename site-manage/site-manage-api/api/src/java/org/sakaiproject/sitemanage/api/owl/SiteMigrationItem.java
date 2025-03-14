@@ -1,6 +1,5 @@
 package org.sakaiproject.sitemanage.api.owl;
 
-import java.time.Instant;
 import java.util.Date;
 import java.util.Optional;
 
@@ -29,11 +28,10 @@ public class SiteMigrationItem {
 	private Optional<Date> typeModifiedDate;
 
 	/** The selected action option **/
-	// OWLTODO: temp values
-	private String actionKey = "fake1";
-	private boolean isActionEditable = true;
-	private Optional<String> actionModifiedEid = Optional.of("owlinstructor01");
-	private Optional<Date> actionModifiedDate = Optional.of(Date.from(Instant.EPOCH));
+	private String actionKey;
+	private boolean isActionEditable;
+	private Optional<String> actionModifiedEid;
+	private Optional<Date> actionModifiedDate;
 
 	/** The migration status **/
 	private String statusKey;

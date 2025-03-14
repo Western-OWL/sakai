@@ -4,7 +4,9 @@ import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.sakaiproject.cheftool.Context;
 import org.sakaiproject.cheftool.RunData;
 import org.sakaiproject.cheftool.VelocityPortlet;
@@ -14,6 +16,7 @@ import org.sakaiproject.sitemanage.api.owl.DisplayConstants;
 import org.sakaiproject.sitemanage.api.owl.MigAction;
 import org.sakaiproject.sitemanage.api.owl.OwlMigrationService;
 import org.sakaiproject.sitemanage.api.owl.SiteMigrationItem;
+import org.sakaiproject.sitemanage.api.owl.UserSelection;
 import org.sakaiproject.util.ResourceLoader;
 
 /**
@@ -47,16 +50,20 @@ public class OwlMigrationHelper
 	{
 		context.put("termMap", termMap);
 		boolean editableOptions = termMap.values().stream().flatMap(Collection::stream).anyMatch(smi -> smi.isTypeEditable());
+		// OWLTODO: add check for editable actions
 		context.put("hasEditableSites", editableOptions); // true if any of the sites are in an editable state (ie. "undecided")
 
-		context.put("optionsDisplayMap", OWL_MIG_SERV.getMigrationTypes()); // map of all selections key -> display value
-		Map<String, String> activeOptions = OWL_MIG_SERV.getActiveTypes(); // map of currently active selections keys -> display value
-		context.put("options", activeOptions); // the possible selections in the migration options dropdown
-		context.put("readOnlyMode", activeOptions.isEmpty()); // shorthand for no active options (tab is effectively in a read-only mode)
-		context.put("readOnlyNoSelectionDisplay", OWL_MIG_SERV.getNoActiveTypesDisplay()); // value to display in options column when in read-only mode and no user selection has been made
+		context.put("typesDisplayMap", OWL_MIG_SERV.getMigrationTypes()); // map of all types key -> display value
+		var activeTypes = OWL_MIG_SERV.getActiveTypes(); // map of currently active types keys -> display value
+		context.put("types", activeTypes); // the possible selections in the migration options dropdown
+		context.put("actionsDisplayMap", OWL_MIG_SERV.getMigrationActions());
+		var activeActions = OWL_MIG_SERV.getActiveActions();
+		context.put("actions", activeActions);
+		
+		context.put("readOnlyMode", activeTypes.isEmpty() && activeActions.isEmpty()); // shorthand for no active types or actions (tab is effectively in a read-only mode)
+		context.put("readOnlyNoSelectionDisplay", OWL_MIG_SERV.getNoActiveTypesDisplay()); // value to display in type/action column when in read-only mode and no user selection has been made
 
-		// OWLTODO: what about active/inactive actions?
-		context.put("typeActionMap", getMigrationActions());
+		context.put("typeActionMap", OWL_MIG_SERV.getTypeActionMap());
 
 		context.put("tlang", rb);
 
@@ -118,11 +125,18 @@ public class OwlMigrationHelper
 	 */
 	public static List<String> updateMigrations(RunData data, SessionState state)
 	{
-		// "userSelection" is the name of the <select> form inputs
-		List<String> selections = List.of(data.getParameters().getStrings("userSelection"));
+		// "userType" and "userAction" are the names of the <select> form inputs
+		var types = List.of(data.getParameters().getStrings("userType"));
+		var actions = List.of(data.getParameters().getStrings("userAction"));
 
-		// these are siteId::selectionKey Strings, so we have to split on :: and then make the appropriate service method call to save them
-		Map<String, String> selMap = selections.stream().map(s -> s.split("::")).filter(a -> a.length == 2).collect(Collectors.toMap(a -> a[0], a -> a[1]));
+		// these are siteId::key Strings
+		var typeMap = types.stream().map(s -> s.split("::")).filter(a -> a.length == 2).collect(Collectors.toMap(a -> a[0], a -> a[1]));
+		var actMap = actions.stream().map(s -> s.split("::")).filter(a -> a.length == 2).collect(Collectors.toMap(a -> a[0], a -> a[1]));
+
+		var siteIds = Stream.concat(typeMap.keySet().stream(), actMap.keySet().stream()).collect(Collectors.toSet());
+
+		var selMap = siteIds.stream().collect(Collectors.toMap(s -> s, s -> new UserSelection(Optional.ofNullable(typeMap.get(s)), Optional.ofNullable(actMap.get(s)))));
+
 		List<String> errorSites = OWL_MIG_SERV.saveSelections(selMap);
 		if (errorSites.isEmpty())
 		{

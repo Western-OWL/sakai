@@ -23,6 +23,8 @@
               <th>#mb("owl.mig.header.option")</th>
               <th>#mb("owl.mig.header.optionOn")</th>
               <th>#mb("owl.mig.header.optionBy")</th>
+              <!--<th>#mb("owl.mig.header.actionOn")</th>
+              <th>#mb("owl.mig.header.actionBy")</th>-->
             </tr>
           </thead>
           </tbody>
@@ -32,8 +34,11 @@
               <td>#linkify($site)</td>
               #if($showSizeCol)<td>#size($site)</td>#end
               <td>#selection($site $options)</td>
-              <td>$MigTool.formatDate($site.SelectionModifiedDate, $tlang.Locale, $noVal)</td>
-              <td>$MigTool.formatUser($site.SelectionModifiedEid, $noVal)</td>
+              #set($dateAndUser = $MigTool.formatLatestDateAndUser($site, $tlang.Locale, $noVal))
+              <td>$dateAndUser.Date</td>
+              <td>$dateAndUser.User</td>
+              <!--<td>$MigTool.formatDate($site.actionModifiedDate, $tlang.Locale, $noVal)</td>
+              <td>$MigTool.formatUser($site.actionModifiedEid, $noVal)</td>-->
             </tr>
             #end
           </tbody>
@@ -70,7 +75,7 @@
 var OWL_MIG = OWL_MIG || {};
 OWL_MIG.showSizeBlurb = function()
 {
-  const selections = Array.from(document.getElementsByName("userSelection"));
+  const selections = Array.from(document.getElementsByName("userAction"));
   const sizeCheckOptionKeys = [$sizeCheckOptions];
 
   for (const selection of selections)
@@ -113,24 +118,97 @@ OWL_MIG.cancelSave = function()
   document.getElementById("cancelBtn").disabled=false;
   contBtn.focus();
 }
+
+// ----- OWL TEMP SCRIPTING BELOW  ------
+// ...just trying to figure out the JS...
+
+// build a JS version of the typeActionMap so we can use it to swap the contents of the action dropdown
+OWL_MIG.actionMap = new Map();
+let actionArray = [];
+#foreach($typeKey in $typeActionMap.keySet())
+  #foreach($action in $typeActionMap.get($typeKey))
+  actionArray.push(["$action.label", "$action.key"]);
+  #end
+  OWL_MIG.actionMap.set("$typeKey", actionArray);
+  actionArray = [];
+#end
+
+//actionMap.set("fakeKey1", [ ["Just some fake", "fake1"], ["Options here so we", "fake2"], ["Can test things out", "fake3"] ]);
+//actionMap.set("fakeKey2", [ ["Just some fakery", "fake4"], ["To make you see", "fake5"], ["Things have changed", "fake6"] ]);
+
+
+OWL_MIG.handleTypeChange = function(event)
+{
+  const typeSelect = event.target;
+  const typeKey = typeSelect.value.split("::")[1];  // format is <siteid>::typeKey
+  const siteId = typeSelect.id.split("_")[0];  // id will be <siteid>_type
+  const actionSelect = document.getElementById(siteId + "_action");
+
+  while (actionSelect.options.length > 0)
+  {
+    actionSelect.remove(0);
+  }
+
+  if (OWL_MIG.actionMap.has(typeKey))
+  {
+    for (const opt of OWL_MIG.actionMap.get(typeKey))
+    {
+      actionSelect.add(new Option(opt[0], siteId + "::" + opt[1]));
+    }
+  }
+
+  if (actionSelect.options.length > 0)
+  {
+    actionSelect.selectedIndex = 0;  // OWLTODO: make it a data requirement that the "undecided" option appears first
+    actionSelect.disabled = false;
+    //actionSelect.classList.remove("hidden");
+  }
+  else
+  {
+    //actionSelect.classList.add("hidden");
+    actionSelect.add(new Option("#mb("owl.mig.noAction")", "noaction"));
+    actionSelect.disabled = true;
+  }
+}
+
 </script>
 
 ## MACROS ONLY BELOW
 
 #macro(selection $site $options)
-#if($site.SelectionEditable && !$readOnlyMode)
-<label for="${site.SiteId}-dropdown" class="sr-only">#mb("owl.mig.select.label") #title($site)</label>
-<select name="userSelection" id="${site.SiteId}-dropdown" data-size-cat="$site.getResourcesSizeCategory().name()">
-  #foreach($optionKey in $options.keySet())
-  <option value="$site.SiteId::$optionKey" #if($optionKey == $site.SelectionKey)selected#end>$options.get($optionKey)</option>
-  #end
-</select>
-#elseif($readOnlyMode && !$site.SelectionModifiedDate.isPresent())
-$readOnlyNoSelectionDisplay.orElse($noVal)
+<div class="owl-mig-dropdowns">
+#if($site.TypeEditable && !$readOnlyMode)
+  <label for="${site.SiteId}_type" class="sr-only">#mb("owl.mig.type.label") #title($site)</label>
+  <select name="userType" id="${site.SiteId}_type" data-size-cat="$site.getResourcesSizeCategory().name()" onchange="OWL_MIG.handleTypeChange(event);">
+    #foreach($typeKey in $types.keySet())
+    <option value="$site.SiteId::$typeKey" #if($typeKey == $site.TypeKey)selected#end>$types.get($typeKey)</option>
+    #end
+  </select>
+#elseif($readOnlyMode && !$site.TypeModifiedDate.isPresent())
+  $readOnlyNoSelectionDisplay.orElse($noVal)
 #else
-#set($status = $MigTool.getStatusDisplay($site))
-$MigTool.getSelectionDisplay($site, $optionsDisplayMap) #if(!$status.Empty)<span class="owl-mig-tracking-status-label">$status</span>#end
+  #set($status = $MigTool.getStatusDisplay($site))
+  $MigTool.getSelectionDisplay($site, $typesDisplayMap) #if(!$status.Empty)<span class="owl-mig-tracking-status-label">$status</span>#end
 #end
+&amp;
+#if(($site.ActionEditable || $site.ActionKey.Empty) && !$readOnlyMode)
+  <label for="${site.SiteId}_type" class="sr-only">#mb("owl.mig.action.label") #title($site)</label>
+  <select name="userAction" id="${site.SiteId}_action" #if($site.ActionKey.Empty)disabled="disabled"#end>
+    #if($site.ActionKey.Empty)
+      <option value="noaction" selected="selected">#mb("owl.mig.noAction")</option>
+    #else
+      #foreach($action in $typeActionMap.get(${site.TypeKey}))
+      <option value="$site.SiteId::$action.key" #if($action.key == $site.ActionKey)selected#end>$action.label</option>
+      #end
+    #end
+  </select>
+#elseif($readOnlyMode && !$site.TypeModifiedDate.isPresent())
+  $readOnlyNoSelectionDisplay.orElse($noVal)
+#else
+  #set($status = $MigTool.getStatusDisplay($site))
+  $MigTool.getSelectionDisplay($site, $typesDisplayMap) #if(!$status.Empty)<span class="owl-mig-tracking-status-label">$status</span>#end
+#end
+</div>
 #end
 
 #macro(size $site)
@@ -142,9 +220,7 @@ $MigTool.formatSize($site)
 #end
 #end
 
-#macro(mb $key)
-$tlang.getString($key)
-#end
+#macro(mb $key)$tlang.getString($key)#end
 
 #macro(title $site)
 $formattedText.escapeHtml($site.SiteTitle)

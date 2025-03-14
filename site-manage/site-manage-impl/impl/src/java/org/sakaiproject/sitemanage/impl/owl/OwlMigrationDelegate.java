@@ -32,6 +32,7 @@ import org.sakaiproject.tool.api.SessionManager;
 
 import lombok.extern.slf4j.Slf4j;
 import org.sakaiproject.sitemanage.api.owl.MigAction;
+import org.sakaiproject.sitemanage.api.owl.UserSelection;
 
 @Slf4j
 public class OwlMigrationDelegate {
@@ -124,7 +125,7 @@ public class OwlMigrationDelegate {
 	}
 
 	// OWLTODO: this map contains only site id and one "selection"; this will need to be refactored to pass two selections (type and action)
-	public List<String> saveSelections(Map<String, String> siteSelections) {
+	public List<String> saveSelections(Map<String, UserSelection> siteSelections) {
 
 		// OWLTODO: we likely need to replace this with something else
 //		Optional<GroupIdentificationParameters> optGip = buildGroupIdentificationParameters();
@@ -142,7 +143,7 @@ public class OwlMigrationDelegate {
 		List<Site> userSites = getUserSites();
 
 		List<String> failedSiteTitles = new ArrayList<>();
-		for (Map.Entry<String, String> siteSelection : siteSelections.entrySet()) {
+		for (Map.Entry<String, UserSelection> siteSelection : siteSelections.entrySet()) {
 			String siteId = siteSelection.getKey();
 			String typeKey = siteSelection.getValue();
 			// OWLTODO: String actionKey = ?

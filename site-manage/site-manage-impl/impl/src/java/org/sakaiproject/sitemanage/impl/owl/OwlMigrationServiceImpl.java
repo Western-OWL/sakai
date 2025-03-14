@@ -20,6 +20,7 @@ import org.sakaiproject.tool.api.SessionManager;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.sakaiproject.sitemanage.api.owl.MigAction;
+import org.sakaiproject.sitemanage.api.owl.UserSelection;
 
 @Slf4j
 public class OwlMigrationServiceImpl implements OwlMigrationService {
@@ -92,7 +93,7 @@ public class OwlMigrationServiceImpl implements OwlMigrationService {
 	}
 
 	@Override
-	public List<String> saveSelections(Map<String, String> siteSelections) {
+	public List<String> saveSelections(Map<String, UserSelection> siteSelections) {
 		return migrationDelegate.saveSelections(siteSelections);
 	}
 

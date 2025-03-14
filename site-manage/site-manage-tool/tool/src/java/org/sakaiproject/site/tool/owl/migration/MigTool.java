@@ -66,19 +66,19 @@ public class MigTool
 		return formatDate(Optional.of(Date.from(instant)), locale, "");
 	}
 
-	public static String formatLatestDateAndUser(SiteMigrationItem item, Locale locale, String noValue)
+	public static FormattedDateAndUser formatLatestDateAndUser(SiteMigrationItem item, Locale locale, String noValue)
 	{
 		if (item.getTypeModifiedDate().isEmpty())
 		{
-			return noValue;  // cannot have an action date without a type date
+			return new FormattedDateAndUser(noValue, noValue);  // cannot have an action date without a type date
 		}
 
 		if (item.getTypeModifiedDate().get().after(item.getActionModifiedDate().orElse(EPOCH)))
 		{
-			return formatDate(item.getTypeModifiedDate(), locale, noValue);
+			return new FormattedDateAndUser(formatDate(item.getTypeModifiedDate(), locale, noValue), formatUser(item.getTypeModifiedEid(), noValue));
 		}
 
-		return formatDate(item.getActionModifiedDate(), locale, noValue);
+		return new FormattedDateAndUser(formatDate(item.getActionModifiedDate(), locale, noValue), formatUser(item.getActionModifiedEid(), noValue));
 	}
 
 	/**
@@ -150,7 +150,6 @@ public class MigTool
 	@Data
 	public static class FormattedDateAndUser
 	{
-		private String date;
-		private String user;
+		private final String date, user;
 	}
 }

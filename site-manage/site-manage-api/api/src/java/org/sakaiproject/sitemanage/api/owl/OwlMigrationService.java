@@ -74,7 +74,7 @@ public interface OwlMigrationService {
 	 * Any of these could result from bad data, or users working concurrently
 	 * The nature of the error will be logged
 	 */
-	public List<String> saveSelections(Map<String, String> siteSelections);
+	public List<String> saveSelections(Map<String, UserSelection> siteSelections);
 
 	public List<String> getActionKeysWithResourcesSizeWarnings();
 
