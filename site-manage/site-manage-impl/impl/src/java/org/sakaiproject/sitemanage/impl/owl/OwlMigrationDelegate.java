@@ -146,7 +146,7 @@ public class OwlMigrationDelegate {
 		for (Map.Entry<String, UserSelection> siteSelection : siteSelections.entrySet()) {
 			String siteId = siteSelection.getKey();
 			String typeKey = siteSelection.getValue().getType().orElse("");
-			// OWLTODO: String actionKey = ?
+			String actionKey = siteSelection.getValue().getAction().orElse("");
 
 			Optional<Site> site = userSites.stream().filter(userSite -> StringUtils.equals(userSite.getId(), siteId)).findFirst();
 			if (!site.isPresent()) {
@@ -163,12 +163,11 @@ public class OwlMigrationDelegate {
 				continue;
 			}
 
-			// OWLTODO: uncomment this section when we have the actionKey passed in as well as the typeKey
-//			if (!activeActions.contains(actionKey)) {
-//				log.warn("User {} tried to change the action selection for site {} to a value that is not an active action: {}" , getCurrentUserEid(), siteId, actionKey);
-//				failedSiteTitles.add(siteTitle);
-//				continue;
-//			}
+			if (!activeActions.contains(actionKey)) {
+				log.warn("User {} tried to change the action selection for site {} to a value that is not an active action: {}" , getCurrentUserEid(), siteId, actionKey);
+				failedSiteTitles.add(siteTitle);
+				continue;
+			}
 
 			// OWLTODO: do we still need the second half of this validation?
 			// Validate that the site is eligible for migration
@@ -198,27 +197,25 @@ public class OwlMigrationDelegate {
 					continue;
 				}
 
-				// OWLTODO:  uncomment this section when we have the actionKey passed in as well as the typeKey
 				// Update action only if the action is changeable
-//				changeable = StringUtils.isEmpty(dto.getActionKey()) || changeableTypes.contains(dto.getActionKey());
-//				if (!changeable) {
-//					if (!dto.getActionKey().equals(actionKey)) {
-//						// User tried to change their unchangeable action
-//						log.warn("User {} tried to change the action selection for site {}, but its existing action '{}' is unchangeable", getCurrentUserEid(), siteId, dto.getActionKey());
-//						failedSiteTitles.add(siteTitle);
-//					}
-//					continue;
-//				}
+				changeable = StringUtils.isEmpty(dto.getActionKey()) || changeableActions.contains(dto.getActionKey());
+				if (!changeable) {
+					if (!dto.getActionKey().equals(actionKey)) {
+						// User tried to change their unchangeable action
+						log.warn("User {} tried to change the action selection for site {}, but its existing action '{}' is unchangeable", getCurrentUserEid(), siteId, dto.getActionKey());
+						failedSiteTitles.add(siteTitle);
+					}
+					continue;
+				}
 
 				// Set the type
 				dto.setTypeKey(typeKey);
 				dto.setTypeModifiedDate(now);
 				//dto.setTypeModifiedEid(gip.userEid); // OWLTODO: where are we getting userEid from if we don't have gip?
 
-				// OWLTODO:  uncomment this section when we have the actionKey passed in as well as the typeKey
 				// Set the action
-				//dto.setActionKey(actionKey);
-				//dto.setActionModifiedDate(now);
+				dto.setActionKey(actionKey);
+				dto.setActionModifiedDate(now);
 				//dto.setActionModifiedEid(gip.userEid); // OWLTODO: where are we getting userEid from if we don't have gip?
 
 				// Set the status if applicable
@@ -366,8 +363,11 @@ public class OwlMigrationDelegate {
 		}
 	}
 
+	/**
+	 * Get all of the user's sites - exclude descriptions, include unpublished sites
+	 * @return List of user's sites
+	 */
 	private List<Site> getUserSites() {
-		// Get all of the user's sites - exclude descriptions, include unpublished sites
 		return siteService.getUserSites(false, true);
 	}
 
