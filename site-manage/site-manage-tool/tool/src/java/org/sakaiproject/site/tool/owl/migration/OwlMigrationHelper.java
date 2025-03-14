@@ -2,11 +2,9 @@ package org.sakaiproject.site.tool.owl.migration;
 
 import java.time.Instant;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import lombok.Data;
 import org.sakaiproject.cheftool.Context;
 import org.sakaiproject.cheftool.RunData;
 import org.sakaiproject.cheftool.VelocityPortlet;
@@ -109,14 +107,7 @@ public class OwlMigrationHelper
 
 	public static Map<String, List<MigAction>> getMigrationActions()
 	{
-		// OWLTODO: obviously this is all fake data right now...
-		var m = new HashMap<String, List<MigAction>>();
-		m.put("undecided", List.of(new MigAction("fake1", "Just some fake"), new MigAction("fake2", "Options here so we"), new MigAction("fake3", "Can test things out")));
-		m.put("doNotMig", List.of(new MigAction("fake4", "Just some fakery"), new MigAction("fake5", "To make you see"), new MigAction("fake6", "Things have changed")));
-		m.put("selfMig", List.of());
-		m.put("assistedMig", List.of());
-
-		return m;
+		return OWL_MIG_SERV.getTypeActionMap();
 	}
 
 	/**

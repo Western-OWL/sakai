@@ -23,7 +23,7 @@ public interface OwlMigrationService {
 	public Map<String, List<SiteMigrationItem>> getSiteMigrationItems();
 
 	/**
-	 * Gets a map of type to list of appropriate migration actions for that type.
+	 * Gets a map of type keys to list of appropriate migration actions for that type.
 	 * @return the map
 	 */
 	public Map<String, List<MigAction>> getTypeActionMap();
@@ -80,7 +80,7 @@ public interface OwlMigrationService {
 
 	/**
 	 * Gets the display value associated with a status key.
-	 * @param selectionKey
+	 * @param actionKey
 	 * @param statusKey
 	 *
 	 * Statuses are visible only if both:
@@ -88,7 +88,7 @@ public interface OwlMigrationService {
 	 *    The statusKey is in the list of visible statuses.
 	 * @return empty String if the status is not visible
 	 */
-	public String getStatusDisplay(String selectionKey, String statusKey);
+	public String getStatusDisplay(String actionKey, String statusKey);
 
 	public Optional<String> getAdminDisplayName();
 

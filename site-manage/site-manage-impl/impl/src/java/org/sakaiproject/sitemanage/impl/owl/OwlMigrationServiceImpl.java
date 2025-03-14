@@ -106,8 +106,8 @@ public class OwlMigrationServiceImpl implements OwlMigrationService {
 	}
 
 	@Override
-	public String getStatusDisplay(String selectionKey, String statusKey) {
-		return migrationDelegate.getStatusDisplay(selectionKey, statusKey);
+	public String getStatusDisplay(String actionKey, String statusKey) {
+		return migrationDelegate.getStatusDisplay(actionKey, statusKey);
 	}
 
 	@Override

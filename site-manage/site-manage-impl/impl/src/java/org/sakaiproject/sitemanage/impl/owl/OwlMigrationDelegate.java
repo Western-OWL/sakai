@@ -3,10 +3,12 @@ package org.sakaiproject.sitemanage.impl.owl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -100,7 +102,26 @@ public class OwlMigrationDelegate {
 	}
 
 	public Map<String, List<MigAction>> getTypeActionMap() {
-		throw new UnsupportedOperationException("OWLTODO implement me!");
+		List<String> activeTypes = OwlMigrationDAO.getActiveTypeKeys();
+		List<String> activeActions = OwlMigrationDAO.getActiveActionKeys();
+		Map<String, String> actionOptions = OwlMigrationDAO.getActionOptions();
+		Map<String, List<String>> typeActionMap = OwlMigrationDAO.getTypesToActionsMap();
+
+		Map<String, List<MigAction>> map = new HashMap<>();
+		for (Entry<String, List<String>> entry : typeActionMap.entrySet()) {
+			String typeKey = entry.getKey();
+			List<String> actionKeys = entry.getValue();
+			if (activeTypes.contains(typeKey)) {
+				for (String actionKey : actionKeys) {
+					if (activeActions.contains(actionKey)) {
+						List<MigAction> actions = map.computeIfAbsent(typeKey, key -> new ArrayList<MigAction>());
+						actions.add(new MigAction(actionKey, actionOptions.get(actionKey)));
+					}
+				}
+			}
+		}
+
+		return map;
 	}
 
 	// OWLTODO: this map contains only site id and one "selection"; this will need to be refactored to pass two selections (type and action)
