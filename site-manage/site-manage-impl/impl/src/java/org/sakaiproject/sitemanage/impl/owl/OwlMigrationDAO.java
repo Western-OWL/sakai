@@ -455,9 +455,7 @@ public class OwlMigrationDAO
             return "";
         }
 
-        Site site = s.get();
-        ResourceProperties props = site.getProperties();
-        return props.getProperty( sitePropKey );
+        return s.get().getProperties().getProperty( sitePropKey );
     }
 
     /**

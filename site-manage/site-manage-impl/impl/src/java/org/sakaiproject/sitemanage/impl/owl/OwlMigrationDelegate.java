@@ -50,17 +50,16 @@ public class OwlMigrationDelegate {
 //	final Comparator<SiteMigrationItem> smiComparator = Comparator.comparing(SiteMigrationItem::getSiteTitle)
 //		.thenComparing(SiteMigrationItem::getSiteId);
 
-	public OwlMigrationDelegate(AuthzGroupService authzGroupService, ContentHostingService contentHostingService,
-			CourseManagementService courseManagementService, EmailService emailService, EventTrackingService eventTrackingService,
-			ServerConfigurationService serverConfigurationService, SessionManager sessionManager, SiteService siteService) {
-		this.authzGroupService = authzGroupService;
-		this.contentHostingService = contentHostingService;
-		this.courseManagementService = courseManagementService;
-		this.emailService = emailService;
-		this.eventTrackingService = eventTrackingService;
-		this.serverConfigurationService = serverConfigurationService;
-		this.sessionManager = sessionManager;
-		this.siteService = siteService;
+	public OwlMigrationDelegate(AuthzGroupService ags, ContentHostingService chs, CourseManagementService cms, EmailService es, EventTrackingService ets,
+			ServerConfigurationService scs, SessionManager sm, SiteService ss) {
+		authzGroupService = ags;
+		contentHostingService = chs;
+		courseManagementService = cms;
+		emailService = es;
+		eventTrackingService = ets;
+		serverConfigurationService = scs;
+		sessionManager = sm;
+		siteService = ss;
 	}
 
 	public List<SiteMigrationItem> getSiteMigrationItems() {
@@ -136,13 +135,13 @@ public class OwlMigrationDelegate {
 //		GroupIdentificationParameters gip = optGip.get();
 
 		List<String> changeableTypes = OwlMigrationDAO.getChangeableTypes();
+		List<String> activeTypes = OwlMigrationDAO.getActiveTypeKeys();
 		List<String> changeableActions = OwlMigrationDAO.getChangeableActions();
+		List<String> activeActions = OwlMigrationDAO.getActiveActionKeys();
 		Map<String, String> selectionStatusMap = OwlMigrationDAO.getInitialActionStatusMap();
-
 		List<Site> userSites = getUserSites();
 
 		List<String> failedSiteTitles = new ArrayList<>();
-
 		for (Map.Entry<String, String> siteSelection : siteSelections.entrySet()) {
 			String siteId = siteSelection.getKey();
 			String typeKey = siteSelection.getValue();
@@ -150,21 +149,21 @@ public class OwlMigrationDelegate {
 
 			Optional<Site> site = userSites.stream().filter(userSite -> StringUtils.equals(userSite.getId(), siteId)).findFirst();
 			if (!site.isPresent()) {
-				log.warn("User {} tried to change the selection for site {} in which they are not a member", getCurrentUserEid(), siteId);
+				log.warn("User {} tried to change the selection(s) for site {} in which they are not a member", getCurrentUserEid(), siteId);
 				failedSiteTitles.add(siteId);
 				continue;
 			}
 
 			String siteTitle = site.get().getTitle();
 
-			if (!OwlMigrationDAO.getActiveTypeKeys().contains(typeKey)) {
+			if (!activeTypes.contains(typeKey)) {
 				log.warn("User {} tried to change the type selection for site {} to a value that is not an active type: {}" , getCurrentUserEid(), siteId, typeKey);
 				failedSiteTitles.add(siteTitle);
 				continue;
 			}
 
 			// OWLTODO: uncomment this section when we have the actionKey passed in as well as the typeKey
-//			if (!OwlMigrationDAO.getActiveActionKeys().contains(actionKey)) {
+//			if (!activeActions.contains(actionKey)) {
 //				log.warn("User {} tried to change the action selection for site {} to a value that is not an active action: {}" , getCurrentUserEid(), siteId, actionKey);
 //				failedSiteTitles.add(siteTitle);
 //				continue;
@@ -235,8 +234,7 @@ public class OwlMigrationDelegate {
 			}
 
 			// OWLTODO: uncomment this section once we've resolved userEid (see above)
-//			boolean selectionPersisted = OwlMigrationDAO.saveSiteMigrationItem(dto);
-//			if (selectionPersisted) {
+//			if (OwlMigrationDAO.saveSiteMigrationItem(dto)) {
 //				eventTrackingService.post(eventTrackingService.newEvent(OwlMigrationService.EVENT_OWL_MIGRATION_SELECTION_SAVED, siteId + "->" + typeKey, true));
 //			} else {
 //				failedSiteTitles.add(siteTitle);
@@ -331,7 +329,7 @@ public class OwlMigrationDelegate {
 			Optional<String> typeModifiedEid = Optional.ofNullable(StringUtils.trimToNull(dto.getTypeModifiedEid()));
 			Optional<Date> typeModifiedDate = Optional.ofNullable(dto.getTypeModifiedDate());
 
-			String actionKey = StringUtils.defaultIfBlank(dto.getActionKey(), "undecided");
+			String actionKey = StringUtils.defaultIfBlank(dto.getActionKey(), "");
 			boolean isActionEditable = OwlMigrationDAO.getChangeableActions().contains(actionKey);
 			Optional<String> actionModifiedEid = Optional.ofNullable(StringUtils.trimToNull(dto.getActionModifiedEid()));
 			Optional<Date> actionModifiedDate = Optional.ofNullable(dto.getActionModifiedDate());
@@ -357,7 +355,7 @@ public class OwlMigrationDelegate {
 			item.setTypeEditable(true);
 			item.setTypeModifiedEid(Optional.empty());
 			item.setTypeModifiedDate(Optional.empty());
-			item.setActionKey("undecided");
+			item.setActionKey("");
 			item.setActionEditable(true);
 			item.setActionModifiedEid(Optional.empty());
 			item.setActionModifiedDate(Optional.empty());

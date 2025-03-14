@@ -119,5 +119,4 @@ public class OwlMigrationServiceImpl implements OwlMigrationService {
 	public String getUIMessage(String messageKey) {
 		return OwlMigrationDAO.getUiMessage(messageKey).orElse("");
 	}
-
 }
