@@ -145,7 +145,7 @@ public class OwlMigrationDelegate {
 		List<String> failedSiteTitles = new ArrayList<>();
 		for (Map.Entry<String, UserSelection> siteSelection : siteSelections.entrySet()) {
 			String siteId = siteSelection.getKey();
-			String typeKey = siteSelection.getValue();
+			String typeKey = siteSelection.getValue().getType().orElse("");
 			// OWLTODO: String actionKey = ?
 
 			Optional<Site> site = userSites.stream().filter(userSite -> StringUtils.equals(userSite.getId(), siteId)).findFirst();
