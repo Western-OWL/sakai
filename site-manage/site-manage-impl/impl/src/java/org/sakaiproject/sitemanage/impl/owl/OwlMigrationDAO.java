@@ -139,10 +139,9 @@ public class OwlMigrationDAO
         {
             throw new IllegalArgumentException( "SiteMigrationItemDTO cannot be null" );
         }
-        if( dto.getSiteID() == null || dto.getTypeKey() == null || dto.getTypeModifiedDate() == null || dto.getTypeModifiedEid() == null
-                || dto.getActionKey() == null || dto.getActionModifiedDate() == null || dto.getActionModifiedEid() == null)
+        if( dto.getSiteID() == null || dto.getTypeKey() == null || dto.getTypeModifiedDate() == null || dto.getTypeModifiedEid() == null )
         {
-            throw new IllegalArgumentException( "SiteMigrationItemDTO members cannot be null: siteID, typeKey, typeModifiedDate, typeModifiedEid, actionKey, actionModifiedDate, actionModifiedEid" );
+            throw new IllegalArgumentException( "SiteMigrationItemDTO members cannot be null: siteID, typeKey, typeModifiedDate, typeModifiedEid" );
         }
 
         try
@@ -157,10 +156,11 @@ public class OwlMigrationDAO
             props.addProperty( OWL_PROJ_MIG_STATUS_EID, StringUtils.trimToEmpty( dto.getStatusModifiedEid() ) );
 
             DateFormat df = new SimpleDateFormat( DATE_FORMAT );
+            String actionModifiedDate = dto.getActionModifiedDate() != null ? df.format( dto.getActionModifiedDate() ) : "";
             String statusModifiedDate = dto.getStatusModifiedDate() != null ? df.format( dto.getStatusModifiedDate() ) : "";
 
             props.addProperty( OWL_PROJ_MIG_TYPE_SELECTION_DATE, df.format( dto.getTypeModifiedDate() ) );
-            props.addProperty( OWL_PROJ_MIG_ACTION_SELECTION_DATE, df.format( dto.getActionModifiedDate() ) );
+            props.addProperty( OWL_PROJ_MIG_ACTION_SELECTION_DATE, actionModifiedDate );
             props.addProperty( OWL_PROJ_MIG_STATUS_DATE, statusModifiedDate );
 
             siteService.save( site );

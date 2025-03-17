@@ -32,6 +32,7 @@ import org.sakaiproject.tool.api.SessionManager;
 
 import lombok.extern.slf4j.Slf4j;
 import org.sakaiproject.sitemanage.api.owl.MigAction;
+import org.sakaiproject.sitemanage.api.owl.OwlMigrationService;
 import org.sakaiproject.sitemanage.api.owl.UserSelection;
 
 @Slf4j
@@ -124,63 +125,54 @@ public class OwlMigrationDelegate {
 		return map;
 	}
 
-	// OWLTODO: this map contains only site id and one "selection"; this will need to be refactored to pass two selections (type and action)
 	public List<String> saveSelections(Map<String, UserSelection> siteSelections) {
-
-		// OWLTODO: we likely need to replace this with something else
-//		Optional<GroupIdentificationParameters> optGip = buildGroupIdentificationParameters();
-//		if (optGip.isEmpty()) {
-//			log.warn("saveSelections invoked by user {} who has no eligible sites to migrate", getCurrentUserEid());
-//			return new ArrayList<>(siteSelections.keySet());
-//		}
-//		GroupIdentificationParameters gip = optGip.get();
 
 		List<String> changeableTypes = OwlMigrationDAO.getChangeableTypes();
 		List<String> activeTypes = OwlMigrationDAO.getActiveTypeKeys();
 		List<String> changeableActions = OwlMigrationDAO.getChangeableActions();
 		List<String> activeActions = OwlMigrationDAO.getActiveActionKeys();
-		Map<String, String> selectionStatusMap = OwlMigrationDAO.getInitialActionStatusMap();
+		Map<String, String> actionStatusMap = OwlMigrationDAO.getInitialActionStatusMap();
 		List<Site> userSites = getUserSites();
+		String currentUserEid = getCurrentUserEid();
 
 		List<String> failedSiteTitles = new ArrayList<>();
-		for (Map.Entry<String, UserSelection> siteSelection : siteSelections.entrySet()) {
+		for (Entry<String, UserSelection> siteSelection : siteSelections.entrySet()) {
 			String siteId = siteSelection.getKey();
 			String typeKey = siteSelection.getValue().getType().orElse("");
 			String actionKey = siteSelection.getValue().getAction().orElse("");
 
 			Optional<Site> site = userSites.stream().filter(userSite -> StringUtils.equals(userSite.getId(), siteId)).findFirst();
 			if (!site.isPresent()) {
-				log.warn("User {} tried to change the selection(s) for site {} in which they are not a member", getCurrentUserEid(), siteId);
+				log.warn("User {} tried to change the selection(s) for site {} in which they are not a member", currentUserEid, siteId);
 				failedSiteTitles.add(siteId);
 				continue;
 			}
 
-			String siteTitle = site.get().getTitle();
+			Site userSite = site.get();
+			String siteTitle = userSite.getTitle();
 
 			if (!activeTypes.contains(typeKey)) {
-				log.warn("User {} tried to change the type selection for site {} to a value that is not an active type: {}" , getCurrentUserEid(), siteId, typeKey);
+				log.warn("User {} tried to change the type selection for site {} to a value that is not an active type: {}" , currentUserEid, siteId, typeKey);
 				failedSiteTitles.add(siteTitle);
 				continue;
 			}
 
 			if (!activeActions.contains(actionKey)) {
-				log.warn("User {} tried to change the action selection for site {} to a value that is not an active action: {}" , getCurrentUserEid(), siteId, actionKey);
+				log.warn("User {} tried to change the action selection for site {} to a value that is not an active action: {}" , currentUserEid, siteId, actionKey);
 				failedSiteTitles.add(siteTitle);
 				continue;
 			}
 
-			// OWLTODO: do we still need the second half of this validation?
 			// Validate that the site is eligible for migration
-			if (!site.isPresent() /*|| !getGroupAndTermIfSiteEligibleForMigration(site.get(), gip, true).isPresent()*/) {
+			if (isUserMaintainer(userSite, getCurrentUserId())) {
+				log.warn("User {} tried to change the selection(s) for site {} in which they are not a maintainer", currentUserEid, siteId);
 				failedSiteTitles.add(siteTitle);
 				continue;
 			}
 
-			String statusKey = selectionStatusMap.get(typeKey);
-
+			String statusKey = actionStatusMap.get(typeKey);
 			Optional<SiteMigrationItemDTO> optDto = OwlMigrationDAO.getSiteMigrationItem(siteId);
 			SiteMigrationItemDTO dto;
-
 			Date now = new Date();
 
 			if (optDto.isPresent()) {
@@ -191,7 +183,7 @@ public class OwlMigrationDelegate {
 				if (!changeable) {
 					if (!dto.getTypeKey().equals(typeKey)) {
 						// User tried to change their unchangeable type
-						log.warn("User {} tried to change the type selection for site {}, but its existing type '{}' is unchangeable", getCurrentUserEid(), siteId, dto.getTypeKey());
+						log.warn("User {} tried to change the type selection for site {}, but its existing type '{}' is unchangeable", currentUserEid, siteId, dto.getTypeKey());
 						failedSiteTitles.add(siteTitle);
 					}
 					continue;
@@ -202,7 +194,7 @@ public class OwlMigrationDelegate {
 				if (!changeable) {
 					if (!dto.getActionKey().equals(actionKey)) {
 						// User tried to change their unchangeable action
-						log.warn("User {} tried to change the action selection for site {}, but its existing action '{}' is unchangeable", getCurrentUserEid(), siteId, dto.getActionKey());
+						log.warn("User {} tried to change the action selection for site {}, but its existing action '{}' is unchangeable", currentUserEid, siteId, dto.getActionKey());
 						failedSiteTitles.add(siteTitle);
 					}
 					continue;
@@ -211,32 +203,45 @@ public class OwlMigrationDelegate {
 				// Set the type
 				dto.setTypeKey(typeKey);
 				dto.setTypeModifiedDate(now);
-				//dto.setTypeModifiedEid(gip.userEid); // OWLTODO: where are we getting userEid from if we don't have gip?
+				dto.setTypeModifiedEid(currentUserEid);
 
-				// Set the action
-				dto.setActionKey(actionKey);
-				dto.setActionModifiedDate(now);
-				//dto.setActionModifiedEid(gip.userEid); // OWLTODO: where are we getting userEid from if we don't have gip?
+				// Set the action if applicable
+				if (!"".equals(actionKey)) {
+					dto.setActionKey(actionKey);
+					dto.setActionModifiedDate(now);
+					dto.setActionModifiedEid(currentUserEid);
+				}
 
 				// Set the status if applicable
 				if (statusKey != null) {
 					dto.setStatusKey(statusKey);
 					dto.setStatusModifiedDate(now);
-					//dto.setStatusModifiedEid(gip.userEid); // OWLTODO: where are we getting userEid from if we don't have gip?
+					dto.setStatusModifiedEid(currentUserEid);
 				}
 			} else {
 				// SiteMigrationItemDTO couldn't be retrieved; try creating one
-				//String statusModifiedEid = statusKey == null ? null : gip.userEid; // OWLTODO: where are we getting userEid from if we don't have gip?
+				String typeModifiedEid = "".equals(typeKey) ? "" : currentUserEid;
+				String actionModifiedEid = "".equals(actionKey) ? "" : currentUserEid;
+				String statusModifiedEid = statusKey == null ? null : currentUserEid;
+				Date typeModifiedDate = now;
+				Date actionModifiedDate = actionKey == null ? null : now;
 				Date statusModifiedDate = statusKey == null ? null : now;
-				//dto = new SiteMigrationItemDTO(siteId, typeKey, gip.userEid, statusKey, statusModifiedEid, now, statusModifiedDate);
+				dto = new SiteMigrationItemDTO(siteId, typeKey, typeModifiedEid, actionKey, actionModifiedEid, statusKey, statusModifiedEid, typeModifiedDate, actionModifiedDate, statusModifiedDate);
 			}
 
-			// OWLTODO: uncomment this section once we've resolved userEid (see above)
-//			if (OwlMigrationDAO.saveSiteMigrationItem(dto)) {
-//				eventTrackingService.post(eventTrackingService.newEvent(OwlMigrationService.EVENT_OWL_MIGRATION_SELECTION_SAVED, siteId + "->" + typeKey, true));
-//			} else {
-//				failedSiteTitles.add(siteTitle);
-//			}
+			if (OwlMigrationDAO.saveSiteMigrationItem(dto)) {
+				String eventRef;
+				if (StringUtils.isNotBlank(typeKey) && StringUtils.isNotBlank(actionKey)) {
+					eventRef = siteId + "->type:" + typeKey + "&action:" + actionKey;
+				} else if (StringUtils.isNotBlank(typeKey)) {
+					eventRef = siteId + "->type:" + typeKey;
+				} else {
+					eventRef = siteId + "->action:" + actionKey;
+				}
+				eventTrackingService.post(eventTrackingService.newEvent(OwlMigrationService.EVENT_OWL_MIGRATION_SELECTION_SAVED, eventRef, true));
+			} else {
+				failedSiteTitles.add(siteTitle);
+			}
 		}
 
 		return failedSiteTitles;
@@ -269,6 +274,10 @@ public class OwlMigrationDelegate {
 		String emailBody = String.format(message.replace("{}", "%s"), (Object[]) params);
 
 		emailService.send(sender, recipient, subject, emailBody, null, null, null);
+	}
+
+	private boolean isUserMaintainer(Site site, String userId) {
+		return site.hasRole(userId, site.getMaintainRole());
 	}
 
 	private SiteMigrationItem buildSiteMigrationItem(Site site) {
@@ -389,10 +398,9 @@ public class OwlMigrationDelegate {
 		return sessionManager.getCurrentSession().getUserEid();
 	}
 
-	// OWLTODO: remove this if it is actually unused
-//	private String getCurrentUserId() {
-//		return sessionManager.getCurrentSessionUserId();
-//	}
+	private String getCurrentUserId() {
+		return sessionManager.getCurrentSessionUserId();
+	}
 
 	// OWLTODO: remove this if it is actually unused
 //	private Instant toInstant(LocalDate localDate) {
