@@ -129,12 +129,13 @@ public class OwlMigrationDAO
     /**
      * Save or update the appropriate items from the SiteMigrationItem into site properties for the site ID packed.
      * @param dto SiteMigrationItem object containing the relevant data to save, and the site ID to save it to
+     * @param resetAction whether or not updating actionKey to "" is allowed or not
      * @param resetStatus whether or not updating statusKey to "" is allowed or not
      * @return true if the operation completed without issues, false if the site could not be retrieved and thus the save/update could not be performed
      * @throws IllegalArgumentException if the SiteMigrationItemDTO is null, or any of it's required members are null (siteID, typeKey, typeModifiedDate, typeModifiedEid,
      *              actionKey, actionModifiedDate, actionModifiedEid)
      */
-    public static boolean saveSiteMigrationItem( SiteMigrationItemDTO dto, boolean resetStatus ) throws IllegalArgumentException
+    public static boolean saveSiteMigrationItem( SiteMigrationItemDTO dto, boolean resetAction, boolean resetStatus ) throws IllegalArgumentException
     {
         if( dto == null )
         {
@@ -162,7 +163,7 @@ public class OwlMigrationDAO
                     props.addProperty( OWL_PROJ_MIG_TYPE_SELECTION_DATE, typeModifiedDate );
                 }
 
-                if( StringUtils.isNotBlank( dto.getActionKey() ) )
+                if( StringUtils.isNotBlank( dto.getActionKey() ) || resetAction )
                 {
                     String actionModifiedDate = dto.getActionModifiedDate() != null ? df.format( dto.getActionModifiedDate() ) : "";
                     props.addProperty( OWL_PROJ_MIG_ACTION_SELECTION, dto.getActionKey() );

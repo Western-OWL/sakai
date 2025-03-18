@@ -156,6 +156,7 @@ public class OwlMigrationDelegate {
 			Optional<SiteMigrationItemDTO> optDto = OwlMigrationDAO.getSiteMigrationItem(siteId);
 			SiteMigrationItemDTO dto;
 			Date now = new Date();
+			boolean resetAction = false;
 			boolean resetStatus = false;
 
 			if (optDto.isPresent()) {
@@ -174,6 +175,11 @@ public class OwlMigrationDelegate {
 					log.warn("User {} tried to change the type selection for site {}, but its existing type '{}' is unchangeable", currentUserEid, siteId, dto.getTypeKey());
 				}
 
+				// If the typeKey is changing, and no actionKey is provided, we need to reset actionKey
+				if (!StringUtils.equals(dto.getTypeKey(), typeKey) && "".equals(actionKey)) {
+					resetAction = true;
+				}
+
 				// Check if actionKey provided is active
 				boolean actionActive = activeActions.contains(actionKey);
 				if (!actionActive && !"".equals(actionKey)) {
@@ -187,9 +193,8 @@ public class OwlMigrationDelegate {
 					log.warn("User {} tried to change the action selection for site {}, but its existing action '{}' is unchangeable", currentUserEid, siteId, dto.getActionKey());
 				}
 
-				// If the action is changing to "" or "undecided", we need to update statusKey to ""
+				// If the action is changing we need to update statusKey, whether the statusKey is empty or not
 				if (!StringUtils.equals(dto.getActionKey(), actionKey)) {
-					statusKey = "";
 					resetStatus = true;
 				}
 
@@ -245,7 +250,7 @@ public class OwlMigrationDelegate {
 				dto = new SiteMigrationItemDTO(siteId, typeKey, typeModifiedEid, actionKey, actionModifiedEid, statusKey, statusModifiedEid, typeModifiedDate, actionModifiedDate, statusModifiedDate);
 			}
 
-			if (OwlMigrationDAO.saveSiteMigrationItem(dto, resetStatus)) {
+			if (OwlMigrationDAO.saveSiteMigrationItem(dto, resetAction, resetStatus)) {
 				String eventRef;
 				if (StringUtils.isNotBlank(typeKey) && StringUtils.isNotBlank(actionKey)) {
 					eventRef = siteId + "->type:" + typeKey + "&action:" + actionKey;
