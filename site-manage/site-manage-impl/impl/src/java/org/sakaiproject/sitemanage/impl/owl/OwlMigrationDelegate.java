@@ -66,7 +66,7 @@ public class OwlMigrationDelegate {
 
 	public List<SiteMigrationItem> getSiteMigrationItems() {
 		List<SiteMigrationItem> siteMigItems = new ArrayList<>();
-		List<Site> sites = getUserSites();
+		List<Site> sites = getUserMaintainerSites(getCurrentUserId());
 		for (Site site : sites) {
 			if ("project".equals(site.getType())) {
 				siteMigItems.add(buildSiteMigrationItem(site));
@@ -132,8 +132,8 @@ public class OwlMigrationDelegate {
 		List<String> changeableActions = OwlMigrationDAO.getChangeableActions();
 		List<String> activeActions = OwlMigrationDAO.getActiveActionKeys();
 		Map<String, String> actionStatusMap = OwlMigrationDAO.getInitialActionStatusMap();
-		List<Site> userSites = getUserSites();
 		String currentUserEid = getCurrentUserEid();
+		List<Site> userSites = getUserMaintainerSites(currentUserEid);
 
 		List<String> failedSiteTitles = new ArrayList<>();
 		for (Entry<String, UserSelection> siteSelection : siteSelections.entrySet()) {
@@ -141,22 +141,16 @@ public class OwlMigrationDelegate {
 			String typeKey = siteSelection.getValue().getType().orElse("");
 			String actionKey = siteSelection.getValue().getAction().orElse("");
 
+			// Validate that the site is eligible for migration
 			Optional<Site> site = userSites.stream().filter(userSite -> StringUtils.equals(userSite.getId(), siteId)).findFirst();
 			if (!site.isPresent()) {
-				log.warn("User {} tried to change the selection(s) for site {} in which they are not a member", currentUserEid, siteId);
+				log.warn("User {} tried to change the selection(s) for site {} in which they are not a maintainer", currentUserEid, siteId);
 				failedSiteTitles.add(siteId);
 				continue;
 			}
 
 			Site userSite = site.get();
 			String siteTitle = userSite.getTitle();
-
-			// Validate that the site is eligible for migration
-			if (isUserMaintainer(userSite, getCurrentUserId())) {
-				log.warn("User {} tried to change the selection(s) for site {} in which they are not a maintainer", currentUserEid, siteId);
-				failedSiteTitles.add(siteTitle);
-				continue;
-			}
 
 			String statusKey = StringUtils.trimToEmpty(actionStatusMap.get(actionKey));
 			Optional<SiteMigrationItemDTO> optDto = OwlMigrationDAO.getSiteMigrationItem(siteId);
@@ -168,14 +162,8 @@ public class OwlMigrationDelegate {
 
 				// Check if typeKey provided is active
 				boolean typeActive = activeTypes.contains(typeKey);
-				if (!typeActive) {
+				if (!typeActive && !"".equals(typeKey)) {
 					log.warn("User {} tried to change the type selection for site {} to a value that is not an active type: {}" , currentUserEid, siteId, typeKey);
-				}
-
-				// Check if actionKey provided is active
-				boolean actionActive = activeActions.contains(actionKey);
-				if (!actionActive) {
-					log.warn("User {} tried to change the action selection for site {} to a value that is not an active action: {}" , currentUserEid, siteId, actionKey);
 				}
 
 				// Check if typeKey provided is changeable
@@ -185,6 +173,12 @@ public class OwlMigrationDelegate {
 					log.warn("User {} tried to change the type selection for site {}, but its existing type '{}' is unchangeable", currentUserEid, siteId, dto.getTypeKey());
 				}
 
+				// Check if actionKey provided is active
+				boolean actionActive = activeActions.contains(actionKey);
+				if (!actionActive && !"".equals(actionKey)) {
+					log.warn("User {} tried to change the action selection for site {} to a value that is not an active action: {}" , currentUserEid, siteId, actionKey);
+				}
+
 				// Check if actionKey provided is changeable
 				boolean actionChangeable = StringUtils.isEmpty(dto.getActionKey()) || changeableActions.contains(dto.getActionKey());
 				if (!actionChangeable && !dto.getActionKey().equals(actionKey)) {
@@ -192,7 +186,12 @@ public class OwlMigrationDelegate {
 					log.warn("User {} tried to change the action selection for site {}, but its existing action '{}' is unchangeable", currentUserEid, siteId, dto.getActionKey());
 				}
 
-				// OWLTODO: if the action is changing, validate the status (either provided if there is one, or the existing one if not) belongs to the new action
+				// If the action is changing to "" or "undecided", we need to update statusKey to ""
+				boolean resetStatus = false;
+				if (!StringUtils.equals(dto.getActionKey(), actionKey)) {
+					statusKey = "";
+					resetStatus = true;
+				}
 
 				// If there's nothing to save (both type and action are not active nor changeable), skip to next site
 				if (!typeActive && !typeChangeable && !actionActive && !actionChangeable) {
@@ -215,7 +214,7 @@ public class OwlMigrationDelegate {
 				}
 
 				// Set the status if applicable
-				if (!"".equals(statusKey)) {
+				if (!"".equals(statusKey) || resetStatus) {
 					dto.setStatusKey(statusKey);
 					dto.setStatusModifiedDate(now);
 					dto.setStatusModifiedEid(currentUserEid);
@@ -291,10 +290,6 @@ public class OwlMigrationDelegate {
 		String emailBody = String.format(message.replace("{}", "%s"), (Object[]) params);
 
 		emailService.send(sender, recipient, subject, emailBody, null, null, null);
-	}
-
-	private boolean isUserMaintainer(Site site, String userId) {
-		return site.hasRole(userId, site.getMaintainRole());
 	}
 
 	private SiteMigrationItem buildSiteMigrationItem(Site site) {
@@ -390,11 +385,12 @@ public class OwlMigrationDelegate {
 	}
 
 	/**
-	 * Get all of the user's sites - exclude descriptions, include unpublished sites
-	 * @return List of user's sites
+	 * Get all of the user's sites where they hold the "maintain" role for the site type - exclude descriptions, include unpublished sites
+	 * @param userId the internal ID of the user in question
+	 * @return List of user's maintainer sites
 	 */
-	private List<Site> getUserSites() {
-		return siteService.getUserSites(false, true);
+	private List<Site> getUserMaintainerSites(String userId) {
+		return siteService.getUserSites(false, true).stream().filter(site -> site.hasRole(userId, site.getMaintainRole())).collect(Collectors.toList());
 	}
 
 	private float getResourcesSizeInGb(Site site) {
