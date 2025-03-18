@@ -156,6 +156,7 @@ public class OwlMigrationDelegate {
 			Optional<SiteMigrationItemDTO> optDto = OwlMigrationDAO.getSiteMigrationItem(siteId);
 			SiteMigrationItemDTO dto;
 			Date now = new Date();
+			boolean resetStatus = false;
 
 			if (optDto.isPresent()) {
 				dto = optDto.get();
@@ -187,7 +188,6 @@ public class OwlMigrationDelegate {
 				}
 
 				// If the action is changing to "" or "undecided", we need to update statusKey to ""
-				boolean resetStatus = false;
 				if (!StringUtils.equals(dto.getActionKey(), actionKey)) {
 					statusKey = "";
 					resetStatus = true;
@@ -245,7 +245,7 @@ public class OwlMigrationDelegate {
 				dto = new SiteMigrationItemDTO(siteId, typeKey, typeModifiedEid, actionKey, actionModifiedEid, statusKey, statusModifiedEid, typeModifiedDate, actionModifiedDate, statusModifiedDate);
 			}
 
-			if (OwlMigrationDAO.saveSiteMigrationItem(dto)) {
+			if (OwlMigrationDAO.saveSiteMigrationItem(dto, resetStatus)) {
 				String eventRef;
 				if (StringUtils.isNotBlank(typeKey) && StringUtils.isNotBlank(actionKey)) {
 					eventRef = siteId + "->type:" + typeKey + "&action:" + actionKey;
