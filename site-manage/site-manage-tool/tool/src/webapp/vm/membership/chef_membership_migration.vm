@@ -189,8 +189,7 @@ OWL_MIG.handleTypeChange = function(event)
 #elseif($readOnlyMode && !$site.TypeModifiedDate.isPresent())
   $readOnlyNoSelectionDisplay.orElse($noVal)
 #else
-  #set($status = $MigTool.getStatusDisplay($site))
-  $MigTool.getSelectionDisplay($site, $typesDisplayMap) #if(!$status.Empty)<span class="owl-mig-tracking-status-label">$status</span>#end
+  $MigTool.getDisplay($site.TypeKey, $typesDisplayMap)
 #end
 &amp;
 <span id="${site.SiteId}_action_container" data-site-title="#title($site)">
@@ -209,7 +208,7 @@ OWL_MIG.handleTypeChange = function(event)
   $readOnlyNoSelectionDisplay.orElse($noVal)
 #else
   #set($status = $MigTool.getStatusDisplay($site))
-  $MigTool.getSelectionDisplay($site, $typesDisplayMap) #if(!$status.Empty)<span class="owl-mig-tracking-status-label">$status</span>#end
+  $MigTool.getDisplay($site.ActionKey, $actionsDisplayMap) #if(!$status.Empty)<span class="owl-mig-tracking-status-label">$status</span>#end
 #end
 </span>
 </div>

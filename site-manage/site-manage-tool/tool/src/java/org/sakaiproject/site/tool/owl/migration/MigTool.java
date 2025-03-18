@@ -136,14 +136,13 @@ public class MigTool
 
 	/**
 	 * Gets the display text for the given site's selection
-	 * @param item the site
-	 * @param displayMap the map of selection keys to display text
+	 * @param key the selected key
+	 * @param displayMap the map of keys to display text
 	 * @return the display value for the key, or the key itself if not found in the map
 	 */
-	public static String getSelectionDisplay(SiteMigrationItem item, Map<String, String> displayMap)
+	public static String getDisplay(String key, Map<String, String> displayMap)
 	{
-		String key = item.getTypeKey();
-		String display = displayMap.get(item.getTypeKey());
+		String display = displayMap.get(key);
 		return display == null ? key : display;
 	}
 
