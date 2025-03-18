@@ -200,6 +200,7 @@ public class OwlMigrationDelegate {
 
 				// If there's nothing to save (both type and action are not active nor changeable), skip to next site
 				if (!typeActive && !typeChangeable && !actionActive && !actionChangeable) {
+					log.warn("User {} tried to change the type and/or action selections for site {}, but neither are active or changeable", currentUserEid, siteId);
 					failedSiteTitles.add(siteTitle);
 					continue;
 				}
