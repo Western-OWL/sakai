@@ -23,8 +23,6 @@
               <th>#mb("owl.mig.header.option")</th>
               <th>#mb("owl.mig.header.optionOn")</th>
               <th>#mb("owl.mig.header.optionBy")</th>
-              <!--<th>#mb("owl.mig.header.actionOn")</th>
-              <th>#mb("owl.mig.header.actionBy")</th>-->
             </tr>
           </thead>
           </tbody>
@@ -37,8 +35,6 @@
               #set($dateAndUser = $MigTool.formatLatestDateAndUser($site, $tlang.Locale, $noVal))
               <td>$dateAndUser.Date</td>
               <td>$dateAndUser.User</td>
-              <!--<td>$MigTool.formatDate($site.actionModifiedDate, $tlang.Locale, $noVal)</td>
-              <td>$MigTool.formatUser($site.actionModifiedEid, $noVal)</td>-->
             </tr>
             #end
           </tbody>
@@ -119,11 +115,9 @@ OWL_MIG.cancelSave = function()
   contBtn.focus();
 }
 
-// ----- OWL TEMP SCRIPTING BELOW  ------
-// ...just trying to figure out the JS...
-
 // build a JS version of the typeActionMap so we can use it to swap the contents of the action dropdown
 OWL_MIG.actionMap = new Map();
+{
 let actionArray = [];
 #foreach($typeKey in $typeActionMap.keySet())
   #foreach($action in $typeActionMap.get($typeKey))
@@ -132,42 +126,50 @@ let actionArray = [];
   OWL_MIG.actionMap.set("$typeKey", actionArray);
   actionArray = [];
 #end
-
-//actionMap.set("fakeKey1", [ ["Just some fake", "fake1"], ["Options here so we", "fake2"], ["Can test things out", "fake3"] ]);
-//actionMap.set("fakeKey2", [ ["Just some fakery", "fake4"], ["To make you see", "fake5"], ["Things have changed", "fake6"] ]);
-
+}
 
 OWL_MIG.handleTypeChange = function(event)
 {
-  const typeSelect = event.target;
-  const typeKey = typeSelect.value.split("::")[1];  // format is <siteid>::typeKey
-  const siteId = typeSelect.id.split("_")[0];  // id will be <siteid>_type
-  const actionSelect = document.getElementById(siteId + "_action");
-
-  while (actionSelect.options.length > 0)
-  {
-    actionSelect.remove(0);
-  }
+  const [siteId, typeKey] = event.target.value.split("::");  // format is <siteid>::<typeKey>
+  const container = document.getElementById(siteId + "_action_container");
+  let actionSelect = document.getElementById(siteId + "_action");
 
   if (OWL_MIG.actionMap.has(typeKey))
   {
+    if (actionSelect == null)
+    {
+      actionSelect = document.createElement("select");
+      actionSelect.name = "userAction";
+      actionSelect.id = siteId + "_action";
+
+      const lbl = document.createElement("label");
+      lbl.htmlFor = actionSelect.id;
+      lbl.classList.add("sr-only");
+      lbl.textContent = "#mb("owl.mig.type.label") " + container.dataset.siteTitle;
+
+      container.replaceChildren(lbl, actionSelect);
+    }
+  
+    while (actionSelect.options.length > 0)
+    {
+      actionSelect.remove(0);
+    }
+
     for (const opt of OWL_MIG.actionMap.get(typeKey))
     {
       actionSelect.add(new Option(opt[0], siteId + "::" + opt[1]));
     }
-  }
-
-  if (actionSelect.options.length > 0)
-  {
     actionSelect.selectedIndex = 0;  // OWLTODO: make it a data requirement that the "undecided" option appears first
-    actionSelect.disabled = false;
-    //actionSelect.classList.remove("hidden");
   }
-  else
+  else if (actionSelect != null)
   {
-    //actionSelect.classList.add("hidden");
-    actionSelect.add(new Option("#mb("owl.mig.noAction")", "noaction"));
-    actionSelect.disabled = true;
+    for (const l of Array.from(actionSelect.labels))
+    {
+      l.remove();
+    }
+    actionSelect.remove();
+
+    container.textContent = "#mb("owl.mig.noAction")";
   }
 }
 
@@ -191,23 +193,25 @@ OWL_MIG.handleTypeChange = function(event)
   $MigTool.getSelectionDisplay($site, $typesDisplayMap) #if(!$status.Empty)<span class="owl-mig-tracking-status-label">$status</span>#end
 #end
 &amp;
+<span id="${site.SiteId}_action_container" data-site-title="#title($site)">
 #if(($site.ActionEditable || $site.ActionKey.Empty) && !$readOnlyMode)
-  <label for="${site.SiteId}_type" class="sr-only">#mb("owl.mig.action.label") #title($site)</label>
-  <select name="userAction" id="${site.SiteId}_action" #if($site.ActionKey.Empty)disabled="disabled"#end>
-    #if($site.ActionKey.Empty)
-      <option value="noaction" selected="selected">#mb("owl.mig.noAction")</option>
-    #else
+  #if($site.ActionKey.Empty)
+    #mb("owl.mig.noAction")
+  #else
+    <label for="${site.SiteId}_action" class="sr-only">#mb("owl.mig.action.label") #title($site)</label>
+    <select name="userAction" id="${site.SiteId}_action">
       #foreach($action in $typeActionMap.get(${site.TypeKey}))
       <option value="$site.SiteId::$action.key" #if($action.key == $site.ActionKey)selected#end>$action.label</option>
       #end
-    #end
-  </select>
+    </select>
+  #end
 #elseif($readOnlyMode && !$site.TypeModifiedDate.isPresent())
   $readOnlyNoSelectionDisplay.orElse($noVal)
 #else
   #set($status = $MigTool.getStatusDisplay($site))
   $MigTool.getSelectionDisplay($site, $typesDisplayMap) #if(!$status.Empty)<span class="owl-mig-tracking-status-label">$status</span>#end
 #end
+</span>
 </div>
 #end
 
@@ -222,11 +226,6 @@ $MigTool.formatSize($site)
 
 #macro(mb $key)$tlang.getString($key)#end
 
-#macro(title $site)
-$formattedText.escapeHtml($site.SiteTitle)
-#end
+#macro(title $site)$formattedText.escapeHtml($site.SiteTitle)#end
 
-#macro(linkify $site)
-<a href="$site.getSiteUrl()" target="_blank">#title($site)</a>
-#end
-
+#macro(linkify $site)<a href="$site.getSiteUrl()" target="_blank">#title($site)</a>#end
