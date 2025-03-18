@@ -133,7 +133,7 @@ public class OwlMigrationDelegate {
 		List<String> activeActions = OwlMigrationDAO.getActiveActionKeys();
 		Map<String, String> actionStatusMap = OwlMigrationDAO.getInitialActionStatusMap();
 		String currentUserEid = getCurrentUserEid();
-		List<Site> userSites = getUserMaintainerSites(currentUserEid);
+		List<Site> userSites = getUserMaintainerSites(getCurrentUserId());
 
 		List<String> failedSiteTitles = new ArrayList<>();
 		for (Entry<String, UserSelection> siteSelection : siteSelections.entrySet()) {
