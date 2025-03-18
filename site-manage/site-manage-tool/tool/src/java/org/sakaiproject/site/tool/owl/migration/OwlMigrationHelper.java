@@ -49,8 +49,7 @@ public class OwlMigrationHelper
 			ResourceLoader rb, Map<String, List<SiteMigrationItem>> termMap)
 	{
 		context.put("termMap", termMap);
-		boolean editableOptions = termMap.values().stream().flatMap(Collection::stream).anyMatch(smi -> smi.isTypeEditable());
-		// OWLTODO: add check for editable actions
+		boolean editableOptions = termMap.values().stream().flatMap(Collection::stream).anyMatch(smi -> smi.isTypeEditable() || smi.isActionEditable());
 		context.put("hasEditableSites", editableOptions); // true if any of the sites are in an editable state (ie. "undecided")
 
 		context.put("typesDisplayMap", OWL_MIG_SERV.getMigrationTypes()); // map of all types key -> display value
@@ -126,8 +125,8 @@ public class OwlMigrationHelper
 	public static List<String> updateMigrations(RunData data, SessionState state)
 	{
 		// "userType" and "userAction" are the names of the <select> form inputs
-		var types = List.of(data.getParameters().getStrings("userType"));
-		var actions = List.of(data.getParameters().getStrings("userAction"));
+		var types = data.getParameters().getStrings("userType") == null ? List.<String>of() : List.of(data.getParameters().getStrings("userType"));
+		var actions = data.getParameters().getStrings("userAction") == null ? List.<String>of() : List.of(data.getParameters().getStrings("userAction"));
 
 		// these are siteId::key Strings
 		var typeMap = types.stream().map(s -> s.split("::")).filter(a -> a.length == 2).collect(Collectors.toMap(a -> a[0], a -> a[1]));
