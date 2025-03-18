@@ -139,38 +139,59 @@ public class OwlMigrationDAO
         {
             throw new IllegalArgumentException( "SiteMigrationItemDTO cannot be null" );
         }
-        if( dto.getSiteID() == null || dto.getTypeKey() == null || dto.getTypeModifiedDate() == null || dto.getTypeModifiedEid() == null )
+        if( dto.getSiteID() == null )
         {
-            throw new IllegalArgumentException( "SiteMigrationItemDTO members cannot be null: siteID, typeKey, typeModifiedDate, typeModifiedEid" );
+            throw new IllegalArgumentException( "SiteMigrationItemDTO members cannot be null: siteID" );
         }
 
         try
         {
-            Site site = siteService.getSite( dto.getSiteID() );
-            ResourcePropertiesEdit props = site.getPropertiesEdit();
-            props.addProperty( OWL_PROJ_MIG_TYPE_SELECTION, dto.getTypeKey() );
-            props.addProperty( OWL_PROJ_MIG_TYPE_SELECTION_EID, dto.getTypeModifiedEid() );
-            props.addProperty( OWL_PROJ_MIG_ACTION_SELECTION, dto.getActionKey() );
-            props.addProperty( OWL_PROJ_MIG_ACTION_SELECTION_EID, dto.getActionModifiedEid() );
-            props.addProperty( OWL_PROJ_MIG_STATUS, StringUtils.trimToEmpty( dto.getStatusKey() ) );
-            props.addProperty( OWL_PROJ_MIG_STATUS_EID, StringUtils.trimToEmpty( dto.getStatusModifiedEid() ) );
+            // Save properties only if at least one of the keys is not null/empty
+            if( StringUtils.isNotBlank( dto.getTypeKey() ) || StringUtils.isNotBlank( dto.getActionKey() ) || StringUtils.isNotBlank( dto.getStatusKey() ) )
+            {
+                Site site = siteService.getSite( dto.getSiteID() );
+                ResourcePropertiesEdit props = site.getPropertiesEdit();
+                DateFormat df = new SimpleDateFormat( DATE_FORMAT );
 
-            DateFormat df = new SimpleDateFormat( DATE_FORMAT );
-            String actionModifiedDate = dto.getActionModifiedDate() != null ? df.format( dto.getActionModifiedDate() ) : "";
-            String statusModifiedDate = dto.getStatusModifiedDate() != null ? df.format( dto.getStatusModifiedDate() ) : "";
+                if( StringUtils.isNotBlank( dto.getTypeKey() ) )
+                {
+                    String typeModifiedDate = dto.getTypeModifiedDate() != null ? df.format( dto.getTypeModifiedDate() ) : "";
+                    props.addProperty( OWL_PROJ_MIG_TYPE_SELECTION, dto.getTypeKey() );
+                    props.addProperty( OWL_PROJ_MIG_TYPE_SELECTION_EID, dto.getTypeModifiedEid() );
+                    props.addProperty( OWL_PROJ_MIG_TYPE_SELECTION_DATE, typeModifiedDate );
+                }
 
-            props.addProperty( OWL_PROJ_MIG_TYPE_SELECTION_DATE, df.format( dto.getTypeModifiedDate() ) );
-            props.addProperty( OWL_PROJ_MIG_ACTION_SELECTION_DATE, actionModifiedDate );
-            props.addProperty( OWL_PROJ_MIG_STATUS_DATE, statusModifiedDate );
+                if( StringUtils.isNotBlank( dto.getActionKey() ) )
+                {
+                    String actionModifiedDate = dto.getActionModifiedDate() != null ? df.format( dto.getActionModifiedDate() ) : "";
+                    props.addProperty( OWL_PROJ_MIG_ACTION_SELECTION, dto.getActionKey() );
+                    props.addProperty( OWL_PROJ_MIG_ACTION_SELECTION_EID, dto.getActionModifiedEid() );
+                    props.addProperty( OWL_PROJ_MIG_ACTION_SELECTION_DATE, actionModifiedDate );
+                }
 
-            siteService.save( site );
+                if( StringUtils.isNotBlank( dto.getStatusKey() ) )
+                {
+                    String statusModifiedDate = dto.getStatusModifiedDate() != null ? df.format( dto.getStatusModifiedDate() ) : "";
+                    props.addProperty( OWL_PROJ_MIG_STATUS, StringUtils.trimToEmpty( dto.getStatusKey() ) );
+                    props.addProperty( OWL_PROJ_MIG_STATUS_EID, StringUtils.trimToEmpty( dto.getStatusModifiedEid() ) );
+                    props.addProperty( OWL_PROJ_MIG_STATUS_DATE, statusModifiedDate );
+                }
+
+                siteService.save( site );
+            }
+
             return true;
         }
-        catch( IdUnusedException | PermissionException ex )
+        catch( IdUnusedException ex )
         {
             log.error( "Unable to retrieve user site by ID [{}]; cannot save SiteMigrationItemDTO", dto.getSiteID(), ex );
-            return false;
         }
+        catch( PermissionException ex )
+        {
+            log.error( "Invalid permissions for site ID [{}]; cannot save SiteMigrationItemDTO", dto.getSiteID(), ex );
+        }
+
+        return false;
     }
 
     /**

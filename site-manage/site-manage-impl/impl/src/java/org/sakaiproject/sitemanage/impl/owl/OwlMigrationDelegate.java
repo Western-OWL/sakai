@@ -151,18 +151,6 @@ public class OwlMigrationDelegate {
 			Site userSite = site.get();
 			String siteTitle = userSite.getTitle();
 
-			if (!activeTypes.contains(typeKey)) {
-				log.warn("User {} tried to change the type selection for site {} to a value that is not an active type: {}" , currentUserEid, siteId, typeKey);
-				failedSiteTitles.add(siteTitle);
-				continue;
-			}
-
-			if (!activeActions.contains(actionKey)) {
-				log.warn("User {} tried to change the action selection for site {} to a value that is not an active action: {}" , currentUserEid, siteId, actionKey);
-				failedSiteTitles.add(siteTitle);
-				continue;
-			}
-
 			// Validate that the site is eligible for migration
 			if (isUserMaintainer(userSite, getCurrentUserId())) {
 				log.warn("User {} tried to change the selection(s) for site {} in which they are not a maintainer", currentUserEid, siteId);
@@ -170,7 +158,7 @@ public class OwlMigrationDelegate {
 				continue;
 			}
 
-			String statusKey = actionStatusMap.get(typeKey);
+			String statusKey = StringUtils.trimToEmpty(actionStatusMap.get(actionKey));
 			Optional<SiteMigrationItemDTO> optDto = OwlMigrationDAO.getSiteMigrationItem(siteId);
 			SiteMigrationItemDTO dto;
 			Date now = new Date();
@@ -178,32 +166,46 @@ public class OwlMigrationDelegate {
 			if (optDto.isPresent()) {
 				dto = optDto.get();
 
-				// Update type only if the type is changeable
-				boolean changeable = StringUtils.isEmpty(dto.getTypeKey()) || changeableTypes.contains(dto.getTypeKey());
-				if (!changeable) {
-					if (!dto.getTypeKey().equals(typeKey)) {
-						// User tried to change their unchangeable type
-						log.warn("User {} tried to change the type selection for site {}, but its existing type '{}' is unchangeable", currentUserEid, siteId, dto.getTypeKey());
-						failedSiteTitles.add(siteTitle);
-					}
+				// Check if typeKey provided is active
+				boolean typeActive = activeTypes.contains(typeKey);
+				if (!typeActive) {
+					log.warn("User {} tried to change the type selection for site {} to a value that is not an active type: {}" , currentUserEid, siteId, typeKey);
+				}
+
+				// Check if actionKey provided is active
+				boolean actionActive = activeActions.contains(actionKey);
+				if (!actionActive) {
+					log.warn("User {} tried to change the action selection for site {} to a value that is not an active action: {}" , currentUserEid, siteId, actionKey);
+				}
+
+				// Check if typeKey provided is changeable
+				boolean typeChangeable = StringUtils.isEmpty(dto.getTypeKey()) || changeableTypes.contains(dto.getTypeKey());
+				if (!typeChangeable && !dto.getTypeKey().equals(typeKey)) {
+					// User tried to change their unchangeable type
+					log.warn("User {} tried to change the type selection for site {}, but its existing type '{}' is unchangeable", currentUserEid, siteId, dto.getTypeKey());
+				}
+
+				// Check if actionKey provided is changeable
+				boolean actionChangeable = StringUtils.isEmpty(dto.getActionKey()) || changeableActions.contains(dto.getActionKey());
+				if (!actionChangeable && !dto.getActionKey().equals(actionKey)) {
+					// User tried to change their unchangeable action
+					log.warn("User {} tried to change the action selection for site {}, but its existing action '{}' is unchangeable", currentUserEid, siteId, dto.getActionKey());
+				}
+
+				// OWLTODO: if the action is changing, validate the status (either provided if there is one, or the existing one if not) belongs to the new action
+
+				// If there's nothing to save (both type and action are not active nor changeable), skip to next site
+				if (!typeActive && !typeChangeable && !actionActive && !actionChangeable) {
+					failedSiteTitles.add(siteTitle);
 					continue;
 				}
 
-				// Update action only if the action is changeable
-				changeable = StringUtils.isEmpty(dto.getActionKey()) || changeableActions.contains(dto.getActionKey());
-				if (!changeable) {
-					if (!dto.getActionKey().equals(actionKey)) {
-						// User tried to change their unchangeable action
-						log.warn("User {} tried to change the action selection for site {}, but its existing action '{}' is unchangeable", currentUserEid, siteId, dto.getActionKey());
-						failedSiteTitles.add(siteTitle);
-					}
-					continue;
+				// Set the type if applicable
+				if (!"".equals(typeKey)) {
+					dto.setTypeKey(typeKey);
+					dto.setTypeModifiedDate(now);
+					dto.setTypeModifiedEid(currentUserEid);
 				}
-
-				// Set the type
-				dto.setTypeKey(typeKey);
-				dto.setTypeModifiedDate(now);
-				dto.setTypeModifiedEid(currentUserEid);
 
 				// Set the action if applicable
 				if (!"".equals(actionKey)) {
@@ -213,19 +215,34 @@ public class OwlMigrationDelegate {
 				}
 
 				// Set the status if applicable
-				if (statusKey != null) {
+				if (!"".equals(statusKey)) {
 					dto.setStatusKey(statusKey);
 					dto.setStatusModifiedDate(now);
 					dto.setStatusModifiedEid(currentUserEid);
 				}
 			} else {
 				// SiteMigrationItemDTO couldn't be retrieved; try creating one
-				String typeModifiedEid = "".equals(typeKey) ? "" : currentUserEid;
-				String actionModifiedEid = "".equals(actionKey) ? "" : currentUserEid;
-				String statusModifiedEid = statusKey == null ? null : currentUserEid;
-				Date typeModifiedDate = now;
-				Date actionModifiedDate = actionKey == null ? null : now;
-				Date statusModifiedDate = statusKey == null ? null : now;
+				String typeModifiedEid = "";
+				Date typeModifiedDate = null;
+				if (!"".equals(typeKey)) {
+					typeModifiedEid = currentUserEid;
+					typeModifiedDate = now;
+				}
+
+				String actionModifiedEid = "";
+				Date actionModifiedDate = null;
+				if (!"".equals(actionKey)) {
+					actionModifiedEid = currentUserEid;
+					actionModifiedDate = now;
+				}
+
+				String statusModifiedEid = "";
+				Date statusModifiedDate = null;
+				if (!"".equals(statusKey)) {
+					statusModifiedEid = currentUserEid;
+					statusModifiedDate = now;
+				}
+
 				dto = new SiteMigrationItemDTO(siteId, typeKey, typeModifiedEid, actionKey, actionModifiedEid, statusKey, statusModifiedEid, typeModifiedDate, actionModifiedDate, statusModifiedDate);
 			}
 
