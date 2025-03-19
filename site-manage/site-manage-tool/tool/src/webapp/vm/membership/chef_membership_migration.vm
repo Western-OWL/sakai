@@ -161,13 +161,16 @@ OWL_MIG.handleTypeChange = function(event)
     }
     actionSelect.selectedIndex = 0;  // OWLTODO: make it a data requirement that the "undecided" option appears first
   }
-  else if (actionSelect != null)
+  else 
   {
-    for (const l of Array.from(actionSelect.labels))
+    if (actionSelect != null)
     {
-      l.remove();
+      for (const l of Array.from(actionSelect.labels))
+      {
+        l.remove();
+      }
+      actionSelect.remove();
     }
-    actionSelect.remove();
 
     container.textContent = "#mb("owl.mig.noAction")";
   }
