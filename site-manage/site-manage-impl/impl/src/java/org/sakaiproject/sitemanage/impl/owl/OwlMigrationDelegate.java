@@ -14,11 +14,9 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
-import org.sakaiproject.authz.api.AuthzGroupService;
 import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.content.api.ContentCollection;
 import org.sakaiproject.content.api.ContentHostingService;
-import org.sakaiproject.coursemanagement.api.CourseManagementService;
 import org.sakaiproject.email.api.EmailService;
 import org.sakaiproject.event.api.EventTrackingService;
 import org.sakaiproject.exception.IdUnusedException;
@@ -38,25 +36,15 @@ import org.sakaiproject.sitemanage.api.owl.UserSelection;
 @Slf4j
 public class OwlMigrationDelegate {
 
-	// OWLTODO: remove services that aren't used, remove from components.xml also
-	private AuthzGroupService authzGroupService;
-	private ContentHostingService contentHostingService;
-	private CourseManagementService courseManagementService;
-	private EmailService emailService;
-	private EventTrackingService eventTrackingService;
-	private ServerConfigurationService serverConfigurationService;
-	private SessionManager sessionManager;
-	private SiteService siteService;
+	private final ContentHostingService contentHostingService;
+	private final EmailService emailService;
+	private final EventTrackingService eventTrackingService;
+	private final ServerConfigurationService serverConfigurationService;
+	private final SessionManager sessionManager;
+	private final SiteService siteService;
 
-	// OWLTODO: remove this if it is actually unused
-//	final Comparator<SiteMigrationItem> smiComparator = Comparator.comparing(SiteMigrationItem::getSiteTitle)
-//		.thenComparing(SiteMigrationItem::getSiteId);
-
-	public OwlMigrationDelegate(AuthzGroupService ags, ContentHostingService chs, CourseManagementService cms, EmailService es, EventTrackingService ets,
-			ServerConfigurationService scs, SessionManager sm, SiteService ss) {
-		authzGroupService = ags;
+	public OwlMigrationDelegate(ContentHostingService chs, EmailService es, EventTrackingService ets, ServerConfigurationService scs, SessionManager sm, SiteService ss) {
 		contentHostingService = chs;
-		courseManagementService = cms;
 		emailService = es;
 		eventTrackingService = ets;
 		serverConfigurationService = scs;
@@ -420,35 +408,4 @@ public class OwlMigrationDelegate {
 	private String getCurrentUserId() {
 		return sessionManager.getCurrentSessionUserId();
 	}
-
-	// OWLTODO: remove this if it is actually unused
-//	private Instant toInstant(LocalDate localDate) {
-//		return localDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
-//	}
-
-	// OWLTODO: remove this if it is actually unused
-//	private <A, B> void appendToMap(Map<A, List<B>> map, A key, B value) {
-//		List<B> values = map.get(key);
-//		if (values == null) {
-//			values = new ArrayList<>();
-//			map.put(key, values);
-//		}
-//		values.add(value);
-//	}
-
-	// OWLTODO: remove this if it is actually unused
-	/**
-	 * Inverts a Map whose value is a List
-	 * E.g. given {A : [1, 2], B : [3, 4]},
-	 * Return {1 : A, 2 : A, 3 : B, 4 : B}
-	 */
-//	private static <A, B> Map<B, A> invertKeyListMap(Map<A, List<B>> toInvert) {
-//		Map<B, A> inverted = new HashMap<>();
-//		for (Map.Entry<A, List<B>> entry : toInvert.entrySet()) {
-//			for (B valueItem : entry.getValue()) {
-//				inverted.put(valueItem, entry.getKey());
-//			}
-//		}
-//		return inverted;
-//	}
 }

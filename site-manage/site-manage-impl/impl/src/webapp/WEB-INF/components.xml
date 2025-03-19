@@ -205,13 +205,11 @@
 	<bean id="org.sakaiproject.sitemanage.api.owl.OwlMigrationService"
 		class="org.sakaiproject.sitemanage.impl.owl.OwlMigrationServiceImpl"
 		init-method="init">
-		<property name="authzGroupService" ref="org.sakaiproject.authz.api.AuthzGroupService"/>
-        <property name="contentHostingService" ref="org.sakaiproject.content.api.ContentHostingService"/>
-		<property name="courseManagementService" ref="org.sakaiproject.coursemanagement.api.CourseManagementService"/>
+		<property name="contentHostingService" ref="org.sakaiproject.content.api.ContentHostingService"/>
 		<property name="emailService" ref="org.sakaiproject.email.api.EmailService"/>
 		<property name="eventTrackingService" ref="org.sakaiproject.event.api.EventTrackingService"/>
 		<property name="serverConfigurationService" ref="org.sakaiproject.component.api.ServerConfigurationService"/>
-        <property name="sessionManager" ref="org.sakaiproject.tool.api.SessionManager"/>
+		<property name="sessionManager" ref="org.sakaiproject.tool.api.SessionManager"/>
 		<property name="siteService" ref="org.sakaiproject.site.api.SiteService"/>
 	</bean>
 

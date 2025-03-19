@@ -6,10 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.sakaiproject.authz.api.AuthzGroupService;
 import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.content.api.ContentHostingService;
-import org.sakaiproject.coursemanagement.api.CourseManagementService;
 import org.sakaiproject.email.api.EmailService;
 import org.sakaiproject.event.api.EventTrackingService;
 import org.sakaiproject.site.api.SiteService;
@@ -25,30 +23,18 @@ import org.sakaiproject.sitemanage.api.owl.UserSelection;
 @Slf4j
 public class OwlMigrationServiceImpl implements OwlMigrationService {
 
-	@Setter
-	protected AuthzGroupService authzGroupService;
-	@Setter
-	protected ContentHostingService contentHostingService;
-	@Setter
-	protected CourseManagementService courseManagementService;
-	@Setter
-	protected EmailService emailService;
-	@Setter
-	protected EventTrackingService eventTrackingService;
-	@Setter
-	protected ServerConfigurationService serverConfigurationService;
-	@Setter
-	protected SessionManager sessionManager;
-	@Setter
-	protected SiteService siteService;
+	@Setter protected ContentHostingService contentHostingService;
+	@Setter protected EmailService emailService;
+	@Setter protected EventTrackingService eventTrackingService;
+	@Setter protected ServerConfigurationService serverConfigurationService;
+	@Setter protected SessionManager sessionManager;
+	@Setter protected SiteService siteService;
 
 	private OwlMigrationDelegate migrationDelegate;
 
 	public void init() {
 		log.info("Initializing OwlMigrationServiceImpl");
-
-		migrationDelegate = new OwlMigrationDelegate(authzGroupService, contentHostingService, courseManagementService,
-			emailService, eventTrackingService, serverConfigurationService, sessionManager, siteService);
+		migrationDelegate = new OwlMigrationDelegate(contentHostingService, emailService, eventTrackingService, serverConfigurationService, sessionManager, siteService);
 	}
 
 	@Override
