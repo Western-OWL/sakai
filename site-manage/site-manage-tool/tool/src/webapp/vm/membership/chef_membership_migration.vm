@@ -210,7 +210,8 @@ OWL_MIG.handleTypeChange = function(event)
 </span>
 </span>
 #set($status = $MigTool.getStatusDisplay($site))
-#if(!$status.Empty)<span id=${site.SiteId}_status class="owl-mig-tracking-status-label">$status</span>#end
+#set($wrap = $site.TypeEditable || $site.ActionEditable)
+#if(!$status.Empty)<span id=${site.SiteId}_status class="owl-mig-tracking-status-label #if($wrap)owl-mig-tracking-status-label-wrap#end">$status</span>#end
 #end
 
 #macro(size $site)
