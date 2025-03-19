@@ -20,7 +20,7 @@ public interface OwlMigrationService {
 	 * Gets a list of SiteMigrationItems.
 	 * Returns an empty list if the user is not authorized to specify migration selections for any eligible sites.
 	 */
-	public Map<String, List<SiteMigrationItem>> getSiteMigrationItems();
+	public List<SiteMigrationItem> getSiteMigrationItems();
 
 	/**
 	 * Gets a map of type keys to list of appropriate migration actions for that type.

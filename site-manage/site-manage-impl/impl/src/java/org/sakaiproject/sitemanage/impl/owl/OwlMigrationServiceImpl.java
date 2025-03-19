@@ -43,14 +43,12 @@ public class OwlMigrationServiceImpl implements OwlMigrationService {
 	}
 
 	@Override
-	public Map<String, List<SiteMigrationItem>> getSiteMigrationItems() {
+	public List<SiteMigrationItem> getSiteMigrationItems() {
 		if (!isMigrationTabEnabled()) {
-			return Collections.emptyMap();
+			return List.of();
 		}
-		// OWLTODO: fix this temp hack to restore the map
-		var map = new HashMap<String, List<SiteMigrationItem>>();
-		map.put("Project Sites", migrationDelegate.getSiteMigrationItems());
-		return map;
+
+		return migrationDelegate.getSiteMigrationItems();
 	}
 
 	@Override

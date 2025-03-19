@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.sakaiproject.cheftool.Context;
 import org.sakaiproject.cheftool.RunData;
-import org.sakaiproject.cheftool.VelocityPortlet;
 import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.event.api.SessionState;
 import org.sakaiproject.sitemanage.api.owl.DisplayConstants;
@@ -36,20 +35,17 @@ public class OwlMigrationHelper
 
 	/**
 	 * Builds the Velocity context for the OWL Migration Tracking tab in the Membership tool.
-	 * @param portlet the portlet
 	 * @param context the Velocity context
-	 * @param runData the rundata
 	 * @param state the session state
 	 * @param template the name of the vm template
 	 * @param rb the message bundle
-	 * @param termMap a map of "common term" (ie. Summer 2023) to sites belonging to that term that are eligible for migration
+	 * @param sites list of sites belonging that are eligible for migration
 	 * @return
 	 */
-	public static String buildMigrationContext(VelocityPortlet portlet, Context context, RunData runData, SessionState state, String template,
-			ResourceLoader rb, Map<String, List<SiteMigrationItem>> termMap)
+	public static String buildMigrationContext(Context context, SessionState state, String template, ResourceLoader rb, List<SiteMigrationItem> sites)
 	{
-		context.put("termMap", termMap);
-		boolean editableOptions = termMap.values().stream().flatMap(Collection::stream).anyMatch(smi -> smi.isTypeEditable() || smi.isActionEditable());
+		context.put("siteList", sites);
+		boolean editableOptions = sites.stream().anyMatch(smi -> smi.isTypeEditable() || smi.isActionEditable());
 		context.put("hasEditableSites", editableOptions); // true if any of the sites are in an editable state (ie. "undecided")
 
 		context.put("typesDisplayMap", OWL_MIG_SERV.getMigrationTypes()); // map of all types key -> display value
@@ -106,7 +102,7 @@ public class OwlMigrationHelper
 		return OWL_MIG_SERV.isMigrationTabEnabled();
 	}
 
-	public static Map<String, List<SiteMigrationItem>> getSiteMigrationItems()
+	public static List<SiteMigrationItem> getSiteMigrationItems()
 	{
 		return OWL_MIG_SERV.getSiteMigrationItems();
 	}

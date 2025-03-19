@@ -240,12 +240,12 @@ public class MembershipAction extends PagedResourceActionII
 		String mode = (String) state.getAttribute( STATE_VIEW_MODE );
 
 		// OWL
-		Map<String, List<SiteMigrationItem>> termMap = Collections.emptyMap();
+		List<SiteMigrationItem> siteList = List.of();
 		if (OwlMigrationHelper.migrationEnabled())
 		{
-			termMap = OwlMigrationHelper.getSiteMigrationItems();
+			siteList = OwlMigrationHelper.getSiteMigrationItems();
 		}
-		boolean migrationAllowed = !termMap.isEmpty();
+		boolean migrationAllowed = !siteList.isEmpty();
 
 		// OWL
 		// mode is null by default so we have to explicitly set it in order to be the first tab on initial load of the tool
@@ -267,7 +267,7 @@ public class MembershipAction extends PagedResourceActionII
 		else if (MIGRATION_MODE.equals(mode)) // OWL
 		{
 			activeTab = MembershipActiveTab.MIGRATION;
-			template = buildMigrationContext(portlet, context, rundata, state, termMap);
+			template = buildMigrationContext(context, rundata, state, siteList);
 		}
 		else
 		{
@@ -315,11 +315,10 @@ public class MembershipAction extends PagedResourceActionII
 	} // buildMainPanelContext
 
 	// OWL
-	private String buildMigrationContext(VelocityPortlet portlet, Context context, RunData runData, SessionState state,
-			Map<String, List<SiteMigrationItem>> termMap)
+	private String buildMigrationContext(Context context, RunData runData, SessionState state, List<SiteMigrationItem> sites)
 	{
 		String template = (String) getContext(runData).get("template");
-		return OwlMigrationHelper.buildMigrationContext(portlet, context, runData, state, template, RB, termMap);
+		return OwlMigrationHelper.buildMigrationContext(context, state, template, RB, sites);
 	}
 
 	/**

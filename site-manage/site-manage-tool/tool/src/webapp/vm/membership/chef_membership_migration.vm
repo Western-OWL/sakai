@@ -11,36 +11,31 @@
     #if(!$banner3.Empty)<div class="sak-banner-info">$banner3</div>#end
 
     <form action="#toolForm("$action")" method="post">
-      #foreach($term in $termMap.keySet())
-      <fieldset>
-        <legend>$term</legend>
-        <table class="table table-responsive table-bordered table-striped">
-          <caption class="sr-only">#mb("owl.mig.header.caption") $term</caption>
-          <thead>
-            <tr>
-              <th>#mb("owl.mig.header.siteTitle")</th>
-              #if($showSizeCol)<th>#mb("owl.mig.header.siteSize")</th>#end
-              <th>#mb("owl.mig.header.option")</th>
-              <th>#mb("owl.mig.header.optionOn")</th>
-              <th>#mb("owl.mig.header.optionBy")</th>
-            </tr>
-          </thead>
-          </tbody>
-            #set($noVal = $tlang.getString("owl.mig.noValue"))
-            #foreach($site in $termMap.get($term))
-            <tr>
-              <td>#linkify($site)</td>
-              #if($showSizeCol)<td>#size($site)</td>#end
-              <td>#selection($site $options)</td>
-              #set($dateAndUser = $MigTool.formatLatestDateAndUser($site, $tlang.Locale, $noVal))
-              <td>$dateAndUser.Date</td>
-              <td>$dateAndUser.User</td>
-            </tr>
-            #end
-          </tbody>
-        </table>
-      </fieldset>
-      #end
+      <table class="table table-responsive table-bordered table-striped">
+        <caption class="sr-only">#mb("owl.mig.header.caption")</caption>
+        <thead>
+          <tr>
+            <th>#mb("owl.mig.header.siteTitle")</th>
+            #if($showSizeCol)<th>#mb("owl.mig.header.siteSize")</th>#end
+            <th>#mb("owl.mig.header.option")</th>
+            <th>#mb("owl.mig.header.optionOn")</th>
+            <th>#mb("owl.mig.header.optionBy")</th>
+          </tr>
+        </thead>
+        </tbody>
+          #set($noVal = $tlang.getString("owl.mig.noValue"))
+          #foreach($site in $siteList)
+          <tr>
+            <td>#linkify($site)</td>
+            #if($showSizeCol)<td>#size($site)</td>#end
+            <td>#selection($site $options)</td>
+            #set($dateAndUser = $MigTool.formatLatestDateAndUser($site, $tlang.Locale, $noVal))
+            <td>$dateAndUser.Date</td>
+            <td>$dateAndUser.User</td>
+          </tr>
+          #end
+        </tbody>
+      </table>
 
       #if($hasEditableSites && !$readOnlyMode)
       <div class="act">
