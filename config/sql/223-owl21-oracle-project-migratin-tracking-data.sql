@@ -49,11 +49,11 @@ VALUES ('!admin', 'OWL_MIG_ACTION_INITIAL_STATUS_MAP', 'mig:pendingMig|alt:trans
 -- Actions on which statuses can be displayed (action keys, pipe delimited)
 -- NOTE: if the action key is not in this list, the status will not be displayed even if it is contained in OWL_MIG_VISIBLE_STATUSES (below)
 INSERT INTO sakai_site_property
-VALUES ('!admin', 'OWL_MIG_ACTIONS_WITH_VISIBLE_STATUSES', 'mig|alt|ret|selfDel|del');
+VALUES ('!admin', 'OWL_MIG_ACTIONS_WITH_VISIBLE_STATUSES', 'mig|alt|ret|del');
 
 -- Statuses that are allowed to be displayed in the UI (status keys, pipe delimited)
 INSERT INTO sakai_site_property
-VALUES ('!admin', 'OWL_MIG_VISIBLE_STATUSES', 'migDone|pendingMig|transDone|transPending|ret|selfDel|del');
+VALUES ('!admin', 'OWL_MIG_VISIBLE_STATUSES', 'migDone|pendingMig|transDone|transPending|ret|del');
 
 -- Types that can be changed in the UI by users after saving the type (type keys, pipe delimited)
 INSERT INTO sakai_site_property
