@@ -168,22 +168,28 @@ public class OwlMigrationDelegate {
 					resetAction = true;
 				}
 
-				// Check if actionKey provided is active
-				boolean actionActive = activeActions.contains(actionKey);
-				if (!actionActive && !"".equals(actionKey)) {
-					log.warn("User {} tried to change the action selection for site {} to a value that is not an active action: {}" , currentUserEid, siteId, actionKey);
-				}
+				// Process actionKey checks if there was an actionKey submitted
+				boolean actionActive = false;
+				boolean actionChangeable = false;
+				if (StringUtils.isNotEmpty(actionKey)) {
 
-				// Check if actionKey provided is changeable
-				boolean actionChangeable = StringUtils.isEmpty(dto.getActionKey()) || changeableActions.contains(dto.getActionKey());
-				if (!actionChangeable && !dto.getActionKey().equals(actionKey)) {
-					// User tried to change their unchangeable action
-					log.warn("User {} tried to change the action selection for site {}, but its existing action '{}' is unchangeable", currentUserEid, siteId, dto.getActionKey());
-				}
+					// Check if actionKey provided is active
+					actionActive = activeActions.contains(actionKey);
+					if (!actionActive && !"".equals(actionKey)) {
+						log.warn("User {} tried to change the action selection for site {} to a value that is not an active action: {}" , currentUserEid, siteId, actionKey);
+					}
 
-				// If the action is changing we need to update statusKey, whether the statusKey is empty or not
-				if (!StringUtils.equals(dto.getActionKey(), actionKey)) {
-					resetStatus = true;
+					// Check if actionKey provided is changeable
+					actionChangeable = StringUtils.isEmpty(dto.getActionKey()) || changeableActions.contains(dto.getActionKey());
+					if (!actionChangeable && !dto.getActionKey().equals(actionKey)) {
+						// User tried to change their unchangeable action
+						log.warn("User {} tried to change the action selection for site {}, but its existing action '{}' is unchangeable", currentUserEid, siteId, dto.getActionKey());
+					}
+
+					// If the action is changing we need to update statusKey, whether the statusKey is empty or not
+					if (!StringUtils.equals(dto.getActionKey(), actionKey)) {
+						resetStatus = true;
+					}
 				}
 
 				// If there's nothing to save (both type and action are not active nor changeable), skip to next site
