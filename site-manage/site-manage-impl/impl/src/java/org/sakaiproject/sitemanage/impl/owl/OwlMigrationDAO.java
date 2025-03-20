@@ -257,8 +257,8 @@ public class OwlMigrationDAO
      */
     public static Optional<String> getDefaultTypeOption()
     {
-        String defaultSelectionOption = StringUtils.trimToNull( getSitePropString( OWL_MIG_TYPE_DEFAULT ) );
-        return Optional.ofNullable( defaultSelectionOption );
+        String defaultTypeOption = StringUtils.trimToNull( getSitePropString( OWL_MIG_TYPE_DEFAULT ) );
+        return Optional.ofNullable( defaultTypeOption );
     }
 
     /**
