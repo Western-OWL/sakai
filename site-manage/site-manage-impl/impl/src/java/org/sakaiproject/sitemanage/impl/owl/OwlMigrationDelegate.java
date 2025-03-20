@@ -160,9 +160,10 @@ public class OwlMigrationDelegate {
 						log.warn("User {} tried to change the type selection for site {}, but its existing type '{}' is unchangeable", currentUserEid, siteId, dto.getTypeKey());
 					}
 
-					// If the typeKey is changing, and no actionKey is provided, we need to reset actionKey
+					// If the typeKey is changing, and no actionKey is provided, we need to reset actionKey and statusKey
 					if (!StringUtils.equals(dto.getTypeKey(), typeKey) && "".equals(actionKey)) {
 						resetAction = true;
+						resetStatus = true;
 					}
 				}
 
@@ -205,7 +206,7 @@ public class OwlMigrationDelegate {
 				}
 
 				// Set the action if applicable
-				if (!"".equals(actionKey)) {
+				if (!"".equals(actionKey) || resetAction) {
 					dto.setActionKey(actionKey);
 					dto.setActionModifiedDate(now);
 					dto.setActionModifiedEid(currentUserEid);
