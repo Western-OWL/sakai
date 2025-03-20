@@ -53,15 +53,7 @@ public class OwlMigrationDelegate {
 	}
 
 	public List<SiteMigrationItem> getSiteMigrationItems() {
-		List<SiteMigrationItem> siteMigItems = new ArrayList<>();
-		List<Site> sites = getUserMaintainerSites(getCurrentUserId());
-		for (Site site : sites) {
-			if ("project".equals(site.getType())) {
-				siteMigItems.add(buildSiteMigrationItem(site));
-			}
-		}
-
-		return siteMigItems;
+		return getUserMaintainProjectSites(getCurrentUserId()).stream().map(site -> buildSiteMigrationItem(site)).collect(Collectors.toList());
 	}
 
 	public Map<String, String> getActiveTypes() {
@@ -121,7 +113,7 @@ public class OwlMigrationDelegate {
 		List<String> activeActions = OwlMigrationDAO.getActiveActionKeys();
 		Map<String, String> actionStatusMap = OwlMigrationDAO.getInitialActionStatusMap();
 		String currentUserEid = getCurrentUserEid();
-		List<Site> userSites = getUserMaintainerSites(getCurrentUserId());
+		List<Site> userSites = getUserMaintainProjectSites(getCurrentUserId());
 
 		List<String> failedSiteTitles = new ArrayList<>();
 		for (Entry<String, UserSelection> siteSelection : siteSelections.entrySet()) {
@@ -391,12 +383,15 @@ public class OwlMigrationDelegate {
 	}
 
 	/**
-	 * Get all of the user's sites where they hold the "maintain" role for the site type - exclude descriptions, include unpublished sites
+	 * Get all of the user's project sites where they hold the "maintain" role for the site type - exclude descriptions, include unpublished sites
 	 * @param userId the internal ID of the user in question
-	 * @return List of user's maintainer sites
+	 * @return List of user's project maintainer sites
 	 */
-	private List<Site> getUserMaintainerSites(String userId) {
-		return siteService.getUserSites(false, true).stream().filter(site -> site.hasRole(userId, site.getMaintainRole())).collect(Collectors.toList());
+	private List<Site> getUserMaintainProjectSites(String userId) {
+		return siteService.getUserSites(false, true).stream()
+				.filter(site -> site.hasRole(userId, site.getMaintainRole()))
+				.filter(site -> "project".equals(site.getType()))
+				.collect(Collectors.toList());
 	}
 
 	private float getResourcesSizeInGb(Site site) {
