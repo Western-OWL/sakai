@@ -150,28 +150,34 @@ public class OwlMigrationDelegate {
 			if (optDto.isPresent()) {
 				dto = optDto.get();
 
-				// Check if typeKey provided is active
-				boolean typeActive = activeTypes.contains(typeKey);
-				if (!typeActive && !"".equals(typeKey)) {
-					log.warn("User {} tried to change the type selection for site {} to a value that is not an active type: {}" , currentUserEid, siteId, typeKey);
-				}
+				// Process typeKey checks if there was a typeKey submitted
+				boolean typeActive = false;
+				boolean typeChangeable = false;
+				if (StringUtils.isNotBlank(typeKey))
+				{
+					// Check if typeKey provided is active
+					typeActive = activeTypes.contains(typeKey);
+					if (!typeActive && !"".equals(typeKey)) {
+						log.warn("User {} tried to change the type selection for site {} to a value that is not an active type: {}" , currentUserEid, siteId, typeKey);
+					}
 
-				// Check if typeKey provided is changeable
-				boolean typeChangeable = StringUtils.isEmpty(dto.getTypeKey()) || changeableTypes.contains(dto.getTypeKey());
-				if (!typeChangeable && !dto.getTypeKey().equals(typeKey)) {
-					// User tried to change their unchangeable type
-					log.warn("User {} tried to change the type selection for site {}, but its existing type '{}' is unchangeable", currentUserEid, siteId, dto.getTypeKey());
-				}
+					// Check if typeKey provided is changeable
+					typeChangeable = StringUtils.isEmpty(dto.getTypeKey()) || changeableTypes.contains(dto.getTypeKey());
+					if (!typeChangeable && !dto.getTypeKey().equals(typeKey)) {
+						// User tried to change their unchangeable type
+						log.warn("User {} tried to change the type selection for site {}, but its existing type '{}' is unchangeable", currentUserEid, siteId, dto.getTypeKey());
+					}
 
-				// If the typeKey is changing, and no actionKey is provided, we need to reset actionKey
-				if (!StringUtils.equals(dto.getTypeKey(), typeKey) && "".equals(actionKey)) {
-					resetAction = true;
+					// If the typeKey is changing, and no actionKey is provided, we need to reset actionKey
+					if (!StringUtils.equals(dto.getTypeKey(), typeKey) && "".equals(actionKey)) {
+						resetAction = true;
+					}
 				}
 
 				// Process actionKey checks if there was an actionKey submitted
 				boolean actionActive = false;
 				boolean actionChangeable = false;
-				if (StringUtils.isNotEmpty(actionKey)) {
+				if (StringUtils.isNotBlank(actionKey)) {
 
 					// Check if actionKey provided is active
 					actionActive = activeActions.contains(actionKey);
