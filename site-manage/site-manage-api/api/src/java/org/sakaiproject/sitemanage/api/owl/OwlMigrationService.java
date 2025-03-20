@@ -19,13 +19,13 @@ public interface OwlMigrationService {
 
 	/**
 	 * Gets a list of SiteMigrationItems.
-	 * @return list of eligible SiteMigrationItems, or an empty list if the user is not authorized to specify migration selections for any eligible sites.
+	 * @return list of eligible {@link org.sakaiproject.sitemanage.api.owl.SiteMigrationItem SiteMigrationItems}, or an empty list if the user is not authorized to specify migration selections for any eligible sites.
 	 */
 	public List<SiteMigrationItem> getSiteMigrationItems();
 
 	/**
 	 * Gets a map of type keys to list of appropriate migration actions for that type.
-	 * @return the map
+	 * @return the map of type keys to {@link org.sakaiproject.sitemanage.api.owl.MigAction MigActions}
 	 */
 	public Map<String, List<MigAction>> getTypeActionMap();
 
@@ -44,7 +44,7 @@ public interface OwlMigrationService {
 
 	/**
 	 * Maps migration action keys to display values. May contain actions that are no longer active.
-	 * @see getActiveActionss()
+	 * @see #getActiveActions()
 	 * @return a map of actionKey to UI value
 	 */
 	public Map<String, String> getMigrationActions();
@@ -64,7 +64,8 @@ public interface OwlMigrationService {
 	/**
 	 * For sites that are eligible for migration and have changeable selections, persist their specified selection.
 	 * Updates each site's selections, associated user, date, and sets an initial status if appropriate
-	 * @param siteSelections a map of siteIds to UserSelection objects
+	 * @param siteSelections a map of siteIds to {@link org.sakaiproject.sitemanage.api.owl.UserSelection UserSelection} objects
+	 * @see org.sakaiproject.sitemanage.api.owl.UserSelection
 	 * @return a list of siteIds whose migration selections could not be persisted
 	 * Possible reasons a site's selection can't be persisted:
 	 *     the current user is not a maintainer in the site,

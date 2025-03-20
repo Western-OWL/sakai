@@ -82,10 +82,10 @@ public class OwlMigrationDAO
     private OwlMigrationDAO() { /* Private default constructor to avoid instantiation */ }
 
     /**
-     * Gets the properties for the given site ID and packs them into a SiteMigraitonItemDTO object
+     * Gets the properties for the given site ID and packs them into a {@link org.sakaiproject.sitemanage.impl.owl.SiteMigrationItemDTO SiteMigrationItemDTO}
      * @param siteID the ID of the site to retrieve the OWL migration properties for
-     * @return An Optional wrapping a SiteMigrationItemDTO object packed with the properties (or empty Strings and null dates if the properties are not found) for the given site ID,
-     *              or an empty Optional if an error occurred
+     * @return An Optional wrapping a {@link org.sakaiproject.sitemanage.impl.owl.SiteMigrationItemDTO SiteMigrationItemDTO} packed with the properties
+     *              (or empty Strings and null dates if the properties are not found) for the given site ID, or an empty Optional if an error occurred
      * @throws IllegalArgumentException if the siteID parameter is null or empty
      */
     public static Optional<SiteMigrationItemDTO> getSiteMigrationItem( String siteID ) throws IllegalArgumentException
@@ -128,7 +128,7 @@ public class OwlMigrationDAO
 
     /**
      * Save or update the appropriate items from the SiteMigrationItem into site properties for the site ID packed.
-     * @param dto SiteMigrationItem object containing the relevant data to save, and the site ID to save it to
+     * @param dto {@link org.sakaiproject.sitemanage.impl.owl.SiteMigrationItemDTO SiteMigrationItemDTO} containing the relevant data to save, and the site ID to save it to
      * @param resetAction whether or not updating actionKey to "" is allowed or not
      * @param resetStatus whether or not updating statusKey to "" is allowed or not
      * @return true if the operation completed without issues, false if the site could not be retrieved and thus the save/update could not be performed
