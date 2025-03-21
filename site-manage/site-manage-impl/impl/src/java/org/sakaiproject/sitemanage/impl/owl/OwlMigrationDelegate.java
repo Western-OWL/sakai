@@ -391,7 +391,7 @@ public class OwlMigrationDelegate {
 	 * @return List of user's project maintainer sites
 	 */
 	private List<Site> getUserMaintainProjectSites(String userId) {
-		return siteService.getSites(SelectionType.ANY, "project", null, null, SortType.NONE, null, false, userId).stream()
+		return siteService.getSites(SelectionType.MEMBER, "project", null, null, SortType.NONE, null, false, userId).stream()
 				.filter(site -> site.hasRole(userId, site.getMaintainRole()))
 				.collect(Collectors.toList());
 	}
