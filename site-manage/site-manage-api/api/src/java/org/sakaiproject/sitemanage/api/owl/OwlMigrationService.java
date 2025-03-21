@@ -62,6 +62,12 @@ public interface OwlMigrationService {
 	public Optional<String> getNoActiveTypesDisplay();
 
 	/**
+	 * If there are no active migration actions, this value will be displayed for sites that are undecided in the read only UI
+	 * @return optional wrapping the default migration action, or empty optional if the corresponding property couldn't be found
+	 */
+	public Optional<String> getNoActiveActionsDisplay();
+
+	/**
 	 * For sites that are eligible for migration and have changeable selections, persist their specified selection.
 	 * Updates each site's selections, associated user, date, and sets an initial status if appropriate
 	 * @param siteSelections a map of siteIds to {@link org.sakaiproject.sitemanage.api.owl.UserSelection UserSelection} objects

@@ -77,6 +77,11 @@ public class OwlMigrationServiceImpl implements OwlMigrationService {
 	}
 
 	@Override
+	public Optional<String> getNoActiveActionsDisplay() {
+		return OwlMigrationDAO.getDefaultActionOption();
+	}
+
+	@Override
 	public List<String> saveSelections(Map<String, UserSelection> siteSelections) {
 		return migrationDelegate.saveSelections(siteSelections);
 	}

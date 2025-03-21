@@ -42,6 +42,7 @@ public class OwlMigrationDAO
     private static final String OWL_MIG_ACTIVE_ADMIN_TYPE_KEYS      = "OWL_MIG_ACTIVE_ADMIN_TYPE_KEYS";
     private static final String OWL_MIG_ADMIN_TYPE_MAP              = "OWL_MIG_ADMIN_TYPE_MAP";
     private static final String OWL_MIG_TYPE_DEFAULT                = "OWL_MIG_TYPE_DEFAULT";
+    private static final String OWL_MIG_ACTION_DEFAULT              = "OWL_MIG_ACTION_DEFAULT";
     private static final String OWL_MIG_TYPES_TO_ACTIONS_MAP        = "OWL_MIG_TYPES_TO_ACTIONS_MAP";
     private static final String OWL_MIG_ACTIVE_ACTION_KEYS          = "OWL_MIG_ACTIVE_ACTION_KEYS";
     private static final String OWL_MIG_ACTION_MAP                  = "OWL_MIG_ACTIONS_MAP";
@@ -258,6 +259,16 @@ public class OwlMigrationDAO
     public static Optional<String> getDefaultTypeOption()
     {
         String defaultTypeOption = StringUtils.trimToNull( getSitePropString( OWL_MIG_TYPE_DEFAULT ) );
+        return Optional.ofNullable( defaultTypeOption );
+    }
+
+    /**
+     * Get the default action value that will be displayed in the UI when there are no "active" action keys
+     * @return An Optional containing the default action value, or an empty Optional if the property can't be found or parsed properly
+     */
+    public static Optional<String> getDefaultActionOption()
+    {
+        String defaultTypeOption = StringUtils.trimToNull( getSitePropString( OWL_MIG_ACTION_DEFAULT ) );
         return Optional.ofNullable( defaultTypeOption );
     }
 
