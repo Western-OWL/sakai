@@ -29,6 +29,8 @@ import org.sakaiproject.sitemanage.api.owl.SiteMigrationItem.ResourcesSizeCatego
 import org.sakaiproject.tool.api.SessionManager;
 
 import lombok.extern.slf4j.Slf4j;
+import org.sakaiproject.site.api.SiteService.SelectionType;
+import org.sakaiproject.site.api.SiteService.SortType;
 import org.sakaiproject.sitemanage.api.owl.MigAction;
 import org.sakaiproject.sitemanage.api.owl.OwlMigrationService;
 import org.sakaiproject.sitemanage.api.owl.UserSelection;
@@ -389,9 +391,8 @@ public class OwlMigrationDelegate {
 	 * @return List of user's project maintainer sites
 	 */
 	private List<Site> getUserMaintainProjectSites(String userId) {
-		return siteService.getUserSites(false, true).stream()
+		return siteService.getSites(SelectionType.ANY, "project", null, null, SortType.NONE, null, false, userId).stream()
 				.filter(site -> site.hasRole(userId, site.getMaintainRole()))
-				.filter(site -> "project".equals(site.getType()))
 				.collect(Collectors.toList());
 	}
 
