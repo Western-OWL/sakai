@@ -1,7 +1,6 @@
 package org.sakaiproject.sitemanage.impl.owl;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -64,7 +63,7 @@ public class OwlMigrationDelegate {
 
 		if (activeTypeOptions.stream().anyMatch(typeKey -> !typeOptions.containsKey(typeKey))) {
 			logAndSendMisconfigurationEmail("OWL_MIG_ACTIVE_TYPE_KEYS contains items that are not keys in OWL_MIG_TYPE_MAP. Until this is resolved, the migration tab will be in read-only mode.");
-			return Collections.emptyMap();
+			return Map.of();
 		}
 
 		return activeTypeOptions.stream()
@@ -77,7 +76,7 @@ public class OwlMigrationDelegate {
 
 		if (activeActionOptions.stream().anyMatch(actionKey -> !actionOptions.containsKey(actionKey))) {
 			logAndSendMisconfigurationEmail("OWL_MIG_ACTIVE_ACTION_KEYS contains items that are not keys in OWL_MIG_ACTIONS_MAP. Until this is resolved, the migration tab will be in read-only mode.");
-			return Collections.emptyMap();
+			return Map.of();
 		}
 
 		return activeActionOptions.stream()
@@ -210,15 +209,15 @@ public class OwlMigrationDelegate {
 				// Set the action if applicable
 				if (!"".equals(actionKey) || resetAction) {
 					dto.setActionKey(actionKey);
-					dto.setActionModifiedDate(now);
-					dto.setActionModifiedEid(currentUserEid);
+					dto.setActionModifiedDate(resetAction ? null : now);
+					dto.setActionModifiedEid(resetAction ? "" : currentUserEid);
 				}
 
 				// Set the status if applicable
 				if (!"".equals(statusKey) || resetStatus) {
 					dto.setStatusKey(statusKey);
-					dto.setStatusModifiedDate(now);
-					dto.setStatusModifiedEid(currentUserEid);
+					dto.setStatusModifiedDate(resetStatus ? null : now);
+					dto.setStatusModifiedEid(resetStatus ? "" : currentUserEid);
 				}
 			} else {
 				// SiteMigrationItemDTO couldn't be retrieved; try creating one
@@ -272,8 +271,9 @@ public class OwlMigrationDelegate {
 	}
 
 	/**
-	 * Takes an slf4j style parameterized message describing a misconfiguraiton issue.
-	 * The message is both logged and emailed to the configured recipients.
+	 * Takes an slf4j style parameterized message describing a misconfiguraiton issue.The message is both logged and emailed to the configured recipients.
+	 * @param message the message to log, with placeholders
+	 * @param params the parameters to insert into the message's placeholders
 	 */
 	public void logAndSendMisconfigurationEmail(String message, String... params) {
 		log.error(message, (Object[]) params);
