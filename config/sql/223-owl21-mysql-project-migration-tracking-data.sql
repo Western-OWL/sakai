@@ -8,7 +8,7 @@ VALUES ('!admin', 'OWL_MIG_ENABLED', 'false');
 
 # Migration type option (keys) that are "active" (available for selection in the UI), (pipe delimited)
 INSERT INTO sakai_site_property
-VALUES ('!admin', 'OWL_MIG_ACTIVE_TYPE_KEYS', 'undecided|acad|research|hrTrain|stuTrain|empTrain|extTrain|extOther|nonInstruct|other');
+VALUES ('!admin', 'OWL_MIG_ACTIVE_TYPE_KEYS', 'undecided|research|hrTrain|stuTrain|empTrain|acad|extTrain|extOther|nonInstruct|other');
 
 # Migration type options map; key:displayValue (pipe delimited)
 INSERT INTO sakai_site_property
