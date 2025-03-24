@@ -253,8 +253,9 @@ public class OwlMigrationDelegate {
 			}
 
 			// Validate actionKey corresponds to typeKey
-			if (StringUtils.isNotBlank(dto.getTypeKey()) && StringUtils.isNotBlank(dto.getActionKey()) && !typeActionMap.get(dto.getTypeKey()).contains(dto.getActionKey())
-					|| (StringUtils.isBlank(dto.getActionKey()) && typeActionMap.get(dto.getTypeKey()) != null)) {
+			List<String> typeActions = typeActionMap.getOrDefault(dto.getTypeKey(), List.of());
+			if (StringUtils.isNotBlank(dto.getTypeKey()) && StringUtils.isNotBlank(dto.getActionKey()) && !typeActions.contains(dto.getActionKey())
+					|| (StringUtils.isBlank(dto.getActionKey()) && !typeActions.isEmpty())) {
 				log.warn("Action key {} does not correspond to type key {}", dto.getActionKey(), dto.getTypeKey());
 				failedSiteTitles.add(siteTitle);
 				continue;
