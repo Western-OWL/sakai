@@ -14,10 +14,6 @@ VALUES ('!admin', 'OWL_MIG_ACTIVE_TYPE_KEYS', 'undecided|acad|research|hrTrain|s
 INSERT INTO sakai_site_property
 VALUES ('!admin', 'OWL_MIG_TYPE_MAP', 'undecided:Undecided|acad:Supplementary Academic Materials|research:Research|hrTrain:Central HR Training|stuTrain:Student Training|empTrain:Departmental Employee Training|extTrain:External Training|extOther:External Other|nonInstruct:Non-Instructional, Other|other:Other');
 
--- Migration admin-only type option (keys) that are "active" (available for selection in the UI), (pipe delimited)
-INSERT INTO sakai_site_property
-VALUES ('!admin', 'OWL_MIG_ACTIVE_ADMIN_TYPE_KEYS', 'ofr|committee');
-
 -- Migration admin-only type options map; key:displayValue (pipe delimited)
 INSERT INTO sakai_site_property
 VALUES ('!admin', 'OWL_MIG_ADMIN_TYPE_MAP', 'ofr:OFR Promotion and Tenure|committee:Board/Selection Committees');

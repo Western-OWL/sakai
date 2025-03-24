@@ -1,6 +1,7 @@
 package org.sakaiproject.sitemanage.impl.owl;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -44,6 +45,8 @@ public class OwlMigrationDelegate {
 	private final SessionManager sessionManager;
 	private final SiteService siteService;
 
+	final Comparator<SiteMigrationItem> smiComparator = Comparator.comparing(SiteMigrationItem::getSiteTitle).thenComparing(SiteMigrationItem::getSiteId);
+
 	public OwlMigrationDelegate(ContentHostingService chs, EmailService es, EventTrackingService ets, ServerConfigurationService scs, SessionManager sm, SiteService ss) {
 		contentHostingService = chs;
 		emailService = es;
@@ -54,7 +57,9 @@ public class OwlMigrationDelegate {
 	}
 
 	public List<SiteMigrationItem> getSiteMigrationItems() {
-		return getUserMaintainProjectSites(getCurrentUserId()).stream().map(site -> buildSiteMigrationItem(site)).collect(Collectors.toList());
+		List<SiteMigrationItem> items = getUserMaintainProjectSites(getCurrentUserId()).stream().map(site -> buildSiteMigrationItem(site)).collect(Collectors.toList());
+		items.sort(smiComparator);
+		return items;
 	}
 
 	public Map<String, String> getActiveTypes() {
@@ -113,6 +118,7 @@ public class OwlMigrationDelegate {
 		List<String> changeableActions = OwlMigrationDAO.getChangeableActions();
 		List<String> activeActions = OwlMigrationDAO.getActiveActionKeys();
 		Map<String, String> actionStatusMap = OwlMigrationDAO.getInitialActionStatusMap();
+		Map<String, List<String>> typeActionMap = OwlMigrationDAO.getTypesToActionsMap();
 		String currentUserEid = getCurrentUserEid();
 		List<Site> userSites = getUserMaintainProjectSites(getCurrentUserId());
 
@@ -243,6 +249,14 @@ public class OwlMigrationDelegate {
 				}
 
 				dto = new SiteMigrationItemDTO(siteId, typeKey, typeModifiedEid, actionKey, actionModifiedEid, statusKey, statusModifiedEid, typeModifiedDate, actionModifiedDate, statusModifiedDate);
+			}
+
+			// Validate actionKey corresponds to typeKey
+			if (StringUtils.isNotBlank(dto.getTypeKey()) && StringUtils.isNotBlank(dto.getActionKey()) && !typeActionMap.get(dto.getTypeKey()).contains(dto.getActionKey())
+					|| (StringUtils.isBlank(dto.getActionKey()) && typeActionMap.get(dto.getTypeKey()) != null)) {
+				log.warn("Action key {} does not correspond to type key {}", dto.getActionKey(), dto.getTypeKey());
+				failedSiteTitles.add(siteTitle);
+				continue;
 			}
 
 			if (OwlMigrationDAO.saveSiteMigrationItem(dto, resetAction, resetStatus)) {

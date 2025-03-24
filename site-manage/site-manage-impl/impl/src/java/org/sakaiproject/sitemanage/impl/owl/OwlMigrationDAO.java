@@ -5,7 +5,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -39,7 +38,6 @@ public class OwlMigrationDAO
     private static final String OWL_MIG_ENABLED                     = "OWL_MIG_ENABLED";
     private static final String OWL_MIG_ACTIVE_TYPE_KEYS            = "OWL_MIG_ACTIVE_TYPE_KEYS";
     private static final String OWL_MIG_TYPE_MAP                    = "OWL_MIG_TYPE_MAP";
-    private static final String OWL_MIG_ACTIVE_ADMIN_TYPE_KEYS      = "OWL_MIG_ACTIVE_ADMIN_TYPE_KEYS";
     private static final String OWL_MIG_ADMIN_TYPE_MAP              = "OWL_MIG_ADMIN_TYPE_MAP";
     private static final String OWL_MIG_TYPE_DEFAULT                = "OWL_MIG_TYPE_DEFAULT";
     private static final String OWL_MIG_ACTION_DEFAULT              = "OWL_MIG_ACTION_DEFAULT";
@@ -268,8 +266,8 @@ public class OwlMigrationDAO
      */
     public static Optional<String> getDefaultActionOption()
     {
-        String defaultTypeOption = StringUtils.trimToNull( getSitePropString( OWL_MIG_ACTION_DEFAULT ) );
-        return Optional.ofNullable( defaultTypeOption );
+        String defaultActionOption = StringUtils.trimToNull( getSitePropString( OWL_MIG_ACTION_DEFAULT ) );
+        return Optional.ofNullable( defaultActionOption );
     }
 
     /**
@@ -280,16 +278,6 @@ public class OwlMigrationDAO
     {
         // Format: undecided:Undecided|acad:Supplementary Academic Materials|research:Research
         return parsePipeAndColonDelimitedProp( OWL_MIG_TYPE_MAP );
-    }
-
-    /**
-     * Get the List of admin-only type keys which are "active" (available to be selected in the UI)
-     * @return A List of Strings, where each String is a type key which is available in the UI for selection by admins only
-     */
-    public static List<String> getActiveAdminTypeKeys()
-    {
-        // Format: undecided|acad|research|hrTrain|stuTrain|empTrain|extTrain|extOther|nonInstruct|other
-        return parsePipeDelimitedProp( OWL_MIG_ACTIVE_ADMIN_TYPE_KEYS );
     }
 
     /**
@@ -312,7 +300,7 @@ public class OwlMigrationDAO
         Map<String, String> map = parsePipeAndColonDelimitedProp( OWL_MIG_TYPES_TO_ACTIONS_MAP );
         if (map.isEmpty())
         {
-            return Collections.emptyMap();
+            return Map.of();
         }
 
         // Now we have key=<typeKey>, value=<actionKeyList>; we need to parse out the value into a List
@@ -526,7 +514,7 @@ public class OwlMigrationDAO
         String[] entries = valueToParse.split( delimiter );
         if( entries == null )
         {
-            return Collections.emptyList();
+            return List.of();
         }
 
         List<String> retList = new ArrayList<>( entries.length );
@@ -555,7 +543,7 @@ public class OwlMigrationDAO
         Optional<Site> s = getAdminWorksite();
         if( s.isEmpty() )
         {
-            return Collections.emptyList();
+            return List.of();
         }
 
         Site site = s.get();
@@ -565,7 +553,7 @@ public class OwlMigrationDAO
         String prop = props.getProperty( sitePropKey );
         if( StringUtils.isBlank( prop ) )
         {
-            return Collections.emptyList();
+            return List.of();
         }
 
         // Split on '|' so we get an array of key:value pairs (key1:value1, key2:value2; etc.)
@@ -583,7 +571,7 @@ public class OwlMigrationDAO
         List<String> entries = parsePipeDelimitedProp( sitePropKey );
         if( entries.isEmpty() )
         {
-            return Collections.emptyMap();
+            return Map.of();
         }
 
         LinkedHashMap<String, String> retMap = new LinkedHashMap<>( entries.size() );
