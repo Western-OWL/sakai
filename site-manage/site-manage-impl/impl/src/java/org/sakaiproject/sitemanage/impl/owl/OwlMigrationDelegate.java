@@ -45,7 +45,8 @@ public class OwlMigrationDelegate {
 	private final SessionManager sessionManager;
 	private final SiteService siteService;
 
-	final Comparator<SiteMigrationItem> smiComparator = Comparator.comparing(SiteMigrationItem::getSiteTitle).thenComparing(SiteMigrationItem::getSiteId);
+	final Comparator<SiteMigrationItem> smiComparator = Comparator.comparing(SiteMigrationItem::getSiteTitle, String.CASE_INSENSITIVE_ORDER)
+			.thenComparing(SiteMigrationItem::getSiteId, String.CASE_INSENSITIVE_ORDER);
 
 	public OwlMigrationDelegate(ContentHostingService chs, EmailService es, EventTrackingService ets, ServerConfigurationService scs, SessionManager sm, SiteService ss) {
 		contentHostingService = chs;
