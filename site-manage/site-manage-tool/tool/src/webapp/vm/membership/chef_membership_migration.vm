@@ -184,8 +184,8 @@ OWL_MIG.handleTypeChange = function(event)
     <option value="$site.SiteId::$typeKey" #if($typeKey == $site.TypeKey)selected#end>$types.get($typeKey)</option>
     #end
   </select>
-#elseif($readOnlyMode && !$site.TypeModifiedDate.isPresent())  <!-- OWLTODO: how to trigger this again? -->
-  $readOnlyNoSelectionDisplay.orElse($noVal)
+#elseif($readOnlyMode && !$site.TypeModifiedDate.isPresent())
+  $readOnlyNoTypeSelectionDisplay.orElse($noVal)
 #else
   $MigTool.getDisplay($site.TypeKey, $typesDisplayMap)
 #end
@@ -203,7 +203,8 @@ OWL_MIG.handleTypeChange = function(event)
     </select>
   #end
 #elseif($readOnlyMode && !$site.ActionModifiedDate.isPresent())
-  $readOnlyNoSelectionDisplay.orElse($noVal) <!-- OWLTODO: is this right for action? -->
+  #set($noActionDisplay = $tlang.getString("owl.mig.noAction"))
+  $readOnlyNoActionSelectionDisplay.orElse($noActionDisplay)
 #else
   $MigTool.getDisplay($site.ActionKey, $actionsDisplayMap)
 #end

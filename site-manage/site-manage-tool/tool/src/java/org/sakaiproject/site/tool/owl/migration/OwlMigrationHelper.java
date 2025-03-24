@@ -56,7 +56,8 @@ public class OwlMigrationHelper
 		context.put("actions", activeActions);
 		
 		context.put("readOnlyMode", activeTypes.isEmpty() && activeActions.isEmpty()); // shorthand for no active types or actions (tab is effectively in a read-only mode)
-		context.put("readOnlyNoSelectionDisplay", OWL_MIG_SERV.getNoActiveTypesDisplay()); // value to display in type/action column when in read-only mode and no user selection has been made
+		context.put("readOnlyNoTypeSelectionDisplay", OWL_MIG_SERV.getNoActiveTypesDisplay()); // value to display in type column when in read-only mode and no user selection has been made
+		context.put("readOnlyNoActionSelectionDisplay", OWL_MIG_SERV.getNoActiveActionsDisplay()); // value to display in action column when in read-only mode and no user selection has been made
 
 		context.put("typeActionMap", OWL_MIG_SERV.getTypeActionMap());
 
