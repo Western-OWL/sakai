@@ -12,7 +12,7 @@ VALUES ('!admin', 'OWL_MIG_ACTIVE_TYPE_KEYS', 'undecided|acad|research|hrTrain|s
 
 # Migration type options map; key:displayValue (pipe delimited)
 INSERT INTO sakai_site_property
-VALUES ('!admin', 'OWL_MIG_TYPE_MAP', 'undecided:Undecided|acad:Supplementary Academic Materials|research:Research|hrTrain:Central HR Training|stuTrain:Student Training|empTrain:Departmental Employee Training|extTrain:External Training|extOther:External Other|nonInstruct:Non-Instructional, Other|other:Other');
+VALUES ('!admin', 'OWL_MIG_TYPE_MAP', 'undecided:Undecided|research:Research|hrTrain:Central HR Training|stuTrain:Student Training|empTrain:Departmental Employee Training|acad:Supplementary Academic Materials|extTrain:External Training|extOther:External Other|nonInstruct:Non-Instructional, Other|other:Other');
 
 # Migration admin-only type options map; key:displayValue (pipe delimited)
 INSERT INTO sakai_site_property
@@ -32,7 +32,7 @@ VALUES ('!admin', 'OWL_MIG_ACTIVE_ACTION_KEYS', 'undecided|mig|alt|ret|selfDel|d
 
 # Migration action options map; key:displayValue (pipe delimited)
 INSERT INTO sakai_site_property
-VALUES ('!admin', 'OWL_MIG_ACTIONS_MAP', 'undecided:Undecided|mig:Request Migration to OWL Brightspace|alt:Transition to Alternate Solution|ret:Retain|selfDel:I will Delete|del:Delete Anytime');
+VALUES ('!admin', 'OWL_MIG_ACTIONS_MAP', 'undecided:Undecided|mig:Request Migration to OWL Brightspace|alt:Transition to Alternate Solution|ret:Retain in Sakai until April 30, 2026|selfDel:I will Delete|del:Delete Anytime');
 
 # Migration statuses; key:displayValue (pipe delimited)
 INSERT INTO sakai_site_property
@@ -53,7 +53,7 @@ VALUES ('!admin', 'OWL_MIG_VISIBLE_STATUSES', 'migDone|pendingMig|transDone|tran
 
 # Types that can be changed in the UI by users after saving the type (type keys, pipe delimited)
 INSERT INTO sakai_site_property
-VALUES ('!admin', 'OWL_MIG_CHANGEABLE_TYPES', 'undecided|other');
+VALUES ('!admin', 'OWL_MIG_CHANGEABLE_TYPES', 'undecided');
 
 # Actions that can be changed in the UI by users after saving the action (action keys, pipe delimited)
 INSERT INTO sakai_site_property
