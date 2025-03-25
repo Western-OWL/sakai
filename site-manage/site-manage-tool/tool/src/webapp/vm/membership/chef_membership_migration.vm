@@ -154,7 +154,7 @@ OWL_MIG.handleTypeChange = function(event)
     {
       actionSelect.add(new Option(opt[0], siteId + "::" + opt[1]));
     }
-    actionSelect.selectedIndex = 0;  // OWLTODO: make it a data requirement that the "undecided" option appears first
+    actionSelect.selectedIndex = 0;
   }
   else 
   {
@@ -190,7 +190,7 @@ OWL_MIG.handleTypeChange = function(event)
   $MigTool.getDisplay($site.TypeKey, $typesDisplayMap)
 #end
 &amp;
-<span id="${site.SiteId}_action_container" data-site-title="#title($site)">
+<span id="${site.SiteId}_action_container" data-site-title="#title($site)" aria-live="polite">
 #if(($site.ActionEditable || $site.ActionKey.Empty) && !$readOnlyMode)
   #if($site.ActionKey.Empty)
     #mb("owl.mig.noAction")
@@ -212,7 +212,7 @@ OWL_MIG.handleTypeChange = function(event)
 </span>
 #set($status = $MigTool.getStatusDisplay($site))
 #set($wrap = $site.TypeEditable || $site.ActionEditable)
-#if(!$status.Empty)<span id=${site.SiteId}_status class="owl-mig-tracking-status-label #if($wrap)owl-mig-tracking-status-label-wrap#end">$status</span>#end
+#if(!$status.Empty)<span id="${site.SiteId}_status" aria-live="polite" class="owl-mig-tracking-status-label #if($wrap)owl-mig-tracking-status-label-wrap#end">$status</span>#end
 #end
 
 #macro(size $site)
