@@ -81,7 +81,7 @@ VALUES ('!admin', 'OWL_MIG_SUPPORT_EMAIL', 'owlmigrationquestions@uwo.ca');
 
 # UI messages/banners that are too difficult to maintain and update through MBM
 INSERT INTO sakai_site_property
-VALUES ('!admin', 'OWL_MIG_MSG_BANNER_TOP_1', 'Your OWL project sites are listed below. Please make selections for each. Once a choice is made, it cannot be changed. You do not need to make a decision for all listed sites at the same time. Any sites left as just "Undecided", or "Other" can be changed later.');
+VALUES ('!admin', 'OWL_MIG_MSG_BANNER_TOP_1', 'Your OWL project sites are listed below. Please make selections for each. Once a choice is made, it cannot be changed. You do not need to make a decision for all listed sites at the same time. Any sites left as just "Undecided" can be changed later.');
 INSERT INTO sakai_site_property
 VALUES ('!admin', 'OWL_MIG_MSG_BANNER_TOP_2', 'More information about specific migration options or how to request a change if you made a mistake can be found at <a target="_blank" href="https://owlmigration.uwo.ca">OWL Migration Help</a>');
 INSERT INTO sakai_site_property
