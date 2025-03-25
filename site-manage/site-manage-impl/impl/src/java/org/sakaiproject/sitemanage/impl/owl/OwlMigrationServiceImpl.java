@@ -52,7 +52,12 @@ public class OwlMigrationServiceImpl implements OwlMigrationService {
 	@Override
 	public Map<String, String> getMigrationTypes() {
 		Map<String, String> optionMap = OwlMigrationDAO.getTypeOptions();
-		optionMap.putAll(OwlMigrationDAO.getAdminTypeOptions());
+		Map<String, String> adminOptionMap = OwlMigrationDAO.getAdminTypeOptions();
+		if (optionMap.isEmpty()) {
+			return adminOptionMap;
+		}
+
+		optionMap.putAll(adminOptionMap);
 		return optionMap;
 	}
 
