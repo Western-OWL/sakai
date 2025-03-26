@@ -264,7 +264,7 @@ public class MembershipAction extends PagedResourceActionII
 			activeTab = MembershipActiveTab.JOINABLE_SITES;
 			template = buildJoinableContext(portlet, context, rundata, state);
 		}
-		else if (MIGRATION_MODE.equals(mode)) // OWL
+		else if (MIGRATION_MODE.equals(mode) && migrationAllowed)  // OWL
 		{
 			activeTab = MembershipActiveTab.MIGRATION;
 			template = buildMigrationContext(context, rundata, state, siteList);
