@@ -38,9 +38,9 @@ public interface OwlMigrationService {
 
 	/**
 	 * Map active migration type keys to display values. If empty, UI should be read only
-	 * @return a map of typeKey to UI value
+	 * @return a map of typeKey to UI value, or empty if something went wrong (misconfiguration, etc)
 	 */
-	public Map<String, String> getActiveTypes();
+	public Optional<Map<String, String>> getActiveTypes();
 
 	/**
 	 * Maps migration action keys to display values. May contain actions that are no longer active.
@@ -51,9 +51,9 @@ public interface OwlMigrationService {
 
 	/**
 	 * Map active migration action keys to display values. If empty, UI should be read only
-	 * @return a map of actionKey to UI value
+	 * @return a map of actionKey to UI value, or empty if something went wrong (misconfiguration, etc)
 	 */
-	public Map<String, String> getActiveActions();
+	public Optional<Map<String, String>> getActiveActions();
 
 	/**
 	 * If there are no active migration types, this value will be displayed for sites that are undecided in the read only UI

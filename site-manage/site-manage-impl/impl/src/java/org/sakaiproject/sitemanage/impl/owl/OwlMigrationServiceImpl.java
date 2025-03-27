@@ -62,7 +62,7 @@ public class OwlMigrationServiceImpl implements OwlMigrationService {
 	}
 
 	@Override
-	public Map<String, String> getActiveTypes() {
+	public Optional<Map<String, String>> getActiveTypes() {
 		return migrationDelegate.getActiveTypes();
 	}
 
@@ -72,7 +72,7 @@ public class OwlMigrationServiceImpl implements OwlMigrationService {
 	}
 
 	@Override
-	public Map<String, String> getActiveActions() {
+	public Optional<Map<String, String>> getActiveActions() {
 		return migrationDelegate.getActiveActions();
 	}
 

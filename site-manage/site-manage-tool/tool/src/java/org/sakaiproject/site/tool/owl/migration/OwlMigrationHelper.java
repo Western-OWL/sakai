@@ -48,14 +48,19 @@ public class OwlMigrationHelper
 		boolean editableOptions = sites.stream().anyMatch(smi -> smi.isTypeEditable() || smi.isActionEditable());
 		context.put("hasEditableSites", editableOptions); // true if any of the sites are in an editable state (ie. "undecided")
 
+		var activeTypesOpt = OWL_MIG_SERV.getActiveTypes(); // map of currently active types keys -> display value
+		var activeActionsOpt = OWL_MIG_SERV.getActiveActions();
+		var activeTypes = activeTypesOpt.orElse(Map.of());
+		var activeActions = activeActionsOpt.orElse(Map.of());
+
 		context.put("typesDisplayMap", OWL_MIG_SERV.getMigrationTypes()); // map of all types key -> display value
-		var activeTypes = OWL_MIG_SERV.getActiveTypes(); // map of currently active types keys -> display value
-		context.put("types", activeTypes); // the possible selections in the migration options dropdown
+		context.put("types", activeTypes); // the possible selections in the types dropdown
 		context.put("actionsDisplayMap", OWL_MIG_SERV.getMigrationActions());
-		var activeActions = OWL_MIG_SERV.getActiveActions();
 		context.put("actions", activeActions);
-		
-		context.put("readOnlyMode", activeTypes.isEmpty() && activeActions.isEmpty()); // shorthand for no active types or actions (tab is effectively in a read-only mode)
+
+		boolean misconfiguration = activeTypesOpt.isEmpty() || activeActionsOpt.isEmpty();
+		boolean explicitReadOnlyMode = activeTypes.isEmpty() && activeActions.isEmpty();
+		context.put("readOnlyMode", explicitReadOnlyMode || misconfiguration); // shorthand for no active types or actions (tab is effectively in a read-only mode), or forced by misconfiguration
 		context.put("readOnlyNoTypeSelectionDisplay", OWL_MIG_SERV.getNoActiveTypesDisplay()); // value to display in type column when in read-only mode and no user selection has been made
 		context.put("readOnlyNoActionSelectionDisplay", OWL_MIG_SERV.getNoActiveActionsDisplay()); // value to display in action column when in read-only mode and no user selection has been made
 

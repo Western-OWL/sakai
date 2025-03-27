@@ -63,30 +63,32 @@ public class OwlMigrationDelegate {
 		return items;
 	}
 
-	public Map<String, String> getActiveTypes() {
+	// Optional is used here instead of empty map to convey the misconfiguration error state (empty optional) vs no active types (empty map inside optional)
+	public Optional<Map<String, String>> getActiveTypes() {
 		final Map<String, String> typeOptions = OwlMigrationDAO.getTypeOptions();
 		List<String> activeTypeOptions = OwlMigrationDAO.getActiveTypeKeys();
 
 		if (activeTypeOptions.stream().anyMatch(typeKey -> !typeOptions.containsKey(typeKey))) {
 			logAndSendMisconfigurationEmail("OWL_MIG_ACTIVE_TYPE_KEYS contains items that are not keys in OWL_MIG_TYPE_MAP. Until this is resolved, the migration tab will be in read-only mode.");
-			return Map.of();
+			return Optional.empty();
 		}
 
-		return activeTypeOptions.stream()
-			.collect(Collectors.toMap(key -> key, typeOptions::get, (v1, v2) -> v2, LinkedHashMap::new));
+		return Optional.of(activeTypeOptions.stream()
+			.collect(Collectors.toMap(key -> key, typeOptions::get, (v1, v2) -> v2, LinkedHashMap::new)));
 	}
 
-	public Map<String, String> getActiveActions() {
+	// see note on getActiveTypes above
+	public Optional<Map<String, String>> getActiveActions() {
 		final Map<String, String> actionOptions = OwlMigrationDAO.getActionOptions();
 		List<String> activeActionOptions = OwlMigrationDAO.getActiveActionKeys();
 
 		if (activeActionOptions.stream().anyMatch(actionKey -> !actionOptions.containsKey(actionKey))) {
 			logAndSendMisconfigurationEmail("OWL_MIG_ACTIVE_ACTION_KEYS contains items that are not keys in OWL_MIG_ACTIONS_MAP. Until this is resolved, the migration tab will be in read-only mode.");
-			return Map.of();
+			return Optional.empty();
 		}
 
-		return activeActionOptions.stream()
-			.collect(Collectors.toMap(key -> key, actionOptions::get, (v1, v2) -> v2, LinkedHashMap::new));
+		return Optional.of(activeActionOptions.stream()
+			.collect(Collectors.toMap(key -> key, actionOptions::get, (v1, v2) -> v2, LinkedHashMap::new)));
 	}
 
 	public Map<String, List<MigAction>> getTypeActionMap() {
