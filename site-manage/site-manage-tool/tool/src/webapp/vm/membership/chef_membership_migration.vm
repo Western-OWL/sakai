@@ -169,6 +169,17 @@ OWL_MIG.handleTypeChange = function(event)
 
     container.textContent = "#mb("owl.mig.noAction")";
   }
+
+  OWL_MIG.removeStatus(siteId);
+}
+
+OWL_MIG.removeStatus = function(siteId)
+{
+  const status = document.getElementById(siteId + "_status");
+  if (status)
+  {
+    status.remove();
+  }
 }
 
 </script>
@@ -196,7 +207,7 @@ OWL_MIG.handleTypeChange = function(event)
     #mb("owl.mig.noAction")
   #else
     <label for="${site.SiteId}_action" class="sr-only">#mb("owl.mig.action.label") #title($site)</label>
-    <select name="userAction" id="${site.SiteId}_action">
+    <select name="userAction" id="${site.SiteId}_action" onchange="OWL_MIG.removeStatus($site.SiteId);">
       #foreach($action in $typeActionMap.get(${site.TypeKey}))
       <option value="$site.SiteId::$action.key" #if($action.key == $site.ActionKey)selected#end>$action.label</option>
       #end
@@ -212,7 +223,7 @@ OWL_MIG.handleTypeChange = function(event)
 </span>
 #set($status = $MigTool.getStatusDisplay($site))
 #set($wrap = $site.TypeEditable || $site.ActionEditable)
-#if(!$status.Empty)<span id="${site.SiteId}_status" aria-live="polite" class="owl-mig-tracking-status-label #if($wrap)owl-mig-tracking-status-label-wrap#end">$status</span>#end
+#if(!$status.Empty)<span aria-live="polite"><span id="${site.SiteId}_status" class="owl-mig-tracking-status-label #if($wrap)owl-mig-tracking-status-label-wrap#end">$status</span></span>#end
 #end
 
 #macro(size $site)
