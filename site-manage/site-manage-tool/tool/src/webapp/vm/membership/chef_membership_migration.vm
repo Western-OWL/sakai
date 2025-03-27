@@ -72,7 +72,7 @@ OWL_MIG.showSizeBlurb = function()
   for (const selection of selections)
   {
     const optionKey = selection.value.split("::")[1];
-    if (sizeCheckOptionKeys.includes(optionKey) && selection.dataset.sizeCat !== "NONE")
+    if (sizeCheckOptionKeys.includes(optionKey) && document.getElementById(selection.id + "_container").dataset.sizeCat !== "NONE")
     {
       return true;
     }
@@ -179,7 +179,7 @@ OWL_MIG.handleTypeChange = function(event)
 <span class="owl-mig-dropdowns">
 #if($site.TypeEditable && !$readOnlyMode)
   <label for="${site.SiteId}_type" class="sr-only">#mb("owl.mig.type.label") #title($site)</label>
-  <select name="userType" id="${site.SiteId}_type" data-size-cat="$site.getResourcesSizeCategory().name()" onchange="OWL_MIG.handleTypeChange(event);">
+  <select name="userType" id="${site.SiteId}_type" onchange="OWL_MIG.handleTypeChange(event);">
     #foreach($typeKey in $types.keySet())
     <option value="$site.SiteId::$typeKey" #if($typeKey == $site.TypeKey)selected#end>$types.get($typeKey)</option>
     #end
@@ -190,7 +190,7 @@ OWL_MIG.handleTypeChange = function(event)
   $MigTool.getDisplay($site.TypeKey, $typesDisplayMap)
 #end
 &amp;
-<span id="${site.SiteId}_action_container" data-site-title="#title($site)" aria-live="polite">
+<span id="${site.SiteId}_action_container" data-site-title="#title($site)" data-size-cat="$site.getResourcesSizeCategory().name()" aria-live="polite">
 #if(($site.ActionEditable || $site.ActionKey.Empty) && !$readOnlyMode)
   #if($site.ActionKey.Empty)
     #mb("owl.mig.noAction")
