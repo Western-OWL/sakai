@@ -150,6 +150,8 @@ public class OwlMigrationDelegate {
 			if (optDto.isPresent()) {
 				dto = optDto.get();
 
+				boolean invalidInput = false;
+
 				// Process typeKey checks if there was a typeKey submitted
 				boolean typeActive = false;
 				boolean typeChangeable = false;
@@ -158,6 +160,7 @@ public class OwlMigrationDelegate {
 					// Check if typeKey provided is active
 					typeActive = activeTypes.contains(typeKey);
 					if (!typeActive && !"".equals(typeKey)) {
+						invalidInput = true;
 						log.warn("User {} tried to change the type selection for site {} to a value that is not an active type: {}" , currentUserEid, siteId, typeKey);
 					}
 
@@ -165,6 +168,7 @@ public class OwlMigrationDelegate {
 					typeChangeable = StringUtils.isEmpty(dto.getTypeKey()) || changeableTypes.contains(dto.getTypeKey());
 					if (!typeChangeable && !dto.getTypeKey().equals(typeKey)) {
 						// User tried to change their unchangeable type
+						invalidInput = true;
 						log.warn("User {} tried to change the type selection for site {}, but its existing type '{}' is unchangeable", currentUserEid, siteId, dto.getTypeKey());
 					}
 
@@ -183,6 +187,7 @@ public class OwlMigrationDelegate {
 					// Check if actionKey provided is active
 					actionActive = activeActions.contains(actionKey);
 					if (!actionActive && !"".equals(actionKey)) {
+						invalidInput = true;
 						log.warn("User {} tried to change the action selection for site {} to a value that is not an active action: {}" , currentUserEid, siteId, actionKey);
 					}
 
@@ -190,6 +195,7 @@ public class OwlMigrationDelegate {
 					actionChangeable = StringUtils.isEmpty(dto.getActionKey()) || changeableActions.contains(dto.getActionKey());
 					if (!actionChangeable && !dto.getActionKey().equals(actionKey)) {
 						// User tried to change their unchangeable action
+						invalidInput = true;
 						log.warn("User {} tried to change the action selection for site {}, but its existing action '{}' is unchangeable", currentUserEid, siteId, dto.getActionKey());
 					}
 
@@ -199,9 +205,9 @@ public class OwlMigrationDelegate {
 					}
 				}
 
-				// If there's nothing to save (both type and action are not active nor changeable), skip to next site
-				if (!typeActive && !typeChangeable && !actionActive && !actionChangeable) {
-					log.warn("User {} tried to change the type and/or action selections for site {}, but neither are active or changeable", currentUserEid, siteId);
+				// If any input was invalid, or there's nothing to save (both type and action are not active nor changeable), skip to next site
+				if (invalidInput || (!typeActive && !typeChangeable && !actionActive && !actionChangeable)) {
+					log.warn("User {} provided invalid input, or tried to change the type and/or action selections for site {}, but neither are active or changeable", currentUserEid, siteId);
 					failedSiteTitles.add(siteTitle);
 					continue;
 				}
