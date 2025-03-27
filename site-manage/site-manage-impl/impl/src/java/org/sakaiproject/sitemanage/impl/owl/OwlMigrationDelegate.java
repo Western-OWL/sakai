@@ -155,6 +155,7 @@ public class OwlMigrationDelegate {
 				// Process typeKey checks if there was a typeKey submitted
 				boolean typeActive = false;
 				boolean typeChangeable = false;
+				boolean typeIsChanging = false;
 				if (StringUtils.isNotBlank(typeKey))
 				{
 					// Check if typeKey provided is active
@@ -172,8 +173,9 @@ public class OwlMigrationDelegate {
 						log.warn("User {} tried to change the type selection for site {}, but its existing type '{}' is unchangeable", currentUserEid, siteId, dto.getTypeKey());
 					}
 
+					typeIsChanging = typeActive && typeChangeable && !StringUtils.equals(dto.getTypeKey(), typeKey);
 					// If the typeKey is changing, and no actionKey is provided, we need to reset actionKey and statusKey
-					if (!StringUtils.equals(dto.getTypeKey(), typeKey) && "".equals(actionKey)) {
+					if (typeIsChanging && "".equals(actionKey)) {
 						resetAction = true;
 						resetStatus = true;
 					}
@@ -192,7 +194,7 @@ public class OwlMigrationDelegate {
 					}
 
 					// Check if actionKey provided is changeable
-					actionChangeable = StringUtils.isEmpty(dto.getActionKey()) || changeableActions.contains(dto.getActionKey());
+					actionChangeable = typeIsChanging || StringUtils.isEmpty(dto.getActionKey()) || changeableActions.contains(dto.getActionKey());
 					if (!actionChangeable && !dto.getActionKey().equals(actionKey)) {
 						// User tried to change their unchangeable action
 						invalidInput = true;
