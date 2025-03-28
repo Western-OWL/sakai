@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -91,7 +92,11 @@ public class OwlMigrationDelegate {
 			.collect(Collectors.toMap(key -> key, actionOptions::get, (v1, v2) -> v2, LinkedHashMap::new)));
 	}
 
-	public Map<String, List<MigAction>> getTypeActionMap() {
+	// see note on getActiveTypes above
+	public Optional<Map<String, List<MigAction>>> getTypeActionMap() {
+		var allTypes = new HashSet<String>(OwlMigrationDAO.getTypeOptions().keySet());
+		allTypes.addAll(OwlMigrationDAO.getAdminTypeOptions().keySet());
+		var allActions = OwlMigrationDAO.getActionOptions().keySet();
 		List<String> activeTypes = OwlMigrationDAO.getActiveTypeKeys();
 		List<String> activeActions = OwlMigrationDAO.getActiveActionKeys();
 		Map<String, String> actionOptions = OwlMigrationDAO.getActionOptions();
@@ -101,6 +106,11 @@ public class OwlMigrationDelegate {
 		for (Entry<String, List<String>> entry : typeActionMap.entrySet()) {
 			String typeKey = entry.getKey();
 			List<String> actionKeys = entry.getValue();
+			if (!allTypes.contains(typeKey) || !allActions.containsAll(actionKeys))
+			{
+				logAndSendMisconfigurationEmail("OWL_MIG_TYPES_TO_ACTIONS_MAP contains items that are not keys in OWL_MIG_TYPE_MAP / OWL_MIG_ADMIN_TYPE_MAP / OWL_MIG_ACTIONS_MAP. Until this is resolved, the migration tab will be in read-only mode.");
+				return Optional.empty();
+			}
 			if (activeTypes.contains(typeKey)) {
 				for (String actionKey : actionKeys) {
 					if (activeActions.contains(actionKey)) {
@@ -111,7 +121,7 @@ public class OwlMigrationDelegate {
 			}
 		}
 
-		return map;
+		return Optional.of(map);
 	}
 
 	public List<String> saveSelections(Map<String, UserSelection> siteSelections) {

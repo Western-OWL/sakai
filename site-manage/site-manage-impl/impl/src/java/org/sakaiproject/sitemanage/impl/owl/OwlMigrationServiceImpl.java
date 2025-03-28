@@ -91,7 +91,7 @@ public class OwlMigrationServiceImpl implements OwlMigrationService {
 		return migrationDelegate.saveSelections(siteSelections);
 	}
 
-	public Map<String, List<MigAction>> getTypeActionMap() {
+	public Optional<Map<String, List<MigAction>>> getTypeActionMap() {
 		return migrationDelegate.getTypeActionMap();
 	}
 

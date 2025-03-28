@@ -24,10 +24,10 @@ public interface OwlMigrationService {
 	public List<SiteMigrationItem> getSiteMigrationItems();
 
 	/**
-	 * Gets a map of type keys to list of appropriate migration actions for that type.
-	 * @return the map of type keys to {@link org.sakaiproject.sitemanage.api.owl.MigAction MigActions}
+	 * Gets a map of type keys to list of appropriate migration actions for that type. If empty, UI should be read only.
+	 * @return the map of type keys to {@link org.sakaiproject.sitemanage.api.owl.MigAction MigActions}, empty if something went wrong (misconfiguration, etc)
 	 */
-	public Map<String, List<MigAction>> getTypeActionMap();
+	public Optional<Map<String, List<MigAction>>> getTypeActionMap();
 
 	/**
 	 * Maps migration type keys to display values. May contain types that are no longer active.
