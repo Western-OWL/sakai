@@ -69,10 +69,6 @@ public class OwlMigrationDelegate {
 		final Map<String, String> typeOptions = OwlMigrationDAO.getTypeOptions();
 		List<String> activeTypeOptions = OwlMigrationDAO.getActiveTypeKeys();
 
-		if (activeTypeOptions.isEmpty()) {
-			return Optional.empty();
-		}
-
 		if (activeTypeOptions.stream().anyMatch(typeKey -> !typeOptions.containsKey(typeKey))) {
 			logAndSendMisconfigurationEmail("OWL_MIG_ACTIVE_TYPE_KEYS contains items that are not keys in OWL_MIG_TYPE_MAP. Until this is resolved, the migration tab will be in read-only mode.");
 			return Optional.empty();
