@@ -241,10 +241,15 @@ public class OwlMigrationDelegate {
 				}
 
 				// Set the status if applicable
-				if (!"".equals(statusKey) || resetStatus) {
+				if (!"".equals(statusKey)) {  // we have a status so update it
 					dto.setStatusKey(statusKey);
-					dto.setStatusModifiedDate(resetStatus ? null : now);
-					dto.setStatusModifiedEid(resetStatus ? "" : currentUserEid);
+					dto.setStatusModifiedDate(now);
+					dto.setStatusModifiedEid(currentUserEid);
+				}
+				else if (resetStatus) {  // there is no new status to set, but we have to wipe any existing status
+					dto.setStatusKey("");
+					dto.setStatusModifiedDate(null);
+					dto.setStatusModifiedEid("");
 				}
 			} else {
 				// SiteMigrationItemDTO couldn't be retrieved; try creating one
