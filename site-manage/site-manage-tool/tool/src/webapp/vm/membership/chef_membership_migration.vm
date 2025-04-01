@@ -207,7 +207,7 @@ OWL_MIG.removeStatus = function(siteId)
     #mb("owl.mig.noAction")
   #else
     <label for="${site.SiteId}_action" class="sr-only">#mb("owl.mig.action.label") #title($site)</label>
-    <select name="userAction" id="${site.SiteId}_action" onchange="OWL_MIG.removeStatus($site.SiteId);">
+    <select name="userAction" id="${site.SiteId}_action" onchange="OWL_MIG.removeStatus('$site.SiteId');">
       #foreach($action in $typeActionMap.get(${site.TypeKey}))
       <option value="$site.SiteId::$action.key" #if($action.key == $site.ActionKey)selected#end>$action.label</option>
       #end
