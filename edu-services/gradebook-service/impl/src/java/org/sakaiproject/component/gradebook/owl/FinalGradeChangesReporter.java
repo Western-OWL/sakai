@@ -1,7 +1,12 @@
 package org.sakaiproject.component.gradebook.owl;
 
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.sakaiproject.component.gradebook.GradebookServiceHibernateImpl;
+import org.sakaiproject.service.gradebook.shared.owl.finalgrades.OwlGradeSubmission;
 import org.sakaiproject.service.gradebook.shared.owl.finalgrades.OwlGradeSubmissionGrades;
 import org.sakaiproject.service.gradebook.shared.owl.finalgrades.report.FGChanges;
 
@@ -17,10 +22,12 @@ import org.sakaiproject.service.gradebook.shared.owl.finalgrades.report.FGChange
 class FinalGradeChangesReporter
 {
 	private final GradebookServiceHibernateImpl gbServ;
+	private final OwlGradebookServiceImpl owlgbServ;
 
-	FinalGradeChangesReporter(GradebookServiceHibernateImpl gbService)
+	FinalGradeChangesReporter(GradebookServiceHibernateImpl gbService, OwlGradebookServiceImpl owlgbService)
 	{
 		gbServ = gbService;
+		owlgbServ = owlgbService;
 	}
 
 	FGChanges getChanges(String siteId, String sectionEid)
@@ -42,19 +49,50 @@ class FinalGradeChangesReporter
 		return Set.of();
 	}
 
+	// Compare with CourseGradeSubmitter.getGradeChangeReport()
 	private Set<OwlGradeSubmissionGrades> getPreviousGrades(String siteId, String sectionEid)
 	{
-		// OWLTODO: impl...see CourseGradeSubmitter.getGradeChangeReport()
-		// step 2 and 3
+		// step 2 - get the last submission
+		OwlGradeSubmission lastSub = owlgbServ.getMostRecentCourseGradeSubmissionForSectionInSite(sectionEid, siteId);
 
-		return Set.of();
+		// step 3 - get the grades for the last submission
+		Set<OwlGradeSubmissionGrades> prevGrades = new HashSet<>();
+		if (lastSub != null)
+		{
+			int submissionStatus = lastSub.getStatusCode();
+			if (submissionStatus == OwlGradeSubmission.PENDING_APPROVAL_STATUS || submissionStatus == OwlGradeSubmission.APPROVED_STATUS)
+			{
+				prevGrades.addAll(lastSub.getGradeData());
+			}
+		}
+
+		return prevGrades;
 	}
 
+	// Compare with CourseGradeSubmitter.checkForGradeChanges()
 	private FGChanges checkForChanges(Set<OwlGradeSubmissionGrades> currentGrades, Set<OwlGradeSubmissionGrades> previousGrades)
 	{
-		// OWLTODO: impl...see CourseGradeSubmitter.checkForGradeChanges()
-		// step 4
+		// step 4 - compare current grades to previous grades for changes
+		Map<String, OwlGradeSubmissionGrades> currentGradeMap = currentGrades.stream().collect(Collectors.toMap(OwlGradeSubmissionGrades::getStudentNumber, Function.identity()));
+		Map<String, OwlGradeSubmissionGrades> prevGradeMap = previousGrades.stream().collect(Collectors.toMap(OwlGradeSubmissionGrades::getStudentNumber, Function.identity()));
 
-		return new FGChanges(0, 0, 0);
+		Set<String> newStudents = new HashSet<>(currentGradeMap.keySet());
+		Set<String> sameStudents = new HashSet<>(currentGradeMap.keySet());
+		Set<String> changedStudents = new HashSet<>();
+		Set<String> missingStudents = new HashSet<>(prevGradeMap.keySet());
+
+		sameStudents.retainAll(prevGradeMap.keySet());
+		newStudents.removeAll(sameStudents);
+		missingStudents.removeAll(sameStudents);
+
+		for (String s : sameStudents)
+		{
+			if (!currentGradeMap.get(s).getGrade().equals(prevGradeMap.get(s).getGrade()))
+			{
+				changedStudents.add(s);
+			}
+		}
+
+		return new FGChanges(changedStudents.size(), newStudents.size(), missingStudents.size());
 	}
 }

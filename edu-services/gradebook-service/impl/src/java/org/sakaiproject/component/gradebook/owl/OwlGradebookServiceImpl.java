@@ -496,7 +496,7 @@ public class OwlGradebookServiceImpl implements OwlGradebookService
 	{
 		if (reporter == null)
 		{
-			reporter = new FinalGradeChangesReporter(gbServ);
+			reporter = new FinalGradeChangesReporter(gbServ, this);
 		}
 
 		return reporter;
