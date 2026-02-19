@@ -8,6 +8,7 @@ import java.util.Set;
 import org.sakaiproject.service.gradebook.shared.owl.anongrading.OwlAnonGradingID;
 import org.sakaiproject.service.gradebook.shared.owl.finalgrades.OwlGradeApproval;
 import org.sakaiproject.service.gradebook.shared.owl.finalgrades.OwlGradeSubmission;
+import org.sakaiproject.service.gradebook.shared.owl.finalgrades.report.FGChanges;
 import org.sakaiproject.tool.gradebook.facades.owl.OwlAuthz;
 
 /**
@@ -213,4 +214,14 @@ public interface OwlGradebookService
 	}
 
 	/* End Owl anonymous grading methods */
+
+
+	/* Begin Final Grades Report Job methods */
+
+	default FGChanges getFinalGradeChanges(String siteId, String sectionId)
+	{
+		return owlDoNotCall().getFinalGradeChanges(siteId, sectionId);
+	}
+
+	/* End Final Grades Report Job methods */
 }
