@@ -2,11 +2,19 @@ package org.sakaiproject.component.gradebook.owl;
 
 import java.util.HashSet;
 import java.util.Map;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.component.gradebook.GradebookServiceHibernateImpl;
 import org.sakaiproject.service.gradebook.shared.owl.finalgrades.OwlGradeSubmission;
+import org.sakaiproject.component.gradebook.owl.report.FGInfo;
+import org.sakaiproject.coursemanagement.api.CourseManagementService;
+import org.sakaiproject.coursemanagement.api.Membership;
+import org.sakaiproject.service.gradebook.shared.InvalidGradeException;
+import org.sakaiproject.service.gradebook.shared.owl.finalgrades.MissingCourseGradeException;
+import org.sakaiproject.service.gradebook.shared.owl.finalgrades.MissingStudentNumberException;
 import org.sakaiproject.service.gradebook.shared.owl.finalgrades.OwlGradeSubmissionGrades;
 import org.sakaiproject.service.gradebook.shared.owl.finalgrades.report.FGChanges;
 
@@ -46,7 +54,73 @@ class FinalGradeChangesReporter
 		// OWLTODO: impl...see CourseGradeSubmitter.getCurrentCourseGrades()
 		// step 1
 
-		return Set.of();
+		Set<OwlGradeSubmissionGrades> finalGrades = new HashSet<>();
+
+		// CourseGradeSubmitter.refreshCurrentProvidedMembers() is called and this point in the original code...
+		// OWLTODO: while we don't need to "refresh", we do need to actually get the members so we essentially
+		// need to still do this
+		var cms = (CourseManagementService) ComponentManager.get(CourseManagementService.class);
+		Set<Membership> providedMembers = cms.getSectionMemberships(sectionEid);
+
+		// Next is: List<OwlGbStudentCourseGradeInfo> courseGrades = owlbus.fg.getSectionCourseGrades(section);
+		// OWLTODO: this info class is part of tool and we likely don't need most of it, so we can probably
+		// just create a stripped down replacement class to perform the same role here
+		var courseGrades = getSectionCourseGrades(siteId, sectionEid);
+
+		// Next is:
+		// convert valid course grade records to Registrar format
+		//Gradebook gb = bus.getGradebook(); // pay this cost up front, instead of once for each grade override
+        //GradeMapping gradeMapping = gb.getSelectedGradeMapping();
+		// OWLTODO: the above are GBNG classes...we need to find out what they are actually used for
+		// gb is only used to get the gradeMapping
+		// mapping is only used to convert course grade to registrar grade, which will be a step later on
+		// for now we will skip this and move on to the main loop
+		
+		// Next is: main loop
+		for (FGInfo record : courseGrades)
+		{
+			try
+			{
+				String studentEid = record.userEid;
+				/*if (!isOfficialStudent(studentEid, currentSectionProvidedMembers))
+                {
+                    continue; // skip unofficial students
+                }*/
+				// OWLTODO: figure out skipping...
+
+				OwlGradeSubmissionGrades grade = new OwlGradeSubmissionGrades();
+				grade.setStudentEid(studentEid);
+
+				/*if (sectionAndUsernameMatchesPrefixList(student, selectedSectionEid)) // OWL-1212 substitute username for student number in the database  --plukasew
+                {
+                    grade.setStudentNumber(studentEid);
+                }
+                else
+                {
+                    grade.setStudentNumber(getStudentNumber(student));
+                }*/
+				// OWLTODO: figure out student numbers...
+
+				//grade.setGrade(courseGradeToRegistrarGrade(record, gradeMapping));
+				// OWLTODO: figure out mapping...
+
+                finalGrades.add(grade);
+			}
+			catch (MissingStudentNumberException | MissingCourseGradeException | InvalidGradeException e)
+			{
+				// just skip this student regardless of reason
+				// GBNG would log but we don't need to do that for this report
+			}
+		}
+
+		return finalGrades;
+	}
+
+	private List<FGInfo> getSectionCourseGrades(String siteId, String sectionEid)
+	{
+		// OWLTODO: impl...
+
+		return List.of();
 	}
 
 	// Compare with CourseGradeSubmitter.getGradeChangeReport()
