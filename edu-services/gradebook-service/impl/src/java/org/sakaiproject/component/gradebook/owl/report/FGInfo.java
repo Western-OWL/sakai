@@ -13,7 +13,7 @@ import org.sakaiproject.service.gradebook.shared.CourseGrade;
 public class FGInfo
 {
 	public final String userEid, studentNumber;
-	private final CourseGrade cg;
+	public final CourseGrade cg;
 
 	// copied from OwlGbCourseGrade
 	public Optional<String> getOverride()

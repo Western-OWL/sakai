@@ -1,5 +1,6 @@
 package org.sakaiproject.component.gradebook.owl;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Arrays;
@@ -15,6 +16,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.component.cover.ServerConfigurationService;
 import org.sakaiproject.component.gradebook.GradebookServiceHibernateImpl;
@@ -31,6 +33,8 @@ import org.sakaiproject.service.gradebook.shared.owl.finalgrades.OwlGradeSubmiss
 import org.sakaiproject.service.gradebook.shared.owl.finalgrades.report.FGChanges;
 import org.sakaiproject.site.api.Site;
 import org.sakaiproject.site.api.SiteService;
+import org.sakaiproject.tool.gradebook.GradeMapping;
+import org.sakaiproject.tool.gradebook.Gradebook;
 import org.sakaiproject.user.api.User;
 import org.sakaiproject.user.api.CandidateDetailProvider;
 import org.sakaiproject.user.api.UserDirectoryService;
@@ -50,10 +54,16 @@ class FinalGradeChangesReporter
 {
 	// statics from CourseGradeSubmitter
 	private static final String SAKORA_ROLES_TO_SUBMIT_SAKAI_PROPERTY = "gradebook.courseGradeSubmission.sakoraRolesToSubmit";
-    private static final List<String> rolesToSubmit = readListFromProperty(SAKORA_ROLES_TO_SUBMIT_SAKAI_PROPERTY);
+	private static final List<String> rolesToSubmit = readListFromProperty(SAKORA_ROLES_TO_SUBMIT_SAKAI_PROPERTY);
 	private static final String COMMA_DELIMITER = ",";
-    public  static final String SAK_PROP_SUBMIT_USERNAME_PREFIX_MAP = "gradebook.courseGradeSubmission.submitUsername.prefixMap";
-    private static final Map<String, Set<String>> submitUsernamePrefixMap = initSubmitUsernamePrefixMap( SAK_PROP_SUBMIT_USERNAME_PREFIX_MAP );
+	private static final String SAK_PROP_SUBMIT_USERNAME_PREFIX_MAP = "gradebook.courseGradeSubmission.submitUsername.prefixMap";
+	private static final Map<String, Set<String>> submitUsernamePrefixMap = initSubmitUsernamePrefixMap( SAK_PROP_SUBMIT_USERNAME_PREFIX_MAP );
+	private static final String REGISTRAR_GRADE_CODES = "gradebook.courseGradeSubmission.registrarGradeCodes";
+	private static final List<String> registrarGradeCodes = readListFromProperty(REGISTRAR_GRADE_CODES);
+	private static final String SAKAI_PASS_GRADE_CODE = "P";
+	private static final String SAKAI_FAIL_GRADE_CODE = "NP";
+	private static final String REGISTRAR_PASS_GRADE_CODE = "PAS";
+	private static final String REGISTRAR_FAIL_GRADE_CODE = "FAI";
 
 	private final GradebookServiceHibernateImpl gbServ;
 	private final OwlGradebookServiceImpl owlgbServ;
@@ -104,7 +114,7 @@ class FinalGradeChangesReporter
 		// Next is:
 		// convert valid course grade records to Registrar format
 		//Gradebook gb = bus.getGradebook(); // pay this cost up front, instead of once for each grade override
-        //GradeMapping gradeMapping = gb.getSelectedGradeMapping();
+		//GradeMapping gradeMapping = gb.getSelectedGradeMapping();
 		// OWLTODO: the above are GBNG classes...we need to find out what they are actually used for
 		// gb is only used to get the gradeMapping
 		// mapping is only used to convert course grade to registrar grade, which will be a step later on
@@ -117,27 +127,25 @@ class FinalGradeChangesReporter
 			{
 				String studentEid = record.userEid;
 				if (!isOfficialStudent(studentEid, providedMembers))
-                {
-                    continue; // skip unofficial students
-                }
+				{
+					continue; // skip unofficial students
+				}
 
 				OwlGradeSubmissionGrades grade = new OwlGradeSubmissionGrades();
 				grade.setStudentEid(studentEid);
 
 				if (sectionAndUsernameMatchesPrefixList(studentEid, sectionEid)) // OWL-1212 substitute username for student number in the database  --plukasew
-                {
-                    grade.setStudentNumber(studentEid);
-                }
-                else
-                {
-                    grade.setStudentNumber(getStudentNumber(studentEid, record.studentNumber));
-                }
+				{
+					grade.setStudentNumber(studentEid);
+				}
+				else
+				{
+					grade.setStudentNumber(getStudentNumber(studentEid, record.studentNumber));
+				}
 				// OWLTODO: figure out student numbers...
 
-				//grade.setGrade(courseGradeToRegistrarGrade(record, gradeMapping));
-				// OWLTODO: figure out mapping...
-
-                finalGrades.add(grade);
+				grade.setGrade(courseGradeToRegistrarGrade(record, gbServ.getGradebook(siteId)));
+				finalGrades.add(grade);
 			}
 			catch (MissingStudentNumberException | MissingCourseGradeException | InvalidGradeException e)
 			{
@@ -147,6 +155,141 @@ class FinalGradeChangesReporter
 		}
 
 		return finalGrades;
+	}
+
+	// Compare to CourseGradeSubmitter.courseGradeToRegistrarGrade()
+	private String courseGradeToRegistrarGrade(FGInfo record, Gradebook gb) throws InvalidGradeException, MissingCourseGradeException
+	{
+		GradeMapping map = gb.getSelectedGradeMapping();
+		CourseGrade courseGrade = record.cg;
+		Optional<String> override = getOverride(courseGrade);
+		String finalGrade;
+		if (override.isPresent()) // we have an overridden grade, as a string
+		{
+			finalGrade = overriddenGradeAsGradeString(override.get(), map);
+		}
+		else // we have a numeric grade, or no grade was recorded
+		{
+			// getCalculatedGrade was originally a non-null toString'd Double, so this should be safe
+			if (!getCalculatedGrade(courseGrade).isPresent())
+			{
+				throw new MissingCourseGradeException("No course grade entered for student: " + record.userEid);
+			}
+
+			finalGrade = formatForRegistrar(courseGrade);
+		}
+
+		if (finalGrade.isEmpty() || finalGrade.length() != 3)
+		{
+			throw new InvalidGradeException("Could not find valid course grade for student: " + record.userEid);
+		}
+
+		return finalGrade;
+	}
+
+	// Compare with OwlGbCourseGrade.getOverride()
+	private static Optional<String> getOverride(CourseGrade cg)
+	{
+		return cg == null ? Optional.empty() : Optional.ofNullable(cg.getEnteredGrade());
+	}
+
+	// Compare with OwlGbCourseGrade.getOverride()
+	private static Optional<Double> getCalculatedGrade(CourseGrade cg)
+	{
+		if (cg == null)
+		{
+			return Optional.empty();
+		}
+
+		double grade = NumberUtils.toDouble(cg.getCalculatedGrade(), Double.MIN_VALUE);
+		return grade == Double.MIN_VALUE ? Optional.empty() : Optional.of(grade);
+	}
+
+	// Compare with FinalGradeFormatter.formatForRegistrar()
+	private static String formatForRegistrar(CourseGrade cg)
+	{
+		return getOverride(cg).map(o -> overrideToRegistrarFinal(o))
+				.orElseGet(() -> getCalculatedGrade(cg)
+						.map(c -> padNumeric(Math.round(c)))
+						.orElse(""));
+	}
+
+	// Compare with CourseGradeSubmitter.overriddenGradeAsGradeString()
+	private String overriddenGradeAsGradeString(String grade, GradeMapping gradeMapping) throws IllegalArgumentException, InvalidGradeException
+	{
+		if (grade == null)
+		{
+			throw new IllegalArgumentException("Grade cannot be null");
+		}
+		if (gradeMapping == null || gradeMapping.getGradeMap().isEmpty())
+		{
+			throw new IllegalStateException("No letter grade mapping defined for this gradebook");
+		}
+
+		String finalGrade;
+		String g = grade.trim();
+		if (isNumber(g) || registrarGradeCodes.contains(g)) // we have a valid numeric grade
+		{
+			finalGrade = overrideToRegistrarFinal(g);
+		}
+		else if (SAKAI_PASS_GRADE_CODE.equals(g))
+		{
+			finalGrade = REGISTRAR_PASS_GRADE_CODE;
+		}
+		else if (SAKAI_FAIL_GRADE_CODE.equals(g))
+		{
+			finalGrade = REGISTRAR_FAIL_GRADE_CODE;
+		}
+		else if (gradeMapping.getGradeMap().containsKey(g)) // have a non-Registrar, non-numeric letter grade
+		{
+			Double doubleGrade = gradeMapping.getValue(g);
+			if (doubleGrade == null)
+			{
+				throw new InvalidGradeException("Could not convert trimmed letter grade to percentage. Grade: " + g);
+			}
+			finalGrade = padNumeric(Math.round(doubleGrade));
+		}
+		else
+		{
+			throw new InvalidGradeException("Could not parse valid grade from trimmed argument: " + g);
+		}
+
+		return finalGrade;
+	}
+
+	// Compare with FinalGradeFormatter.padNumeric()
+	private static String padNumeric(long grade)
+	{
+		DecimalFormat formatNoDecimals = new DecimalFormat("000");
+		return formatNoDecimals.format(grade);
+	}
+
+	// Compare with FinalGradeFormatter.overrideToRegistrarFinal()
+	private static String overrideToRegistrarFinal(String override)
+	{
+		String g = override.trim();
+		try
+		{
+			return padNumeric(Long.parseLong(g));
+		}
+		catch (NumberFormatException nfe)
+		{
+			while (g.length() < 3)
+			{
+				g += " "; // pad with trailing spaces to fill 3 characters
+			}
+
+			return g;
+		}
+	}
+
+	// Compare with CourseGradeSubmitter.isNumber()
+	private boolean isNumber(String value)
+	{
+		boolean result = true;
+		try { Double.parseDouble(value); }
+		catch (NumberFormatException nfe) { result = false; }
+		return result;
 	}
 
 	// Compare with OwlFinalGradesService.getSectionCourseGrades()
@@ -208,96 +351,96 @@ class FinalGradeChangesReporter
 
 	// from CourseGradeSubmitter.isOfficialStudent()
 	private boolean isOfficialStudent(String eid, Set<Membership> members)
-    {
-        boolean official = false;
-        if (eid != null && !eid.isEmpty())
-        {
-            for (Membership m : members)
-            {
-                if (eid.equals(m.getUserId()))
-                {
-                    official = rolesToSubmit.contains(m.getRole());
-                    break;
-                }
-            }
-        }
+	{
+		boolean official = false;
+		if (eid != null && !eid.isEmpty())
+		{
+			for (Membership m : members)
+			{
+				if (eid.equals(m.getUserId()))
+				{
+					official = rolesToSubmit.contains(m.getRole());
+					break;
+				}
+			}
+		}
 
-        return official;
-    }
+		return official;
+	}
 
 	// adapted from CourseGradeSubmitter
 	private static List<String> readListFromProperty(String propName)
-    {
-        String[] propArray = ServerConfigurationService.getStrings(propName);
-        List<String> propList;
-        if (propArray != null)
-        {
-            propList = Arrays.asList(propArray);
-        }
-        else
-        {
-            throw new RuntimeException("Required property " + propName + " has not been set.");
-        }
+	{
+		String[] propArray = ServerConfigurationService.getStrings(propName);
+		List<String> propList;
+		if (propArray != null)
+		{
+			propList = Arrays.asList(propArray);
+		}
+		else
+		{
+			throw new RuntimeException("Required property " + propName + " has not been set.");
+		}
 
-        return propList;
-    }
+		return propList;
+	}
 
 	// adapted from CourseGradeSubmitter
 	private boolean sectionAndUsernameMatchesPrefixList( String userEID, String sectionEID )
-    {
-        // Short circuit
-        if( sectionEID == null || sectionEID.isEmpty() || StringUtils.isBlank(userEID) )
-            return false;
+	{
+		// Short circuit
+		if( sectionEID == null || sectionEID.isEmpty() || StringUtils.isBlank(userEID) )
+			return false;
 
-        // Find the matching section prefix
-        String sectionPrefix = checkForUsernameSubmissionPrefix(sectionEID);
+		// Find the matching section prefix
+		String sectionPrefix = checkForUsernameSubmissionPrefix(sectionEID);
 
-        // If a section prefix match was found, return true/false if username starts with any prefix from the section prefix specific username prefix list
-        if( !sectionPrefix.isEmpty() )
-            return StringUtils.startsWithAny( userEID,
-                submitUsernamePrefixMap.get( sectionPrefix ).toArray( new String[submitUsernamePrefixMap.get( sectionPrefix ).size()] ) );
+		// If a section prefix match was found, return true/false if username starts with any prefix from the section prefix specific username prefix list
+		if( !sectionPrefix.isEmpty() )
+			return StringUtils.startsWithAny( userEID,
+				submitUsernamePrefixMap.get( sectionPrefix ).toArray( new String[submitUsernamePrefixMap.get( sectionPrefix ).size()] ) );
 
-        // No section prefix match, return false
-        return false;
-    }
+		// No section prefix match, return false
+		return false;
+	}
 
 	// from CourseGradeSubmitter
 	public static String checkForUsernameSubmissionPrefix(String sectionEid)
-    {
-        for (String prefix : submitUsernamePrefixMap.keySet())
-        {
-            if (sectionEid.startsWith(prefix))
-            {
-                return prefix;
-            }
-        }
+	{
+		for (String prefix : submitUsernamePrefixMap.keySet())
+		{
+			if (sectionEid.startsWith(prefix))
+			{
+				return prefix;
+			}
+		}
 
-        return "";
-    }
+		return "";
+	}
 
 	// from CourseGradeSubmitter
 	public static Map<String, Set<String>> initSubmitUsernamePrefixMap( String propName )
-    {
-        List<String> prefixList = readListFromProperty( propName );
-        Map<String, Set<String>> prefixMap = new HashMap<>();
-        for( String prefixEntry : prefixList )
-        {
-            String[] entry = prefixEntry.split( COMMA_DELIMITER );
-            String sectionPrefix = entry[0];
-            String usernamePrefix = entry[1];
+	{
+		List<String> prefixList = readListFromProperty( propName );
+		Map<String, Set<String>> prefixMap = new HashMap<>();
+		for( String prefixEntry : prefixList )
+		{
+			String[] entry = prefixEntry.split( COMMA_DELIMITER );
+			String sectionPrefix = entry[0];
+			String usernamePrefix = entry[1];
 
-            if( prefixMap.keySet().contains( sectionPrefix ) )
-                prefixMap.get( sectionPrefix ).add( usernamePrefix );
-            else
-                prefixMap.put( sectionPrefix, new HashSet<>( Arrays.asList( usernamePrefix ) ) );
-        }
+			if( prefixMap.keySet().contains( sectionPrefix ) )
+				prefixMap.get( sectionPrefix ).add( usernamePrefix );
+			else
+				prefixMap.put( sectionPrefix, new HashSet<>( Arrays.asList( usernamePrefix ) ) );
+		}
 
-        return prefixMap;
-    }
+		return prefixMap;
+	}
 
 	// adapted from CourseGradeSubmitter and OwlFinalGradesService.getSectionCourseGrades()/OwlBusinessService.getRevealedStudentNumber()
 	private String getStudentNumber(String studentEid, String number) throws MissingStudentNumberException
-    {
+	{
 		//String number = student.gbUser.getStudentNumber();
 		// OWLTODO: we can't use the above so have to recreate student number acquisition...
 		// CourseGradeSubmitter ultimately ends up with a call to owlbus.getRevealedStudentNumber(), so we use that logic here...
@@ -309,8 +452,8 @@ class FinalGradeChangesReporter
 			throw new MissingStudentNumberException("Couldn't find student number for user: " + studentEid);
 		}
 
-        return number;
-    }
+		return number;
+	}
 
 	// adapted from OwlBusinessService
 	private String getRevealedStudentNumber(String userEid, String siteId, String sectionEid)
