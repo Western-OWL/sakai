@@ -1,22 +1,31 @@
 package org.sakaiproject.component.gradebook.owl;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.component.gradebook.GradebookServiceHibernateImpl;
 import org.sakaiproject.service.gradebook.shared.owl.finalgrades.OwlGradeSubmission;
 import org.sakaiproject.component.gradebook.owl.report.FGInfo;
 import org.sakaiproject.coursemanagement.api.CourseManagementService;
 import org.sakaiproject.coursemanagement.api.Membership;
+import org.sakaiproject.exception.IdUnusedException;
+import org.sakaiproject.service.gradebook.shared.CourseGrade;
 import org.sakaiproject.service.gradebook.shared.InvalidGradeException;
 import org.sakaiproject.service.gradebook.shared.owl.finalgrades.MissingCourseGradeException;
 import org.sakaiproject.service.gradebook.shared.owl.finalgrades.MissingStudentNumberException;
 import org.sakaiproject.service.gradebook.shared.owl.finalgrades.OwlGradeSubmissionGrades;
 import org.sakaiproject.service.gradebook.shared.owl.finalgrades.report.FGChanges;
+import org.sakaiproject.site.api.Site;
+import org.sakaiproject.site.api.SiteService;
+import org.sakaiproject.user.api.UserDirectoryService;
 
 /**
  * Delegate class to handle retrieving final grade changes (revised/added/removed counts) for the unsubmitted
@@ -27,15 +36,20 @@ import org.sakaiproject.service.gradebook.shared.owl.finalgrades.report.FGChange
  *
  * @author plukasew
  */
+@Slf4j
 class FinalGradeChangesReporter
 {
 	private final GradebookServiceHibernateImpl gbServ;
 	private final OwlGradebookServiceImpl owlgbServ;
+	private final SiteService siteServ;
+	private final UserDirectoryService userDirServ;
 
-	FinalGradeChangesReporter(GradebookServiceHibernateImpl gbService, OwlGradebookServiceImpl owlgbService)
+	FinalGradeChangesReporter(GradebookServiceHibernateImpl gbService, OwlGradebookServiceImpl owlgbService, SiteService siteService, UserDirectoryService userDirService)
 	{
 		gbServ = gbService;
 		owlgbServ = owlgbService;
+		siteServ = siteService;
+		userDirServ = userDirService;
 	}
 
 	FGChanges getChanges(String siteId, String sectionEid)
@@ -65,7 +79,7 @@ class FinalGradeChangesReporter
 		// Next is: List<OwlGbStudentCourseGradeInfo> courseGrades = owlbus.fg.getSectionCourseGrades(section);
 		// OWLTODO: this info class is part of tool and we likely don't need most of it, so we can probably
 		// just create a stripped down replacement class to perform the same role here
-		var courseGrades = getSectionCourseGrades(siteId, sectionEid);
+		var courseGrades = getSectionCourseGrades(siteId, providedMembers);
 
 		// Next is:
 		// convert valid course grade records to Registrar format
@@ -75,7 +89,7 @@ class FinalGradeChangesReporter
 		// gb is only used to get the gradeMapping
 		// mapping is only used to convert course grade to registrar grade, which will be a step later on
 		// for now we will skip this and move on to the main loop
-		
+
 		// Next is: main loop
 		for (FGInfo record : courseGrades)
 		{
@@ -116,11 +130,33 @@ class FinalGradeChangesReporter
 		return finalGrades;
 	}
 
-	private List<FGInfo> getSectionCourseGrades(String siteId, String sectionEid)
+	// Compare with OwlFinalGradesService.getSectionCourseGrades()
+	private List<FGInfo> getSectionCourseGrades(String siteId, Set<Membership> sectionMembers)
 	{
-		// OWLTODO: impl...
+		try
+		{
+			// Get the list of gradeable users for the section (compare with GradebookNgBusinessService.getGradeableUsers())
+			Site site = siteServ.getSite(siteId);
+			List<String> userUuids = new ArrayList<>(site.getUsersIsAllowed("section.role.student"));
+			// OWLTODO: retain only those users belonging to the section in question
 
-		return List.of();
+			// Get the course grades for the gradeable users
+			Map<String, CourseGrade> grades = gbServ.getCourseGradeForStudents(siteId, userUuids);
+			List<FGInfo> gradeList = new ArrayList<>(grades.size());
+			for (Entry<String, CourseGrade> entry : grades.entrySet())
+			{
+				//Optional<OwlGbUser>
+				FGInfo fg = new FGInfo("fake", "fake", entry.getValue());
+				gradeList.add(fg);
+			}
+
+			return gradeList;
+		}
+		catch (IdUnusedException ex)
+		{
+			log.error("Unable to get site by id: {}", siteId, ex);
+			return Collections.emptyList();
+		}
 	}
 
 	// Compare with CourseGradeSubmitter.getGradeChangeReport()

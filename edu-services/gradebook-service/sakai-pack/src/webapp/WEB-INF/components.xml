@@ -96,6 +96,7 @@
         <property name="rubricsService" ref="org.sakaiproject.rubrics.api.RubricsService" />
         <property name="entityManager" ref="org.sakaiproject.entity.api.EntityManager"/>
         <property name="toolManager" ref="org.sakaiproject.tool.api.ToolManager" />
+        <property name="uds" ref="org.sakaiproject.user.api.UserDirectoryService" />
 	</bean>
 	<bean id="org_sakaiproject_service_gradebook_GradebookPermissionServiceTarget"
           class="org.sakaiproject.component.gradebook.GradebookPermissionServiceImpl"

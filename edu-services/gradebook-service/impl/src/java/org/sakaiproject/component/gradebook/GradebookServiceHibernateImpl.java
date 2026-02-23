@@ -106,6 +106,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
 import org.sakaiproject.component.gradebook.owl.OwlGradebookServiceImpl;
 import org.sakaiproject.service.gradebook.shared.owl.OwlGradebookService;
+import org.sakaiproject.user.api.UserDirectoryService;
 
 /**
  * A Hibernate implementation of GradebookService.
@@ -119,9 +120,10 @@ public class GradebookServiceHibernateImpl extends BaseHibernateManager implemen
 
 	@Setter
 	protected ServerConfigurationService serverConfigService;
-	
+
 	@Setter private EntityManager entityManager;
 	@Setter private ToolManager toolManager;
+	@Setter private UserDirectoryService uds;
 
 	@Getter @Setter
 	private RubricsService rubricsService;
@@ -134,18 +136,18 @@ public class GradebookServiceHibernateImpl extends BaseHibernateManager implemen
 	{
 		if (owl == null)
 		{
-			owl = new OwlGradebookServiceImpl(authz.owl(), this);
+			owl = new OwlGradebookServiceImpl(authz.owl(), this, siteService, uds);
 		}
 
 		return owl;
 	}
 	// ----- End OWL modifications -----
-	
+
 	public void init() {
 		// register as an entity producer
 		entityManager.registerEntityProducer(this, REFERENCE_ROOT);
 	}
-	
+
 	@Override
 	public boolean isAssignmentDefined(final String gradebookUid, final String assignmentName) {
 		if (!isUserAbleToViewAssignments(gradebookUid)) {
@@ -162,7 +164,7 @@ public class GradebookServiceHibernateImpl extends BaseHibernateManager implemen
 		});
 		return (assignment != null);
 	}
-	
+
 	@Override
 	public Optional<String> getEntityUrl(Reference ref, Entity.UrlType urlType) {
 		try {
@@ -178,7 +180,7 @@ public class GradebookServiceHibernateImpl extends BaseHibernateManager implemen
 			return Optional.empty();
 		}
 	}
-	
+
 	@Override
 	public boolean parseEntityReference(String stringReference, Reference reference) {
 		if (StringUtils.startsWith(stringReference, REFERENCE_ROOT)) {
@@ -271,7 +273,7 @@ public class GradebookServiceHibernateImpl extends BaseHibernateManager implemen
 
 		return getAssignmentDefinition(assignment);
 	}
-	
+
 	/**
 	 * Method to retrieve Assignment by ID.
 	 *
@@ -285,11 +287,11 @@ public class GradebookServiceHibernateImpl extends BaseHibernateManager implemen
 				return getAssignmentById(gradeableObjectID);
 			}
 		});
-		
+
 		if (assignment == null) {
 			throw new AssessmentNotFoundException("No gradebook item exists with gradable object id = " + gradeableObjectID);
 		}
-		
+
 		return getAssignmentDefinition(assignment);
 	}
 
@@ -792,7 +794,7 @@ public class GradebookServiceHibernateImpl extends BaseHibernateManager implemen
 					gradebookUid, assignmentId);
 			throw new GradebookSecurityException();
 		}
-		
+
 		final String validatedName = GradebookHelper.validateAssignmentNameAndPoints(assignmentDefinition);
 
 		final Gradebook gradebook = this.getGradebook(gradebookUid);
@@ -1703,7 +1705,7 @@ public class GradebookServiceHibernateImpl extends BaseHibernateManager implemen
 				}
 
 				final Long categoryId = gbItem.getCategory() != null ? gbItem.getCategory().getId() : null;
-				
+
 				if (studentIds.size() == 1 && this.authz.isUserAbleToGradeItemForStudent(gradebook.getUid(), gradableObjectId, studentIds.get(0))) {
 					// This condition boosts performance when this method is called for a single user:
 					// it skips filtering the entire class list
@@ -3471,7 +3473,7 @@ public class GradebookServiceHibernateImpl extends BaseHibernateManager implemen
 				.divide((totalPossible.divide(new BigDecimal(numOfAssignments), GradebookService.MATH_CONTEXT)),
 						GradebookService.MATH_CONTEXT)
 				.multiply(new BigDecimal("100"));
-		
+
 		if (equalWeightAssignments == null) {
 			Category category = getCategory(categoryId);
 			equalWeightAssignments = category.isEqualWeightAssignments();

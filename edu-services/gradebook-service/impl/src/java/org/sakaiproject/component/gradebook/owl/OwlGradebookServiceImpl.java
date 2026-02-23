@@ -23,7 +23,9 @@ import org.sakaiproject.service.gradebook.shared.owl.finalgrades.OwlGradeSubmiss
 import org.sakaiproject.service.gradebook.shared.owl.OwlGradebookService;
 import org.sakaiproject.service.gradebook.shared.owl.anongrading.OwlAnonGradingID;
 import org.sakaiproject.service.gradebook.shared.owl.finalgrades.report.FGChanges;
+import org.sakaiproject.site.api.SiteService;
 import org.sakaiproject.tool.gradebook.facades.owl.OwlAuthz;
+import org.sakaiproject.user.api.UserDirectoryService;
 import org.springframework.orm.hibernate5.HibernateCallback;
 
 /**
@@ -35,6 +37,8 @@ public class OwlGradebookServiceImpl implements OwlGradebookService
 {
 	private final OwlAuthz owlAuthz;
 	private final GradebookServiceHibernateImpl gbServ;
+	private final SiteService siteServ;
+	private final UserDirectoryService userDirServ;
 	private FinalGradeChangesReporter reporter;
 
 	@Override
@@ -496,7 +500,7 @@ public class OwlGradebookServiceImpl implements OwlGradebookService
 	{
 		if (reporter == null)
 		{
-			reporter = new FinalGradeChangesReporter(gbServ, this);
+			reporter = new FinalGradeChangesReporter(gbServ, this, siteServ, userDirServ);
 		}
 
 		return reporter;
