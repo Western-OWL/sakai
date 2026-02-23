@@ -2,10 +2,13 @@ package org.sakaiproject.component.gradebook.owl;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -25,7 +28,9 @@ import org.sakaiproject.service.gradebook.shared.owl.finalgrades.OwlGradeSubmiss
 import org.sakaiproject.service.gradebook.shared.owl.finalgrades.report.FGChanges;
 import org.sakaiproject.site.api.Site;
 import org.sakaiproject.site.api.SiteService;
+import org.sakaiproject.user.api.User;
 import org.sakaiproject.user.api.UserDirectoryService;
+import org.sakaiproject.user.api.UserNotDefinedException;
 
 /**
  * Delegate class to handle retrieving final grade changes (revised/added/removed counts) for the unsubmitted
@@ -138,15 +143,39 @@ class FinalGradeChangesReporter
 			// Get the list of gradeable users for the section (compare with GradebookNgBusinessService.getGradeableUsers())
 			Site site = siteServ.getSite(siteId);
 			List<String> userUuids = new ArrayList<>(site.getUsersIsAllowed("section.role.student"));
-			// OWLTODO: retain only those users belonging to the section in question
+
+			// Retain only those users belonging to the section in question
+			Map<String, String> uuidToEIDMap = new HashMap<>(sectionMembers.size());
+			ListIterator<String> itr = userUuids.listIterator();
+			while (itr.hasNext())
+			{
+				String uuid = itr.next();
+				try
+				{
+					User user = userDirServ.getUser(uuid);
+					Optional<Membership> opt = sectionMembers.stream().filter(m -> m.getUserId().equals(user.getEid())).findFirst();
+					if (opt.isEmpty())
+					{
+						itr.remove();
+					}
+					else
+					{
+						uuidToEIDMap.put(uuid, opt.get().getUserId());
+					}
+				}
+				catch (UserNotDefinedException ex)
+				{
+					log.error("Unable to get user by UUID: {}", uuid, ex);
+				}
+			}
 
 			// Get the course grades for the gradeable users
 			Map<String, CourseGrade> grades = gbServ.getCourseGradeForStudents(siteId, userUuids);
 			List<FGInfo> gradeList = new ArrayList<>(grades.size());
 			for (Entry<String, CourseGrade> entry : grades.entrySet())
 			{
-				//Optional<OwlGbUser>
-				FGInfo fg = new FGInfo("fake", "fake", entry.getValue());
+				// OWLTODO: get the student # from somehwere
+				FGInfo fg = new FGInfo(uuidToEIDMap.get(entry.getKey()), "fakeStudentNumber", entry.getValue());
 				gradeList.add(fg);
 			}
 
