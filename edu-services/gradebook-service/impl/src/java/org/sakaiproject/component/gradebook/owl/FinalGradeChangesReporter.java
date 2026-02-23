@@ -2,6 +2,7 @@ package org.sakaiproject.component.gradebook.owl;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -13,7 +14,9 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.sakaiproject.component.cover.ComponentManager;
+import org.sakaiproject.component.cover.ServerConfigurationService;
 import org.sakaiproject.component.gradebook.GradebookServiceHibernateImpl;
 import org.sakaiproject.service.gradebook.shared.owl.finalgrades.OwlGradeSubmission;
 import org.sakaiproject.component.gradebook.owl.report.FGInfo;
@@ -29,6 +32,7 @@ import org.sakaiproject.service.gradebook.shared.owl.finalgrades.report.FGChange
 import org.sakaiproject.site.api.Site;
 import org.sakaiproject.site.api.SiteService;
 import org.sakaiproject.user.api.User;
+import org.sakaiproject.user.api.CandidateDetailProvider;
 import org.sakaiproject.user.api.UserDirectoryService;
 import org.sakaiproject.user.api.UserNotDefinedException;
 
@@ -44,10 +48,19 @@ import org.sakaiproject.user.api.UserNotDefinedException;
 @Slf4j
 class FinalGradeChangesReporter
 {
+	// statics from CourseGradeSubmitter
+	private static final String SAKORA_ROLES_TO_SUBMIT_SAKAI_PROPERTY = "gradebook.courseGradeSubmission.sakoraRolesToSubmit";
+    private static final List<String> rolesToSubmit = readListFromProperty(SAKORA_ROLES_TO_SUBMIT_SAKAI_PROPERTY);
+	private static final String COMMA_DELIMITER = ",";
+    public  static final String SAK_PROP_SUBMIT_USERNAME_PREFIX_MAP = "gradebook.courseGradeSubmission.submitUsername.prefixMap";
+    private static final Map<String, Set<String>> submitUsernamePrefixMap = initSubmitUsernamePrefixMap( SAK_PROP_SUBMIT_USERNAME_PREFIX_MAP );
+
 	private final GradebookServiceHibernateImpl gbServ;
 	private final OwlGradebookServiceImpl owlgbServ;
 	private final SiteService siteServ;
 	private final UserDirectoryService userDirServ;
+	private final CandidateDetailProvider cdp;
+	private final CourseManagementService cms;
 
 	FinalGradeChangesReporter(GradebookServiceHibernateImpl gbService, OwlGradebookServiceImpl owlgbService, SiteService siteService, UserDirectoryService userDirService)
 	{
@@ -55,6 +68,8 @@ class FinalGradeChangesReporter
 		owlgbServ = owlgbService;
 		siteServ = siteService;
 		userDirServ = userDirService;
+		cdp = (CandidateDetailProvider) ComponentManager.get("org.sakaiproject.user.api.CandidateDetailProvider");
+		cms = (CourseManagementService) ComponentManager.get(CourseManagementService.class);
 	}
 
 	FGChanges getChanges(String siteId, String sectionEid)
@@ -78,13 +93,13 @@ class FinalGradeChangesReporter
 		// CourseGradeSubmitter.refreshCurrentProvidedMembers() is called and this point in the original code...
 		// OWLTODO: while we don't need to "refresh", we do need to actually get the members so we essentially
 		// need to still do this
-		var cms = (CourseManagementService) ComponentManager.get(CourseManagementService.class);
 		Set<Membership> providedMembers = cms.getSectionMemberships(sectionEid);
 
 		// Next is: List<OwlGbStudentCourseGradeInfo> courseGrades = owlbus.fg.getSectionCourseGrades(section);
 		// OWLTODO: this info class is part of tool and we likely don't need most of it, so we can probably
 		// just create a stripped down replacement class to perform the same role here
-		var courseGrades = getSectionCourseGrades(siteId, providedMembers);
+		// NOTE: we are actually getting the student numbers in this step, just like GBNG does
+		var courseGrades = getSectionCourseGrades(siteId, providedMembers, sectionEid);
 
 		// Next is:
 		// convert valid course grade records to Registrar format
@@ -101,23 +116,22 @@ class FinalGradeChangesReporter
 			try
 			{
 				String studentEid = record.userEid;
-				/*if (!isOfficialStudent(studentEid, currentSectionProvidedMembers))
+				if (!isOfficialStudent(studentEid, providedMembers))
                 {
                     continue; // skip unofficial students
-                }*/
-				// OWLTODO: figure out skipping...
+                }
 
 				OwlGradeSubmissionGrades grade = new OwlGradeSubmissionGrades();
 				grade.setStudentEid(studentEid);
 
-				/*if (sectionAndUsernameMatchesPrefixList(student, selectedSectionEid)) // OWL-1212 substitute username for student number in the database  --plukasew
+				if (sectionAndUsernameMatchesPrefixList(studentEid, sectionEid)) // OWL-1212 substitute username for student number in the database  --plukasew
                 {
                     grade.setStudentNumber(studentEid);
                 }
                 else
                 {
-                    grade.setStudentNumber(getStudentNumber(student));
-                }*/
+                    grade.setStudentNumber(getStudentNumber(studentEid, record.studentNumber));
+                }
 				// OWLTODO: figure out student numbers...
 
 				//grade.setGrade(courseGradeToRegistrarGrade(record, gradeMapping));
@@ -136,7 +150,7 @@ class FinalGradeChangesReporter
 	}
 
 	// Compare with OwlFinalGradesService.getSectionCourseGrades()
-	private List<FGInfo> getSectionCourseGrades(String siteId, Set<Membership> sectionMembers)
+	private List<FGInfo> getSectionCourseGrades(String siteId, Set<Membership> sectionMembers, String sectionEid)
 	{
 		try
 		{
@@ -174,8 +188,12 @@ class FinalGradeChangesReporter
 			List<FGInfo> gradeList = new ArrayList<>(grades.size());
 			for (Entry<String, CourseGrade> entry : grades.entrySet())
 			{
-				// OWLTODO: get the student # from somehwere
-				FGInfo fg = new FGInfo(uuidToEIDMap.get(entry.getKey()), "fakeStudentNumber", entry.getValue());
+				//Optional<OwlGbUser> student = bus.owl().getUserRevealingNumber(entry.getKey(), site);
+				// OWLTODO: instead of the above we just need eid and student number
+				String eid = uuidToEIDMap.get(entry.getKey());
+				String number = getRevealedStudentNumber(eid, siteId, sectionEid);
+				FGInfo fg = new FGInfo(eid, number, entry.getValue());
+
 				gradeList.add(fg);
 			}
 
@@ -186,6 +204,157 @@ class FinalGradeChangesReporter
 			log.error("Unable to get site by id: {}", siteId, ex);
 			return Collections.emptyList();
 		}
+	}
+
+	// from CourseGradeSubmitter.isOfficialStudent()
+	private boolean isOfficialStudent(String eid, Set<Membership> members)
+    {
+        boolean official = false;
+        if (eid != null && !eid.isEmpty())
+        {
+            for (Membership m : members)
+            {
+                if (eid.equals(m.getUserId()))
+                {
+                    official = rolesToSubmit.contains(m.getRole());
+                    break;
+                }
+            }
+        }
+
+        return official;
+    }
+
+	// adapted from CourseGradeSubmitter
+	private static List<String> readListFromProperty(String propName)
+    {
+        String[] propArray = ServerConfigurationService.getStrings(propName);
+        List<String> propList;
+        if (propArray != null)
+        {
+            propList = Arrays.asList(propArray);
+        }
+        else
+        {
+            throw new RuntimeException("Required property " + propName + " has not been set.");
+        }
+
+        return propList;
+    }
+
+	// adapted from CourseGradeSubmitter
+	private boolean sectionAndUsernameMatchesPrefixList( String userEID, String sectionEID )
+    {
+        // Short circuit
+        if( sectionEID == null || sectionEID.isEmpty() || StringUtils.isBlank(userEID) )
+            return false;
+
+        // Find the matching section prefix
+        String sectionPrefix = checkForUsernameSubmissionPrefix(sectionEID);
+
+        // If a section prefix match was found, return true/false if username starts with any prefix from the section prefix specific username prefix list
+        if( !sectionPrefix.isEmpty() )
+            return StringUtils.startsWithAny( userEID,
+                submitUsernamePrefixMap.get( sectionPrefix ).toArray( new String[submitUsernamePrefixMap.get( sectionPrefix ).size()] ) );
+
+        // No section prefix match, return false
+        return false;
+    }
+
+	// from CourseGradeSubmitter
+	public static String checkForUsernameSubmissionPrefix(String sectionEid)
+    {
+        for (String prefix : submitUsernamePrefixMap.keySet())
+        {
+            if (sectionEid.startsWith(prefix))
+            {
+                return prefix;
+            }
+        }
+
+        return "";
+    }
+
+	// from CourseGradeSubmitter
+	public static Map<String, Set<String>> initSubmitUsernamePrefixMap( String propName )
+    {
+        List<String> prefixList = readListFromProperty( propName );
+        Map<String, Set<String>> prefixMap = new HashMap<>();
+        for( String prefixEntry : prefixList )
+        {
+            String[] entry = prefixEntry.split( COMMA_DELIMITER );
+            String sectionPrefix = entry[0];
+            String usernamePrefix = entry[1];
+
+            if( prefixMap.keySet().contains( sectionPrefix ) )
+                prefixMap.get( sectionPrefix ).add( usernamePrefix );
+            else
+                prefixMap.put( sectionPrefix, new HashSet<>( Arrays.asList( usernamePrefix ) ) );
+        }
+
+        return prefixMap;
+    }
+
+	// adapted from CourseGradeSubmitter and OwlFinalGradesService.getSectionCourseGrades()/OwlBusinessService.getRevealedStudentNumber()
+	private String getStudentNumber(String studentEid, String number) throws MissingStudentNumberException
+    {
+		//String number = student.gbUser.getStudentNumber();
+		// OWLTODO: we can't use the above so have to recreate student number acquisition...
+		// CourseGradeSubmitter ultimately ends up with a call to owlbus.getRevealedStudentNumber(), so we use that logic here...
+		//String number = getRevealedStudentNumber(studentEid, siteId);
+		// OWLTODO: we are getting student number passed in now, like CourseGradeSubmitter does...clean up these comments if that works out
+
+		if (number.isEmpty())
+		{
+			throw new MissingStudentNumberException("Couldn't find student number for user: " + studentEid);
+		}
+
+        return number;
+    }
+
+	// adapted from OwlBusinessService
+	private String getRevealedStudentNumber(String userEid, String siteId, String sectionEid)
+	{
+		try
+		{
+			var user = userDirServ.getUserByEid(userEid);
+			var site = siteServ.getSite(siteId);
+			return cdp.getInstitutionalNumericId(user, site)
+					.orElseGet(() ->
+					{
+						String num = cdp.getInstitutionalNumericIdIgnoringCandidatePermissions(user, site).orElse("");
+						if (!num.isEmpty() && isStudentInRoster(user, sectionEid)) // check for presence of number before hitting CM tables
+						{
+							return num; // always reveal student number if they are in the roster as a student
+						}
+
+						return "";
+					});
+		}
+		catch (UserNotDefinedException e)
+		{
+			// OwlBusinessService.getUserRevealingNumber() handles this by returning empty optional, so we will return empty string here
+			return "";
+		}
+		catch (IdUnusedException iue)
+		{
+			// GradebookNgBusinessService returns null in this case and OwlFinalGradesService just returns empty list if that were to happen
+			// however, in both cases the siteId is coming from Sakai itself and so this will not happen in practce. We can return empty string here.
+			return "";
+		}
+	}
+
+	// adapted from OwlBusinessService.isStudentInARoster(user, sections)
+	private boolean isStudentInRoster(User user, String sectionEid)
+	{
+		// OWLTODO: the original code would return true if the student was in any roster in the site...
+		// However, since we will only be dealing with students that have already been show to be members
+		// of the specific roster we are concerned with, it should be safe to only check that roster...
+		// in fact, if performance is a concern we can probably skip this check entirely...
+		// although, there is a role checking component of this code that we may have to account for elsewhere
+		// if we totally skip the check
+		Set<Membership> members = cms.getSectionMemberships(sectionEid);
+		return members.stream().anyMatch(m -> m.getUserId().equals(user.getEid()) && "S".equals(m.getRole()));
 	}
 
 	// Compare with CourseGradeSubmitter.getGradeChangeReport()
