@@ -17,6 +17,8 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.sakaiproject.authz.api.SecurityAdvisor;
+import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.component.cover.ServerConfigurationService;
 import org.sakaiproject.component.gradebook.GradebookServiceHibernateImpl;
@@ -35,6 +37,7 @@ import org.sakaiproject.site.api.Site;
 import org.sakaiproject.site.api.SiteService;
 import org.sakaiproject.tool.gradebook.GradeMapping;
 import org.sakaiproject.tool.gradebook.Gradebook;
+import org.sakaiproject.tool.gradebook.facades.Authz;
 import org.sakaiproject.user.api.User;
 import org.sakaiproject.user.api.CandidateDetailProvider;
 import org.sakaiproject.user.api.UserDirectoryService;
@@ -71,6 +74,7 @@ class FinalGradeChangesReporter
 	private final UserDirectoryService userDirServ;
 	private final CandidateDetailProvider cdp;
 	private final CourseManagementService cms;
+	private final SecurityService secServ;
 
 	FinalGradeChangesReporter(GradebookServiceHibernateImpl gbService, OwlGradebookServiceImpl owlgbService, SiteService siteService, UserDirectoryService userDirService)
 	{
@@ -80,6 +84,7 @@ class FinalGradeChangesReporter
 		userDirServ = userDirService;
 		cdp = (CandidateDetailProvider) ComponentManager.get("org.sakaiproject.user.api.CandidateDetailProvider");
 		cms = (CourseManagementService) ComponentManager.get(CourseManagementService.class);
+		secServ = (SecurityService) ComponentManager.get("org.sakaiproject.authz.api.SecurityService");
 	}
 
 	FGChanges getChanges(String siteId, String sectionEid)
@@ -327,7 +332,7 @@ class FinalGradeChangesReporter
 			}
 
 			// Get the course grades for the gradeable users
-			Map<String, CourseGrade> grades = gbServ.getCourseGradeForStudents(siteId, userUuids);
+			Map<String, CourseGrade> grades = getCourseGrades(siteId, userUuids);
 			List<FGInfo> gradeList = new ArrayList<>(grades.size());
 			for (Entry<String, CourseGrade> entry : grades.entrySet())
 			{
@@ -346,6 +351,33 @@ class FinalGradeChangesReporter
 		{
 			log.error("Unable to get site by id: {}", siteId, ex);
 			return Collections.emptyList();
+		}
+	}
+
+	private Map<String, CourseGrade> getCourseGrades(String siteId, List<String> userUuids)
+	{
+		// if the course grade for this site is not released, a permission check occurs to see if the current
+		// user has gb perms...when run under the job this seems to not be the case and thus this method returns no grades...
+		// so, we have a private method that uses a securityadvisor to make sure we have the necessary perms
+
+		SecurityAdvisor yesMan = (String userID, String function, String reference) ->
+		{
+			if (Authz.PERMISSION_GRADE_ALL.equals(function) || Authz.PERMISSION_GRADE_SECTION.equals(function) || Authz.PERMISSION_EDIT_ASSIGNMENTS.equals(function))
+			{
+				return SecurityAdvisor.SecurityAdvice.ALLOWED;
+			}
+
+			return SecurityAdvisor.SecurityAdvice.PASS;
+		};
+
+		try
+		{
+			secServ.pushAdvisor(yesMan);
+			return gbServ.getCourseGradeForStudents(siteId, userUuids);
+		}
+		finally
+		{
+			secServ.popAdvisor(yesMan);
 		}
 	}
 
