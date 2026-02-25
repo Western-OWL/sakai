@@ -12,8 +12,6 @@ import java.util.ListIterator;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -556,8 +554,16 @@ class FinalGradeChangesReporter
 	private FGChanges checkForChanges(Set<OwlGradeSubmissionGrades> currentGrades, Set<OwlGradeSubmissionGrades> previousGrades)
 	{
 		// step 4 - compare current grades to previous grades for changes
-		Map<String, OwlGradeSubmissionGrades> currentGradeMap = currentGrades.stream().collect(Collectors.toMap(OwlGradeSubmissionGrades::getStudentNumber, Function.identity()));
-		Map<String, OwlGradeSubmissionGrades> prevGradeMap = previousGrades.stream().collect(Collectors.toMap(OwlGradeSubmissionGrades::getStudentNumber, Function.identity()));
+		Map<String, OwlGradeSubmissionGrades> currentGradeMap = new HashMap<>(currentGrades.size());
+		Map<String, OwlGradeSubmissionGrades> prevGradeMap = new HashMap<>(previousGrades.size());
+		for (OwlGradeSubmissionGrades grade : currentGrades)
+		{
+			currentGradeMap.put(grade.getStudentNumber(), grade);
+		}
+		for (OwlGradeSubmissionGrades grade : previousGrades)
+		{
+			prevGradeMap.put(grade.getStudentNumber(), grade);
+		}
 
 		Set<String> newStudents = new HashSet<>(currentGradeMap.keySet());
 		Set<String> sameStudents = new HashSet<>(currentGradeMap.keySet());
