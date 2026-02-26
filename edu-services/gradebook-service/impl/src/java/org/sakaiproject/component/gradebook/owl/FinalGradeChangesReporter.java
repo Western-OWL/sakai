@@ -96,34 +96,18 @@ class FinalGradeChangesReporter
 		return checkForChanges(getCurrentGrades(siteId, sectionEid), getPreviousGrades(siteId, sectionEid));
 	}
 
+	// adapted from CourseGradeSubmitter.getCurrentCourseGrades()
 	private Set<OwlGradeSubmissionGrades> getCurrentGrades(String siteId, String sectionEid)
 	{
-		// OWLTODO: impl...see CourseGradeSubmitter.getCurrentCourseGrades()
 		// step 1
 
 		Set<OwlGradeSubmissionGrades> finalGrades = new HashSet<>();
 
-		// CourseGradeSubmitter.refreshCurrentProvidedMembers() is called and this point in the original code...
-		// OWLTODO: while we don't need to "refresh", we do need to actually get the members so we essentially
-		// need to still do this
 		Set<Membership> providedMembers = cms.getSectionMemberships(sectionEid);
 
-		// Next is: List<OwlGbStudentCourseGradeInfo> courseGrades = owlbus.fg.getSectionCourseGrades(section);
-		// OWLTODO: this info class is part of tool and we likely don't need most of it, so we can probably
-		// just create a stripped down replacement class to perform the same role here
-		// NOTE: we are actually getting the student numbers in this step, just like GBNG does
+		// NOTE: we are actually getting the student numbers in this method call, just like GBNG does
 		var courseGrades = getSectionCourseGrades(siteId, providedMembers, sectionEid);
 
-		// Next is:
-		// convert valid course grade records to Registrar format
-		//Gradebook gb = bus.getGradebook(); // pay this cost up front, instead of once for each grade override
-		//GradeMapping gradeMapping = gb.getSelectedGradeMapping();
-		// OWLTODO: the above are GBNG classes...we need to find out what they are actually used for
-		// gb is only used to get the gradeMapping
-		// mapping is only used to convert course grade to registrar grade, which will be a step later on
-		// for now we will skip this and move on to the main loop
-
-		// Next is: main loop
 		for (FGInfo record : courseGrades)
 		{
 			try
@@ -145,7 +129,6 @@ class FinalGradeChangesReporter
 				{
 					grade.setStudentNumber(getStudentNumber(studentEid, record.studentNumber));
 				}
-				// OWLTODO: figure out student numbers...
 
 				grade.setGrade(courseGradeToRegistrarGrade(record, gbServ.getGradebook(siteId)));
 				finalGrades.add(grade);
@@ -160,7 +143,7 @@ class FinalGradeChangesReporter
 		return finalGrades;
 	}
 
-	// Compare to CourseGradeSubmitter.courseGradeToRegistrarGrade()
+	// adapted from CourseGradeSubmitter.courseGradeToRegistrarGrade()
 	private String courseGradeToRegistrarGrade(FGInfo record, Gradebook gb) throws InvalidGradeException, MissingCourseGradeException
 	{
 		GradeMapping map = gb.getSelectedGradeMapping();
@@ -190,13 +173,13 @@ class FinalGradeChangesReporter
 		return finalGrade;
 	}
 
-	// Compare with OwlGbCourseGrade.getOverride()
+	// adapted from OwlGbCourseGrade.getOverride()
 	private static Optional<String> getOverride(CourseGrade cg)
 	{
 		return cg == null ? Optional.empty() : Optional.ofNullable(cg.getEnteredGrade());
 	}
 
-	// Compare with OwlGbCourseGrade.getOverride()
+	// adapted from OwlGbCourseGrade.getOverride()
 	private static Optional<Double> getCalculatedGrade(CourseGrade cg)
 	{
 		if (cg == null)
@@ -208,7 +191,7 @@ class FinalGradeChangesReporter
 		return grade == Double.MIN_VALUE ? Optional.empty() : Optional.of(grade);
 	}
 
-	// Compare with FinalGradeFormatter.formatForRegistrar()
+	// adapted from FinalGradeFormatter.formatForRegistrar()
 	private static String formatForRegistrar(CourseGrade cg)
 	{
 		return getOverride(cg).map(o -> overrideToRegistrarFinal(o))
@@ -217,7 +200,7 @@ class FinalGradeChangesReporter
 						.orElse(""));
 	}
 
-	// Compare with CourseGradeSubmitter.overriddenGradeAsGradeString()
+	// from CourseGradeSubmitter.overriddenGradeAsGradeString()
 	private String overriddenGradeAsGradeString(String grade, GradeMapping gradeMapping) throws IllegalArgumentException, InvalidGradeException
 	{
 		if (grade == null)
@@ -260,14 +243,14 @@ class FinalGradeChangesReporter
 		return finalGrade;
 	}
 
-	// Compare with FinalGradeFormatter.padNumeric()
+	// from FinalGradeFormatter.padNumeric()
 	private static String padNumeric(long grade)
 	{
 		DecimalFormat formatNoDecimals = new DecimalFormat("000");
 		return formatNoDecimals.format(grade);
 	}
 
-	// Compare with FinalGradeFormatter.overrideToRegistrarFinal()
+	// from FinalGradeFormatter.overrideToRegistrarFinal()
 	private static String overrideToRegistrarFinal(String override)
 	{
 		String g = override.trim();
@@ -286,7 +269,7 @@ class FinalGradeChangesReporter
 		}
 	}
 
-	// Compare with CourseGradeSubmitter.isNumber()
+	// from CourseGradeSubmitter.isNumber()
 	private boolean isNumber(String value)
 	{
 		boolean result = true;
@@ -295,12 +278,12 @@ class FinalGradeChangesReporter
 		return result;
 	}
 
-	// Compare with OwlFinalGradesService.getSectionCourseGrades()
+	// adapted from OwlFinalGradesService.getSectionCourseGrades()
 	private List<FGInfo> getSectionCourseGrades(String siteId, Set<Membership> sectionMembers, String sectionEid)
 	{
 		try
 		{
-			// Get the list of gradeable users for the section (compare with GradebookNgBusinessService.getGradeableUsers())
+			// Get the list of gradeable users for the section (adapted from GradebookNgBusinessService.getGradeableUsers())
 			Site site = siteServ.getSite(siteId);
 			List<String> userUuids = new ArrayList<>(site.getUsersIsAllowed("section.role.student"));
 
@@ -325,17 +308,17 @@ class FinalGradeChangesReporter
 				}
 				catch (UserNotDefinedException ex)
 				{
-					log.error("Unable to get user by UUID: {}", uuid, ex);
+					log.error("Unable to get user by UUID: {}", uuid);
 				}
 			}
 
 			// Get the course grades for the gradeable users
 			Map<String, CourseGrade> grades = getCourseGrades(siteId, userUuids);
 			List<FGInfo> gradeList = new ArrayList<>(grades.size());
+			// NOTE: in GBNG there is a check here to see if the current user has permission to see student numbers,
+			// which is omitted for the job. This can result in discrepancies between the job results and the UI.
 			for (Entry<String, CourseGrade> entry : grades.entrySet())
 			{
-				//Optional<OwlGbUser> student = bus.owl().getUserRevealingNumber(entry.getKey(), site);
-				// OWLTODO: instead of the above we just need eid and student number
 				String eid = uuidToEIDMap.get(entry.getKey());
 				String number = getRevealedStudentNumber(eid, siteId, sectionEid);
 				FGInfo fg = new FGInfo(eid, number, entry.getValue());
@@ -468,15 +451,9 @@ class FinalGradeChangesReporter
 		return prefixMap;
 	}
 
-	// adapted from CourseGradeSubmitter and OwlFinalGradesService.getSectionCourseGrades()/OwlBusinessService.getRevealedStudentNumber()
+	// adapted from CourseGradeSubmitter
 	private String getStudentNumber(String studentEid, String number) throws MissingStudentNumberException
 	{
-		//String number = student.gbUser.getStudentNumber();
-		// OWLTODO: we can't use the above so have to recreate student number acquisition...
-		// CourseGradeSubmitter ultimately ends up with a call to owlbus.getRevealedStudentNumber(), so we use that logic here...
-		//String number = getRevealedStudentNumber(studentEid, siteId);
-		// OWLTODO: we are getting student number passed in now, like CourseGradeSubmitter does...clean up these comments if that works out
-
 		if (number.isEmpty())
 		{
 			throw new MissingStudentNumberException("Couldn't find student number for user: " + studentEid);
@@ -520,17 +497,14 @@ class FinalGradeChangesReporter
 	// adapted from OwlBusinessService.isStudentInARoster(user, sections)
 	private boolean isStudentInRoster(User user, String sectionEid)
 	{
-		// OWLTODO: the original code would return true if the student was in any roster in the site...
-		// However, since we will only be dealing with students that have already been show to be members
-		// of the specific roster we are concerned with, it should be safe to only check that roster...
-		// in fact, if performance is a concern we can probably skip this check entirely...
-		// although, there is a role checking component of this code that we may have to account for elsewhere
-		// if we totally skip the check
+		// the original code would return true if the student was in any roster in the site.
+		// However, since we will only be dealing with students that have already been shown to be members
+		// of the specific roster we are concerned with, it should be safe to only check that roster.
 		Set<Membership> members = cms.getSectionMemberships(sectionEid);
 		return members.stream().anyMatch(m -> m.getUserId().equals(user.getEid()) && "S".equals(m.getRole()));
 	}
 
-	// Compare with CourseGradeSubmitter.getGradeChangeReport()
+	// adapted from CourseGradeSubmitter.getGradeChangeReport()/getPreviousCourseGrades()
 	private Set<OwlGradeSubmissionGrades> getPreviousGrades(String siteId, String sectionEid)
 	{
 		// step 2 - get the last submission
@@ -550,7 +524,7 @@ class FinalGradeChangesReporter
 		return prevGrades;
 	}
 
-	// Compare with CourseGradeSubmitter.checkForGradeChanges()
+	// adapted from CourseGradeSubmitter.checkForGradeChanges()
 	private FGChanges checkForChanges(Set<OwlGradeSubmissionGrades> currentGrades, Set<OwlGradeSubmissionGrades> previousGrades)
 	{
 		// step 4 - compare current grades to previous grades for changes
